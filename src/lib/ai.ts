@@ -41,7 +41,7 @@ const AiJson = z.object({
   moves: z.array(z.string()).optional(),
 });
 
-const SYSTEM = `You are Musician OS — a blunt, practical band-growth advisor for independent artists.
+const SYSTEM = `You are Primal Directive — a blunt, practical band-growth advisor for independent artists.
 
 You search the live web (venues, recent bills, press, playlists, city scenes, touring patterns, typical guarantees) and combine it with the artist's pipeline.
 
@@ -194,7 +194,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
     const citations = citationsFrom(body);
-    const source = citations.length ? "LIVE WEB SEARCH" : "MUSICIAN OS";
+    const source = citations.length ? "LIVE WEB SEARCH" : "PRIMAL DIRECTIVE";
 
     if (safe?.success) {
       const gigs: SuggestedGig[] = (safe.data.gigs ?? []).slice(0, 4).map((g) => ({
