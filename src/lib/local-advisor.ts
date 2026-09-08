@@ -45,7 +45,7 @@ function drawAdvice(
   fee: string,
 ): LocalAdvice {
   return {
-    source: "MUSICIAN OS PLAYBOOK",
+    source: "PRIMAL DIRECTIVE PLAYBOOK",
     answer: `${artist} will not grow a ${draw} ${genre} draw by chasing bigger rooms. Own ${home} first.
 
 Play the 100–250 cap rooms on a cadence — monthly, not quarterly — so the same faces see you twice. Club Cafe, Thunderbird, and a walk-up like Brillobox are the right size. Mr. Smalls is a stretch hold: it converts when you walk in with a finished bill, not a hope.
@@ -99,7 +99,7 @@ function billAdvice(
   draw: string,
 ): LocalAdvice {
   return {
-    source: "MUSICIAN OS PLAYBOOK",
+    source: "PRIMAL DIRECTIVE PLAYBOOK",
     answer: `A 250-cap bill for ${artist} (${genre}, draw ${draw}, home ${home}) should stack audiences, not friends.
 
 1. ${artist} — hometown headliner or high support.
@@ -144,7 +144,7 @@ Do not put three local same-scene bands on one bill. You cannibalize one crowd. 
 
 function routingAdvice(artist: string, home: string): LocalAdvice {
   return {
-    source: "MUSICIAN OS PLAYBOOK",
+    source: "PRIMAL DIRECTIVE PLAYBOOK",
     answer: `Do not drive six hours from ${home} for Johnny Brenda's as a one-off. ${artist} needs a cluster.
 
 Northeast cluster (3–4 nights):
@@ -188,7 +188,7 @@ Rule: two rooms within 3 hours or it does not leave the driveway. Ask Stage Left
 
 function contentAdvice(artist: string, home: string): LocalAdvice {
   return {
-    source: "MUSICIAN OS PLAYBOOK",
+    source: "PRIMAL DIRECTIVE PLAYBOOK",
     answer: `Content that sells tickets for ${artist} is footage of rooms people can actually walk into in ${home} — not studio aesthetic.
 
 This month:
@@ -221,7 +221,7 @@ function venueAdvice(
   fee: string,
 ): LocalAdvice {
   return {
-    source: "MUSICIAN OS PLAYBOOK",
+    source: "PRIMAL DIRECTIVE PLAYBOOK",
     answer: `Rooms that fit ${artist} at draw ${draw} out of ${home}:
 
 Right now: Club Cafe, Thunderbird, Brillobox, 123 Pleasant Street, Purple Fiddle.
