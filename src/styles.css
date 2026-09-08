@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-bg: #07090c;
+  --color-surface: #101419;
+  --color-surface-2: #151a20;
+  --color-fg: #f5f7f9;
+  --color-muted: #9aa5af;
+  --color-soft: #cbd2d8;
+  --color-line: #28313a;
+  --color-line-strong: #3a4652;
+  --color-accent: #ff7a18;
+  --color-accent-fg: #101214;
+  --color-live: #55d49a;
+  --color-danger: #ff6b6b;
+  --color-warn: #ffc36e;
+  --color-info: #72a7ff;
+  --color-background: #07090c;
+  --color-foreground: #f5f7f9;
+  --color-border: #28313a;
+  --color-card: #101419;
+  --color-primary: #ff7a18;
+  --color-primary-foreground: #101214;
+  --color-muted-foreground: #9aa5af;
+  --color-ring: #ff7a18;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --shadow-card: 0 10px 35px #0004;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100dvh;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    background-image: radial-gradient(
+      900px 420px at 50% -160px,
+      #121a22 0%,
+      var(--color-bg) 58%
+    );
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    font-family: var(--font-display);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

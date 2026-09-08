@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Musician OS",
+      "hasCanvas": false,
+      "bodyTextLen": 790,
+      "bodyTextHash": "39a3f59ccc1a85b8cd9c360abcb3afc36e25a423b027fad27775f3b69efdb5f7",
+      "bodyTextPrefix": "MUSICIAN OS Artist Command Center Advisor Board Gigs People Cale",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Musician OS",
+      "hasCanvas": false,
+      "bodyTextLen": 752,
+      "bodyTextHash": "643538c1638a462daec2be41cc6f25f140fef574bf3dc417e61bb7f202699c61",
+      "bodyTextPrefix": "MUSICIAN OS Artist Command Center Command Center Saturday, Septe",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
