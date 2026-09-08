@@ -105,7 +105,7 @@ function AdvisorPage() {
 
       <Card className="flex min-h-[28rem] flex-1 flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <strong className="text-sm">Musician OS AI</strong>
+          <strong className="text-sm">Primal Directive AI</strong>
           <div className="flex items-center gap-3">
             <button
               type="button"
