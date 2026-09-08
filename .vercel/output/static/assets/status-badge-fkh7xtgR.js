@@ -1,1 +1,0 @@
-import{C as e,n as t}from"./index-CUL5lKV5.js";import{t as n}from"./badge-DfP0sF8N.js";var r=e(),i={lead:`muted`,outreach:`info`,negotiating:`warn`,hold:`accent`,booked:`live`,completed:`live`,passed:`danger`};function a({status:e}){return(0,r.jsx)(n,{tone:i[e],children:t[e]})}export{a as t};
