@@ -93,15 +93,6 @@ function AdvisorPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Eyebrow>Growth advisor</Eyebrow>
-      <Card className="mb-3">
-        <h2 className="font-display text-xl font-semibold tracking-tight">
-          Grow the band — not just the calendar.
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted">
-          Ask in plain English. The advisor searches the live web and reads your
-          pipeline so advice fits this band, this city, this week.
-        </p>
-      </Card>
 
       <Card className="flex min-h-[28rem] flex-1 flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
