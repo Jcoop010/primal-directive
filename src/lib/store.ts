@@ -70,7 +70,7 @@ function welcomeChat(): ChatMessage[] {
       id: uid(),
       role: "ai",
       text: WELCOME_TEXT,
-      source: "MUSICIAN OS",
+      source: "PRIMAL DIRECTIVE",
     },
   ];
 }
