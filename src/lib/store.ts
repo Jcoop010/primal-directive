@@ -138,36 +138,55 @@ export const useMusician = create<State & Actions>()(
         })),
       clearChat: () => set({ chat: welcomeChat() }),
       ingestSuggestedGig: (g) =>
-        set((s) => ({
-          gigs: [
-            {
-              id: uid(),
-              name: g.name,
-              venue: g.venue,
-              city: g.city,
-              date: g.date,
-              fee: g.fee,
-              conf: g.conf,
-              status: g.status ?? "lead",
-              notes: g.reason,
-            },
-            ...s.gigs,
-          ],
-        })),
+        set((s) => {
+          const duplicate = s.gigs.some(
+            (existing) =>
+              existing.name.trim().toLowerCase() === g.name.trim().toLowerCase() &&
+              (existing.venue || "").trim().toLowerCase() ===
+                (g.venue || "").trim().toLowerCase() &&
+              (existing.date || "") === (g.date || ""),
+          );
+          if (duplicate) return s;
+          return {
+            gigs: [
+              {
+                id: uid(),
+                name: g.name,
+                venue: g.venue,
+                city: g.city,
+                date: g.date,
+                fee: g.fee,
+                conf: g.conf,
+                status: g.status ?? "lead",
+                notes: g.reason,
+              },
+              ...s.gigs,
+            ],
+          };
+        }),
       ingestSuggestedPerson: (p) =>
-        set((s) => ({
-          people: [
-            {
-              id: uid(),
-              name: p.name,
-              role: p.role,
-              city: p.city,
-              contact: "",
-              notes: [p.detail, p.reason].filter(Boolean).join(" — "),
-            },
-            ...s.people,
-          ],
-        })),
+        set((s) => {
+          const duplicate = s.people.some(
+            (existing) =>
+              existing.name.trim().toLowerCase() === p.name.trim().toLowerCase() &&
+              existing.role.trim().toLowerCase() === p.role.trim().toLowerCase() &&
+              existing.city.trim().toLowerCase() === p.city.trim().toLowerCase(),
+          );
+          if (duplicate) return s;
+          return {
+            people: [
+              {
+                id: uid(),
+                name: p.name,
+                role: p.role,
+                city: p.city,
+                contact: "",
+                notes: [p.detail, p.reason].filter(Boolean).join(" — "),
+              },
+              ...s.people,
+            ],
+          };
+        }),
       setComposer: (patch) =>
         set((s) => ({ composer: { ...s.composer, ...patch } })),
       openGig: (id) =>
@@ -249,6 +268,7 @@ export function buildAdvisorContext() {
   const collected = sumMoney(s.money, "collected");
   const outstanding = sumMoney(s.money, "outstanding");
   const costs = sumMoney(s.money, "cost");
+  const profit = collected - costs;
   const gigLines = s.gigs
     .slice(0, 12)
     .map(
@@ -267,7 +287,7 @@ TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
-MONEY: collected $${collected}, outstanding $${outstanding}, costs $${costs}, profit $${Math.max(0, collected - costs)}
+MONEY: collected $${collected}, outstanding $${outstanding}, costs $${costs}, profit $${profit}
 
 GIG PIPELINE:
 ${gigLines || "(empty)"}
