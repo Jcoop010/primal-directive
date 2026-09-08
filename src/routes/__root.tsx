@@ -10,7 +10,7 @@ import { AppShell } from "@/components/app-shell";
 import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "Musician OS";
+const APP_NAME = "Primal Directive";
 
 export const Route = createRootRoute({
   head: () => ({

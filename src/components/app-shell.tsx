@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-dvh md:flex">
       <aside className="hidden w-56 shrink-0 flex-col border-r border-line bg-bg/80 md:flex">
         <div className="px-5 pt-6 pb-4">
-          <div className="text-[11px] font-bold tracking-[0.22em]">MUSICIAN OS</div>
+          <div className="text-[11px] font-bold tracking-[0.22em]">PRIMAL DIRECTIVE</div>
           <div className="mt-1 text-xs text-muted">Artist Command Center</div>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -98,7 +98,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="mx-auto flex max-w-3xl items-end justify-between gap-4">
             <div>
               <div className="text-[11px] font-bold tracking-[0.22em] md:hidden">
-                MUSICIAN OS
+                PRIMAL DIRECTIVE
               </div>
               <div className="mt-1 text-xs text-muted md:hidden">
                 Artist Command Center
