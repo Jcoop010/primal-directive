@@ -2,13 +2,83 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
+import { GIG_STATUSES, MONEY_TYPES, PERSON_ROLES } from "@/lib/types";
+
+const suggestedGigSchema = z.object({
+  name: z.string(),
+  venue: z.string(),
+  city: z.string(),
+  date: z.string(),
+  fee: z.number(),
+  conf: z.number(),
+  reason: z.string(),
+  status: z.enum(GIG_STATUSES).optional(),
+});
+
+const suggestedPersonSchema = z.object({
+  name: z.string(),
+  role: z.enum(PERSON_ROLES),
+  city: z.string(),
+  detail: z.string(),
+  reason: z.string(),
+});
+
+const gigSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  venue: z.string(),
+  city: z.string(),
+  date: z.string(),
+  fee: z.number(),
+  conf: z.number(),
+  status: z.enum(GIG_STATUSES),
+  notes: z.string(),
+});
+
+const personSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: z.enum(PERSON_ROLES),
+  city: z.string(),
+  contact: z.string(),
+  notes: z.string(),
+});
+
+const moneySchema = z.object({
+  id: z.string(),
+  type: z.enum(MONEY_TYPES),
+  amount: z.number(),
+  label: z.string(),
+  date: z.string(),
+  gigId: z.string().optional(),
+});
+
+const chatSchema = z.object({
+  id: z.string(),
+  role: z.enum(["user", "ai"]),
+  text: z.string(),
+  source: z.string().optional(),
+  citations: z.array(z.string()).optional(),
+  gigs: z.array(suggestedGigSchema).optional(),
+  people: z.array(suggestedPersonSchema).optional(),
+  moves: z.array(z.string()).optional(),
+});
+
+const profileSchema = z.object({
+  artistName: z.string(),
+  city: z.string(),
+  genre: z.string(),
+  draw: z.string(),
+  feeTarget: z.number(),
+  notes: z.string(),
+});
 
 const stateSchema = z.object({
-  gigs: z.array(z.unknown()).max(5000),
-  people: z.array(z.unknown()).max(5000),
-  money: z.array(z.unknown()).max(5000),
-  chat: z.array(z.unknown()).max(2000),
-  profile: z.record(z.string(), z.unknown()),
+  gigs: z.array(gigSchema).max(5000),
+  people: z.array(personSchema).max(5000),
+  money: z.array(moneySchema).max(5000),
+  chat: z.array(chatSchema).max(2000),
+  profile: profileSchema,
 });
 
 const loadInput = z.object({});
