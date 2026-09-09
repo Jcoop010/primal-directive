@@ -22,7 +22,7 @@ function BoardPage() {
   const collected = sumMoney(moneyEntries, "collected");
   const outstanding = sumMoney(moneyEntries, "outstanding");
   const costs = sumMoney(moneyEntries, "cost");
-  const profit = Math.max(0, collected - costs);
+  const profit = collected - costs;
   const open = pipelineGigs(gigs);
   const signals = deriveSignals(gigs, moneyEntries, people);
 
@@ -30,32 +30,16 @@ function BoardPage() {
     <div>
       <Eyebrow>Booking board</Eyebrow>
       <div className="grid grid-cols-2 gap-2.5">
-        <MetricCard
-          label="Collected"
-          value={money(collected)}
-          hint="cash logged"
-        />
-        <MetricCard
-          label="Outstanding"
-          value={money(outstanding)}
-          hint="money to collect"
-        />
-        <MetricCard
-          label="Open pipeline"
-          value={money(pipelineValue(gigs))}
-          hint={`${open.length} opportunities`}
-        />
-        <MetricCard
-          label="Weighted"
-          value={money(Math.round(weightedValue(gigs)))}
-          hint="planning estimate"
-        />
+        <MetricCard label="Collected" value={money(collected)} hint="cash logged" />
+        <MetricCard label="Outstanding" value={money(outstanding)} hint="money to collect" />
+        <MetricCard label="Open pipeline" value={money(pipelineValue(gigs))} hint={`${open.length} opportunities`} />
+        <MetricCard label="Weighted" value={money(Math.round(weightedValue(gigs)))} hint="fee × confidence" />
       </div>
       <MetricCard
         className="mt-2.5"
         label="Real gig profit"
         value={money(profit)}
-        hint="after tracked costs"
+        hint={profit < 0 ? "loss after tracked costs" : "after tracked costs"}
       />
 
       <Eyebrow>Signals</Eyebrow>
@@ -65,10 +49,7 @@ function BoardPage() {
             <Link
               key={s.id}
               to={s.href ?? "/board"}
-              className={cn(
-                "block",
-                i < signals.length - 1 && "border-b border-line pb-3",
-              )}
+              className={cn("block", i < signals.length - 1 && "border-b border-line pb-3")}
             >
               <div className="flex items-center gap-2">
                 <span
@@ -81,9 +62,7 @@ function BoardPage() {
                 />
                 <div className="text-sm font-semibold">{s.title}</div>
               </div>
-              <p className="mt-1 pl-3.5 text-xs leading-relaxed text-muted">
-                {s.detail}
-              </p>
+              <p className="mt-1 pl-3.5 text-xs leading-relaxed text-muted">{s.detail}</p>
             </Link>
           ))}
         </div>
@@ -91,12 +70,9 @@ function BoardPage() {
 
       <Eyebrow>AI next move</Eyebrow>
       <Card>
-        <h2 className="font-display text-lg font-semibold">
-          Turn live web signals into a pursuit list
-        </h2>
+        <h2 className="font-display text-lg font-semibold">Turn live web signals into a pursuit list</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Ask the advisor for rooms, bills, and routing that fit this draw —
-          then push winners into the pipeline.
+          Ask the advisor for rooms, bills, and routing that fit this draw — then push winners into the pipeline.
         </p>
         <Link
           to="/"
@@ -109,9 +85,7 @@ function BoardPage() {
       <Eyebrow>Pipeline snapshot</Eyebrow>
       <Card className="p-0">
         {open.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-muted">
-            No open gigs. Add an opportunity or ask the advisor.
-          </p>
+          <p className="px-4 py-8 text-center text-sm text-muted">No open gigs. Add an opportunity or ask the advisor.</p>
         ) : (
           open.slice(0, 5).map((g, i) => (
             <div
@@ -122,15 +96,11 @@ function BoardPage() {
               )}
             >
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">
-                  {g.venue || g.name}
-                </div>
+                <div className="truncate text-sm font-semibold">{g.venue || g.name}</div>
                 <div className="text-xs text-muted">{g.city}</div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className="text-sm font-semibold tabular">
-                  {money(g.fee)}
-                </span>
+                <span className="text-sm font-semibold tabular">{money(g.fee)}</span>
                 <StatusBadge status={g.status} />
               </div>
             </div>
