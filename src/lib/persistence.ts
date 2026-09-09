@@ -86,7 +86,7 @@ const saveInput = z.object({ state: stateSchema });
 
 export const loadAppState = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .validator((input) => loadInput.parse(input ?? {}))
+  .validator(loadInput)
   .handler(async ({ context }) => {
     const sql = await getSql();
     const rows = await sql.query<{ state: unknown; version: number }>(
@@ -102,7 +102,7 @@ export const loadAppState = createServerFn({ method: "GET" })
 
 export const saveAppState = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((input) => saveInput.parse(input))
+  .validator(saveInput)
   .handler(async ({ context, data }) => {
     const sql = await getSql();
     const serialized = JSON.stringify(data.state);
