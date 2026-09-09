@@ -19,112 +19,143 @@ function CalendarPage() {
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), 1);
   });
+  const [selected, setSelected] = useState<string | null>(null);
 
-  const monthDays = useMemo(() => {
-    const year = cursor.getFullYear();
-    const month = cursor.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: firstDay + daysInMonth }, (_, i) =>
-      i < firstDay ? null : new Date(year, month, i - firstDay + 1),
-    );
-  }, [cursor]);
-
-  const gigsByDay = useMemo(() => {
+  const byDay = useMemo(() => {
     const map = new Map<string, typeof gigs>();
-    for (const gig of gigs) {
-      const day = toIsoDay(gig.date);
-      const list = map.get(day) ?? [];
-      list.push(gig);
-      map.set(day, list);
+    for (const g of gigs) {
+      if (!g.date) continue;
+      const list = map.get(g.date) ?? [];
+      list.push(g);
+      map.set(g.date, list);
     }
     return map;
   }, [gigs]);
 
+  const cells = useMemo(() => buildCells(cursor), [cursor]);
   const monthLabel = cursor.toLocaleDateString(undefined, {
     month: "long",
     year: "numeric",
   });
-
-  const shiftMonth = (delta: number) => {
-    setCursor((current) =>
-      new Date(current.getFullYear(), current.getMonth() + delta, 1),
-    );
-  };
+  const selectedGigs = selected ? (byDay.get(selected) ?? []) : [];
+  const upcoming = [...gigs]
+    .filter((g) => g.date && g.status !== "passed")
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <Eyebrow>OPERATIONS</Eyebrow>
-          <h1 className="mt-1 text-2xl font-semibold">Calendar</h1>
-        </div>
-        <div className="flex items-center gap-2">
+    <div>
+      <Eyebrow>Calendar</Eyebrow>
+      <Card>
+        <div className="mb-4 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => shiftMonth(-1)}
+            className="flex size-10 items-center justify-center rounded-md border border-line hover:bg-surface-2"
+            onClick={() =>
+              setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))
+            }
             aria-label="Previous month"
-            className="rounded-lg border p-2"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft className="size-4" />
           </button>
-          <div className="min-w-32 text-center text-sm font-medium">{monthLabel}</div>
+          <div className="font-display text-lg font-semibold">{monthLabel}</div>
           <button
             type="button"
-            onClick={() => shiftMonth(1)}
+            className="flex size-10 items-center justify-center rounded-md border border-line hover:bg-surface-2"
+            onClick={() =>
+              setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))
+            }
             aria-label="Next month"
-            className="rounded-lg border p-2"
           >
-            <ChevronRight size={18} />
+            <ChevronRight className="size-4" />
           </button>
         </div>
-      </div>
-
-      <Card className="overflow-hidden">
-        <div className="grid grid-cols-7 border-b">
-          {WEEKDAYS.map((day, index) => (
-            <div key={`${day}-${index}`} className="p-2 text-center text-xs font-medium opacity-60">
-              {day}
+        <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold tracking-[0.12em] text-muted">
+          {WEEKDAYS.map((d, i) => (
+            <div key={`${d}-${i}`} className="py-1">
+              {d}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7">
-          {monthDays.map((day, index) => {
-            const key = day ? toIsoDay(day) : `empty-${index}`;
-            const dayGigs = day ? gigsByDay.get(key) ?? [] : [];
+        <div className="mt-1 grid grid-cols-7 gap-1">
+          {cells.map((cell, i) => {
+            if (!cell) return <div key={`pad-${i}`} />;
+            const iso = toIsoDay(cell);
+            const items = byDay.get(iso) ?? [];
+            const isToday = iso === toIsoDay(new Date());
+            const isSel = selected === iso;
             return (
-              <div key={key} className="min-h-24 border-b border-r p-2">
-                {day && (
-                  <>
-                    <div className={cn("mb-2 text-xs", toIsoDay(new Date()) === key && "font-bold")}>{day.getDate()}</div>
-                    <div className="space-y-1">
-                      {dayGigs.map((gig) => (
-                        <button
-                          type="button"
-                          key={gig.id}
-                          onClick={() => openGig(gig.id)}
-                          className="block w-full truncate rounded-md border p-1 text-left text-xs"
-                          title={`${gig.name} — ${longDate(gig.date)}`}
-                        >
-                          <span className="font-medium">{gig.name}</span>
-                          <StatusBadge status={gig.status} />
-                        </button>
-                      ))}
-                    </div>
-                  </>
+              <button
+                key={iso}
+                type="button"
+                onClick={() => setSelected(iso)}
+                className={cn(
+                  "flex min-h-11 flex-col items-center justify-center rounded-md text-sm",
+                  isSel && "bg-accent text-accent-fg",
+                  !isSel && isToday && "border border-accent/60",
+                  !isSel && !isToday && "hover:bg-surface-2",
                 )}
-              </div>
+              >
+                {cell.getDate()}
+                {items.length > 0 ? (
+                  <span
+                    className={cn(
+                      "mt-0.5 size-1 rounded-full",
+                      isSel ? "bg-accent-fg" : "bg-accent",
+                    )}
+                  />
+                ) : (
+                  <span className="mt-0.5 size-1" />
+                )}
+              </button>
             );
           })}
         </div>
       </Card>
 
-      {gigs.length === 0 && (
-        <EmptyState
-          title="No gigs on the calendar"
-          body="Booked and scheduled gigs will appear here."
-        />
-      )}
+      <Eyebrow>{selected ? longDate(selected) : "Upcoming"}</Eyebrow>
+      <Card className="p-0">
+        {(selected ? selectedGigs : upcoming).length === 0 ? (
+          <EmptyState
+            title={selected ? "Nothing this day" : "Nothing scheduled"}
+            body="Add a dated gig from the pipeline or ask the advisor for a routing cluster."
+            action="Add gig"
+            onAction={() => openGig()}
+          />
+        ) : (
+          (selected ? selectedGigs : upcoming).map((g, i, arr) => (
+            <button
+              key={g.id}
+              type="button"
+              onClick={() => openGig(g.id)}
+              className={cn(
+                "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-surface-2",
+                i < arr.length - 1 && "border-b border-line",
+              )}
+            >
+              <div>
+                <div className="text-sm font-semibold">{g.venue || g.name}</div>
+                <div className="text-xs text-muted">
+                  {g.city}
+                  {!selected ? ` · ${longDate(g.date)}` : ""}
+                </div>
+              </div>
+              <StatusBadge status={g.status} />
+            </button>
+          ))
+        )}
+      </Card>
     </div>
   );
+}
+
+function buildCells(month: Date) {
+  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const start = first.getDay();
+  const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const cells: Array<Date | null> = [];
+  for (let i = 0; i < start; i++) cells.push(null);
+  for (let d = 1; d <= days; d++) {
+    cells.push(new Date(month.getFullYear(), month.getMonth(), d));
+  }
+  return cells;
 }
