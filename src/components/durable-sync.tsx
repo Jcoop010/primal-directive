@@ -23,11 +23,28 @@ export function DurableSync() {
         if (state) {
           useMusician.setState((current) => ({
             ...current,
-            gigs: state.gigs as typeof current.gigs,
-            people: state.people as typeof current.people,
-            money: state.money as typeof current.money,
-            chat: state.chat as typeof current.chat,
-            profile: state.profile as typeof current.profile,
+            gigs: state.gigs,
+            people: state.people,
+            money: state.money,
+            chat: state.chat,
+            profile: state.profile,
+          }));
+        } else {
+          // A first-time account must never inherit the browser's demo seed.
+          useMusician.setState((current) => ({
+            ...current,
+            gigs: [],
+            people: [],
+            money: [],
+            chat: [],
+            profile: {
+              artistName: "",
+              city: "",
+              genre: "",
+              draw: "",
+              feeTarget: 0,
+              notes: "",
+            },
           }));
         }
         readyFor.current = user.id;
@@ -42,7 +59,7 @@ export function DurableSync() {
 
   useEffect(() => {
     if (!user || isPending) return;
-    const unsubscribe = useMusician.subscribe((state) => {
+    const unsubscribe = useMusician.subscribe(() => {
       if (readyFor.current !== user.id || loading.current) return;
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
