@@ -18,7 +18,7 @@ export function DurableSync() {
     if (readyFor.current === user.id || loading.current) return;
     loading.current = true;
 
-    void loadAppState({})
+    void loadAppState({ data: {} })
       .then(({ state }) => {
         if (state) {
           useMusician.setState((current) => ({
@@ -65,12 +65,14 @@ export function DurableSync() {
       timer.current = setTimeout(() => {
         const current = useMusician.getState();
         void saveAppState({
-          state: {
-            gigs: current.gigs,
-            people: current.people,
-            money: current.money,
-            chat: current.chat,
-            profile: current.profile,
+          data: {
+            state: {
+              gigs: current.gigs,
+              people: current.people,
+              money: current.money,
+              chat: current.chat,
+              profile: current.profile,
+            },
           },
         }).catch((error) => console.error("[primal-directive] durable save failed", error));
       }, 650);
