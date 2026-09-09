@@ -14,11 +14,6 @@ import {
 } from "./check-auth-invariant.mjs";
 import { projectRoot } from "./with-app-env.mjs";
 
-/**
- * The JSON body `/__app-env` would serve. Do not start a real Vite server —
- * `import { createServer } from "vite"` loads rolldown native bindings that
- * SIGSEGV the test worker under qemu-user (amd64 image builds).
- */
 function appEnvFetch(env) {
   return async () => ({
     ok: true,
@@ -90,14 +85,13 @@ test("only a divergence warns the smoke verdict", () => {
   }
 });
 
-test("the build side resolves the template's shipped app-env", () => {
-  assert.equal(buildAuthEnabled(projectRoot(), {}), false);
+test("the build side resolves the shipped app-env", () => {
+  assert.equal(buildAuthEnabled(projectRoot(), {}), true);
   assert.equal(buildAuthEnabled(projectRoot(), { VITE_AUTH_ENABLED: "true" }), true);
+  assert.equal(buildAuthEnabled(projectRoot(), { VITE_AUTH_ENABLED: "false" }), false);
 });
 
 test("the CLI reports rather than silently passing when run via a symlink", async () => {
-  // A check whose exit code is the whole signal must never no-op to 0 because
-  // process.argv[1] came in through a symlinked path.
   const link = join(mkdtempSync(join(tmpdir(), "auth-invariant-link-")), "scripts");
   symlinkSync(join(projectRoot(), "scripts"), link);
   const error = await promisify(execFile)(process.execPath, [
