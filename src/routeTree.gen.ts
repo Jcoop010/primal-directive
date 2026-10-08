@@ -56,8 +56,6 @@ const PeopleRoute = PeopleRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
-  '/demo': typeof DemoRoute
-  '/demo': typeof DemoRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/gigs': typeof GigsRoute
@@ -66,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/gigs': typeof GigsRoute
@@ -75,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/gigs': typeof GigsRoute
@@ -83,10 +83,10 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
-  id: '__root__' | '/' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
