@@ -74,6 +74,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     else setComposer({ commandOpen: true });
   }
 
+  if (pathname === "/demo") return <>{children}</>;
+
   return (
     <SignInGate fallback={<SignInScreen />}>
       <div className="min-h-dvh md:flex">
