@@ -2,11 +2,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
+import { recordMerchSale as applyMerchSale, restockMerch } from "@/lib/merch-ops";
 import type {
   ArtistProfile,
   ChatMessage,
   Gig,
   MoneyEntry,
+  MerchProduct,
+  MerchSale,
   Person,
   SuggestedGig,
   SuggestedPerson,
@@ -27,6 +30,8 @@ type State = {
   gigs: Gig[];
   people: Person[];
   money: MoneyEntry[];
+  merchProducts: MerchProduct[];
+  merchSales: MerchSale[];
   chat: ChatMessage[];
   profile: ArtistProfile;
   composer: Composer;
@@ -42,6 +47,10 @@ type Actions = {
   addMoney: (entry: Omit<MoneyEntry, "id">) => string;
   updateMoney: (id: string, patch: Partial<MoneyEntry>) => void;
   removeMoney: (id: string) => void;
+  addMerchProduct: (product: Omit<MerchProduct, "id">) => string;
+  updateMerchProduct: (id: string, patch: Partial<MerchProduct>) => void;
+  restockMerchProduct: (id: string, quantity: number) => void;
+  recordMerchSale: (sale: Omit<MerchSale, "id">) => string;
   updateProfile: (patch: Partial<ArtistProfile>) => void;
   addUserMessage: (text: string) => void;
   addAiMessage: (msg: Omit<ChatMessage, "id" | "role">) => void;
@@ -79,6 +88,8 @@ function fresh(): Omit<State, "composer"> & { composer: Composer } {
   const seed = createSeed();
   return {
     ...seed,
+    merchProducts: [],
+    merchSales: [],
     chat: welcomeChat(),
     composer: { ...emptyComposer },
   };
@@ -222,6 +233,8 @@ export const useMusician = create<State & Actions>()(
           gigs: [],
           people: [],
           money: [],
+          merchProducts: [],
+          merchSales: [],
           chat: welcomeChat(),
           composer: { ...emptyComposer },
         }),
@@ -232,6 +245,8 @@ export const useMusician = create<State & Actions>()(
         gigs: s.gigs,
         people: s.people,
         money: s.money,
+        merchProducts: s.merchProducts,
+        merchSales: s.merchSales,
         chat: s.chat,
         profile: s.profile,
       }),
