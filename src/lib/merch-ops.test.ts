@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { recordMerchSale, restockMerch, summarizeMerch } from "./merch-ops.ts";
+import { buildMerchLedgerEntries, recordMerchSale, restockMerch, summarizeMerch } from "./merch-ops.ts";
 import type { MerchProduct, MerchSale } from "./types.ts";
 
 const products: MerchProduct[] = [
@@ -11,6 +11,31 @@ const sale: Omit<MerchSale, "id"> = {
   productId: "tee", quantity: 2, unitPrice: 30, unitCost: 10,
   date: "2026-10-11", gigId: "show-1", paymentMethod: "cash", notes: "",
 };
+
+test("records both merch revenue and cost of goods against the same show", () => {
+  const entries = buildMerchLedgerEntries(sale, "Logo Tee", {
+    revenueId: "revenue-1",
+    costId: "cost-1",
+  });
+  assert.equal(entries.length, 2);
+  assert.deepEqual(entries.map((entry) => [entry.type, entry.amount]), [
+    ["collected", 60],
+    ["cost", 20],
+  ]);
+  assert.equal(entries[0]?.gigId, "show-1");
+  assert.equal(entries[1]?.gigId, "show-1");
+});
+
+test("rejects invalid merch ledger identities and amounts", () => {
+  assert.throws(() => buildMerchLedgerEntries(sale, "Logo Tee", {
+    revenueId: "same",
+    costId: "same",
+  }), /unique IDs/);
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, unitCost: -1 }, "Logo Tee", {
+    revenueId: "revenue-1",
+    costId: "cost-1",
+  }), /non-negative/);
+});
 
 test("records a sale, snapshots unit economics, and reduces stock", () => {
   const result = recordMerchSale(products, [], sale, "sale-1");
