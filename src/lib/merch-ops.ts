@@ -1,4 +1,39 @@
-import type { MerchProduct, MerchSale } from "@/lib/types";
+import type { MerchProduct, MerchSale, MoneyEntry } from "@/lib/types";
+
+/** Build the linked cash-ledger entries for one merch sale. */
+export function buildMerchLedgerEntries(
+  sale: Omit<MerchSale, "id">,
+  productName: string,
+  ids: { revenueId: string; costId: string },
+): MoneyEntry[] {
+  if (!productName.trim()) throw new Error("Product name is required for merch ledger entries.");
+  if (!ids.revenueId.trim() || !ids.costId.trim() || ids.revenueId === ids.costId) {
+    throw new Error("Merch ledger entries require two unique IDs.");
+  }
+  if (!Number.isInteger(sale.quantity) || sale.quantity < 1) {
+    throw new Error("Quantity must be a positive whole number.");
+  }
+  validAmount(sale.unitPrice, "Sale price");
+  validAmount(sale.unitCost, "Unit cost");
+  return [
+    {
+      id: ids.revenueId,
+      type: "collected",
+      amount: sale.quantity * sale.unitPrice,
+      label: `Merch sale: ${productName} × ${sale.quantity}`,
+      date: sale.date,
+      gigId: sale.gigId,
+    },
+    {
+      id: ids.costId,
+      type: "cost",
+      amount: sale.quantity * sale.unitCost,
+      label: `Merch cost of goods: ${productName} × ${sale.quantity}`,
+      date: sale.date,
+      gigId: sale.gigId,
+    },
+  ];
+}
 
 export type MerchSummary = {
   unitsSold: number;
