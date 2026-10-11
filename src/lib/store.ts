@@ -182,18 +182,28 @@ export const useMusician = create<State & Actions>()(
           if (!product) throw new Error("Product not found while recording sale.");
           // Keep the sale, inventory movement, and cash ledger entry in one state update.
           // This prevents a successful sale from being saved without its corresponding revenue record.
-          const ledgerEntry: MoneyEntry = {
+          const revenueEntry: MoneyEntry = {
             id: uid(),
             type: "collected",
             amount: sale.quantity * sale.unitPrice,
-            label: `Merch: ${product.name} × ${sale.quantity}`,
+            label: `Merch sale: ${product.name} × ${sale.quantity}`,
+            date: sale.date,
+            gigId: sale.gigId,
+          };
+          const costOfGoodsEntry: MoneyEntry = {
+            id: uid(),
+            type: "cost",
+            amount: sale.quantity * sale.unitCost,
+            label: `Merch cost of goods: ${product.name} × ${sale.quantity}`,
             date: sale.date,
             gigId: sale.gigId,
           };
           return {
             merchProducts: result.products,
             merchSales: result.sales,
-            money: [ledgerEntry, ...s.money],
+            // Record revenue and its inventory cost together so show-level net
+            // reflects merch margin rather than treating all merch receipts as profit.
+            money: [revenueEntry, costOfGoodsEntry, ...s.money],
           };
         });
         return id;
