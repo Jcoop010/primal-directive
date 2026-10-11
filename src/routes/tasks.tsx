@@ -43,7 +43,7 @@ function TasksPage() {
           <Eyebrow>Operational control room</Eyebrow>
           <h2 className="mt-2 text-xl font-extrabold tracking-tight">Tasks & show workflows</h2>
           <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-            Turn booked shows into a coordinated checklist from deal terms through post-show reconciliation. Generated tasks are saved and duplicate-protected.
+            Booking a show now creates its operational checklist automatically, from deal terms through post-show reconciliation. Use the generator below to backfill missing tasks for existing bookings; tasks are saved and duplicate-protected.
           </p>
         </div>
         <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface-2">
