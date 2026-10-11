@@ -92,6 +92,8 @@ export interface FileRoutesByTo {
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
   '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -103,13 +105,15 @@ export interface FileRoutesById {
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
   '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch'
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch'
-  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch'
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -122,6 +126,7 @@ export interface RootRouteChildren {
   PeopleRoute: typeof PeopleRoute
   TourRoute: typeof TourRoute
   MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -189,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MerchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -202,6 +214,7 @@ const rootRouteChildren: RootRouteChildren = {
   PeopleRoute: PeopleRoute,
   TourRoute: TourRoute,
   MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
