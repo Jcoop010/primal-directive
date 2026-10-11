@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
 import { recordMerchSale as applyMerchSale, restockMerch } from "@/lib/merch-ops";
+import { generateShowTaskPacks } from "@/lib/show-workflows";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -10,6 +11,7 @@ import type {
   MoneyEntry,
   MerchProduct,
   MerchSale,
+  OperationalTask,
   Person,
   SuggestedGig,
   SuggestedPerson,
@@ -32,6 +34,7 @@ type State = {
   money: MoneyEntry[];
   merchProducts: MerchProduct[];
   merchSales: MerchSale[];
+  tasks: OperationalTask[];
   chat: ChatMessage[];
   profile: ArtistProfile;
   composer: Composer;
@@ -51,6 +54,8 @@ type Actions = {
   updateMerchProduct: (id: string, patch: Partial<MerchProduct>) => void;
   restockMerchProduct: (id: string, quantity: number) => void;
   recordMerchSale: (sale: Omit<MerchSale, "id">) => string;
+  generateShowTasks: () => number;
+  updateOperationalTask: (id: string, patch: Partial<Pick<OperationalTask, "status" | "dueDate">>) => void;
   updateProfile: (patch: Partial<ArtistProfile>) => void;
   addUserMessage: (text: string) => void;
   addAiMessage: (msg: Omit<ChatMessage, "id" | "role">) => void;
@@ -90,6 +95,7 @@ function fresh(): Omit<State, "composer"> & { composer: Composer } {
     ...seed,
     merchProducts: [],
     merchSales: [],
+    tasks: [],
     chat: welcomeChat(),
     composer: { ...emptyComposer },
   };
@@ -174,6 +180,25 @@ export const useMusician = create<State & Actions>()(
         });
         return id;
       },
+      generateShowTasks: () => {
+        let added = 0;
+        set((s) => {
+          const generated = generateShowTaskPacks(s.gigs, s.tasks);
+          added = generated.length;
+          if (generated.length === 0) return s;
+          return {
+            tasks: [
+              ...generated.map((task) => ({ ...task, id: uid() })),
+              ...s.tasks,
+            ],
+          };
+        });
+        return added;
+      },
+      updateOperationalTask: (id, patch) =>
+        set((s) => ({
+          tasks: s.tasks.map((task) => task.id === id ? { ...task, ...patch } : task),
+        })),
       updateProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
       addUserMessage: (text) =>
@@ -272,6 +297,7 @@ export const useMusician = create<State & Actions>()(
           money: [],
           merchProducts: [],
           merchSales: [],
+          tasks: [],
           chat: welcomeChat(),
           composer: { ...emptyComposer },
         }),
@@ -284,6 +310,7 @@ export const useMusician = create<State & Actions>()(
         money: s.money,
         merchProducts: s.merchProducts,
         merchSales: s.merchSales,
+        tasks: s.tasks,
         chat: s.chat,
         profile: s.profile,
       }),
