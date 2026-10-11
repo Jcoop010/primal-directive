@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { MetricCard } from "@/components/metric-card";
 import { downloadCsv, longDate, money } from "@/lib/format";
-import { restockMerch, summarizeMerch } from "@/lib/merch-ops";
+import { summarizeMerch } from "@/lib/merch-ops";
 import { useMusician } from "@/lib/store";
 import { MERCH_CATEGORIES, MERCH_PAYMENT_METHODS, type MerchCategory, type MerchPaymentMethod } from "@/lib/types";
 import { cn } from "@/lib/utils";
