@@ -1,10 +1,15 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { evaluateAutomationPermission, retryDecision } from "./automation-policy.ts";
+import {
+  evaluateAutomationPermission,
+  retryDecision,
+  type AutomationPermission,
+  type AutomationPolicy,
+} from "./automation-policy.ts";
 
-const policy = (overrides = {}) => ({
+const policy = (overrides: Partial<AutomationPolicy> = {}): AutomationPolicy => ({
   enabled: true,
-  permissions: new Set([
+  permissions: new Set<AutomationPermission>([
     "booking_research",
     "draft_messages",
     "send_campaign_messages",
@@ -55,7 +60,7 @@ describe("automation permission policy", () => {
   });
 
   it("requires a granted permission for each low-risk action", () => {
-    const result = evaluateAutomationPermission("calendar_sync", policy({ permissions: new Set() }));
+    const result = evaluateAutomationPermission("calendar_sync", policy({ permissions: new Set<AutomationPermission>() }));
     assert.equal(result.allowed, false);
   });
 
