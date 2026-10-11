@@ -154,7 +154,23 @@ export const useMusician = create<State & Actions>()(
         const id = uid();
         set((s) => {
           const result = applyMerchSale(s.merchProducts, s.merchSales, sale, id);
-          return { merchProducts: result.products, merchSales: result.sales };
+          const product = s.merchProducts.find((item) => item.id === sale.productId);
+          if (!product) throw new Error("Product not found while recording sale.");
+          // Keep the sale, inventory movement, and cash ledger entry in one state update.
+          // This prevents a successful sale from being saved without its corresponding revenue record.
+          const ledgerEntry: MoneyEntry = {
+            id: uid(),
+            type: "collected",
+            amount: sale.quantity * sale.unitPrice,
+            label: `Merch: ${product.name} × ${sale.quantity}`,
+            date: sale.date,
+            gigId: sale.gigId,
+          };
+          return {
+            merchProducts: result.products,
+            merchSales: result.sales,
+            money: [ledgerEntry, ...s.money],
+          };
         });
         return id;
       },
