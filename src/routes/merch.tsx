@@ -27,7 +27,6 @@ function MerchPage() {
   const addProduct = useMusician((s) => s.addMerchProduct);
   const restockProduct = useMusician((s) => s.restockMerchProduct);
   const recordSale = useMusician((s) => s.recordMerchSale);
-  const addMoney = useMusician((s) => s.addMoney);
   const [showProductForm, setShowProductForm] = useState(false);
   const [productName, setProductName] = useState("");
   const [sku, setSku] = useState("");
@@ -86,10 +85,6 @@ function MerchPage() {
       recordSale({
         productId: product.id, quantity: parsedQuantity, unitPrice: parsedPrice, unitCost: product.unitCost,
         date: saleDate, gigId: gigId || undefined, paymentMethod, notes: saleNotes.trim(),
-      });
-      addMoney({
-        type: "collected", amount: parsedQuantity * parsedPrice,
-        label: `Merch: ${product.name} × ${parsedQuantity}`, date: saleDate, gigId: gigId || undefined,
       });
       setQuantity("1"); setSalePrice(""); setSaleNotes("");
       toast.success("Sale recorded and inventory reduced.");
