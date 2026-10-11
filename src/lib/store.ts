@@ -137,6 +137,27 @@ export const useMusician = create<State & Actions>()(
         })),
       removeMoney: (id) =>
         set((s) => ({ money: s.money.filter((m) => m.id !== id) })),
+      addMerchProduct: (product) => {
+        const id = uid();
+        set((s) => ({ merchProducts: [{ ...product, id }, ...s.merchProducts] }));
+        return id;
+      },
+      updateMerchProduct: (id, patch) =>
+        set((s) => ({
+          merchProducts: s.merchProducts.map((product) =>
+            product.id === id ? { ...product, ...patch } : product,
+          ),
+        })),
+      restockMerchProduct: (id, quantity) =>
+        set((s) => ({ merchProducts: restockMerch(s.merchProducts, id, quantity) })),
+      recordMerchSale: (sale) => {
+        const id = uid();
+        set((s) => {
+          const result = applyMerchSale(s.merchProducts, s.merchSales, sale, id);
+          return { merchProducts: result.products, merchSales: result.sales };
+        });
+        return id;
+      },
       updateProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
       addUserMessage: (text) =>
