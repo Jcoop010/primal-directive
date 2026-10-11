@@ -82,6 +82,20 @@ export type MoneyEntry = {
   gigId?: string;
 };
 
+export type OperationalTaskStatus = "open" | "done";
+
+export type OperationalTask = {
+  id: string;
+  title: string;
+  description: string;
+  category: "booking" | "advancing" | "promotion" | "merch" | "finance";
+  gigId: string;
+  dueDate: string;
+  status: OperationalTaskStatus;
+  sourceKey: string;
+  createdAt: string;
+};
+
 export type ChatRole = "user" | "ai";
 
 export type SuggestedGig = {
