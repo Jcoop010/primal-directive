@@ -107,13 +107,31 @@ export const useMusician = create<State & Actions>()(
       ...fresh(),
       addGig: (gig) => {
         const id = uid();
-        set((s) => ({ gigs: [{ ...gig, id }, ...s.gigs] }));
+        set((s) => {
+          const savedGig = { ...gig, id };
+          // Booking is the workflow trigger: a confirmed, dated show immediately
+          // receives its operational checklist instead of relying on a manual step.
+          const tasks = savedGig.status === "booked"
+            ? generateShowTaskPacks([savedGig], s.tasks).map((task) => ({ ...task, id: uid() }))
+            : [];
+          return {
+            gigs: [savedGig, ...s.gigs],
+            tasks: [...tasks, ...s.tasks],
+          };
+        });
         return id;
       },
       updateGig: (id, patch) =>
-        set((s) => ({
-          gigs: s.gigs.map((g) => (g.id === id ? { ...g, ...patch } : g)),
-        })),
+        set((s) => {
+          const previous = s.gigs.find((gig) => gig.id === id);
+          const gigs = s.gigs.map((gig) => (gig.id === id ? { ...gig, ...patch } : gig));
+          const updated = gigs.find((gig) => gig.id === id);
+          const newlyBooked = previous?.status !== "booked" && updated?.status === "booked";
+          const tasks = newlyBooked && updated
+            ? generateShowTaskPacks([updated], s.tasks).map((task) => ({ ...task, id: uid() }))
+            : [];
+          return { gigs, tasks: [...tasks, ...s.tasks] };
+        }),
       removeGig: (id) =>
         set((s) => ({
           gigs: s.gigs.filter((g) => g.id !== id),
