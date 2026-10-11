@@ -77,6 +77,7 @@ export interface FileRoutesByTo {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -87,6 +88,7 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
