@@ -230,3 +230,118 @@ Build and test a complete workflow before adding more disconnected screens: **co
 
 For each stage, tests must prove correct persistence, retries, duplicate-event handling, permission checks, failure recovery, and audit logging. Only claim a step is autonomous after the connected service actually performs and verifies it. Expand next into lead-to-booking and receipt-to-reconciliation workflows, reusing the same automation engine and data model.
 
+
+
+## Competitive research and differentiation strategy (reviewed 2026-10-11)
+
+### Market reality
+
+The category is moving beyond basic calendars and shared gig notes. Existing products already cover substantial parts of band coordination, touring logistics, booking CRM, finances, merch, release operations, fan CRM, and AI-assisted workflows. A feature-count race would be easy to copy and expensive to maintain.
+
+Competitive examples reviewed:
+- BandHelper: schedules, setlists, contacts, band finance, stage plots, invoices, and performance support — https://www.bandhelper.com/
+- Master Tour / Eventric: professional tour itineraries, day sheets, travel and crew logistics; official pricing page — https://www.eventric.com/pricing-plans-tour-management-software/
+- Artist Growth: broad artist-ecosystem collaboration and business management — https://help.artistgrowth.com/en/i-currently-use-master-tour.-is-artist-growth-the-same-thing-help-center
+- Prism.fm: booking, offers, contracts, advancing, settlements, financial reporting, and live-event demand insights — https://prism.fm/
+- Riffboard: independent artist shows, contacts, tasks, releases, audience tools and AI-assistant integration — https://www.riffboard.com/
+- MNGR: releases, shows, tasks, finance, contacts and a command-center operating view — https://www.trymngr.com/
+- Cultivate: live-music booking CRM with per-deal stages, next steps, quiet-deal alerts and linked tour stops — https://cultivatelmi.com/crm
+- Bandruption: approval-led AI workflows across promotion, events, tickets, merch and fan participation — https://bandruption.com/
+- Sonic DIY and ArtistHQ are further signs that independent-artist all-in-one operations and connected show/merch/finance flows are active competitive territory — https://www.sonic.diy/tools and https://artisthq.app/band-management-software
+
+These are public product claims, not a hands-on feature audit. Recheck live pricing and capabilities before making public competitor comparisons.
+
+### Recommended positioning
+
+**Primal Directive should be the execution-first operating system for independent and regional touring bands.** Its promise should not be "everything in one dashboard"; it should be "the right work happens on time, the records stay connected, and the band knows what it actually earned."
+
+The defensible wedge is a cross-functional, evidence-backed loop that is especially useful for bands without a full-time manager:
+1. A booking opportunity becomes a dated deal, a next action, a follow-up deadline and a forecast — without creating duplicate records.
+2. Confirmation triggers the show checklist, deal/payment deadlines, advance requests, promotion draft, travel considerations and show-specific merch preparation.
+3. The system surfaces blockers and unanswered questions before show day, with owners and escalation rules.
+4. Recorded show results reconcile guarantee/door income, deductions, expenses, merch sales, stock movements, outstanding balances and proposed band shares.
+5. Verified outcomes update the venue/market history, actual show profitability, merch sell-through, routing assumptions and future offer recommendations.
+6. Every important recommendation shows its source data, assumptions, confidence and what would change the conclusion.
+
+### Market signals to turn into product advantage
+
+- **Booking follow-through is a high-value workflow, not just a contact list.** Cultivate's current positioning around holds, offers, next steps, quiet-deal alerts and linked tour stops shows that specialized booking pipelines are getting more sophisticated. Primal Directive should connect the pipeline all the way through the show, money, merch and learning loop rather than recreate a generic CRM.
+- **Mobile-first is a requirement.** The work happens in vans, venues, parking lots and after the show. Critical actions, task completion, receipt capture, sales entry and approval review must be fast and usable on a phone.
+- **Fan value is concentrated.** Spotify for Artists' Fan Study reports that its super-listener segment represents about 2% of monthly listeners but over 18% of monthly streams, and in the cited sample accounted for 50% of on-platform ticket sales. The product opportunity is to help bands identify and nurture repeat attendees using permissioned, first-party information — not spam everyone. Source: https://artists.spotify.com/fan-study/merch-and-live
+- **Merch is strategically important, but fan trust matters.** Spotify reports that among artists with fewer than one million monthly listeners, the number selling merch on Spotify grew more than threefold and total merch sales volume more than sixfold from 2022 to 2024. MIDiA's March 2026 discussion also notes rising appetite for more distinctive merch and concerns about affordability and over-monetization. Help bands select products and quantities from evidence, measure sell-through and margin, and avoid unnecessary inventory risk. Sources: https://artists.spotify.com/fan-study/merch-and-live and https://www.midiaresearch.com/blog/the-new-rules-of-musics-growth-engine-insights-from-midias-merch-and-ticket-buyer-survey
+- **AI automation must be earned and verifiable.** OWASP identifies excessive agency, excessive permissions and excessive autonomy as material risks for AI agents. Enforce permissions at the execution layer, bind approval to the exact action, use idempotency/replay protection, show before/after, log outcomes, and fail closed on uncertain or high-impact actions. Source: https://genai.owasp.org/llmrisk/llm062025-excessive-agency/
+
+### What to build next, in order
+
+#### P0 — Finish and trust the operational foundation
+- Make the task center the single source of truth for generated and manually created operational work; connect every task to its canonical show, deal, owner, evidence and next action.
+- Build a real automation control room: enabled/disabled state, trigger, exact proposed action, approval, attempt count, last result, retry/resume, error reason, and audit trail.
+- Add workflow-level idempotency keys, concurrency-safe writes and duplicate-event tests. A sale, email or imported event must never silently create duplicate ledger entries or repeat an external action.
+- Add data provenance to financial summaries: actual vs projected, source transaction, missing fields, reconciliation status and last-updated time.
+- Preserve phone-first usability, clear empty states, accessible controls, export/backup, and visible connection status.
+
+#### P1 — Close the show-to-profit loop
+- Add a show closeout checklist that compares the agreed deal with actual settlement, expenses, merch revenue/COGS and stock count.
+- Separate projected, reported and verified money. Never call a show "profitable" if material expenses or settlement fields are missing; show a range or incomplete status instead.
+- Track balances due, invoice/deposit deadlines, follow-up history and evidence of payment. Draft reminders first; require authorization before sending.
+- Calculate proposed member shares only from an explicitly configured band policy, show the math, and require approval before marking payouts as paid.
+- Generate a post-show report with actual net, merch sell-through, unresolved discrepancies, outstanding money and concrete follow-up actions.
+
+#### P2 — Build a booking and routing intelligence advantage
+- Model each pitch/deal separately from the venue/contact, with stages, last contact, next step, due date, offer terms, probability and loss reason.
+- Surface stale opportunities and missing next actions; generate evidence-based personalized drafts, but never invent a contact or claim a message was sent when it was only drafted.
+- Evaluate tour stops using expected net profit, travel time/cost, show spacing, availability and uncertainty — not just distance or headline guarantee.
+- Build a venue memory from the band's own verified history: response time, deal outcomes, attendance, merch performance, payment reliability, production fit and rebooking interval.
+- Show recommendation explanations and counterfactuals (e.g., why a stop is or is not worth adding).
+
+#### P3 — Connect audience growth to live revenue
+- Track event links, source/UTM, campaign dates, content assets, approved posts, ticket clicks where integrations permit, attendance and repeat attendance.
+- Build a permission-based fan CRM with source, consent, interests and last interaction; support exports and deletion requests.
+- Recommend a small set of high-value actions for the most engaged fans: announce nearby dates, share approved live clips, offer a relevant merch drop or invite repeat attendance.
+- Measure results per campaign/show and distinguish correlation from causal attribution. Do not imply access to private platform analytics without an authorized connection.
+
+#### P4 — Complete merch as a show-day workflow
+- Add true product variants (size/color), inventory movement ledger, purchase/production costs, multi-item checkout, refunds/voids and payment-processing fees.
+- Create a show pack: planned quantities by variant, packed-out stock, sold quantities, comps, damaged/returned units and counted remaining stock.
+- Reconcile expected stock with physical count after the show; flag variance and update inventory only through traceable movements.
+- Compare sell-through, margin and demand by venue, market, show attendance where known, and product variant before recommending the next print run.
+
+### Product-level moat and success metrics
+
+The moat should be accumulated verified operational history, not an AI prompt or a long feature list. Over time, the product can learn each band's actual booking conversion, venue reliability, route costs, show economics, merch demand and fan return behavior — while keeping the data portable and controlled by the band.
+
+Track these outcomes:
+- Admin minutes per show and per booking recovered.
+- Percentage of confirmed shows with complete advances by deadline.
+- Percentage of completed shows reconciled within 24–48 hours.
+- Unpaid balances and overdue follow-ups recovered.
+- Duplicate actions prevented; failed workflows recovered successfully.
+- Forecast vs actual show profit error.
+- Merch sell-through, stock variance and gross margin by show.
+- Booking reply rate, conversion by stage, rebooking rate and route net profit.
+- Campaign-to-ticket/attendance conversion where measurable.
+- Approval edit/reject rates and verified automation success rates.
+
+### What not to do
+
+- Do not add more modules before the current modules share canonical records and reliable workflows.
+- Do not market the product as fully autonomous until external integrations perform and verify real actions.
+- Do not use fabricated industry benchmarks, fake venue intelligence or unsupported AI confidence.
+- Do not make a feature checklist the main marketing message; show the end-to-end result.
+- Do not force bands into a manager/label workflow if their reality is a small crew sharing responsibility.
+- Do not sacrifice exports, data ownership, consent, least privilege or human override for automation.
+
+### Research source list
+
+Public pages reviewed on 2026-10-11; product features and pricing can change:
+- BandHelper — https://www.bandhelper.com/
+- Master Tour pricing — https://www.eventric.com/pricing-plans-tour-management-software/
+- Artist Growth comparison — https://help.artistgrowth.com/en/i-currently-use-master-tour.-is-artist-growth-the-same-thing-help-center
+- Prism.fm — https://prism.fm/
+- Riffboard — https://www.riffboard.com/
+- MNGR — https://www.trymngr.com/
+- Cultivate CRM — https://cultivatelmi.com/crm
+- Bandruption — https://bandruption.com/
+- Spotify for Artists Fan Study — https://artists.spotify.com/fan-study/merch-and-live
+- MIDiA Research, 19 March 2026 — https://www.midiaresearch.com/blog/the-new-rules-of-musics-growth-engine-insights-from-midias-merch-and-ticket-buyer-survey
+- OWASP LLM06:2025 Excessive Agency — https://genai.owasp.org/llmrisk/llm062025-excessive-agency/
