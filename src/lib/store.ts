@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
-import { recordMerchSale as applyMerchSale, restockMerch } from "@/lib/merch-ops";
+import { buildMerchLedgerEntries, recordMerchSale as applyMerchSale, restockMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks } from "@/lib/show-workflows";
 import type {
   ArtistProfile,
@@ -182,28 +182,16 @@ export const useMusician = create<State & Actions>()(
           if (!product) throw new Error("Product not found while recording sale.");
           // Keep the sale, inventory movement, and cash ledger entry in one state update.
           // This prevents a successful sale from being saved without its corresponding revenue record.
-          const revenueEntry: MoneyEntry = {
-            id: uid(),
-            type: "collected",
-            amount: sale.quantity * sale.unitPrice,
-            label: `Merch sale: ${product.name} × ${sale.quantity}`,
-            date: sale.date,
-            gigId: sale.gigId,
-          };
-          const costOfGoodsEntry: MoneyEntry = {
-            id: uid(),
-            type: "cost",
-            amount: sale.quantity * sale.unitCost,
-            label: `Merch cost of goods: ${product.name} × ${sale.quantity}`,
-            date: sale.date,
-            gigId: sale.gigId,
-          };
+          const ledgerEntries = buildMerchLedgerEntries(sale, product.name, {
+            revenueId: uid(),
+            costId: uid(),
+          });
           return {
             merchProducts: result.products,
             merchSales: result.sales,
             // Record revenue and its inventory cost together so show-level net
             // reflects merch margin rather than treating all merch receipts as profit.
-            money: [revenueEntry, costOfGoodsEntry, ...s.money],
+            money: [...ledgerEntries, ...s.money],
           };
         });
         return id;
