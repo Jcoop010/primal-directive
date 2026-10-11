@@ -21,6 +21,7 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
 function TourPage() {
   const gigs = useMusician((s) => s.gigs);
   const entries = useMusician((s) => s.money);
+  const merchSales = useMusician((s) => s.merchSales);
 
   const tour = useMemo(() => {
     const stops = gigs
@@ -46,6 +47,19 @@ function TourPage() {
       });
     return summarizeTour(stops);
   }, [gigs, entries]);
+
+  const actualMerchRevenue = merchSales.reduce((sum, sale) => sum + sale.quantity * sale.unitPrice, 0);
+  const actualMerchProfit = merchSales.reduce((sum, sale) => sum + sale.quantity * (sale.unitPrice - sale.unitCost), 0);
+  const actualMerchUnits = merchSales.reduce((sum, sale) => sum + sale.quantity, 0);
+  const merchByGig = new Map<string, { revenue: number; grossProfit: number; units: number }>();
+  for (const sale of merchSales) {
+    if (!sale.gigId) continue;
+    const current = merchByGig.get(sale.gigId) ?? { revenue: 0, grossProfit: 0, units: 0 };
+    current.revenue += sale.quantity * sale.unitPrice;
+    current.grossProfit += sale.quantity * (sale.unitPrice - sale.unitCost);
+    current.units += sale.quantity;
+    merchByGig.set(sale.gigId, current);
+  }
 
   const stopsByDate = [...tour.stops].sort((a, b) => {
     const aDate = gigs.find((gig) => gig.id === a.id)?.date ?? "";
@@ -73,6 +87,8 @@ function TourPage() {
         <Metric label="Recorded costs" value={money(tour.expectedCosts)} detail="Expenses linked to these shows" />
         <Metric label="Expected net" value={money(tour.expectedNet)} detail="Gross minus linked costs" />
         <Metric label="Risk-adjusted net" value={money(tour.riskAdjustedNet)} detail="Net weighted by each gig's confidence" />
+        <Metric label="Actual merch sales" value={money(actualMerchRevenue)} detail={`${actualMerchUnits} units recorded`} />
+        <Metric label="Merch gross profit" value={money(actualMerchProfit)} detail="Recorded sales less saved item costs" />
       </div>
 
       <Card className="p-4">
@@ -81,7 +97,7 @@ function TourPage() {
           <div>
             <div className="text-sm font-semibold">What these numbers mean</div>
             <p className="mt-1 text-xs leading-relaxed text-muted">
-              This first version uses the fee and confidence already saved on each show, plus expenses linked to that show in Money. It does not guess fuel, lodging, merch, taxes, or door deals. Add those costs to Money and link them to the gig to improve the estimate.
+              Expected show economics use saved gig fees and confidence plus linked expenses. Actual merch sales are reported separately from projected show income, and show-linked merch is attributed only when you link a sale to a gig. Fuel, lodging, taxes, door deals, and unrecorded merch are not guessed.
             </p>
           </div>
         </div>
@@ -108,6 +124,7 @@ function TourPage() {
             {stopsByDate.map((stop) => {
               const gig = gigs.find((item) => item.id === stop.id);
               const status = gig?.status ?? "lead";
+              const merch = merchByGig.get(stop.id);
               return (
                 <Card key={stop.id} className="p-4">
                   <div className="flex items-start justify-between gap-3">
@@ -118,6 +135,7 @@ function TourPage() {
                         <span className="truncate">{[gig?.venue, gig?.city].filter(Boolean).join(" · ") || "Venue details needed"}</span>
                       </div>
                       <div className="mt-1 text-xs text-muted">{longDate(gig?.date)} · {status}</div>
+                    {merch && <div className="mt-1 text-xs font-medium text-accent">Merch: {money(merch.revenue)} sales · {merch.units} units · {money(merch.grossProfit)} gross profit</div>}
                     </div>
                     <div className="shrink-0 text-right">
                       <div className="text-sm font-bold tabular">{money(stop.expectedNet)}</div>
