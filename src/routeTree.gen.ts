@@ -122,6 +122,7 @@ export interface RootRouteChildren {
   PeopleRoute: typeof PeopleRoute
   TourRoute: typeof TourRoute
   MerchRoute: typeof MerchRoute
+  SettlementRoute: typeof SettlementRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -189,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MerchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settlement': {
+      id: '/settlement'
+      path: '/settlement'
+      fullPath: '/settlement'
+      preLoaderRoute: typeof SettlementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -202,6 +210,7 @@ const rootRouteChildren: RootRouteChildren = {
   PeopleRoute: PeopleRoute,
   TourRoute: TourRoute,
   MerchRoute: MerchRoute,
+  SettlementRoute: SettlementRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
