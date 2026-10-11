@@ -121,3 +121,33 @@ export type ArtistProfile = {
   feeTarget: number;
   notes: string;
 };
+
+export const MERCH_CATEGORIES = ["apparel", "music", "accessories", "stickers", "other"] as const;
+export type MerchCategory = (typeof MERCH_CATEGORIES)[number];
+
+export const MERCH_PAYMENT_METHODS = ["cash", "card", "digital", "other"] as const;
+export type MerchPaymentMethod = (typeof MERCH_PAYMENT_METHODS)[number];
+
+export type MerchProduct = {
+  id: string;
+  name: string;
+  sku: string;
+  category: MerchCategory;
+  price: number;
+  unitCost: number;
+  stockOnHand: number;
+  reorderAt: number;
+  active: boolean;
+};
+
+export type MerchSale = {
+  id: string;
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  unitCost: number;
+  date: string;
+  gigId?: string;
+  paymentMethod: MerchPaymentMethod;
+  notes: string;
+};
