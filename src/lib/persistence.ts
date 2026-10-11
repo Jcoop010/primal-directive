@@ -42,6 +42,7 @@ const personSchema = z.object({
   city: z.string(),
   contact: z.string(),
   notes: z.string(),
+  settlementSharePercent: z.number().min(0).max(100).optional(),
 });
 
 const moneySchema = z.object({
@@ -96,6 +97,7 @@ const profileSchema = z.object({
   draw: z.string(),
   feeTarget: z.number(),
   notes: z.string(),
+  reservePercent: z.number().min(0).max(100).default(0),
 });
 
 const stateSchema = z.object({
