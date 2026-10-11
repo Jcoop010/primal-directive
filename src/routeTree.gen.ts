@@ -16,6 +16,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as GigsRouteImport } from './routes/gigs'
 import { Route as MoneyRouteImport } from './routes/money'
 import { Route as PeopleRouteImport } from './routes/people'
+import { Route as TourRouteImport } from './routes/tour'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const PeopleRoute = PeopleRouteImport.update({
   path: '/people',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,10 +90,10 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
-  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -97,6 +104,7 @@ export interface RootRouteChildren {
   GigsRoute: typeof GigsRoute
   MoneyRoute: typeof MoneyRoute
   PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -150,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PeopleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -161,6 +176,7 @@ const rootRouteChildren: RootRouteChildren = {
   GigsRoute: GigsRoute,
   MoneyRoute: MoneyRoute,
   PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
