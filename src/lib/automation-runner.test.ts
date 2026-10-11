@@ -46,7 +46,7 @@ describe("automation run state machine", () => {
     const secondStart = move(retry.run, "running");
     assert.equal(secondStart.ok, true);
     if (!secondStart.ok) return;
-    const exhausted = move({ ...secondStart.run, attempt: secondStart.run.maxAttempts }, "running");
+    const exhausted = move({ ...secondStart.run, status: "retry_scheduled", attempt: secondStart.run.maxAttempts, nextAttemptAt: "2026-10-11T20:02:00.000Z" }, "running");
     assert.equal(exhausted.ok, false);
   });
 
