@@ -305,6 +305,14 @@ export function buildAdvisorContext() {
   const outstanding = sumMoney(s.money, "outstanding");
   const costs = sumMoney(s.money, "cost");
   const profit = collected - costs;
+  const merchRevenue = s.merchSales.reduce((sum, sale) => sum + sale.quantity * sale.unitPrice, 0);
+  const merchGrossProfit = s.merchSales.reduce((sum, sale) => sum + sale.quantity * (sale.unitPrice - sale.unitCost), 0);
+  const merchUnitsSold = s.merchSales.reduce((sum, sale) => sum + sale.quantity, 0);
+  const lowStock = s.merchProducts.filter((product) => product.active && product.stockOnHand <= product.reorderAt);
+  const merchLines = s.merchProducts
+    .slice(0, 15)
+    .map((product) => `- ${product.name} [${product.sku || "no SKU"}] | stock ${product.stockOnHand} | price ${product.price} | cost ${product.unitCost}${product.active && product.stockOnHand <= product.reorderAt ? " | REORDER" : ""}`)
+    .join("\\n");
   const gigLines = s.gigs
     .slice(0, 12)
     .map(
@@ -323,7 +331,11 @@ TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
-MONEY: collected $${collected}, outstanding $${outstanding}, costs $${costs}, profit $${profit}
+MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
+MERCH: recorded sales ${merchRevenue}, gross profit ${merchGrossProfit}, units sold ${merchUnitsSold}, low-stock items ${lowStock.length}
+
+MERCH INVENTORY:
+${merchLines || "(empty)"}
 
 GIG PIPELINE:
 ${gigLines || "(empty)"}
