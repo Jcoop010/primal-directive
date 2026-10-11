@@ -60,7 +60,7 @@ describe("automation permission policy", () => {
   });
 
   it("requires a granted permission for each low-risk action", () => {
-    const result = evaluateAutomationPermission("calendar_sync", policy({ permissions: new Set<AutomationPermission>() }));
+    const result = evaluateAutomationPermission("sync_confirmed_show_calendar", policy({ permissions: new Set<AutomationPermission>() }));
     assert.equal(result.allowed, false);
   });
 
