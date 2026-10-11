@@ -196,7 +196,7 @@ export function calculateSettlement(
     const exact = distributableCents * member.sharePercent / 100;
     return { member, index, cents: Math.floor(exact), remainder: exact - Math.floor(exact) };
   });
-  let centsLeft = distributableCents - shares.reduce((sum, item) => sum + item.cents, 0);
+  const centsLeft = distributableCents - shares.reduce((sum, item) => sum + item.cents, 0);
   const priority = [...shares].sort((x, y) => y.remainder - x.remainder || x.index - y.index);
   for (let i = 0; i < centsLeft; i += 1) priority[i % priority.length]!.cents += 1;
 
