@@ -55,6 +55,7 @@ test("the enabled app exposes auth and app-state migrations to the migration run
   assert.deepEqual(pendingMigrations(readdirSync(migrationsDir), []), [
     { name: "0001_auth.sql", path: "0001_auth.sql" },
     { name: "0002_app_state.sql", path: "0002_app_state.sql" },
+    { name: "0003_security_hardening.sql", path: "0003_security_hardening.sql" },
   ]);
   assert.ok(readdirSync(join(migrationsDir, "auth")).includes("0001_auth.sql"));
 });
