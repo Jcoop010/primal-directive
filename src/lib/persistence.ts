@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { GIG_STATUSES, MONEY_TYPES, PERSON_ROLES } from "@/lib/types";
+import { GIG_STATUSES, MERCH_CATEGORIES, MERCH_PAYMENT_METHODS, MONEY_TYPES, PERSON_ROLES } from "@/lib/types";
 
 const suggestedGigSchema = z.object({
   name: z.string(),
@@ -53,6 +53,31 @@ const moneySchema = z.object({
   gigId: z.string().optional(),
 });
 
+
+const merchProductSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  sku: z.string(),
+  category: z.enum(MERCH_CATEGORIES),
+  price: z.number().nonnegative(),
+  unitCost: z.number().nonnegative(),
+  stockOnHand: z.number().int().nonnegative(),
+  reorderAt: z.number().int().nonnegative(),
+  active: z.boolean(),
+});
+
+const merchSaleSchema = z.object({
+  id: z.string(),
+  productId: z.string(),
+  quantity: z.number().int().positive(),
+  unitPrice: z.number().nonnegative(),
+  unitCost: z.number().nonnegative(),
+  date: z.string(),
+  gigId: z.string().optional(),
+  paymentMethod: z.enum(MERCH_PAYMENT_METHODS),
+  notes: z.string(),
+});
+
 const chatSchema = z.object({
   id: z.string(),
   role: z.enum(["user", "ai"]),
@@ -77,6 +102,8 @@ const stateSchema = z.object({
   gigs: z.array(gigSchema).max(5000),
   people: z.array(personSchema).max(5000),
   money: z.array(moneySchema).max(5000),
+  merchProducts: z.array(merchProductSchema).max(5000).default([]),
+  merchSales: z.array(merchSaleSchema).max(20000).default([]),
   chat: z.array(chatSchema).max(2000),
   profile: profileSchema,
 });
