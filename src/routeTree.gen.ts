@@ -18,7 +18,6 @@ import { Route as MoneyRouteImport } from './routes/money'
 import { Route as PeopleRouteImport } from './routes/people'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as MerchRouteImport } from './routes/merch'
-import { Route as SettlementRouteImport } from './routes/settlement'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -65,11 +64,6 @@ const MerchRoute = MerchRouteImport.update({
   path: '/merch',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettlementRoute = SettlementRouteImport.update({
-  id: '/settlement',
-  path: '/settlement',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,7 +75,6 @@ export interface FileRoutesByFullPath {
   '/people': typeof PeopleRoute
   '/tour': typeof TourRoute
   '/merch': typeof MerchRoute
-  '/settlement': typeof SettlementRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -106,7 +99,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/settlement'
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch'
   id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch'
@@ -122,7 +115,6 @@ export interface RootRouteChildren {
   PeopleRoute: typeof PeopleRoute
   TourRoute: typeof TourRoute
   MerchRoute: typeof MerchRoute
-  SettlementRoute: typeof SettlementRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -190,13 +182,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MerchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settlement': {
-      id: '/settlement'
-      path: '/settlement'
-      fullPath: '/settlement'
-      preLoaderRoute: typeof SettlementRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -210,7 +195,6 @@ const rootRouteChildren: RootRouteChildren = {
   PeopleRoute: PeopleRoute,
   TourRoute: TourRoute,
   MerchRoute: MerchRoute,
-  SettlementRoute: SettlementRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
