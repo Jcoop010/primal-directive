@@ -26,6 +26,8 @@ export function DurableSync() {
             gigs: state.gigs,
             people: state.people,
             money: state.money,
+            merchProducts: state.merchProducts ?? [],
+            merchSales: state.merchSales ?? [],
             chat: state.chat,
             profile: state.profile,
           }));
@@ -36,6 +38,8 @@ export function DurableSync() {
             gigs: [],
             people: [],
             money: [],
+            merchProducts: [],
+            merchSales: [],
             chat: [],
             profile: {
               artistName: "",
@@ -70,6 +74,8 @@ export function DurableSync() {
               gigs: current.gigs,
               people: current.people,
               money: current.money,
+              merchProducts: current.merchProducts,
+              merchSales: current.merchSales,
               chat: current.chat,
               profile: current.profile,
             },
