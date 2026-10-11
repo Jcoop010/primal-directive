@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   canTransitionShow,
+  calculateSettlement,
   showWorkflowKey,
   summarizeShowFinances,
 } from "./band-ops.ts";
@@ -85,5 +86,48 @@ describe("show workflow idempotency key", () => {
   it("rejects empty IDs and invalid versions", () => {
     assert.throws(() => showWorkflowKey("", "calendar"), /required/i);
     assert.throws(() => showWorkflowKey("show-1", "calendar", 0), /positive integer/i);
+  });
+});
+
+describe("settlement payout calculation", () => {
+  const members = [
+    { id: "a", name: "Member A", sharePercent: 50 },
+    { id: "b", name: "Member B", sharePercent: 30 },
+    { id: "c", name: "Member C", sharePercent: 20 },
+  ] as const;
+
+  it("calculates actual net, reserve, and member payouts to the exact cent", () => {
+    const result = calculateSettlement([
+      { label: "Guarantee", amount: 1000, kind: "income", status: "actual" },
+      { label: "Merch profit contribution", amount: 120.01, kind: "income", status: "actual" },
+      { label: "Fuel", amount: 70.02, kind: "expense", status: "actual" },
+      { label: "Estimated hotel", amount: 200, kind: "expense", status: "expected" },
+    ], members, 10);
+    assert.equal(result.actualNet, 1049.99);
+    assert.equal(result.reserveAmount, 105);
+    assert.equal(result.distributableAmount, 944.99);
+    assert.equal(result.payouts.reduce((sum, payout) => sum + Math.round(payout.amount * 100), 0), 94499);
+    assert.deepEqual(result.payouts.map((payout) => payout.amount), [472.5, 283.5, 188.99]);
+    assert.equal(result.deficit, 0);
+  });
+
+  it("never proposes payouts when actual expenses exceed actual income", () => {
+    const result = calculateSettlement([
+      { label: "Guarantee", amount: 100, kind: "income", status: "actual" },
+      { label: "Van repair", amount: 140, kind: "expense", status: "actual" },
+    ], members);
+    assert.equal(result.actualNet, -40);
+    assert.equal(result.deficit, 40);
+    assert.equal(result.distributableAmount, 0);
+    assert.deepEqual(result.payouts.map((payout) => payout.amount), [0, 0, 0]);
+  });
+
+  it("rejects splits that do not total 100%, duplicate members, and invalid reserve", () => {
+    assert.throws(() => calculateSettlement([], [{ id: "a", name: "A", sharePercent: 90 }]), /total 100/i);
+    assert.throws(() => calculateSettlement([], [
+      { id: "a", name: "A", sharePercent: 50 },
+      { id: "a", name: "Duplicate", sharePercent: 50 },
+    ]), /unique/i);
+    assert.throws(() => calculateSettlement([], members, 101), /between 0 and 100/i);
   });
 });
