@@ -160,3 +160,14 @@ A feature is not complete because a screen exists. It is complete only when:
 Administrative work removed per band per week, without increasing missed bookings, payment errors, or loss of control.
 
 Supporting metrics: qualified booking opportunities, outreach reply rate, booking conversion, time from confirmation to fully advanced, show settlement completion, late-payment recovery, net profit per show, task completion reliability, and agent actions requiring manual correction.
+
+
+## Implementation snapshot — October 11, 2026
+
+The first implementation slice is available on `feat/autonomous-band-os-foundation` and is tracked in draft PR #2. It is not yet merged or verified as passing CI.
+
+- **Tour Economics page:** `/tour` is now connected to the existing navigation and reads the current gig pipeline plus cost entries linked to each gig. It shows expected gross, recorded linked costs, expected net, and confidence-weighted net.
+- **Shared logic:** show lifecycle transitions, finance summaries, tour-stop economics, automation permission decisions, retry backoff, and an automation-run state machine have isolated unit tests.
+- **Current data limitation:** tour cost estimates only include costs already linked to a gig. Travel, lodging, crew, production, door, merch, tax, and settlement-specific fields are not yet captured as first-class data.
+- **Validation gate:** run `npm test`, `npm run typecheck`, `npm run check:auth`, and `npm run lint` in a working CI environment before merge. Do not infer that checks passed merely because the workflow file exists.
+- **Release gate:** keep production untouched until CI passes and the existing Vercel project's team/domain/deployment provisioning issue is resolved.
