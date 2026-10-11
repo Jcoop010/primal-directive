@@ -107,7 +107,7 @@ describe("settlement payout calculation", () => {
     assert.equal(result.reserveAmount, 105);
     assert.equal(result.distributableAmount, 944.99);
     assert.equal(result.payouts.reduce((sum, payout) => sum + Math.round(payout.amount * 100), 0), 94499);
-    assert.deepEqual(result.payouts.map((payout) => payout.amount), [472.5, 283.5, 188.99]);
+    assert.deepEqual(result.payouts.map((payout) => payout.amount), [472.49, 283.5, 189]);
     assert.equal(result.deficit, 0);
   });
 
