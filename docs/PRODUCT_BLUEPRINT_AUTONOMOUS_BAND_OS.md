@@ -251,6 +251,21 @@ Competitive examples reviewed:
 
 These are public product claims, not a hands-on feature audit. Recheck live pricing and capabilities before making public competitor comparisons.
 
+### Highest-priority competitive threat: feature parity is already here
+
+ArtistHQ is a particularly close direct competitor, not merely an adjacent example. Its public feature page advertises a show pipeline through settlement, show-linked merch sales, band splits, tour P&L, show/task linking, contact follow-up, gear, documents, release workflows, and exports. Its public pricing includes a free tier and a $19/month Plus tier. Source: https://artisthq.app/features and https://artisthq.app/
+
+Riffboard advertises AI-assistant integration via MCP, broad artist CRM/release/show features, and more than 100 MCP tools. Bandruption explicitly positions itself around approval-led AI workflows and agentic promotion. These are signals that "we use AI" or "we connect the modules" will not, by itself, be a moat. Sources: https://www.riffboard.com/ and https://bandruption.com/
+
+Therefore, Primal Directive must NOT market connected merch-to-P&L or all-in-one band administration as uniquely its own. Those are category expectations. The differentiator has to be proved in shipped product behavior:
+- **Autonomous completion, not just tracking:** work advances when its prerequisites are satisfied; exceptions are detected and escalated; completed external effects are verified.
+- **Evidence-backed business intelligence:** each recommendation is traceable to the band's own actual show, venue, audience, travel, and merch data, with uncertainty shown.
+- **Regional-band fit:** quick setup, phone-first use, small-team permissions, simple price/value, and practical workflows for self-managed acts without a full-time manager.
+- **A reliable closed loop:** booking pipeline → venue advance → show-day execution → actual settlement → stock/expense reconciliation → learning and next best action.
+- **Trust as a product feature:** exact-action approval, least-privilege integrations, replay protection, audit trail, easy pause/undo where possible, and no claim of execution until the external system confirms success.
+
+Before any public comparison, verify competitor capabilities and pricing directly. Do not claim a feature is unique if a competitor already advertises it. The positioning should focus on the quality, autonomy, and outcomes of the end-to-end system—not broad feature ownership.
+
 ### Recommended positioning
 
 **Primal Directive should be the execution-first operating system for independent and regional touring bands.** Its promise should not be "everything in one dashboard"; it should be "the right work happens on time, the records stay connected, and the band knows what it actually earned."
