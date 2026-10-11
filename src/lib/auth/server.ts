@@ -48,27 +48,48 @@ export const authConfigured =
   !authDisabled && Boolean(grokClientId && grokClientSecret);
 
 const explicitBaseURL = env("BETTER_AUTH_URL");
+const originForHost = (value: string): string => {
+  const normalized = value.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+  return `https://${normalized}`;
+};
+const deploymentOrigins = [
+  env("VERCEL_PROJECT_PRODUCTION_URL"),
+  env("VERCEL_URL"),
+]
+  .filter((host): host is string => Boolean(host))
+  .map(originForHost);
 const previewAllowedHosts: string[] = [...PREVIEW_ALLOWED_HOSTS];
 const LOCAL_DEV_ORIGINS: string[] = [
   "http://localhost:8080",
   "http://127.0.0.1:8080",
   "http://[::1]:8080",
 ];
-const baseURL = explicitBaseURL ?? {
-  allowedHosts: [...previewAllowedHosts, "localhost", "127.0.0.1", "[::1]"],
+const baseURL = explicitBaseURL ?? deploymentOrigins[0] ?? {
+  allowedHosts: [
+    ...previewAllowedHosts,
+    ...deploymentOrigins.map((origin) => origin.replace(/^https?:\/\//, "")),
+    "primal-directive.vercel.app",
+    "localhost",
+    "127.0.0.1",
+    "[::1]",
+  ],
   protocol: "auto" as const,
   fallback: "http://localhost:8080",
 };
 
-const trustedOrigins: string[] = explicitBaseURL
-  ? [explicitBaseURL, ...LOCAL_DEV_ORIGINS]
-  : [
-      ...previewAllowedHosts,
-      ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
-      ...LOCAL_DEV_ORIGINS,
-    ];
+const trustedOrigins: string[] = [
+  ...(explicitBaseURL ? [originForHost(explicitBaseURL)] : []),
+  ...deploymentOrigins,
+  "https://primal-directive.vercel.app",
+  ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
+  ...LOCAL_DEV_ORIGINS,
+].filter((origin, index, all) => all.indexOf(origin) === index);
 
-const databaseUrl = env("DATABASE_URL") ?? env("STORAGE_URL");
+const databaseUrl =
+  env("DATABASE_URL") ??
+  env("STORAGE_URL") ??
+  env("database_POSTGRES_URL") ??
+  env("database_POSTGRES_PRISMA_URL");
 
 const issuerBase = grokIssuer.replace(/\/+$/, "");
 const grokAuthorizationUrl = `${issuerBase}/api/auth/oauth2/authorize`;
