@@ -60,7 +60,7 @@ function TourPage() {
           <Eyebrow>Tour operations</Eyebrow>
           <h2 className="mt-2 text-xl font-extrabold tracking-tight">Tour economics</h2>
           <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-            See which held and booked shows look strongest financially before you commit to the route.
+            Compare held, booked, and completed shows to see where the route's estimated economics are strongest.
           </p>
         </div>
         <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface-2">
@@ -89,7 +89,7 @@ function TourPage() {
 
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-bold">Held and booked shows</h3>
+          <h3 className="text-sm font-bold">Tour stops</h3>
           <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">{tour.stopCount} stops</span>
         </div>
 
