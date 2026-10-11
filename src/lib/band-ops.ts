@@ -126,3 +126,93 @@ export function showWorkflowKey(
   }
   return `show:${id}:workflow:${workflow}:v${version}`;
 }
+
+
+export type SettlementMember = {
+  id: string;
+  name: string;
+  sharePercent: number;
+};
+
+export type MemberPayout = {
+  memberId: string;
+  memberName: string;
+  sharePercent: number;
+  amount: number;
+};
+
+export type SettlementCalculation = {
+  actualIncome: number;
+  actualExpenses: number;
+  actualNet: number;
+  reservePercent: number;
+  reserveAmount: number;
+  distributableAmount: number;
+  deficit: number;
+  payouts: MemberPayout[];
+};
+
+/**
+ * Calculates a proposed settlement from verified actuals only.
+ * It does not initiate transfers or imply that a payout has been paid.
+ * Payouts are rounded to cents using largest-remainder allocation so they
+ * always add up exactly to the distributable amount.
+ */
+export function calculateSettlement(
+  lines: readonly ShowFinancialLine[],
+  members: readonly SettlementMember[],
+  reservePercent = 0,
+): SettlementCalculation {
+  if (!Number.isFinite(reservePercent) || reservePercent < 0 || reservePercent > 100) {
+    throw new Error("Reserve percent must be between 0 and 100.");
+  }
+  if (members.length === 0) throw new Error("At least one member is required.");
+  const seenIds = new Set<string>();
+  let shareTotal = 0;
+  for (const member of members) {
+    if (!member.id.trim() || !member.name.trim()) {
+      throw new Error("Every member requires an ID and name.");
+    }
+    if (seenIds.has(member.id)) throw new Error("Member IDs must be unique.");
+    seenIds.add(member.id);
+    if (!Number.isFinite(member.sharePercent) || member.sharePercent < 0 || member.sharePercent > 100) {
+      throw new Error(`Invalid split percentage for ${member.name}.`);
+    }
+    shareTotal += member.sharePercent;
+  }
+  if (Math.abs(shareTotal - 100) > 0.000001) {
+    throw new Error("Member split percentages must total 100%.");
+  }
+
+  const actual = summarizeShowFinances(lines.filter((line) => line.status === "actual"));
+  const toCents = (amount: number) => Math.round(amount * 100);
+  const incomeCents = toCents(actual.actualIncome);
+  const expenseCents = toCents(actual.actualExpenses);
+  const netCents = incomeCents - expenseCents;
+  const reserveCents = Math.round(Math.max(0, netCents) * reservePercent / 100);
+  const distributableCents = Math.max(0, netCents - reserveCents);
+
+  const shares = members.map((member, index) => {
+    const exact = distributableCents * member.sharePercent / 100;
+    return { member, index, cents: Math.floor(exact), remainder: exact - Math.floor(exact) };
+  });
+  let centsLeft = distributableCents - shares.reduce((sum, item) => sum + item.cents, 0);
+  const priority = [...shares].sort((x, y) => y.remainder - x.remainder || x.index - y.index);
+  for (let i = 0; i < centsLeft; i += 1) priority[i % priority.length]!.cents += 1;
+
+  return {
+    actualIncome: incomeCents / 100,
+    actualExpenses: expenseCents / 100,
+    actualNet: netCents / 100,
+    reservePercent,
+    reserveAmount: reserveCents / 100,
+    distributableAmount: distributableCents / 100,
+    deficit: Math.max(0, -netCents) / 100,
+    payouts: shares.map(({ member, cents }) => ({
+      memberId: member.id,
+      memberName: member.name,
+      sharePercent: member.sharePercent,
+      amount: cents / 100,
+    })),
+  };
+}
