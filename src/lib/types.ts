@@ -70,6 +70,7 @@ export type Person = {
   city: string;
   contact: string;
   notes: string;
+  settlementSharePercent?: number;
 };
 
 export type MoneyEntry = {
@@ -120,6 +121,7 @@ export type ArtistProfile = {
   draw: string;
   feeTarget: number;
   notes: string;
+  reservePercent?: number;
 };
 
 export const MERCH_CATEGORIES = ["apparel", "music", "accessories", "stickers", "other"] as const;
