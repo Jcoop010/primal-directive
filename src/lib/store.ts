@@ -322,7 +322,7 @@ export function buildAdvisorContext() {
     .join("\n");
   const peopleLines = s.people
     .slice(0, 12)
-    .map((p) => `- ${p.name} (${p.role}) ${p.city} | ${p.notes}`)
+    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
     .join("\n");
   return `ARTIST: ${s.profile.artistName}
 HOME: ${s.profile.city}
