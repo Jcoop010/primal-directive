@@ -171,3 +171,62 @@ The first implementation slice is available on `feat/autonomous-band-os-foundati
 - **Current data limitation:** tour cost estimates only include costs already linked to a gig. Travel, lodging, crew, production, door, merch, tax, and settlement-specific fields are not yet captured as first-class data.
 - **Validation gate:** run `npm test`, `npm run typecheck`, `npm run check:auth`, and `npm run lint` in a working CI environment before merge. Do not infer that checks passed merely because the workflow file exists.
 - **Release gate:** keep production untouched until CI passes and the existing Vercel project's team/domain/deployment provisioning issue is resolved.
+
+## Operating model: one autonomous administrative workflow
+
+The band should not have to manage separate tools as disconnected destinations. Primal Directive should own a shared operational record and orchestrate work across the existing modules. A module is a capability and focused workspace, not a separate silo.
+
+### The closed-loop execution cycle
+
+1. **Observe:** monitor the band's approved inboxes, calendar, booking pipeline, task list, money records, merch activity, deadlines, and connected services.
+2. **Understand:** connect each event to the right band, contact, show, task, transaction, or campaign; deduplicate updates and identify missing or conflicting facts.
+3. **Prioritize:** rank work by deadline, expected value, risk, and dependency; explain why a task matters.
+4. **Prepare:** draft the next email, checklist, invoice, budget, promotion plan, packing list, or reconciliation using verified band data.
+5. **Authorize:** check the band's permissions and the action's risk tier. Routine, reversible actions can run under explicit rules; financial transfers, binding commitments, signatures, refunds, and sensitive communications require approval.
+6. **Execute:** call the connected provider or update the canonical record. A plan or draft is not considered executed.
+7. **Verify:** confirm the provider result or persisted state, prevent duplicate writes, and record evidence.
+8. **Follow through:** create the next task, schedule a permitted follow-up, or escalate a blocker with a clear reason and one-tap decision.
+9. **Learn:** compare expected and actual results, then improve future recommendations using verified outcomes rather than guesses.
+
+### One event should coordinate the entire business
+
+When a gig becomes confirmed, the system should orchestrate—not merely recommend—the following connected work:
+- Add or update the canonical event and sync the authorized calendars.
+- Confirm member availability and create role-specific tasks.
+- Generate an advance checklist and request missing production, hospitality, schedule, parking, and contact details.
+- Track the contract, deposit, balance due, invoice, and payment deadlines.
+- Prepare the show budget, travel plan, and merch allocation based on inventory and previous sales.
+- Prepare a promotion plan with approved assets, event links, deadlines, and channel-specific copy.
+- After the show, reconcile the guarantee/door income, expenses, merch, receipts, and outstanding balances.
+- Produce a reviewable show report with actual net, missing data, and next actions; feed verified outcomes into booking and routing intelligence.
+
+Every stage must be resumable. If a provider is disconnected or a venue does not respond, the system should preserve progress, show the blocker, and retry only within safe limits.
+
+### Modules and shared capabilities
+
+- **Command Center:** prioritized work queue, blockers, overdue items, money at risk, and a visible record of what the agents did.
+- **Booking & relationships:** venue research, verified contacts, opportunity scoring, outreach, reply triage, follow-up, and pipeline movement.
+- **Shows & tour operations:** calendars, member availability, advancing, contracts, production documents, routing, checklists, and show closeout.
+- **Money & administration:** invoices, deposits, expenses, receipts, reimbursements, tax-ready exports, payment follow-up, budgets, and show profitability.
+- **Merch:** product/size/color variants, purchase costs, inventory movements, show packing and reconciliation, multi-item orders, refunds/voids, and sales analytics.
+- **Audience & content:** EPK, assets, content calendar, approved publishing workflows, mailing/ticket links, campaign measurement, and follow-up.
+- **Documents & knowledge:** one searchable home for contracts, riders, stage plots, input lists, invoices, receipts, EPK versions, and important contact history.
+- **People & permissions:** band-member roles, assignments, approval rights, and a clear view of each person's responsibilities.
+- **Automation control room:** enabled workflows, trigger conditions, action limits, approval queue, run history, retry/resume, errors, and audit evidence.
+
+### Product rules
+
+- One canonical record for a venue, contact, gig, task, product, sale, or transaction; modules link to it rather than duplicating it.
+- One task system and one audit history across the product.
+- Every automated action has a visible status: proposed, awaiting approval, running, succeeded, failed, or blocked.
+- No fabricated live facts, invented venue contacts, fake delivery confirmations, or unsupported financial certainty.
+- All external connections are opt-in, revocable, permission-scoped, and clearly marked connected or disconnected.
+- Routine work may be autonomous only after its limits and failure behavior are configured. Human approval remains mandatory for high-impact or irreversible actions.
+- The interface must remain usable from a phone; automation status and approvals cannot depend on desktop-only workflows.
+
+### Implementation priority: prove one end-to-end loop
+
+Build and test a complete workflow before adding more disconnected screens: **confirmed gig → advance tasks and deadlines → approved promotion → show-day merch pack → recorded sales and expenses → post-show reconciliation → profitability and next actions**.
+
+For each stage, tests must prove correct persistence, retries, duplicate-event handling, permission checks, failure recovery, and audit logging. Only claim a step is autonomous after the connected service actually performs and verifies it. Expand next into lead-to-booking and receipt-to-reconciliation workflows, reusing the same automation engine and data model.
+
