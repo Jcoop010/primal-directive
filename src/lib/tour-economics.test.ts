@@ -29,7 +29,7 @@ describe("tour economics", () => {
 
   it("calculates the guarantee needed to reach a target net", () => {
     const result = summarizeTourStop(stop());
-    assert.equal(result.minimumGuaranteeForTarget(1000), 720);
+    assert.equal(result.minimumGuaranteeForTarget(1000), 1050);
   });
 
   it("aggregates a tour and ranks higher risk-adjusted stops first", () => {
@@ -38,10 +38,10 @@ describe("tour economics", () => {
       stop({ id: "high", label: "Higher return", expectedGuarantee: 1500, confidence: 0.9 }),
     ]);
     assert.equal(result.stopCount, 2);
-    assert.equal(result.expectedGross, 2100);
+    assert.equal(result.expectedGross, 2400);
     assert.equal(result.expectedCosts, 700);
-    assert.equal(result.expectedNet, 1400);
-    assert.equal(result.expectedMargin, 1400 / 2100);
+    assert.equal(result.expectedNet, 1700);
+    assert.equal(result.expectedMargin, 1700 / 2400);
     assert.equal(result.stops[0].id, "high");
   });
 
