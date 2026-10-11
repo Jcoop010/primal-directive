@@ -3,6 +3,7 @@ import {
   Banknote,
   CalendarDays,
   LayoutGrid,
+  ListChecks,
   Music2,
   Plus,
   Route as RouteIcon,
@@ -33,6 +34,7 @@ const NAV = [
   { to: "/money", label: "Money", icon: Banknote },
   { to: "/tour", label: "Tour", icon: RouteIcon },
   { to: "/merch", label: "Merch", icon: ShoppingBag },
+  { to: "/tasks", label: "Tasks", icon: ListChecks },
 ] as const;
 
 function SignInScreen() {
@@ -168,7 +170,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/90 backdrop-blur-md md:hidden">
-          <div className="mx-auto grid max-w-3xl grid-cols-8 px-1 pb-[env(safe-area-inset-bottom)]">
+          <div className="mx-auto grid max-w-3xl grid-cols-9 px-1 pb-[env(safe-area-inset-bottom)]">
             {NAV.map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
               return (
