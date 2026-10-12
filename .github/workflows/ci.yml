@@ -32,8 +32,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify authentication invariants
-        run: npm run check:auth
+      - name: Verify authentication invariants against the running dev server
+        run: |
+          npm run dev > /tmp/primal-directive-dev.log 2>&1 &
+          DEV_PID=$!
+          trap 'kill "$DEV_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:8080/__app-env > /dev/null; then
+              npm run check:auth
+              exit $?
+            fi
+            if ! kill -0 "$DEV_PID" 2>/dev/null; then
+              cat /tmp/primal-directive-dev.log
+              exit 1
+            fi
+            sleep 2
+          done
+          cat /tmp/primal-directive-dev.log
+          echo "Dev server did not become ready in time."
+          exit 1
 
       - name: Typecheck
         run: npm run typecheck
