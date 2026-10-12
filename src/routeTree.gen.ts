@@ -64,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -73,6 +74,7 @@ export interface FileRoutesByTo {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,13 +85,14 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
-  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/api/auth/$'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,6 +103,7 @@ export interface RootRouteChildren {
   GigsRoute: typeof GigsRoute
   MoneyRoute: typeof MoneyRoute
   PeopleRoute: typeof PeopleRoute
+  ApiAuthRoute: typeof ApiAuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -153,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PeopleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -164,6 +175,7 @@ const rootRouteChildren: RootRouteChildren = {
   GigsRoute: GigsRoute,
   MoneyRoute: MoneyRoute,
   PeopleRoute: PeopleRoute,
+  ApiAuthRoute: ApiAuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
@@ -223,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -232,6 +245,7 @@ export interface FileRoutesByTo {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -242,6 +256,7 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -347,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -356,6 +372,7 @@ export interface FileRoutesByTo {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -366,6 +383,7 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -506,6 +524,7 @@ export interface FileRoutesByFullPath {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -515,6 +534,7 @@ export interface FileRoutesByTo {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -525,6 +545,7 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -631,6 +652,7 @@ export interface FileRoutesByFullPath {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -640,6 +662,7 @@ export interface FileRoutesByTo {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -650,6 +673,7 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -790,6 +814,7 @@ export interface FileRoutesByFullPath {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -799,6 +824,7 @@ export interface FileRoutesByTo {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -809,6 +835,7 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
+  '/api/auth/$': typeof ApiAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
