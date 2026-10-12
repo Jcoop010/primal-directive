@@ -130,7 +130,7 @@ async function complete(args: {
   search: boolean;
 }) {
   const body: Record<string, unknown> = {
-    model: "grok-4.5",
+    model: "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
     max_tokens: 1600,
@@ -150,6 +150,7 @@ async function complete(args: {
       Authorization: `Bearer ${args.apiKey}`,
     },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(45_000),
   });
   return res;
 }
@@ -202,7 +203,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
     const citations = citationsFrom(body);
-    const source = citations.length ? "LIVE WEB SEARCH — SOURCES ATTACHED" : "AI ANALYSIS — NO SOURCES ATTACHED";
+    const source = citations.length ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
       const gigs: SuggestedGig[] = (safe.data.gigs ?? []).slice(0, 4).map((g) => ({
