@@ -19,6 +19,21168 @@ import { Route as PeopleRouteImport } from './routes/people'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as MerchRouteImport } from './routes/merch'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as AuthApiRouteImport } from './routes/api/auth/
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthApiRoute = AuthApiRouteImport.update({
+  id: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+  '/api/auth/
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+  AuthApiRoute: typeof AuthApiRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+  AuthApiRoute: AuthApiRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: {
+      id: '/api/auth/  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+      path: '/api/auth/  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+      fullPath: '/api/auth/  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+      preLoaderRoute: typeof AuthApiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  path: '/api/auth/
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GigsRoute = GigsRouteImport.update({
+  id: '/gigs',
+  path: '/gigs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+,
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+  '/tour': typeof TourRoute
+  '/merch': typeof MerchRoute
+  '/tasks': typeof TasksRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+  TourRoute: typeof TourRoute
+  MerchRoute: typeof MerchRoute
+  TasksRoute: typeof TasksRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+  TourRoute: TourRoute,
+  MerchRoute: MerchRoute,
+  TasksRoute: TasksRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
