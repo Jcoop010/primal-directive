@@ -82,8 +82,25 @@ const grokAuthorizationUrl = `${issuerBase}/api/auth/oauth2/authorize`;
 const grokTokenUrl = `${issuerBase}/api/auth/oauth2/token`;
 const grokUserInfoUrl = `${issuerBase}/api/auth/oauth2/userinfo`;
 
+function postgresConnectionString(connectionString: string): string {
+  // node-postgres/pg-connection-string v2.9+ interprets sslmode=require as
+  // certificate verification (verify-full). Existing managed Postgres
+  // endpoints using the historical libpq "require" behavior can then fail
+  // with SELF_SIGNED_CERT_IN_CHAIN. Keep TLS encryption while restoring the
+  // documented libpq-compatible meaning of "require" for that explicit mode.
+  try {
+    const url = new URL(connectionString);
+    if (url.searchParams.get("sslmode") === "require") {
+      url.searchParams.set("uselibpqcompat", "true");
+    }
+    return url.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 const database = databaseUrl
-  ? new Pool({ connectionString: databaseUrl })
+  ? new Pool({ connectionString: postgresConnectionString(databaseUrl) })
   : { dialect: pgliteDialect(() => getPglite()), type: "postgres" as const };
 
 export const SESSION_TOKEN_COOKIE = "__Host-grok-auth.session_token";
