@@ -5,7 +5,8 @@
   "type": "module",
   "overrides": {
     "nf3": "0.3.17",
-    "@tanstack/start-server-core": "1.169.39"
+    "@tanstack/start-server-core": "1.169.39",
+    "@tanstack/react-store": "0.11.2"
   },
   "scripts": {
     "dev": "node scripts/with-app-env.mjs vite dev --host 0.0.0.0 --port 8080",
