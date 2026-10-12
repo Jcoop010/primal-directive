@@ -3,14 +3,17 @@
  * Deploy-time database migrator (node-postgres, `pg`).
  *
  * Runs during `npm run build` — on every Vercel deploy — applying pending files
- * in ../migrations to DATABASE_URL. Each file is applied in one transaction and
- * recorded in a `_migrations` table, so it runs once and is safe to re-run.
+ * in ../migrations to the same Postgres connection used by the app. Each file is
+ * applied in one transaction and recorded in a `_migrations` table, so it runs
+ * once and is safe to re-run.
  *
  * The read is non-recursive, so the opt-in auth schema under migrations/auth/
  * is not applied to an app that never asked for sign-in.
  *
- * No DATABASE_URL (local / preview builds) -> skip; the PGLite fallback applies
- * the same files at startup instead (see src/lib/db.ts).
+ * Vercel integrations often expose the connection as POSTGRES_PRISMA_URL or
+ * POSTGRES_URL instead of DATABASE_URL. Resolve the same aliases as src/lib/db.ts
+ * and src/lib/auth/server.ts so production auth tables are actually migrated.
+ * If no URL is configured, skip; the PGLite fallback migrates itself.
  */
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -18,10 +21,19 @@ import { dirname, join } from "node:path";
 import pg from "pg";
 import { pendingMigrations } from "./migration-plan.mjs";
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
+const databaseUrl =
+  process.env.DATABASE_URL ??
+  process.env.STORAGE_URL ??
+  process.env.POSTGRES_PRISMA_URL ??
+  process.env.POSTGRES_URL_NON_POOLING ??
+  process.env.POSTGRES_URL ??
+  process.env.database_POSTGRES_PRISMA_URL ??
+  process.env.database_POSTGRES_URL_NON_POOLING ??
+  process.env.database_POSTGRES_URL;
+
+if (!databaseUrl?.trim()) {
   console.log(
-    "[migrate] DATABASE_URL not set — skipping (the PGLite fallback migrates itself).",
+    "[migrate] No Postgres URL configured — skipping (the PGLite fallback migrates itself).",
   );
   process.exit(0);
 }
