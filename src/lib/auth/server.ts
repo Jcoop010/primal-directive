@@ -89,11 +89,12 @@ const trustedOrigins: string[] = [
 const databaseUrl =
   env("DATABASE_URL") ??
   env("STORAGE_URL") ??
-  env("database_POSTGRES_URL") ??
-  env("database_POSTGRES_PRISMA_URL") ??
   env("POSTGRES_PRISMA_URL") ??
   env("POSTGRES_URL_NON_POOLING") ??
-  env("POSTGRES_URL");
+  env("POSTGRES_URL") ??
+  env("database_POSTGRES_PRISMA_URL") ??
+  env("database_POSTGRES_URL_NON_POOLING") ??
+  env("database_POSTGRES_URL");
 
 const issuerBase = grokIssuer.replace(/\/+$/, "");
 const grokAuthorizationUrl = `${issuerBase}/api/auth/oauth2/authorize`;
