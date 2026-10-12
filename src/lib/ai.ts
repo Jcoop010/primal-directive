@@ -206,7 +206,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const source = citations.length ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
-      const gigs: SuggestedGig[] = (safe.data.gigs ?? []).slice(0, 4).map((g) => ({
+      // Structured leads are actionable real-world claims. Without returned citations,
+      // keep them out of the UI even if the model emitted plausible-looking entries.
+      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).slice(0, 4).map((g) => ({
         name: g.name,
         venue: g.venue,
         city: g.city,
@@ -216,7 +218,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         reason: g.reason,
         status: g.status,
       }));
-      const people: SuggestedPerson[] = (safe.data.people ?? [])
+      const people: SuggestedPerson[] = (citations.length ? safe.data.people ?? [] : [])
         .slice(0, 4)
         .map((p) => ({
           name: p.name,
