@@ -186,7 +186,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let res = await complete({ apiKey, messages, search: true });
+    try {
+      let res = await complete({ apiKey, messages, search: true });
     if (!res.ok) {
       res = await complete({ apiKey, messages, search: false });
     }
@@ -234,6 +235,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-    // Never show malformed or schema-invalid model output as if it were a vetted answer.
-    return fallback();
+      // Never show malformed or schema-invalid model output as if it were a vetted answer.
+      return fallback();
+    } catch {
+      // Network failures, invalid JSON, and provider-side response changes must not crash the advisor.
+      return fallback();
+    }
   });
