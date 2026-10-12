@@ -8,7 +8,11 @@ export type DbSource = "postgres" | "pglite";
 // creating a second integration or asking the user to expose a database secret.
 const rawDatabaseUrl =
   typeof process !== "undefined"
-    ? process.env.DATABASE_URL ?? process.env.STORAGE_URL
+    ? process.env.DATABASE_URL ??
+      process.env.STORAGE_URL ??
+      process.env.POSTGRES_PRISMA_URL ??
+      process.env.POSTGRES_URL_NON_POOLING ??
+      process.env.POSTGRES_URL
     : undefined;
 const databaseUrl =
   rawDatabaseUrl && rawDatabaseUrl.trim() ? rawDatabaseUrl : undefined;
