@@ -195,7 +195,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
     const citations = citationsFrom(body);
-    const source = citations.length ? "LIVE WEB SEARCH" : "PRIMAL DIRECTIVE";
+    const source = citations.length ? "LIVE WEB SEARCH — SOURCES ATTACHED" : "AI ANALYSIS — NO SOURCES ATTACHED";
 
     if (safe?.success) {
       const gigs: SuggestedGig[] = (safe.data.gigs ?? []).slice(0, 4).map((g) => ({
