@@ -3,8 +3,11 @@ import {
   Banknote,
   CalendarDays,
   LayoutGrid,
+  ListChecks,
   Music2,
   Plus,
+  Route as RouteIcon,
+  ShoppingBag,
   Sparkles,
   UserRound,
   Users,
@@ -29,6 +32,9 @@ const NAV = [
   { to: "/people", label: "People", icon: Users },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/money", label: "Money", icon: Banknote },
+  { to: "/tour", label: "Tour", icon: RouteIcon },
+  { to: "/merch", label: "Merch", icon: ShoppingBag },
+  { to: "/tasks", label: "Tasks", icon: ListChecks },
 ] as const;
 
 function SignInScreen() {
@@ -43,7 +49,7 @@ function SignInScreen() {
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-muted">
           Sign in to access your private pipeline, gigs, people, calendar, money,
-          and Advisor. Each account gets its own workspace data.
+          Advisor, Tour, Merch, and Tasks. Each account gets its own workspace data.
         </p>
         <div className="mt-6">
           <SignInButtons />
@@ -163,8 +169,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </main>
         </div>
 
-        <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/90 backdrop-blur-md md:hidden">
-          <div className="mx-auto grid max-w-3xl grid-cols-6 px-1 pb-[env(safe-area-inset-bottom)]">
+        <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-20 overflow-x-auto border-t border-line bg-bg/90 backdrop-blur-md md:hidden">
+          <div className="mx-auto flex w-max min-w-full max-w-3xl overflow-x-auto px-1 pb-[env(safe-area-inset-bottom)]">
             {NAV.map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
               return (
@@ -172,7 +178,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-semibold",
+                    "flex min-h-14 w-[68px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] font-semibold",
                     active ? "text-fg" : "text-muted",
                   )}
                 >

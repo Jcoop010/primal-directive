@@ -1,0 +1,133 @@
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import {
+  canTransitionShow,
+  calculateSettlement,
+  showWorkflowKey,
+  summarizeShowFinances,
+} from "./band-ops.ts";
+
+describe("show lifecycle transitions", () => {
+  it("allows the normal booking-to-settlement path", () => {
+    const path = [
+      ["lead", "researched"],
+      ["researched", "qualified"],
+      ["qualified", "outreach_ready"],
+      ["outreach_ready", "contacted"],
+      ["contacted", "negotiating"],
+      ["negotiating", "contracted"],
+      ["contracted", "confirmed"],
+      ["confirmed", "advancing"],
+      ["advancing", "performed"],
+      ["performed", "settling"],
+      ["settling", "settled"],
+    ] as const;
+    for (const [from, to] of path) {
+      assert.equal(canTransitionShow(from, to).ok, true, `${from} -> ${to}`);
+    }
+  });
+
+  it("does not allow a hold to be mistaken for a confirmed show lifecycle completion", () => {
+    assert.equal(canTransitionShow("hold", "performed").ok, false);
+    assert.equal(canTransitionShow("lead", "settled").ok, false);
+  });
+
+  it("rejects no-op transitions with a useful reason", () => {
+    const result = canTransitionShow("confirmed", "confirmed");
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.match(result.reason, /already/i);
+  });
+});
+
+describe("show financial summary", () => {
+  it("separates estimates from actuals and calculates net correctly", () => {
+    const summary = summarizeShowFinances([
+      { label: "Guarantee", amount: 1200, kind: "income", status: "expected" },
+      { label: "Merch", amount: 250, kind: "income", status: "actual" },
+      { label: "Travel estimate", amount: 180, kind: "expense", status: "expected" },
+      { label: "Fuel", amount: 70, kind: "expense", status: "actual" },
+    ]);
+    assert.deepEqual(summary, {
+      expectedIncome: 1200,
+      actualIncome: 250,
+      expectedExpenses: 180,
+      actualExpenses: 70,
+      expectedNet: 1020,
+      actualNet: 180,
+      unverifiedLines: 2,
+    });
+  });
+
+  it("rejects negative, infinite, and NaN amounts", () => {
+    for (const amount of [-1, Infinity, NaN]) {
+      assert.throws(
+        () =>
+          summarizeShowFinances([
+            { label: "Bad line", amount, kind: "income", status: "actual" },
+          ]),
+        /finite and non-negative/i,
+      );
+    }
+  });
+});
+
+describe("show workflow idempotency key", () => {
+  it("normalizes workflow name and produces stable keys", () => {
+    assert.equal(
+      showWorkflowKey("show-123", "Create Calendar Event"),
+      "show:show-123:workflow:create calendar event:v1",
+    );
+    assert.equal(
+      showWorkflowKey("show-123", "create calendar event", 1),
+      showWorkflowKey("show-123", "Create Calendar Event", 1),
+    );
+  });
+
+  it("rejects empty IDs and invalid versions", () => {
+    assert.throws(() => showWorkflowKey("", "calendar"), /required/i);
+    assert.throws(() => showWorkflowKey("show-1", "calendar", 0), /positive integer/i);
+  });
+});
+
+describe("settlement payout calculation", () => {
+  const members = [
+    { id: "a", name: "Member A", sharePercent: 50 },
+    { id: "b", name: "Member B", sharePercent: 30 },
+    { id: "c", name: "Member C", sharePercent: 20 },
+  ] as const;
+
+  it("calculates actual net, reserve, and member payouts to the exact cent", () => {
+    const result = calculateSettlement([
+      { label: "Guarantee", amount: 1000, kind: "income", status: "actual" },
+      { label: "Merch profit contribution", amount: 120.01, kind: "income", status: "actual" },
+      { label: "Fuel", amount: 70.02, kind: "expense", status: "actual" },
+      { label: "Estimated hotel", amount: 200, kind: "expense", status: "expected" },
+    ], members, 10);
+    assert.equal(result.actualNet, 1049.99);
+    assert.equal(result.reserveAmount, 105);
+    assert.equal(result.distributableAmount, 944.99);
+    assert.equal(result.payouts.reduce((sum, payout) => sum + Math.round(payout.amount * 100), 0), 94499);
+    assert.deepEqual(result.payouts.map((payout) => payout.amount), [472.49, 283.5, 189]);
+    assert.equal(result.deficit, 0);
+  });
+
+  it("never proposes payouts when actual expenses exceed actual income", () => {
+    const result = calculateSettlement([
+      { label: "Guarantee", amount: 100, kind: "income", status: "actual" },
+      { label: "Van repair", amount: 140, kind: "expense", status: "actual" },
+    ], members);
+    assert.equal(result.actualNet, -40);
+    assert.equal(result.deficit, 40);
+    assert.equal(result.distributableAmount, 0);
+    assert.deepEqual(result.payouts.map((payout) => payout.amount), [0, 0, 0]);
+  });
+
+  it("rejects splits that do not total 100%, duplicate members, and invalid reserve", () => {
+    assert.throws(() => calculateSettlement([], [{ id: "a", name: "A", sharePercent: 90 }]), /total 100/i);
+    assert.throws(() => calculateSettlement([], [
+      { id: "a", name: "A", sharePercent: 50 },
+      { id: "a", name: "Duplicate", sharePercent: 50 },
+    ]), /unique/i);
+    assert.throws(() => calculateSettlement([], members, 101), /between 0 and 100/i);
+  });
+});

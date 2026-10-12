@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+import { randomBytes } from "node:crypto";
+
 const base = "http://127.0.0.1:8080/api/auth";
 const email = `ci-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
-const password = "CI-Only-Test-Password-123!";
+const password = `Ci-${randomBytes(24).toString("base64url")}!`;
 
 async function post(path, payload) {
   const response = await fetch(`${base}/${path}`, {

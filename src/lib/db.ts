@@ -3,13 +3,16 @@ import { pendingMigrations } from "../../scripts/migration-plan.mjs";
 /** Which database backend is active. */
 export type DbSource = "postgres" | "pglite";
 
-// The Vercel Supabase integration was originally installed with the STORAGE
-// prefix. Accept both names so the existing connection can be used without
-// creating a second integration or asking the user to expose a database secret.
+// Vercel's existing Supabase integration exposes connection strings with
+// lowercase "database_" prefixes. Prefer conventional names, then accept those
+// integration variables so production auth/data use persistent Postgres rather
+// than falling back to per-instance embedded PGlite.
 const rawDatabaseUrl =
   typeof process !== "undefined"
     ? process.env.DATABASE_URL ??
       process.env.STORAGE_URL ??
+      process.env.database_POSTGRES_URL ??
+      process.env.database_POSTGRES_PRISMA_URL ??
       process.env.POSTGRES_PRISMA_URL ??
       process.env.POSTGRES_URL_NON_POOLING ??
       process.env.POSTGRES_URL
