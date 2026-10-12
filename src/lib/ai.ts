@@ -126,8 +126,8 @@ async function complete(args: {
   const body: Record<string, unknown> = {
     model: "grok-4.5",
     messages: args.messages,
-    temperature: 0.6,
-    max_tokens: 1100,
+    temperature: 0.2,
+    max_tokens: 1600,
   };
   if (args.search) {
     body.search_parameters = {
