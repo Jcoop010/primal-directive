@@ -38,6 +38,21 @@ if (!databaseUrl?.trim()) {
   process.exit(0);
 }
 
+function postgresConnectionString(connectionString) {
+  // Match the app's Postgres SSL handling. Newer pg-connection-string releases
+  // interpret sslmode=require as verify-full; managed endpoints that rely on
+  // libpq's historical "require" semantics otherwise fail certificate checks.
+  try {
+    const url = new URL(connectionString);
+    if (url.searchParams.get("sslmode") === "require") {
+      url.searchParams.set("uselibpqcompat", "true");
+    }
+    return url.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 const migrationsDir = join(dirname(fileURLToPath(import.meta.url)), "..", "migrations");
 
 async function main() {
@@ -54,7 +69,7 @@ async function main() {
     return;
   }
 
-  const pool = new pg.Pool({ connectionString: databaseUrl, max: 1 });
+  const pool = new pg.Pool({ connectionString: postgresConnectionString(databaseUrl), max: 1 });
   const client = await pool.connect();
   try {
     await client.query(
