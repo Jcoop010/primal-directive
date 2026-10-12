@@ -7,7 +7,10 @@ const password = "CI-Only-Test-Password-123!";
 async function post(path, payload) {
   const response = await fetch(`${base}/${path}`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      origin: "http://127.0.0.1:8080",
+    },
     body: JSON.stringify(payload),
   });
   const body = await response.json().catch(() => null);
