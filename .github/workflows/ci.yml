@@ -22,15 +22,17 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Remove committed Vercel build output and refresh lockfile
+      - name: Remove committed Vercel build output and normalize lockfile
         run: |
           if [ -d .vercel/output ]; then
             rm -rf .vercel/output
-            npm install --package-lock-only --ignore-scripts
+          fi
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          if ! git diff --quiet -- package-lock.json || [ -n "$(git status --porcelain .vercel)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -A .vercel package-lock.json
-            git diff --cached --quiet || git commit -m "chore: remove committed Vercel build output"
+            git commit -m "chore: normalize dependency lockfile"
             git push
           fi
 
