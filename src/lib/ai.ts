@@ -171,7 +171,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "system", content: SYSTEM },
       {
         role: "system",
-        content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nARTIST CONTEXT:\n${data.context}`,
+        content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${data.context}`,
       },
       ...data.history.slice(-8).map((h) => ({
         role: h.role === "ai" ? "assistant" : "user",
