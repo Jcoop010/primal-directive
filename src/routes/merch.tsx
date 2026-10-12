@@ -23,13 +23,19 @@ const paymentLabel: Record<MerchPaymentMethod, string> = {
 function MerchPage() {
   const products = useMusician((s) => s.merchProducts);
   const sales = useMusician((s) => s.merchSales);
+  const orders = useMusician((s) => s.merchOrders);
+  const adjustments = useMusician((s) => s.merchInventoryAdjustments);
+  const recordOrder = useMusician((s) => s.recordMerchOrder);
   const gigs = useMusician((s) => s.gigs);
   const addProduct = useMusician((s) => s.addMerchProduct);
-  const restockProduct = useMusician((s) => s.restockMerchProduct);
-  const recordSale = useMusician((s) => s.recordMerchSale);
+  const adjustProduct = useMusician((s) => s.adjustMerchProduct);
+  const refundOrder = useMusician((s) => s.refundMerchOrder);
   const [showProductForm, setShowProductForm] = useState(false);
   const [productName, setProductName] = useState("");
   const [sku, setSku] = useState("");
+  const [size, setSize] = useState("");
+  const [color, setColor] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState<MerchCategory>("apparel");
   const [price, setPrice] = useState("30");
   const [unitCost, setUnitCost] = useState("10");
@@ -44,6 +50,14 @@ function MerchPage() {
   const [saleNotes, setSaleNotes] = useState("");
   const [restockProductId, setRestockProductId] = useState("");
   const [restockQuantity, setRestockQuantity] = useState("12");
+  const [adjustmentReason, setAdjustmentReason] = useState<"restock" | "comp" | "damage" | "correction">("restock");
+  const [adjustmentNote, setAdjustmentNote] = useState("");
+  const [cartItems, setCartItems] = useState<{ productId: string; quantity: number; unitPrice: number; unitCost: number }[]>([]);
+  const [discount, setDiscount] = useState("0");
+  const [tax, setTax] = useState("0");
+  const [fee, setFee] = useState("0");
+  const [member, setMember] = useState("");
+  const [orderQuery, setOrderQuery] = useState("");
 
   const summary = useMemo(() => summarizeMerch(products, sales), [products, sales]);
   const activeProducts = products.filter((product) => product.active);
@@ -53,6 +67,13 @@ function MerchPage() {
     const lowA = a.active && a.stockOnHand <= a.reorderAt ? 1 : 0;
     const lowB = b.active && b.stockOnHand <= b.reorderAt ? 1 : 0;
     return lowB - lowA || a.name.localeCompare(b.name);
+  });
+  const filteredOrders = orders.filter((order) => {
+    const query = orderQuery.trim().toLowerCase();
+    if (!query) return true;
+    const gig = gigs.find((item) => item.id === order.gigId);
+    const items = order.lines.map((line) => products.find((product) => product.id === line.productId)?.name ?? "").join(" ");
+    return [order.id, order.status, order.channel, order.member, order.notes, gig?.venue, gig?.name, items].some((value) => value?.toLowerCase().includes(query));
   });
 
   function submitProduct(event: FormEvent<HTMLFormElement>) {
@@ -67,8 +88,9 @@ function MerchPage() {
     addProduct({
       name: productName.trim(), sku: sku.trim(), category, price: parsedPrice, unitCost: parsedCost,
       stockOnHand: parsedStock, reorderAt: parsedReorder, active: true,
+      size: size.trim() || undefined, color: color.trim() || undefined, imageUrl: imageUrl.trim() || undefined,
     });
-    setProductName(""); setSku(""); setPrice("30"); setUnitCost("10"); setStock("24"); setReorderAt("5");
+    setProductName(""); setSku(""); setSize(""); setColor(""); setImageUrl(""); setPrice("30"); setUnitCost("10"); setStock("24"); setReorderAt("5");
     setShowProductForm(false);
     toast.success("Merch product added to inventory.");
   }
@@ -82,14 +104,37 @@ function MerchPage() {
     if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1) return toast.error("Quantity must be a whole number above zero.");
     if (parsedPrice === undefined || !Number.isFinite(parsedPrice) || parsedPrice < 0) return toast.error("Enter a valid sale price.");
     try {
-      recordSale({
-        productId: product.id, quantity: parsedQuantity, unitPrice: parsedPrice, unitCost: product.unitCost,
-        date: saleDate, gigId: gigId || undefined, paymentMethod, notes: saleNotes.trim(),
+      setCartItems((current) => {
+        const found = current.find((item) => item.productId === product.id);
+        return found
+          ? current.map((item) => item.productId === product.id ? { ...item, quantity: item.quantity + parsedQuantity, unitPrice: parsedPrice } : item)
+          : [...current, { productId: product.id, quantity: parsedQuantity, unitPrice: parsedPrice, unitCost: product.unitCost }];
       });
       setQuantity("1"); setSalePrice(""); setSaleNotes("");
-      toast.success("Sale recorded and inventory reduced.");
+      toast.success("Item added to this order.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Sale could not be recorded.");
+    }
+  }
+
+  function completeOrder() {
+    try {
+      recordOrder({
+        channel: gigId ? "show" : "table",
+        date: saleDate,
+        lines: cartItems,
+        discountAmount: Number(discount),
+        taxAmount: Number(tax),
+        processingFee: Number(fee),
+        paymentMethod,
+        gigId: gigId || undefined,
+        member: member.trim() || undefined,
+        notes: saleNotes.trim(),
+      });
+      setCartItems([]); setDiscount("0"); setTax("0"); setFee("0"); setMember(""); setSaleNotes("");
+      toast.success("Paid order recorded; inventory and ledger updated.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Order could not be recorded.");
     }
   }
 
@@ -97,8 +142,8 @@ function MerchPage() {
     event.preventDefault();
     try {
       const amount = Number(restockQuantity);
-      restockProduct(restockProductId, amount);
-      toast.success("Inventory restocked.");
+      adjustProduct(restockProductId, amount, adjustmentReason, adjustmentNote.trim() || adjustmentReason);
+      toast.success("Inventory adjustment recorded.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Restock failed.");
     }
@@ -120,11 +165,20 @@ function MerchPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-2.5">
-        <MetricCard label="Merch sales" value={money(summary.grossSales)} hint="recorded revenue" />
+        <MetricCard label="Gross sales" value={money(summary.grossSales)} hint={`less ${money(summary.discounts)} discounts`} />
+        <MetricCard label="Net sales" value={money(summary.netSales)} hint="after discounts" />
         <MetricCard label="Gross profit" value={money(summary.grossProfit)} hint="sales less item cost" />
         <MetricCard label="Units sold" value={String(summary.unitsSold)} hint="across recorded sales" />
         <MetricCard label="Inventory at cost" value={money(summary.inventoryCostValue)} hint="current stock value" />
+        <MetricCard label="Tax collected" value={money(summary.taxCollected)} hint="manual order entries" />
+        <MetricCard label="Processor fees" value={money(summary.processingFees)} hint="manually entered" />
+        <MetricCard label="After tax & fees" value={money(summary.netAfterTaxAndFees)} hint="before other costs" />
       </div>
+
+      <Card className="border-warn/30 p-3.5">
+        <div className="text-xs font-semibold">Online payments: setup required</div>
+        <p className="mt-1 text-xs leading-relaxed text-muted">This screen records orders after you confirm payment. Stripe Checkout, payment links, provider webhooks, and provider-processed refunds are not configured, so no card payment is claimed as collected by the app.</p>
+      </Card>
 
       {lowStock.length > 0 && (
         <Card className="border-warn/40 p-4">
@@ -142,8 +196,8 @@ function MerchPage() {
         <h3 className="text-sm font-bold">Inventory</h3>
         <div className="flex gap-3">
           <button type="button" onClick={() => downloadCsv("merch-inventory.csv", [
-            ["name", "sku", "category", "price", "unit_cost", "stock_on_hand", "reorder_at", "active"],
-            ...products.map((p) => [p.name, p.sku, p.category, String(p.price), String(p.unitCost), String(p.stockOnHand), String(p.reorderAt), String(p.active)]),
+            ["name", "sku", "size", "color", "image_url", "category", "price", "unit_cost", "stock_on_hand", "reorder_at", "active"],
+            ...products.map((p) => [p.name, p.sku, p.size ?? "", p.color ?? "", p.imageUrl ?? "", p.category, String(p.price), String(p.unitCost), String(p.stockOnHand), String(p.reorderAt), String(p.active)]),
           ])} className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-fg">Export</button>
           <button type="button" onClick={() => setShowProductForm((value) => !value)} className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">
             <Plus className="size-3.5" /> Add item
@@ -167,6 +221,15 @@ function MerchPage() {
                   {MERCH_CATEGORIES.map((item) => <option key={item} value={item}>{categoryLabel[item]}</option>)}
                 </select>
               </label>
+              <label className="text-xs font-semibold text-muted">Size / variant
+                <input value={size} onChange={(e) => setSize(e.target.value)} placeholder="Large" className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
+              </label>
+              <label className="text-xs font-semibold text-muted">Color
+                <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Moss green" className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
+              </label>
+              <label className="col-span-2 text-xs font-semibold text-muted">Product image URL (optional)
+                <input type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
+              </label>
               <label className="text-xs font-semibold text-muted">Sale price ($)
                 <input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
               </label>
@@ -188,6 +251,51 @@ function MerchPage() {
         </Card>
       )}
 
+      {orders.length > 0 && (
+        <>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-bold">Order history</h3>
+            <button type="button" onClick={() => downloadCsv("merch-orders.csv", [
+              ["order_id", "date", "status", "channel", "show", "subtotal", "discount", "tax", "fee", "total", "payment", "member", "notes"],
+              ...orders.map((order) => [order.id, order.date, order.status, order.channel, order.gigId ?? "", String(order.subtotal), String(order.discountAmount), String(order.taxAmount), String(order.processingFee), String(order.total), order.paymentMethod, order.member ?? "", order.notes]),
+            ])} className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-fg">Export orders</button>
+          </div>
+          <input value={orderQuery} onChange={(event) => setOrderQuery(event.target.value)} placeholder="Search orders, shows, members, or items" className="w-full rounded-md border border-line bg-bg px-3 py-2 text-sm text-fg" />
+          {filteredOrders.slice(0, 100).map((order) => (
+            <Card key={order.id} className="p-3.5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-xs font-semibold">Order {order.id.slice(0, 8)} · {order.status}</div>
+                  <div className="mt-1 text-xs text-muted">{longDate(order.date)} · {order.lines.length} item types · {order.channel}{order.member ? ` · ${order.member}` : ""}</div>
+                  <div className="mt-1 text-[10px] text-muted">Subtotal {money(order.subtotal)} · discount {money(order.discountAmount)} · tax {money(order.taxAmount)} · fees {money(order.processingFee)}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-sm font-bold">{money(order.total)}</div>
+                  {order.status === "paid" && <button type="button" onClick={() => {
+                    if (window.confirm("Record a full refund for this order? Process the refund in the payment provider first if this was paid by card.")) {
+                      refundOrder(order.id, true, "Full refund; provider action must be completed separately if applicable.");
+                      toast.success("Refund recorded and returned items added back to stock.");
+                    }
+                  }} className="mt-1 text-[10px] font-semibold text-danger">Record full refund</button>}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </>
+      )}
+
+      {adjustments.length > 0 && (
+        <details className="rounded-lg border border-line bg-surface p-3.5">
+          <summary className="cursor-pointer text-xs font-semibold">Inventory adjustment history ({adjustments.length})</summary>
+          <div className="mt-3 space-y-2">
+            {adjustments.slice(0, 20).map((adjustment) => {
+              const product = products.find((item) => item.id === adjustment.productId);
+              return <div key={adjustment.id} className="flex justify-between gap-2 text-xs text-muted"><span>{adjustment.date} · {product?.name ?? "Item"} · {adjustment.reason}</span><span className="font-semibold">{adjustment.quantityDelta > 0 ? "+" : ""}{adjustment.quantityDelta}</span></div>;
+            })}
+          </div>
+        </details>
+      )}
+
       {products.length === 0 ? (
         <Card className="p-5">
           <div className="grid size-10 place-items-center rounded-lg bg-surface-2"><PackagePlus className="size-5 text-accent" /></div>
@@ -204,7 +312,7 @@ function MerchPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-bold">{product.name}</div>
-                    <div className="mt-1 text-xs text-muted">{categoryLabel[product.category]}{product.sku ? ` · ${product.sku}` : ""}</div>
+                    <div className="mt-1 text-xs text-muted">{categoryLabel[product.category]}{product.sku ? ` · ${product.sku}` : ""}{product.size ? ` · ${product.size}` : ""}{product.color ? ` · ${product.color}` : ""}</div>
                     <div className={cn("mt-2 text-xs font-semibold", low ? "text-warn" : "text-muted")}>{product.stockOnHand} in stock{low ? " · REORDER" : ""}</div>
                   </div>
                   <div className="shrink-0 text-right">
@@ -223,7 +331,7 @@ function MerchPage() {
         <>
           <Eyebrow>Record a sale</Eyebrow>
           <Card className="p-4">
-            <p className="mb-3 text-xs leading-relaxed text-muted">A sale reduces on-hand stock, snapshots the item cost for profit reporting, and records the collected revenue in Money.</p>
+            <p className="mb-3 text-xs leading-relaxed text-muted">Build a multi-item order, then record it after payment has been collected. This manual flow does not process card payments or confirm external provider payments.</p>
             <form onSubmit={submitSale} className="space-y-3">
               <label className="block text-xs font-semibold text-muted">Product
                 <select value={saleProductId} onChange={(e) => { const id = e.target.value; setSaleProductId(id); setSalePrice(""); }} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
@@ -254,26 +362,63 @@ function MerchPage() {
                   {gigs.map((gig) => <option key={gig.id} value={gig.id}>{gig.date || "No date"} · {gig.venue || gig.name}</option>)}
                 </select>
               </label>
+              <label className="block text-xs font-semibold text-muted">Handled by (optional)
+                <input value={member} onChange={(e) => setMember(e.target.value)} placeholder="Band member" className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
+              </label>
               <label className="block text-xs font-semibold text-muted">Notes (optional)
                 <input value={saleNotes} onChange={(e) => setSaleNotes(e.target.value)} placeholder="Bundle, discount, who handled the table…" className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
               </label>
-              <button type="submit" className="h-11 w-full rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg">Record sale</button>
+              <button type="submit" className="h-11 w-full rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg">Add item to order</button>
             </form>
+            {cartItems.length > 0 && (
+              <div className="mt-4 space-y-3 border-t border-line pt-4">
+                <div className="text-sm font-bold">Current order · {cartItems.reduce((sum, item) => sum + item.quantity, 0)} units</div>
+                {cartItems.map((item) => {
+                  const product = products.find((entry) => entry.id === item.productId);
+                  return <div key={item.productId} className="flex justify-between text-xs"><span>{product?.name ?? "Item"} × {item.quantity}</span><span>{money(item.quantity * item.unitPrice)}</span></div>;
+                })}
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="text-xs font-semibold text-muted">Discount ($)<input type="number" min="0" step="0.01" value={discount} onChange={(e) => setDiscount(e.target.value)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" /></label>
+                  <label className="text-xs font-semibold text-muted">Sales tax ($)<input type="number" min="0" step="0.01" value={tax} onChange={(e) => setTax(e.target.value)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" /></label>
+                  <label className="text-xs font-semibold text-muted">Processing fee ($)<input type="number" min="0" step="0.01" value={fee} onChange={(e) => setFee(e.target.value)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" /></label>
+                  <div className="self-end text-xs text-muted">Total: {money(Math.max(0, cartItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0) - Number(discount) + Number(tax)))}</div>
+                </div>
+                <button type="button" onClick={completeOrder} className="h-11 w-full rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg">Record paid order</button>
+                <button type="button" onClick={() => setCartItems([])} className="w-full py-2 text-xs font-semibold text-muted">Clear cart</button>
+              </div>
+            )}
           </Card>
 
-          <Eyebrow>Restock inventory</Eyebrow>
+          <Eyebrow>Inventory adjustment</Eyebrow>
           <Card className="p-4">
-            <form onSubmit={submitRestock} className="flex items-end gap-2">
-              <label className="min-w-0 flex-1 text-xs font-semibold text-muted">Product
+            <form onSubmit={submitRestock} className="space-y-3">
+              <label className="block text-xs font-semibold text-muted">Product
                 <select value={restockProductId} onChange={(e) => setRestockProductId(e.target.value)} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
                   <option value="">Choose item</option>
                   {products.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
                 </select>
               </label>
-              <label className="w-24 text-xs font-semibold text-muted">Add units
-                <input type="number" min="1" step="1" value={restockQuantity} onChange={(e) => setRestockQuantity(e.target.value)} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-xs font-semibold text-muted">Reason
+                  <select value={adjustmentReason} onChange={(e) => {
+                    const next = e.target.value as typeof adjustmentReason;
+                    setAdjustmentReason(next);
+                    setRestockQuantity((current) => {
+                      const amount = Math.abs(Number(current) || 1);
+                      return next === "restock" ? String(amount) : next === "comp" || next === "damage" ? String(-amount) : current;
+                    });
+                  }} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
+                    <option value="restock">Restock (+ units)</option><option value="comp">Comp (− units)</option><option value="damage">Damage (− units)</option><option value="correction">Count correction (+/−)</option>
+                  </select>
+                </label>
+                <label className="text-xs font-semibold text-muted">Units {adjustmentReason === "restock" ? "to add" : "change (+/−)"}
+                  <input type="number" step="1" value={restockQuantity} onChange={(e) => setRestockQuantity(e.target.value)} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
+                </label>
+              </div>
+              <label className="block text-xs font-semibold text-muted">Note (optional)
+                <input value={adjustmentNote} onChange={(e) => setAdjustmentNote(e.target.value)} placeholder="Purchase, damaged item, or count explanation" className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
               </label>
-              <button type="submit" aria-label="Restock selected product" className="grid size-10 shrink-0 place-items-center rounded-md bg-accent text-accent-fg"><PackagePlus className="size-4" /></button>
+              <button type="submit" className="h-10 w-full rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg">Save inventory adjustment</button>
             </form>
           </Card>
         </>
@@ -282,10 +427,10 @@ function MerchPage() {
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-bold">Recent sales</h3>
         <button type="button" onClick={() => downloadCsv("merch-sales.csv", [
-          ["date", "product", "quantity", "unit_price", "unit_cost", "gross_sales", "gross_profit", "payment", "show", "notes"],
+          ["date", "product", "quantity", "unit_price", "unit_cost", "gross_sales", "discount", "tax", "processing_fee", "gross_profit", "payment", "order_id", "channel", "member", "show", "notes"],
           ...sales.map((sale) => {
             const product = products.find((item) => item.id === sale.productId);
-            return [sale.date, product?.name ?? "Deleted product", String(sale.quantity), String(sale.unitPrice), String(sale.unitCost), String(sale.quantity * sale.unitPrice), String(sale.quantity * (sale.unitPrice - sale.unitCost)), sale.paymentMethod, sale.gigId ?? "", sale.notes];
+            return [sale.date, product?.name ?? "Deleted product", String(sale.quantity), String(sale.unitPrice), String(sale.unitCost), String(sale.quantity * sale.unitPrice), String(sale.discountAmount ?? 0), String(sale.taxAmount ?? 0), String(sale.processingFee ?? 0), String(sale.quantity * sale.unitPrice - (sale.discountAmount ?? 0) - sale.quantity * sale.unitCost), sale.paymentMethod, sale.orderId ?? "", sale.channel ?? "", sale.member ?? "", sale.gigId ?? "", sale.notes];
           }),
         ])} className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-fg">Export sales</button>
       </div>
@@ -322,7 +467,7 @@ function MerchPage() {
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-accent" />
           <div>
             <div className="text-sm font-semibold">Built for the road</div>
-            <p className="mt-1 text-xs leading-relaxed text-muted">Track apparel variants separately (for example, shirt color and size as separate SKUs), see reorder alerts, connect sales to a specific gig, and export records. Inventory purchases, card processor fees, sales tax, refunds, and member merch splits still need dedicated workflows before this becomes full merch accounting.</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">Products can be tracked by size and color, and each order can contain multiple items with discount, tax, processor fee, show, and member attribution. Online checkout, refunds/voids, provider webhooks, and cross-device stock locking are not connected yet.</p>
             <Link to="/money" className="mt-3 inline-flex text-xs font-semibold text-accent">Open money ledger →</Link>
           </div>
         </div>

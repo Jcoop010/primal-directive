@@ -52,6 +52,7 @@ const moneySchema = z.object({
   label: z.string(),
   date: z.string(),
   gigId: z.string().optional(),
+  sourceOrderId: z.string().optional(),
 });
 
 
@@ -65,6 +66,9 @@ const merchProductSchema = z.object({
   stockOnHand: z.number().int().nonnegative(),
   reorderAt: z.number().int().nonnegative(),
   active: z.boolean(),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  imageUrl: z.string().optional(),
 });
 
 const merchSaleSchema = z.object({
@@ -77,6 +81,64 @@ const merchSaleSchema = z.object({
   gigId: z.string().optional(),
   paymentMethod: z.enum(MERCH_PAYMENT_METHODS),
   notes: z.string(),
+  orderId: z.string().optional(),
+  channel: z.enum(["table", "show", "online"]).optional(),
+  member: z.string().optional(),
+  discountAmount: z.number().nonnegative().optional(),
+  taxAmount: z.number().nonnegative().optional(),
+  processingFee: z.number().nonnegative().optional(),
+});
+
+const merchOrderSchema = z.object({
+  id: z.string(),
+  status: z.enum(["paid", "refunded", "void"]),
+  channel: z.enum(["table", "show", "online"]),
+  date: z.string(),
+  createdAt: z.string(),
+  lines: z.array(z.object({ productId: z.string(), quantity: z.number().int().positive(), unitPrice: z.number().nonnegative(), unitCost: z.number().nonnegative() })),
+  subtotal: z.number().nonnegative(),
+  discountAmount: z.number().nonnegative(),
+  taxAmount: z.number().nonnegative(),
+  processingFee: z.number().nonnegative(),
+  total: z.number().nonnegative(),
+  paymentMethod: z.enum(MERCH_PAYMENT_METHODS),
+  gigId: z.string().optional(),
+  member: z.string().optional(),
+  notes: z.string(),
+  providerReference: z.string().optional(),
+  refundedAmount: z.number().nonnegative().optional(),
+});
+
+const merchInventoryAdjustmentSchema = z.object({
+  id: z.string(),
+  productId: z.string(),
+  quantityDelta: z.number().int(),
+  reason: z.enum(["opening", "restock", "sale", "return", "comp", "damage", "correction"]),
+  date: z.string(),
+  gigId: z.string().optional(),
+  note: z.string(),
+  sourceOrderId: z.string().optional(),
+});
+
+const merchRefundSchema = z.object({
+  id: z.string(),
+  orderId: z.string(),
+  date: z.string(),
+  amount: z.number().nonnegative(),
+  restocked: z.boolean(),
+  note: z.string(),
+});
+
+const operationalTaskSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  category: z.enum(["booking", "advancing", "promotion", "merch", "finance"]),
+  gigId: z.string(),
+  dueDate: z.string(),
+  status: z.enum(["open", "done"]),
+  sourceKey: z.string(),
+  createdAt: z.string(),
 });
 
 const chatSchema = z.object({
@@ -106,6 +168,10 @@ const stateSchema = z.object({
   money: z.array(moneySchema).max(5000),
   merchProducts: z.array(merchProductSchema).max(5000).default([]),
   merchSales: z.array(merchSaleSchema).max(20000).default([]),
+  merchOrders: z.array(merchOrderSchema).max(20000).default([]),
+  merchInventoryAdjustments: z.array(merchInventoryAdjustmentSchema).max(50000).default([]),
+  merchRefunds: z.array(merchRefundSchema).max(20000).default([]),
+  tasks: z.array(operationalTaskSchema).max(20000).default([]),
   chat: z.array(chatSchema).max(2000),
   profile: profileSchema,
 });

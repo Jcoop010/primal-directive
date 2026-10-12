@@ -16,10 +16,6 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as GigsRouteImport } from './routes/gigs'
 import { Route as MoneyRouteImport } from './routes/money'
 import { Route as PeopleRouteImport } from './routes/people'
-import { Route as TourRouteImport } from './routes/tour'
-import { Route as MerchRouteImport } from './routes/merch'
-import { Route as TasksRouteImport } from './routes/tasks'
-import { Route as AuthApiRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -56,56 +52,27 @@ const PeopleRoute = PeopleRouteImport.update({
   path: '/people',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TourRoute = TourRouteImport.update({
-  id: '/tour',
-  path: '/tour',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MerchRoute = MerchRouteImport.update({
-  id: '/merch',
-  path: '/merch',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TasksRoute = TasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthApiRoute = AuthApiRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
-  '/api/auth/$': typeof AuthApiRoute
-  '/': typeof IndexRoute
+  '/api/auth/  '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
-  '/tour': typeof TourRoute
-  '/merch': typeof MerchRoute
-  '/tasks': typeof TasksRoute
 }
 export interface FileRoutesByTo {
-  '/api/auth/$': typeof AuthApiRoute
-  '/': typeof IndexRoute
+  '/api/auth/  '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
-  '/tour': typeof TourRoute
-  '/merch': typeof MerchRoute
-  '/tasks': typeof TasksRoute
 }
 export interface FileRoutesById {
-  '/api/auth/$': typeof AuthApiRoute
-  __root__: typeof rootRouteImport
+  '/api/auth/  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
   '/board': typeof BoardRoute
@@ -113,16 +80,13 @@ export interface FileRoutesById {
   '/gigs': typeof GigsRoute
   '/money': typeof MoneyRoute
   '/people': typeof PeopleRoute
-  '/tour': typeof TourRoute
-  '/merch': typeof MerchRoute
-  '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
-  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -133,10 +97,6 @@ export interface RootRouteChildren {
   GigsRoute: typeof GigsRoute
   MoneyRoute: typeof MoneyRoute
   PeopleRoute: typeof PeopleRoute
-  TourRoute: typeof TourRoute
-  MerchRoute: typeof MerchRoute
-  TasksRoute: typeof TasksRoute
-  AuthApiRoute: typeof AuthApiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -190,31 +150,3338 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PeopleRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tour': {
-      id: '/tour'
-      path: '/tour'
-      fullPath: '/tour'
-      preLoaderRoute: typeof TourRouteImport
+    '/api/auth/: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/merch': {
-      id: '/merch'
-      path: '/merch'
-      fullPath: '/merch'
-      preLoaderRoute: typeof MerchRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tasks': {
-      id: '/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksRouteImport
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: {
+      id: '/api/auth/: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+      path: '/api/auth/: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
+      fullPath: '/api/auth/: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+
       preLoaderRoute: typeof AuthApiRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -229,10 +3496,817 @@ const rootRouteChildren: RootRouteChildren = {
   GigsRoute: GigsRoute,
   MoneyRoute: MoneyRoute,
   PeopleRoute: PeopleRoute,
-  TourRoute: TourRoute,
-  MerchRoute: MerchRoute,
-  TasksRoute: TasksRoute,
-  AuthApiRoute: AuthApiRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
+: typeof AuthApiRoute
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
+  '/board': typeof BoardRoute
+  '/calendar': typeof CalendarRoute
+  '/gigs': typeof GigsRoute
+  '/money': typeof MoneyRoute
+  '/people': typeof PeopleRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
+  BoardRoute: typeof BoardRoute
+  CalendarRoute: typeof CalendarRoute
+  GigsRoute: typeof GigsRoute
+  MoneyRoute: typeof MoneyRoute
+  PeopleRoute: typeof PeopleRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gigs': {
+      id: '/gigs'
+      path: '/gigs'
+      fullPath: '/gigs'
+      preLoaderRoute: typeof GigsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
+  BoardRoute: BoardRoute,
+  CalendarRoute: CalendarRoute,
+  GigsRoute: GigsRoute,
+  MoneyRoute: MoneyRoute,
+  PeopleRoute: PeopleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

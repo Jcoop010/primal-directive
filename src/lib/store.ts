@@ -2,13 +2,16 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
-import { buildMerchLedgerEntries, recordMerchSale as applyMerchSale, restockMerch } from "@/lib/merch-ops";
+import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks } from "@/lib/show-workflows";
 import type {
   ArtistProfile,
   ChatMessage,
   Gig,
   MoneyEntry,
+  MerchInventoryAdjustment,
+  MerchOrder,
+  MerchRefund,
   MerchProduct,
   MerchSale,
   OperationalTask,
@@ -34,6 +37,9 @@ type State = {
   money: MoneyEntry[];
   merchProducts: MerchProduct[];
   merchSales: MerchSale[];
+  merchOrders: MerchOrder[];
+  merchInventoryAdjustments: MerchInventoryAdjustment[];
+  merchRefunds: MerchRefund[];
   tasks: OperationalTask[];
   chat: ChatMessage[];
   profile: ArtistProfile;
@@ -53,7 +59,10 @@ type Actions = {
   addMerchProduct: (product: Omit<MerchProduct, "id">) => string;
   updateMerchProduct: (id: string, patch: Partial<MerchProduct>) => void;
   restockMerchProduct: (id: string, quantity: number) => void;
+  adjustMerchProduct: (id: string, quantityDelta: number, reason: "restock" | "comp" | "damage" | "correction", note: string) => void;
   recordMerchSale: (sale: Omit<MerchSale, "id">) => string;
+  recordMerchOrder: (order: Omit<MerchOrder, "id" | "status" | "createdAt" | "subtotal" | "total" | "refundedAmount">) => string;
+  refundMerchOrder: (id: string, restock: boolean, note: string) => void;
   generateShowTasks: () => number;
   updateOperationalTask: (id: string, patch: Partial<Pick<OperationalTask, "status" | "dueDate">>) => void;
   updateProfile: (patch: Partial<ArtistProfile>) => void;
@@ -95,6 +104,9 @@ function fresh(): Omit<State, "composer"> & { composer: Composer } {
     ...seed,
     merchProducts: [],
     merchSales: [],
+    merchOrders: [],
+    merchInventoryAdjustments: [],
+    merchRefunds: [],
     tasks: [],
     chat: welcomeChat(),
     composer: { ...emptyComposer },
@@ -163,7 +175,10 @@ export const useMusician = create<State & Actions>()(
         set((s) => ({ money: s.money.filter((m) => m.id !== id) })),
       addMerchProduct: (product) => {
         const id = uid();
-        set((s) => ({ merchProducts: [{ ...product, id }, ...s.merchProducts] }));
+        set((s) => ({
+          merchProducts: [{ ...product, id }, ...s.merchProducts],
+          merchInventoryAdjustments: product.stockOnHand > 0 ? [{ id: uid(), productId: id, quantityDelta: product.stockOnHand, reason: "opening", date: new Date().toISOString().slice(0, 10), note: "Opening stock" }, ...s.merchInventoryAdjustments] : s.merchInventoryAdjustments,
+        }));
         return id;
       },
       updateMerchProduct: (id, patch) =>
@@ -173,7 +188,17 @@ export const useMusician = create<State & Actions>()(
           ),
         })),
       restockMerchProduct: (id, quantity) =>
-        set((s) => ({ merchProducts: restockMerch(s.merchProducts, id, quantity) })),
+        set((s) => {
+          const products = restockMerch(s.merchProducts, id, quantity);
+          return {
+            merchProducts: products,
+            merchInventoryAdjustments: [{ id: uid(), productId: id, quantityDelta: quantity, reason: "restock", date: new Date().toISOString().slice(0, 10), note: "Restocked" }, ...s.merchInventoryAdjustments],
+          };
+        }),
+      adjustMerchProduct: (id, quantityDelta, reason, note) => set((s) => ({
+        merchProducts: applyInventoryAdjustment(s.merchProducts, id, quantityDelta, reason),
+        merchInventoryAdjustments: [{ id: uid(), productId: id, quantityDelta, reason, date: new Date().toISOString().slice(0, 10), note }, ...s.merchInventoryAdjustments],
+      })),
       recordMerchSale: (sale) => {
         const id = uid();
         set((s) => {
@@ -196,6 +221,45 @@ export const useMusician = create<State & Actions>()(
         });
         return id;
       },
+      recordMerchOrder: (order) => {
+        const id = uid();
+        set((s) => {
+          const result = applyMerchOrder(s.merchProducts, s.merchOrders, s.merchSales, order, {
+            orderId: id,
+            saleIds: order.lines.map(() => uid()),
+            ledgerIds: order.lines.flatMap(() => [uid(), uid()]),
+          });
+          return {
+            merchProducts: result.products,
+            merchOrders: result.orders,
+            merchSales: result.sales,
+            merchInventoryAdjustments: [
+              ...order.lines.map((line) => ({ id: uid(), productId: line.productId, quantityDelta: -line.quantity, reason: "sale" as const, date: order.date, gigId: order.gigId, note: `Sale from order ${id}`, sourceOrderId: id })),
+              ...s.merchInventoryAdjustments,
+            ],
+            money: [...result.ledgerEntries, ...s.money],
+          };
+        });
+        return id;
+      },
+      refundMerchOrder: (orderId, restock, note) => set((s) => {
+        const result = applyMerchRefund(s.merchProducts, s.merchOrders, s.merchRefunds, {
+          orderId,
+          refundId: uid(),
+          date: new Date().toISOString().slice(0, 10),
+          restock,
+          note,
+          ledgerIds: [uid(), uid(), uid()],
+          adjustmentIds: s.merchOrders.find((order) => order.id === orderId)?.lines.map(() => uid()) ?? [],
+        });
+        return {
+          merchProducts: result.products,
+          merchOrders: result.orders,
+          merchRefunds: result.refunds,
+          merchInventoryAdjustments: [...result.adjustments, ...s.merchInventoryAdjustments],
+          money: [...result.ledgerEntries, ...s.money],
+        };
+      }),
       generateShowTasks: () => {
         let added = 0;
         set((s) => {
@@ -313,6 +377,9 @@ export const useMusician = create<State & Actions>()(
           money: [],
           merchProducts: [],
           merchSales: [],
+          merchOrders: [],
+          merchInventoryAdjustments: [],
+          merchRefunds: [],
           tasks: [],
           chat: welcomeChat(),
           composer: { ...emptyComposer },
@@ -326,6 +393,9 @@ export const useMusician = create<State & Actions>()(
         money: s.money,
         merchProducts: s.merchProducts,
         merchSales: s.merchSales,
+        merchOrders: s.merchOrders,
+        merchInventoryAdjustments: s.merchInventoryAdjustments,
+        merchRefunds: s.merchRefunds,
         tasks: s.tasks,
         chat: s.chat,
         profile: s.profile,

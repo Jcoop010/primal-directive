@@ -80,6 +80,7 @@ export type MoneyEntry = {
   label: string;
   date: string;
   gigId?: string;
+  sourceOrderId?: string;
 };
 
 export type OperationalTaskStatus = "open" | "done";
@@ -154,6 +155,10 @@ export type MerchProduct = {
   stockOnHand: number;
   reorderAt: number;
   active: boolean;
+  /** Variant attributes are captured per SKU so stock is tracked per size/color. */
+  size?: string;
+  color?: string;
+  imageUrl?: string;
 };
 
 export type MerchSale = {
@@ -166,4 +171,57 @@ export type MerchSale = {
   gigId?: string;
   paymentMethod: MerchPaymentMethod;
   notes: string;
+  orderId?: string;
+  channel?: "table" | "show" | "online";
+  member?: string;
+  discountAmount?: number;
+  taxAmount?: number;
+  processingFee?: number;
+};
+
+export type MerchOrderStatus = "paid" | "refunded" | "void";
+export type MerchOrderLine = {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  unitCost: number;
+};
+export type MerchOrder = {
+  id: string;
+  status: MerchOrderStatus;
+  channel: "table" | "show" | "online";
+  date: string;
+  createdAt: string;
+  lines: MerchOrderLine[];
+  subtotal: number;
+  discountAmount: number;
+  taxAmount: number;
+  processingFee: number;
+  total: number;
+  paymentMethod: MerchPaymentMethod;
+  gigId?: string;
+  member?: string;
+  notes: string;
+  providerReference?: string;
+  refundedAmount?: number;
+};
+
+export type MerchInventoryAdjustment = {
+  id: string;
+  productId: string;
+  quantityDelta: number;
+  reason: "opening" | "restock" | "sale" | "return" | "comp" | "damage" | "correction";
+  date: string;
+  gigId?: string;
+  note: string;
+  sourceOrderId?: string;
+};
+
+export type MerchRefund = {
+  id: string;
+  orderId: string;
+  date: string;
+  amount: number;
+  restocked: boolean;
+  note: string;
 };

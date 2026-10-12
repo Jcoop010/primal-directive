@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildMerchLedgerEntries, recordMerchSale, restockMerch, summarizeMerch } from "./merch-ops.ts";
-import type { MerchProduct, MerchSale } from "./types.ts";
+import { adjustMerchInventory, buildMerchLedgerEntries, recordMerchOrder, recordMerchSale, refundMerchOrder, restockMerch, summarizeMerch } from "./merch-ops.ts";
+import type { MerchOrder, MerchProduct, MerchSale } from "./types.ts";
 
 const products: MerchProduct[] = [
   { id: "tee", name: "Logo Tee", sku: "TEE-BLK", category: "apparel", price: 30, unitCost: 10, stockOnHand: 12, reorderAt: 3, active: true },
@@ -54,6 +54,12 @@ test("restock adds whole units and rejects unknown product", () => {
   assert.throws(() => restockMerch(products, "missing", 1), /not found/i);
 });
 
+test("audits inventory changes and prevents negative stock", () => {
+  assert.equal(adjustMerchInventory(products, "tee", -2, "comp")[0]?.stockOnHand, 10);
+  assert.throws(() => adjustMerchInventory(products, "tee", -13, "damage"), /negative/);
+  assert.throws(() => adjustMerchInventory(products, "tee", -1, "restock"), /increase stock/);
+});
+
 test("summarizes gross sales, cost of goods, profit, and low stock", () => {
   const summary = summarizeMerch(products, [{ ...sale, id: "sale-1" }]);
   assert.equal(summary.unitsSold, 2);
@@ -66,4 +72,55 @@ test("summarizes gross sales, cost of goods, profit, and low stock", () => {
 
 test("rejects malformed historical sale values", () => {
   assert.throws(() => summarizeMerch(products, [{ ...sale, id: "sale-1", unitPrice: -1 }]), /non-negative/);
+});
+
+const orderInput: Omit<MerchOrder, "id" | "status" | "createdAt" | "subtotal" | "total" | "refundedAmount"> = {
+  channel: "show", date: "2026-10-12", lines: [
+    { productId: "tee", quantity: 2, unitPrice: 30, unitCost: 10 },
+    { productId: "sticker", quantity: 1, unitPrice: 3, unitCost: 0.5 },
+  ],
+  discountAmount: 3, taxAmount: 5, processingFee: 1, paymentMethod: "cash", gigId: "show-1", member: "Ari", notes: "",
+};
+
+test("records a multi-item order with exact discount, tax, fee, stock, and ledger totals", () => {
+  const result = recordMerchOrder(products, [], [], orderInput, {
+    orderId: "order-1", saleIds: ["sale-a", "sale-b"], ledgerIds: ["rev-a", "cost-a", "rev-b", "cost-b"],
+  });
+  assert.equal(result.orders[0]?.subtotal, 63);
+  assert.equal(result.orders[0]?.total, 65);
+  assert.equal(result.products[0]?.stockOnHand, 10);
+  assert.equal(result.products[1]?.stockOnHand, 1);
+  assert.equal(result.sales.reduce((sum, item) => sum + item.discountAmount!, 0), 3);
+  assert.equal(result.ledgerEntries.filter((entry) => entry.type === "collected").reduce((sum, entry) => sum + entry.amount, 0), 60);
+  assert.equal(result.ledgerEntries.filter((entry) => entry.label.startsWith("Merch sales tax")).reduce((sum, entry) => sum + entry.amount, 0), 5);
+  assert.equal(result.ledgerEntries.filter((entry) => entry.label.startsWith("Merch processing fee")).reduce((sum, entry) => sum + entry.amount, 0), 1);
+  assert.ok(result.ledgerEntries.every((entry) => entry.sourceOrderId === "order-1"));
+});
+
+test("rejects duplicate and oversold multi-item orders without mutating source inventory", () => {
+  assert.throws(() => recordMerchOrder(products, [], [], { ...orderInput, lines: [{ ...orderInput.lines[0]!, quantity: 99 }, orderInput.lines[1]!] }, {
+    orderId: "order-2", saleIds: ["s1", "s2"], ledgerIds: ["r1", "c1", "r2", "c2"],
+  }), /Not enough stock/);
+  assert.equal(products[0]?.stockOnHand, 12);
+  assert.throws(() => recordMerchOrder(products, [], [], { ...orderInput, lines: [orderInput.lines[0]!, orderInput.lines[0]!] }, {
+    orderId: "order-3", saleIds: ["s1", "s2"], ledgerIds: ["r1", "c1", "r2", "c2"],
+  }), /only once/);
+});
+
+test("refunds a manual order once and optionally restores stock with audit entries", () => {
+  const paid = recordMerchOrder(products, [], [], orderInput, {
+    orderId: "order-4", saleIds: ["s1", "s2"], ledgerIds: ["r1", "c1", "r2", "c2"],
+  });
+  const refunded = refundMerchOrder(paid.products, paid.orders, [], {
+    orderId: "order-4", refundId: "refund-1", date: "2026-10-12", restock: true, note: "Returned",
+    ledgerIds: ["refund-revenue", "refund-tax", "refund-cogs"], adjustmentIds: ["adj-a", "adj-b"],
+  });
+  assert.equal(refunded.orders[0]?.status, "refunded");
+  assert.equal(refunded.products[0]?.stockOnHand, 12);
+  assert.equal(refunded.adjustments.length, 2);
+  assert.equal(refunded.ledgerEntries.find((entry) => entry.type === "collected")?.amount, -60);
+  assert.throws(() => refundMerchOrder(refunded.products, refunded.orders, refunded.refunds, {
+    orderId: "order-4", refundId: "refund-2", date: "2026-10-12", restock: true, note: "duplicate",
+    ledgerIds: ["r", "t", "c"], adjustmentIds: ["a", "b"],
+  }), /already/);
 });
