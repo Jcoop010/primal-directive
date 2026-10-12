@@ -6,14 +6,12 @@ import { auth } from "@/lib/auth/server";
  * Without this catch-all, /api/auth/* can fall through to the app shell and
  * browser signup/sign-in receives HTML instead of Better Auth JSON.
  *
- * The checked-in route tree is generated before production builds, while the
- * standalone typecheck runs against the committed tree. The assertion bridges
- * that generation boundary; the Vite/TanStack route generator resolves the
- * actual route path from this file.
+ * Keep the checked-in generated route tree in sync with this API route so
+ * standalone typechecks and production builds resolve the same path.
  */
 const handleAuth = ({ request }: { request: Request }) => auth.handler(request);
 
-export const Route = createFileRoute("/api/auth/$" as never)({
+export const Route = createFileRoute("/api/auth/$")({
   server: {
     handlers: {
       GET: handleAuth,
