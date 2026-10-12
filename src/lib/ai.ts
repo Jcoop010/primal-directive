@@ -207,7 +207,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
-      // keep them out of the UI even if the model emitted plausible-looking entries.\n      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).slice(0, 4).map((g) => ({
+      // keep them out of the UI even if the model emitted plausible-looking entries.
+      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).slice(0, 4).map((g) => ({
         name: g.name,
         venue: g.venue,
         city: g.city,
