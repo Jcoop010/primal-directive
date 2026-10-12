@@ -1,14 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { auth } from "@/lib/auth/server";
 
-/**
- * Better Auth's API must be mounted as a real server route.
- * Without this catch-all, /api/auth/* can fall through to the app shell and
- * browser signup/sign-in receives HTML instead of Better Auth JSON.
- *
- * Keep the checked-in generated route tree in sync with this API route so
- * standalone typechecks and production builds resolve the same path.
- */
+/** Route all Better Auth requests (sign-up, sign-in, sessions and OAuth) to the auth handler. */
 const handleAuth = ({ request }: { request: Request }) => auth.handler(request);
 
 export const Route = createFileRoute("/api/auth/$")({
