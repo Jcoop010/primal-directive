@@ -65,13 +65,28 @@ function toSql(run: Run): Sql {
   return sql;
 }
 
+function postgresConnectionString(connectionString: string): string {
+  // See auth/server.ts: pg-connection-string now treats sslmode=require as
+  // verify-full unless libpq compatibility is enabled. Managed DB endpoints
+  // using historical require semantics otherwise fail with SELF_SIGNED_CERT_IN_CHAIN.
+  try {
+    const url = new URL(connectionString);
+    if (url.searchParams.get("sslmode") === "require") {
+      url.searchParams.set("uselibpqcompat", "true");
+    }
+    return url.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 function createPostgresSql(): Promise<Sql> {
   globalRef.__pgSqlPromise__ ??= (async () => {
     const { Pool, types } = await import("pg");
     types.setTypeParser(OID_INT8, Number);
     types.setTypeParser(OID_DATE, identity);
     types.setTypeParser(OID_INTERVAL, identity);
-    const pool = new Pool({ connectionString: databaseUrl });
+    const pool = new Pool({ connectionString: postgresConnectionString(databaseUrl!) });
     return toSql(async <T>(text: string, params: unknown[]) => {
       const res = await pool.query(text, params);
       return res.rows as T[];
