@@ -54,21 +54,28 @@ const LOCAL_DEV_ORIGINS: string[] = [
   "http://127.0.0.1:8080",
   "http://[::1]:8080",
 ];
+const PRODUCTION_HOST = "primal-directive.vercel.app";
 const baseURL = explicitBaseURL ?? {
-  allowedHosts: [...previewAllowedHosts, "localhost", "127.0.0.1", "[::1]"],
+  allowedHosts: [...previewAllowedHosts, PRODUCTION_HOST, "localhost", "127.0.0.1", "[::1]"],
   protocol: "auto" as const,
-  fallback: "http://localhost:8080",
+  fallback: `https://${PRODUCTION_HOST}`,
 };
 
 const trustedOrigins: string[] = explicitBaseURL
   ? [explicitBaseURL, ...LOCAL_DEV_ORIGINS]
   : [
+      `https://${PRODUCTION_HOST}`,
       ...previewAllowedHosts,
       ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
       ...LOCAL_DEV_ORIGINS,
     ];
 
-const databaseUrl = env("DATABASE_URL") ?? env("STORAGE_URL");
+const databaseUrl =
+  env("DATABASE_URL") ??
+  env("STORAGE_URL") ??
+  env("POSTGRES_PRISMA_URL") ??
+  env("POSTGRES_URL_NON_POOLING") ??
+  env("POSTGRES_URL");
 
 const issuerBase = grokIssuer.replace(/\/+$/, "");
 const grokAuthorizationUrl = `${issuerBase}/api/auth/oauth2/authorize`;

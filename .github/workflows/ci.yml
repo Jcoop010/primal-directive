@@ -22,20 +22,36 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Remove committed Vercel build output and refresh lockfile
+      - name: Remove committed Vercel build output and normalize lockfile
         run: |
           if [ -d .vercel/output ]; then
             rm -rf .vercel/output
-            npm install --package-lock-only --ignore-scripts
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A .vercel package-lock.json
-            git diff --cached --quiet || git commit -m "chore: remove committed Vercel build output"
-            git push
           fi
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Verify authentication invariants against the running dev server
+        run: |
+          npm run dev > /tmp/primal-directive-dev.log 2>&1 &
+          DEV_PID=$!
+          trap 'kill "$DEV_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:8080/__app-env > /dev/null; then
+              npm run check:auth
+              node scripts/ci-auth-smoke.mjs
+              exit $?
+            fi
+            if ! kill -0 "$DEV_PID" 2>/dev/null; then
+              cat /tmp/primal-directive-dev.log
+              exit 1
+            fi
+            sleep 2
+          done
+          cat /tmp/primal-directive-dev.log
+          echo "Dev server did not become ready in time."
+          exit 1
 
       - name: Typecheck
         run: npm run typecheck
