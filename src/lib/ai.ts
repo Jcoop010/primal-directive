@@ -241,7 +241,19 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       }
     }
 
-    if (!res?.ok) return fallback();
+    if (!res?.ok) {
+      const local = fallback();
+      return {
+        ...local,
+        source: "OFFLINE MODE — AI PROVIDER UNAVAILABLE OR QUOTA EXHAUSTED",
+        answer: `The AI provider did not return a usable response. This may mean the free-tier quota is exhausted, the configured key is invalid, or the provider is temporarily unavailable. No live web research was completed for this answer. The guidance below is generated locally from the app context and should not be treated as verification of current external facts.\\n\\n${local.answer}`,
+        moves: [
+          "Continue using the offline advisor for app-record-based checks and next actions.",
+          "If AI is still unavailable after the free quota resets, check the provider's account status and the existing project's GROQ_API_KEY or XAI_API_KEY configuration.",
+          "Verify current venue, contact, event, and deal information against primary sources before acting.",
+        ],
+      };
+    }
 
     const body = (await res.json()) as Record<string, unknown>;
     const choices = body.choices as
