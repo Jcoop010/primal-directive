@@ -22,6 +22,9 @@ function TourPage() {
   const gigs = useMusician((s) => s.gigs);
   const entries = useMusician((s) => s.money);
   const merchSales = useMusician((s) => s.merchSales);
+  const merchProducts = useMusician((s) => s.merchProducts);
+  const merchOrders = useMusician((s) => s.merchOrders);
+  const merchRefunds = useMusician((s) => s.merchRefunds);
 
   const tour = useMemo(() => {
     const stops = gigs
@@ -48,17 +51,28 @@ function TourPage() {
     return summarizeTour(stops);
   }, [gigs, entries]);
 
-  const actualMerchRevenue = merchSales.reduce((sum, sale) => sum + sale.quantity * sale.unitPrice, 0);
-  const actualMerchProfit = merchSales.reduce((sum, sale) => sum + sale.quantity * (sale.unitPrice - sale.unitCost), 0);
-  const actualMerchUnits = merchSales.reduce((sum, sale) => sum + sale.quantity, 0);
+  const actualMerch = useMemo(
+    () => summarizeMerch(merchProducts, merchSales, merchOrders, merchRefunds),
+    [merchProducts, merchSales, merchOrders, merchRefunds],
+  );
+  const actualMerchRevenue = actualMerch.netSales;
+  const actualMerchProfit = actualMerch.grossProfit;
+  const actualMerchUnits = actualMerch.unitsSold;
   const merchByGig = new Map<string, { revenue: number; grossProfit: number; units: number }>();
-  for (const sale of merchSales) {
-    if (!sale.gigId) continue;
-    const current = merchByGig.get(sale.gigId) ?? { revenue: 0, grossProfit: 0, units: 0 };
-    current.revenue += sale.quantity * sale.unitPrice;
-    current.grossProfit += sale.quantity * (sale.unitPrice - sale.unitCost);
-    current.units += sale.quantity;
-    merchByGig.set(sale.gigId, current);
+  for (const gig of gigs) {
+    const summary = summarizeMerch(
+      merchProducts,
+      merchSales.filter((sale) => sale.gigId === gig.id),
+      merchOrders,
+      merchRefunds,
+    );
+    if (summary.unitsSold || summary.netSales || summary.grossProfit) {
+      merchByGig.set(gig.id, {
+        revenue: summary.netSales,
+        grossProfit: summary.grossProfit,
+        units: summary.unitsSold,
+      });
+    }
   }
 
   const stopsByDate = [...tour.stops].sort((a, b) => {
