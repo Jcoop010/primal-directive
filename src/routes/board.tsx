@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { CalendarDays, CheckCircle2, CircleAlert, ListChecks } from "lucide-react";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
-import { money } from "@/lib/format";
+import { longDate, money, toIsoDay } from "@/lib/format";
 import { deriveSignals } from "@/lib/signals";
 import {
   pipelineGigs,
@@ -19,12 +20,47 @@ function BoardPage() {
   const gigs = useMusician((s) => s.gigs);
   const moneyEntries = useMusician((s) => s.money);
   const people = useMusician((s) => s.people);
+  const tasks = useMusician((s) => s.tasks);
   const collected = sumMoney(moneyEntries, "collected");
   const outstanding = sumMoney(moneyEntries, "outstanding");
   const costs = sumMoney(moneyEntries, "cost");
   const profit = collected - costs;
   const open = pipelineGigs(gigs);
   const signals = deriveSignals(gigs, moneyEntries, people);
+  const today = toIsoDay(new Date());
+  const openTasks = tasks.filter((task) => task.status === "open");
+  const overdueTasks = openTasks
+    .filter((task) => task.dueDate < today)
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const nextShow = gigs
+    .filter(
+      (gig) =>
+        gig.status === "booked" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(gig.date) &&
+        gig.date >= today,
+    )
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+  const nextShowAllTasks = nextShow
+    ? tasks.filter((task) => task.gigId === nextShow.id)
+    : [];
+  const nextShowTaskPackCount = nextShowAllTasks.filter((task) =>
+    task.sourceKey.startsWith(`show:${nextShow?.id}:`),
+  ).length;
+  const hasCompleteTaskPack = nextShowTaskPackCount >= 6;
+  const nextShowTasks = nextShow
+    ? openTasks
+        .filter((task) => task.gigId === nextShow.id && task.dueDate <= nextShow.date)
+        .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+    : [];
+  const latestCompletedShow = gigs
+    .filter((gig) => gig.status === "completed" && /^\\d{4}-\\d{2}-\\d{2}$/.test(gig.date))
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  const settlementTask = latestCompletedShow
+    ? tasks.find((task) => task.gigId === latestCompletedShow.id && task.sourceKey === `show:${latestCompletedShow.id}:reconcile:v1`)
+    : undefined;
+  const completedShowOutstanding = latestCompletedShow
+    ? sumMoney(moneyEntries.filter((entry) => entry.gigId === latestCompletedShow.id), "outstanding")
+    : 0;
 
   return (
     <div>
@@ -41,6 +77,151 @@ function BoardPage() {
         value={money(profit)}
         hint={profit < 0 ? "loss after tracked costs" : "after tracked costs"}
       />
+
+      <Eyebrow>Band Pulse</Eyebrow>
+      <Card>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-lg font-semibold">What needs attention</h2>
+            <p className="mt-1 text-sm text-muted">
+              A live snapshot calculated from your saved shows and tasks.
+            </p>
+          </div>
+          <ListChecks className="size-5 shrink-0 text-accent" />
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-line bg-bg p-3">
+            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Open tasks</div>
+            <div className="mt-1 text-2xl font-bold tabular">{openTasks.length}</div>
+          </div>
+          <div className="rounded-lg border border-line bg-bg p-3">
+            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Overdue</div>
+            <div className={cn("mt-1 text-2xl font-bold tabular", overdueTasks.length > 0 && "text-warn")}>{overdueTasks.length}</div>
+          </div>
+        </div>
+
+        {nextShow ? (
+          <div className="mt-4 rounded-lg border border-line p-3">
+            <div className="flex items-start gap-2">
+              <CalendarDays className="mt-0.5 size-4 shrink-0 text-accent" />
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Next booked show</div>
+                <div className="mt-1 truncate text-sm font-semibold">{nextShow.venue || nextShow.name}</div>
+                <div className="mt-1 text-xs text-muted">{[nextShow.city, longDate(nextShow.date)].filter(Boolean).join(" · ")}</div>
+                {!hasCompleteTaskPack ? (
+                  <div className="mt-3 rounded-md border border-dashed border-line p-3">
+                    <div className="flex items-start gap-2 text-xs">
+                      <CircleAlert className="mt-0.5 size-4 shrink-0 text-warn" />
+                      <div>
+                        <div className="font-semibold">Show checklist missing or incomplete</div>
+                        <p className="mt-1 leading-relaxed text-muted">
+                          {nextShowTaskPackCount === 0
+                            ? "No generated checklist was found. The show is not confirmed ready just because no tasks appear here."
+                            : `Only ${nextShowTaskPackCount} of the 6 standard workflow tasks were found.`}
+                          {" "}Open Tasks and generate any missing steps.
+                        </p>
+                        <Link to="/tasks" className="mt-2 inline-flex min-h-9 items-center rounded-md bg-accent px-3 text-xs font-semibold text-accent-fg">
+                          Generate missing tasks
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex items-center gap-2 text-xs">
+                    {nextShowTasks.length === 0 ? (
+                      <>
+                        <CheckCircle2 className="size-4 text-live" />
+                        <span className="text-muted">All pre-show tasks due by show day are marked complete.</span>
+                      </>
+                    ) : (
+                      <>
+                        <CircleAlert className="size-4 text-warn" />
+                        <span className="text-muted">{nextShowTasks.length} open preparation task{nextShowTasks.length === 1 ? "" : "s"} due by show day.</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                {nextShowTasks.slice(0, 3).map((task) => (
+                  <div key={task.id} className="mt-2 flex items-start justify-between gap-3 border-t border-line pt-2 text-xs">
+                    <span>{task.title}</span>
+                    <span className="shrink-0 text-muted">{longDate(task.dueDate)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-4 rounded-lg border border-dashed border-line p-3 text-sm text-muted">
+            No future booked show found. Confirm a dated gig to activate show-readiness tracking.
+          </p>
+        )}
+
+        {latestCompletedShow ? (
+          <div className="mt-4 rounded-lg border border-line p-3">
+            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Latest completed show · settlement</div>
+            <div className="mt-1 text-sm font-semibold">{latestCompletedShow.venue || latestCompletedShow.name}</div>
+            <div className="mt-1 text-xs text-muted">{[latestCompletedShow.city, longDate(latestCompletedShow.date)].filter(Boolean).join(" · ")}</div>
+            <div className="mt-3 flex items-start gap-2 text-xs">
+              {!settlementTask ? (
+                <>
+                  <CircleAlert className="mt-0.5 size-4 shrink-0 text-warn" />
+                  <div>
+                    <div className="font-semibold">Settlement checklist not found</div>
+                    <p className="mt-1 leading-relaxed text-muted">Generate the missing show task pack before treating this show as reconciled.</p>
+                  </div>
+                </>
+              ) : settlementTask.status === "open" ? (
+                <>
+                  <CircleAlert className="mt-0.5 size-4 shrink-0 text-warn" />
+                  <div>
+                    <div className="font-semibold">Show reconciliation still open</div>
+                    <p className="mt-1 leading-relaxed text-muted">
+                      {completedShowOutstanding > 0
+                        ? `${money(completedShowOutstanding)} is recorded as outstanding for this show.`
+                        : "Verify actual income, costs, and merch results; no outstanding amount is currently recorded against this show."}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-live" />
+                  <div>
+                    <div className="font-semibold">Reconciliation task marked complete</div>
+                    <p className="mt-1 leading-relaxed text-muted">
+                      {completedShowOutstanding > 0
+                        ? `${money(completedShowOutstanding)} is still recorded as outstanding; follow up on collection.`
+                        : "Confirm all actual income, costs, and merch results were recorded before closing the books."}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+            {(!settlementTask || settlementTask.status === "open" || completedShowOutstanding > 0) && (
+              <Link to="/tasks" className="mt-3 inline-flex min-h-9 items-center rounded-md bg-accent px-3 text-xs font-semibold text-accent-fg">
+                Review settlement tasks
+              </Link>
+            )}
+          </div>
+        ) : null}
+
+        {overdueTasks.length > 0 ? (
+          <div className="mt-4">
+            <div className="mb-2 text-xs font-semibold">Overdue actions</div>
+            <div className="space-y-2">
+              {overdueTasks.slice(0, 3).map((task) => (
+                <div key={task.id} className="flex items-start justify-between gap-3 text-xs">
+                  <span>{task.title}</span>
+                  <span className="shrink-0 text-warn">{longDate(task.dueDate)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <Link to="/tasks" className="mt-4 inline-flex min-h-10 items-center rounded-md bg-accent px-3.5 text-sm font-semibold text-accent-fg">
+          Review tasks
+        </Link>
+      </Card>
 
       <Eyebrow>Signals</Eyebrow>
       <Card>
