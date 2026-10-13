@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import testCase from "node:test";
 import { calculateSettlement, isPayoutMember, parsePayoutAmount } from "./settlement.ts";
+import { hasGigLinkedFinancialHistory } from "./contact-integrity.ts";
 import type { MoneyEntry, Person } from "./types.ts";
 const members: Person[] = [
   { id: "a", name: "Alex", role: "member", city: "", contact: "", notes: "", settlementSharePercent: 50 },
@@ -53,4 +54,19 @@ testCase("never allocates a negative pool and preserves cent totals", () => {
   assert.equal(result.netPool, 0); assert.equal(result.totalRemaining, 0);
   const positive = calculateSettlement("show-1", splitMembers, [entry("guarantee", "collected", 10)]);
   assert.equal(positive.lines.reduce((sum, line) => sum + line.amountDue, 0), 10);
+});
+
+test("a show with linked ledger history cannot be deleted without losing reconciliation", () => {
+  assert.equal(hasGigLinkedFinancialHistory("gig-1", [{ gigId: "gig-1" }], [], [], []), true);
+});
+
+test("linked merch sales, orders, and inventory adjustments also protect show history", () => {
+  assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [{ gigId: "gig-1" }], [], []), true);
+  assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [], [{ gigId: "gig-1" }], []), true);
+  assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [], [], [{ gigId: "gig-1" }]), true);
+});
+
+test("unrelated financial records do not block deletion of an empty show", () => {
+  assert.equal(hasGigLinkedFinancialHistory("gig-1", [{ gigId: "gig-2" }], [], [], []), false);
+  assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [], [], []), false);
 });
