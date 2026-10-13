@@ -43,6 +43,26 @@ test("offline financial advice refuses to invent totals when the money summary i
   assert.doesNotMatch(result.answer, /\$\d/);
 });
 
+test("offline advisor ranks gigs from linked collected income and cost records only", () => {
+  const context = financialContext.replace(
+    "MONEY: collected 1200, outstanding 300, costs 450, profit 750",
+    \`MONEY: collected 1800, outstanding 500, costs 550, profit 1250
+MONEY LEDGER (up to 18 records; may be incomplete; app-recorded, not bank-verified):
+- date:2026-10-01 | type:collected | amount:1000 | gigId:gig-a | gig:Show A | label:guarantee
+- date:2026-10-01 | type:cost | amount:400 | gigId:gig-a | gig:Show A | label:travel
+- date:2026-10-02 | type:collected | amount:800 | gigId:gig-b | gig:Show B | label:guarantee
+- date:2026-10-02 | type:cost | amount:100 | gigId:gig-b | gig:Show B | label:lodging
+- date:2026-10-02 | type:outstanding | amount:500 | gigId:gig-b | gig:Show B | label:unpaid balance
+- date:2026-10-02 | type:cost | amount:999 | gigId:none | gig:unlinked | label:unassigned expense\`,
+  );
+  const result = localGrowthAdvice("Which gigs are most profitable?", context);
+  assert.match(result.answer, /Show A: collected \\$1,000\\.00; recorded costs \\$400\\.00; cash-based difference \\$600\\.00/);
+  assert.match(result.answer, /Show B: collected \\$800\\.00; recorded costs \\$100\\.00; cash-based difference \\$700\\.00/);
+  assert.match(result.answer, /highest cash-based difference is Show B at \\$700\\.00/);
+  assert.match(result.answer, /outstanding amounts are excluded from collected cash/i);
+  assert.doesNotMatch(result.answer, /\\$1,299\\.00/);
+});
+
 test("offline advisor refuses to rank gig profitability without gig-linked records", () => {
   const result = localGrowthAdvice("Which gigs are most profitable?", financialContext);
   assert.match(result.answer, /does not include a reconciled income-and-cost breakdown for each gig/i);
