@@ -199,6 +199,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     const messages = [
       { role: "system", content: SYSTEM },
+      ...(provider === "groq" ? [{
+        role: "system",
+        content: "PROVIDER LIMITATION: This request uses Groq without a web-search tool. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
+      }] : []),
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${data.context}`,
