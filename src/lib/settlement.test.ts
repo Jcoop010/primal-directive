@@ -1,12 +1,22 @@
 import assert from "node:assert/strict";
 import testCase from "node:test";
-import { calculateSettlement, isPayoutMember } from "./settlement.ts";
+import { calculateSettlement, isPayoutMember, parsePayoutAmount } from "./settlement.ts";
 import type { MoneyEntry, Person } from "./types.ts";
 const members: Person[] = [
   { id: "a", name: "Alex", role: "member", city: "", contact: "", notes: "", settlementSharePercent: 50 },
   { id: "b", name: "Blair", role: "member", city: "", contact: "", notes: "", settlementSharePercent: 50 },
 ];
 const entry = (id: string, type: MoneyEntry["type"], amount: number, extra: Partial<MoneyEntry> = {}): MoneyEntry => ({ id, type, amount, label: id, date: "2026-10-13", gigId: "show-1", ...extra });
+testCase("validates partial payouts to cents without allowing overpayment", () => {
+  assert.equal(parsePayoutAmount("12.34", 50), 12.34);
+  assert.equal(parsePayoutAmount("12.345", 50), 12.35);
+  assert.equal(parsePayoutAmount("50.01", 50), null);
+  assert.equal(parsePayoutAmount("0", 50), null);
+  assert.equal(parsePayoutAmount("-1", 50), null);
+  assert.equal(parsePayoutAmount(" ", 50), null);
+  assert.equal(parsePayoutAmount("1", 0), null);
+});
+
 testCase("only individual members or explicitly configured legacy contacts are payout eligible", () => {
   assert.equal(isPayoutMember({ role: "member", settlementSharePercent: undefined }), true);
   assert.equal(isPayoutMember({ role: "band", settlementSharePercent: undefined }), false);
@@ -17,6 +27,16 @@ testCase("splits collected cash after linked operating costs", () => {
   const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 1000), entry("fuel", "cost", 100), entry("owed", "outstanding", 500)]);
   assert.equal(result.netPool, 900); assert.equal(result.sharesValid, true); assert.deepEqual(result.lines.map((line) => line.amountDue), [450, 450]); assert.equal(result.totalRemaining, 900);
 });
+testCase("payout reversals cannot create negative paid totals or inflate remaining allocation", () => {
+  const result = calculateSettlement("show-1", members, [
+    entry("guarantee", "collected", 100),
+    entry("payout-a", "payout", 10, { memberId: "a" }),
+    entry("reversal-a", "payout", -20, { memberId: "a" }),
+  ]);
+  assert.equal(result.lines[0].amountPaid, 0);
+  assert.equal(result.lines[0].remaining, result.lines[0].amountDue);
+});
+
 testCase("tracks partial payouts separately from operating costs", () => {
   const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 100), entry("payout-a", "payout", 20, { memberId: "a" })]);
   assert.equal(result.lines[0].amountPaid, 20); assert.equal(result.lines[0].remaining, 30); assert.equal(result.operatingCosts, 0); assert.equal(result.totalPaid, 20);

@@ -4,6 +4,7 @@ import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
 import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
+import { hasRecordedPayouts } from "@/lib/contact-integrity";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -51,8 +52,8 @@ type Actions = {
   updateGig: (id: string, patch: Partial<Gig>) => void;
   removeGig: (id: string) => void;
   addPerson: (person: Omit<Person, "id">) => string;
-  updatePerson: (id: string, patch: Partial<Person>) => void;
-  removePerson: (id: string) => void;
+  updatePerson: (id: string, patch: Partial<Person>) => boolean;
+  removePerson: (id: string) => boolean;
   addMoney: (entry: Omit<MoneyEntry, "id">) => string;
   updateMoney: (id: string, patch: Partial<MoneyEntry>) => void;
   removeMoney: (id: string) => void;
@@ -171,12 +172,29 @@ export const useMusician = create<State & Actions>()(
         set((s) => ({ people: [{ ...person, id }, ...s.people] }));
         return id;
       },
-      updatePerson: (id, patch) =>
-        set((s) => ({
-          people: s.people.map((p) => (p.id === id ? { ...p, ...patch } : p)),
-        })),
-      removePerson: (id) =>
-        set((s) => ({ people: s.people.filter((p) => p.id !== id) })),
+      updatePerson: (id, patch) => {
+        let blocked = false;
+        set((s) => {
+          const current = s.people.find((person) => person.id === id);
+          if (current && patch.role !== undefined && patch.role !== current.role && hasRecordedPayouts(id, s.money)) {
+            blocked = true;
+            return s;
+          }
+          return { people: s.people.map((person) => (person.id === id ? { ...person, ...patch } : person)) };
+        });
+        return !blocked;
+      },
+      removePerson: (id) => {
+        let blocked = false;
+        set((s) => {
+          if (hasRecordedPayouts(id, s.money)) {
+            blocked = true;
+            return s;
+          }
+          return { people: s.people.filter((person) => person.id !== id) };
+        });
+        return !blocked;
+      },
       addMoney: (entry) => {
         const id = uid();
         set((s) => ({ money: [{ ...entry, id }, ...s.money] }));

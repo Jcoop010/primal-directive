@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { money, longDate, toIsoDay, downloadCsv } from "@/lib/format";
-import { calculateSettlement, isPayoutMember } from "@/lib/settlement";
+import { calculateSettlement, isPayoutMember, parsePayoutAmount } from "@/lib/settlement";
 import { useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ function SettlementPage() {
   const entries = useMusician((state) => state.money);
   const addMoney = useMusician((state) => state.addMoney);
   const [selectedGigId, setSelectedGigId] = useState("");
+  const [payoutAmounts, setPayoutAmounts] = useState<Record<string, string>>({});
   const completedGigs = useMemo(() => gigs.filter((gig) => gig.status === "completed").sort((a, b) => b.date.localeCompare(a.date)), [gigs]);
   const selectedGig = completedGigs.find((gig) => gig.id === selectedGigId) ?? completedGigs[0];
   const bandMembers = people.filter(isPayoutMember);
@@ -26,6 +27,7 @@ function SettlementPage() {
     if (!selectedGig || !summary?.sharesValid || amount <= 0) return;
     addMoney({ type: "payout", amount, label: `Gig payout — ${memberName}`, date: toIsoDay(new Date()), gigId: selectedGig.id, memberId });
     toast.success(`Recorded ${money(amount)} payout for ${memberName}`);
+    setPayoutAmounts((current) => { const next = { ...current }; delete next[memberId]; return next; });
   }
   function exportSettlement() {
     if (!selectedGig || !summary) return;
@@ -59,7 +61,7 @@ function SettlementPage() {
       {summary?.lines.map((line) => <Card key={line.memberId} className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-bold">{line.memberName}</div><div className="mt-1 text-xs text-muted">{line.sharePercent === undefined ? "Share not set" : `${line.sharePercent}% share`}</div></div><div className="text-right"><div className="text-lg font-extrabold tabular">{money(line.amountDue)}</div><div className="text-[10px] uppercase tracking-wider text-muted">Allocation</div></div></div>
         <div className="grid grid-cols-2 gap-2 text-xs"><div className="rounded-lg bg-surface-2 p-3"><div className="text-muted">Paid</div><div className="mt-1 font-bold">{money(line.amountPaid)}</div></div><div className="rounded-lg bg-surface-2 p-3"><div className="text-muted">Remaining</div><div className="mt-1 font-bold">{money(line.remaining)}</div></div></div>
-        {line.overpaid > 0 ? <div className="text-xs text-danger">Recorded payouts exceed this allocation by {money(line.overpaid)}. Review the ledger before recording another payout.</div> : <button type="button" disabled={!summary?.sharesValid || line.remaining <= 0} onClick={() => recordPayout(line.memberId, line.memberName, line.remaining)} className={cn("flex h-10 w-full items-center justify-center gap-2 rounded-lg text-sm font-bold", line.remaining > 0 && summary?.sharesValid ? "bg-accent text-accent-fg" : "bg-surface-2 text-muted")}>{line.remaining > 0 ? `Record payout · ${money(line.remaining)}` : line.amountDue === 0 ? "No payout due" : <><CheckCircle2 className="size-4" /> Fully paid</>}</button>}
+        {line.overpaid > 0 ? <div className="text-xs text-danger">Recorded payouts exceed this allocation by {money(line.overpaid)}. Review the ledger before recording another payout.</div> : line.remaining > 0 ? <div className="space-y-2"><label className="block text-xs font-semibold text-muted" htmlFor={`payout-${line.memberId}`}>Payout amount</label><div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2"><input id={`payout-${line.memberId}`} type="number" min="0.01" max={line.remaining} step="0.01" value={payoutAmounts[line.memberId] ?? String(line.remaining)} onChange={(event) => setPayoutAmounts((current) => ({ ...current, [line.memberId]: event.target.value }))} className="h-10 min-w-0 rounded-lg border border-line bg-bg px-3 text-sm" aria-label={`Payout amount for ${line.memberName}`} /><button type="button" onClick={() => { const amount = parsePayoutAmount(payoutAmounts[line.memberId] ?? String(line.remaining), line.remaining); if (amount === null) { toast.error(`Enter an amount between $0.01 and ${money(line.remaining)}.`); return; } recordPayout(line.memberId, line.memberName, amount); }} className="flex h-10 items-center justify-center rounded-lg bg-accent px-3 text-sm font-bold text-accent-fg">Record payout</button></div><p className="text-[11px] leading-relaxed text-muted">Enter a partial amount or leave the full remaining balance.</p></div> : line.amountDue === 0 ? "No payout due" : <div className="flex items-center gap-2 text-sm font-semibold"><CheckCircle2 className="size-4 text-live" /> Fully paid</div>}
       </Card>)}
       {paid ? <Card className="p-4"><div className="flex items-center gap-2 text-sm font-semibold"><CheckCircle2 className="size-4 text-live" /> All member allocations recorded as paid.</div><p className="mt-1 text-xs text-muted">This confirms entries in Primal Directive's ledger, not bank transfer completion.</p></Card> : null}
     </>}

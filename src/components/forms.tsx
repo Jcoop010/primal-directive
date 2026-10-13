@@ -199,7 +199,11 @@ export function PersonDrawer() {
           initial={editing}
           onSave={(data) => {
             if (editing) {
-              updatePerson(editing.id, data);
+              const saved = updatePerson(editing.id, data);
+              if (!saved) {
+                toast.error("This contact has recorded payouts. Its role cannot be changed until those records are corrected.");
+                return;
+              }
               toast("Contact updated");
             } else {
               addPerson(data);
@@ -210,7 +214,11 @@ export function PersonDrawer() {
           onDelete={
             editing
               ? () => {
-                  removePerson(editing.id);
+                  const removed = removePerson(editing.id);
+                  if (!removed) {
+                    toast.error("This contact has payout history. Remove or correct its payout records before deleting the contact.");
+                    return;
+                  }
                   toast("Contact removed");
                   setComposer({ personOpen: false, editingPersonId: undefined });
                 }
@@ -383,6 +391,10 @@ function MoneyForm({
         const parsedAmount = parseLedgerAmount(amount);
         if (parsedAmount === null) {
           toast.error("Enter a non-zero amount. Use a negative value for a refund or reversal.");
+          return;
+        }
+        if (type === "payout" && parsedAmount < 0) {
+          toast.error("Member payouts must be positive. Correct or remove the original payout instead.");
           return;
         }
         onSave({
