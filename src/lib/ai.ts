@@ -153,8 +153,12 @@ async function complete(args: {
   }
   // GPT-OSS 120B supports Groq's built-in browser_search tool. Enable it only
   // when current external evidence can materially improve the answer.
-  if (args.search && args.provider === "groq") {
-    body.tools = [{ type: "browser_search" }];
+  if (args.provider === "groq") {
+    // Keep search sessions economical while retaining deliberate reasoning on
+    // workspace-only questions. Groq documents low effort as a good balance
+    // for browser-search requests.
+    body.reasoning_effort = args.search ? "low" : "medium";
+    if (args.search) body.tools = [{ type: "browser_search" }];
   }
   const endpoint = args.provider === "groq"
     ? "https://api.groq.com/openai/v1/chat/completions"
