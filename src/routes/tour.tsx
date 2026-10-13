@@ -4,6 +4,7 @@ import { ArrowUpRight, MapPin, Route as RouteIcon, Wallet } from "lucide-react";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { money, longDate } from "@/lib/format";
 import { summarizeTour } from "@/lib/tour-economics";
+import { summarizeMerch } from "@/lib/merch-ops";
 import { useMusician } from "@/lib/store";
 
 export const Route = createFileRoute("/tour")({ component: TourPage });
