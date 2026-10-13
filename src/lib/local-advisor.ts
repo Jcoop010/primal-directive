@@ -23,6 +23,37 @@ const STATUS_PRIORITY: Record<string, number> = {
   hold: 3,
 };
 
+type LinkedMoneyRecord = {
+  date: string;
+  type: "collected" | "outstanding" | "cost";
+  amount: number;
+  gigId: string;
+  gigName: string;
+};
+
+function parseLinkedMoneyLedger(context: string): LinkedMoneyRecord[] {
+  const section = context.match(/^MONEY LEDGER[^\\n]*\\n([\\s\\S]*?)(?=\\n\\n|$)/m)?.[1];
+  if (!section || section.trim() === "(empty)") return [];
+  const records: LinkedMoneyRecord[] = [];
+
+  for (const line of section.split("\\n")) {
+    const match = line.match(/^- date:([^|]*) \\| type:(collected|outstanding|cost) \\| amount:(-?\\d+(?:\\.\\d+)?) \\| gigId:([^|]+) \\| gig:([^|]+) \\| label:(.*)$/);
+    if (!match) continue;
+    const amount = Number(match[3]);
+    const gigId = match[4].trim();
+    const gigName = match[5].trim();
+    if (!Number.isFinite(amount) || amount < 0 || !gigId || gigId === "none" || gigName === "unlinked" || gigName === "unknown") continue;
+    records.push({
+      date: match[1].trim(),
+      type: match[2] as LinkedMoneyRecord["type"],
+      amount,
+      gigId,
+      gigName,
+    });
+  }
+  return records;
+}
+
 /**
  * Conservative offline fallback. It never generates real-world leads.
  * It can still prioritize an opportunity explicitly present in the supplied
@@ -54,12 +85,71 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
   const asksGigFinance = /(by gig|per gig|each gig|which gigs?|show[- ]level|tour profitability|profit.*gig|gig.*profit)/.test(q);
 
   if (asksFinance && asksGigFinance) {
-    focus = "I can see the overall recorded money totals, but the context supplied to the offline advisor does not include a reconciled income-and-cost breakdown for each gig. I can’t reliably rank gig profitability from pipeline fees alone: those fees may be unconfirmed, and expenses may not be linked to the right show. Link collected income and every relevant cost to each gig in Money, then reconcile settlement before comparing shows.";
-    moves = [
-      "Open each completed gig and confirm its actual collected income, not its proposed fee.",
-      "Link travel, lodging, production, and other costs to the correct gig where applicable.",
-      "Reconcile the final settlement, then compare collected income minus recorded gig costs.",
-    ];
+    const ledger = parseLinkedMoneyLedger(context);
+    const byGig = new Map<string, {
+      name: string;
+      collected: number;
+      costs: number;
+      hasCollected: boolean;
+      hasCosts: boolean;
+    }>();
+    for (const entry of ledger) {
+      if (entry.type === "outstanding") continue;
+      const group = byGig.get(entry.gigId) ?? {
+        name: entry.gigName,
+        collected: 0,
+        costs: 0,
+        hasCollected: false,
+        hasCosts: false,
+      };
+      group.name = entry.gigName;
+      if (entry.type === "collected") {
+        group.collected += entry.amount;
+        group.hasCollected = true;
+      } else {
+        group.costs += entry.amount;
+        group.hasCosts = true;
+      }
+      byGig.set(entry.gigId, group);
+    }
+    const summaries = [...byGig.values()].map((gig) => ({
+      ...gig,
+      complete: gig.hasCollected && gig.hasCosts,
+      difference: gig.hasCollected && gig.hasCosts ? gig.collected - gig.costs : undefined,
+    }));
+    const comparable = summaries.filter((gig) => gig.complete)
+      .sort((a, b) => (b.difference ?? 0) - (a.difference ?? 0));
+    const money = (value: number) => new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 2,
+    }).format(value);
+
+    if (summaries.length > 0) {
+      const lines = summaries
+        .sort((a, b) => {
+          if (a.complete !== b.complete) return a.complete ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        })
+        .map((gig) => `- ${gig.name}: ${gig.hasCollected ? `collected ${money(gig.collected)}` : "no collected income linked"}; ${gig.hasCosts ? `recorded costs ${money(gig.costs)}` : "no costs linked"}; ${gig.complete ? `cash-based difference ${money(gig.difference!)}` : "incomplete — cannot compare reliably"}`)
+        .join("\\n");
+      const ranking = comparable.length >= 2
+        ? `Among the ${comparable.length} gigs with both collected income and costs recorded, the highest cash-based difference is ${comparable[0].name} at ${money(comparable[0].difference!)}. This ranks only the linked records supplied, not guaranteed future profit.`
+        : "There are not enough gigs with both collected income and linked costs to produce a reliable ranking.";
+      focus = `Gig-linked cash summary from app records (not bank-verified):\\n${lines}\\n\\n${ranking}\\n\\nLimits: outstanding amounts are excluded from collected cash. The context includes only up to 18 ledger records and may be incomplete; unlinked expenses, missing entries, or later refunds can change the comparison. Cash-based difference is not necessarily accounting profit or taxable income.`;
+      moves = [
+        "Reconcile each gig's collected payments against settlement and invoices.",
+        "Link travel, lodging, production, merch cost, and other relevant costs to the correct gig.",
+        "Review missing or unlinked records before using the comparison to decide future guarantees or routes.",
+      ];
+    } else {
+      focus = "I can't reliably rank gig profitability because no collected-income or cost entries linked to individual gigs were included in the advisor context. I won't infer show profit from proposed pipeline fees. Link actual collected payments and relevant costs to each gig in Money, then ask again.";
+      moves = [
+        "Open Money and link collected income entries to the gig they belong to.",
+        "Link costs to the relevant gig; keep unpaid fees in outstanding rather than collected.",
+        "Reconcile each settlement before comparing shows.",
+      ];
+    }
   } else if (asksFinance) {
     const moneyLine = context.match(/^MONEY:.*$/m)?.[0];
     const readAmount = (label: string): number | undefined => {
