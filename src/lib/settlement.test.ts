@@ -23,6 +23,24 @@ testCase("only individual members or explicitly configured legacy contacts are p
   assert.equal(isPayoutMember({ role: "band", settlementSharePercent: 50 }), true);
   assert.equal(isPayoutMember({ role: "booker", settlementSharePercent: 50 }), false);
 });
+testCase("holds the configured reserve before allocating member shares", () => {
+  const result = calculateSettlement("show-1", members, [
+    entry("guarantee", "collected", 1000),
+    entry("fuel", "cost", 100),
+  ], 10);
+  assert.equal(result.preReservePool, 900);
+  assert.equal(result.reservePercent, 10);
+  assert.equal(result.reserveAmount, 90);
+  assert.equal(result.netPool, 810);
+  assert.deepEqual(result.lines.map((line) => line.amountDue), [405, 405]);
+});
+
+testCase("clamps invalid reserve percentages safely", () => {
+  const entries = [entry("guarantee", "collected", 100)];
+  assert.equal(calculateSettlement("show-1", members, entries, 150).netPool, 0);
+  assert.equal(calculateSettlement("show-1", members, entries, Number.NaN).reserveAmount, 0);
+});
+
 testCase("splits collected cash after linked operating costs", () => {
   const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 1000), entry("fuel", "cost", 100), entry("owed", "outstanding", 500)]);
   assert.equal(result.netPool, 900); assert.equal(result.sharesValid, true); assert.deepEqual(result.lines.map((line) => line.amountDue), [450, 450]); assert.equal(result.totalRemaining, 900);
