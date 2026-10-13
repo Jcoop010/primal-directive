@@ -364,7 +364,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
-        answer: "The AI provider responded, but its answer was not usable. I retried once with a stricter JSON-only request and without live search; that retry did not produce a valid answer either. I’m using conservative workspace rules instead. Live research was not verified.\\n\\n" + local.answer,
+        answer: "The AI provider responded, but its answer was not usable. I retried once with a stricter JSON-only request and without live search; that retry did not produce a valid answer either. I’m using conservative workspace rules instead. Live research was not verified.\n\n" + local.answer,
       };
     }
 
