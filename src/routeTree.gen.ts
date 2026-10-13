@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as GigsRouteImport } from './routes/gigs'
@@ -29,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoardRoute = BoardRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthRoute
   '/': typeof IndexRoute
   '/demo': typeof DemoRoute
+  '/dashboard': typeof DashboardRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/gigs': typeof GigsRoute
@@ -119,15 +126,16 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  fullPaths: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
-  id: '__root__' | '/' | '/demo' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  to: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  id: '__root__' | '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DemoRoute: typeof DemoRoute
+  DashboardRoute: typeof DashboardRoute
   BoardRoute: typeof BoardRoute
   CalendarRoute: typeof CalendarRoute
   GigsRoute: typeof GigsRoute
@@ -146,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -224,6 +239,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DemoRoute: DemoRoute,
+  DashboardRoute: DashboardRoute,
   BoardRoute: BoardRoute,
   CalendarRoute: CalendarRoute,
   GigsRoute: GigsRoute,
