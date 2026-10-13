@@ -41,8 +41,9 @@ const env = (key: string): string | undefined => {
 
 const authDisabled = env("VITE_AUTH_ENABLED") === "false";
 const grokIssuer = env("GROK_AUTH_ISSUER") ?? GROK_ISSUER_DEFAULT;
-const grokClientId = env("GROK_AUTH_CLIENT_ID") ?? PREVIEW_CLIENT_ID;
-const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? PREVIEW_CLIENT_SECRET;
+const allowPreviewOAuthFallback = process.env.NODE_ENV !== "production" && env("VERCEL") !== "1";
+const grokClientId = env("GROK_AUTH_CLIENT_ID") ?? (allowPreviewOAuthFallback ? PREVIEW_CLIENT_ID : undefined);
+const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? (allowPreviewOAuthFallback ? PREVIEW_CLIENT_SECRET : undefined);
 
 export const authConfigured =
   !authDisabled && Boolean(grokClientId && grokClientSecret);

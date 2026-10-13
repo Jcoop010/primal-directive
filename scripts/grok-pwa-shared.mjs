@@ -32,6 +32,11 @@ function placeholderCardColor(site = {}) {
   return /^[0-9a-fA-F]{6}$/.test(hex) ? hex : "";
 }
 
+export function isGrokPlatformHost(hostHeader) {
+  const host = String(hostHeader ?? "").split(",")[0].trim().split(":")[0].toLowerCase();
+  return host === "grok.me" || host.endsWith(".grok.me") || host === "grok-sandbox.com" || host.endsWith(".grok-sandbox.com");
+}
+
 export function appNameFromHost(hostHeader) {
   const host = String(hostHeader ?? "").split(",")[0].trim().split(":")[0].toLowerCase();
   if (!host.endsWith(".grok.me")) return DEFAULT_APP_NAME;
@@ -86,8 +91,13 @@ export function renderInstallPageHtml(template, { host, url } = {}) {
   return String(template).replaceAll("{{APP_NAME}}", escapeHtml(appNameFromHost(host))).replaceAll("{{APP_URL}}", escapeHtml(stripInstallParams(url)));
 }
 
-export function renderWebManifest(hostHeader) {
-  const name = appNameFromHost(hostHeader);
+export function renderWebManifest(hostHeader, site = readOgSite()) {
+  const siteName = String(site?.title ?? "").trim();
+  const host = String(hostHeader ?? "").split(",")[0].trim().split(":")[0].toLowerCase();
+  const standaloneVercelHost = host === "vercel.app" || host.endsWith(".vercel.app");
+  const name = isGrokPlatformHost(hostHeader)
+    ? appNameFromHost(hostHeader)
+    : siteName || (standaloneVercelHost ? "Primal Directive" : appNameFromHost(hostHeader));
   return JSON.stringify({ name, short_name: name, id: "/", start_url: "/", scope: "/", display: "standalone", background_color: "#000000", theme_color: "#000000", icons: [{ src: "/__grok/icon-180.png", sizes: "180x180", type: "image/png" }] }, null, 2);
 }
 
@@ -189,11 +199,13 @@ export function injectGrokPwaHead(html, ctx = {}) {
   let next = stripShareMetaTags(html);
   const missing = grokPwaHeadTags(appName).filter(([key]) => key === "manifest" ? !next.includes('href="/__grok/manifest.webmanifest"') : key === "apple-touch-icon" ? !next.includes('href="/__grok/icon-180.png"') : !next.includes(`name="${key}"`)).map(([, tag]) => tag);
   next = insertAfterHeadOpen(next, grokOgHeadTags({ host, appName, site, documentTitle, cwd }).join(""));
-  if (!next.includes("/grok-app-builder/extensions.js")) missing.push(...grokExtensionsHeadTags(projectId));
-  else if (projectId && !next.includes('name="grok-project-id"')) missing.push(`<meta name="grok-project-id" content="${escapeHtml(projectId)}">`);
-  if (projectId && !next.includes('property="grok:app_id"') && !next.includes("property='grok:app_id'")) missing.push(`<meta property="grok:app_id" content="${escapeHtml(projectId)}">`);
-  const creatorTags = grokXCreatorHeadTags(creator, creatorId);
-  if (creatorTags.length) { const hasCreator = next.includes('property="x:creator" content=') || next.includes("property='x:creator' content="); if (!hasCreator) missing.push(creatorTags[0]); if (!next.includes('property="x:creator:id"')) missing.push(creatorTags[1]); }
+  if (isGrokPlatformHost(host)) {
+    if (!next.includes("/grok-app-builder/extensions.js")) missing.push(...grokExtensionsHeadTags(projectId));
+    else if (projectId && !next.includes('name="grok-project-id"')) missing.push(`<meta name="grok-project-id" content="${escapeHtml(projectId)}">`);
+    if (projectId && !next.includes('property="grok:app_id"') && !next.includes("property='grok:app_id'")) missing.push(`<meta property="grok:app_id" content="${escapeHtml(projectId)}">`);
+    const creatorTags = grokXCreatorHeadTags(creator, creatorId);
+    if (creatorTags.length) { const hasCreator = next.includes('property="x:creator" content=') || next.includes("property='x:creator' content="); if (!hasCreator) missing.push(creatorTags[0]); if (!next.includes('property="x:creator:id"')) missing.push(creatorTags[1]); }
+  }
   return missing.length ? insertBeforeHeadClose(next, missing.join("")) : next;
 }
 function findHeadClose(buf) { return buf.toString("latin1").search(/<\/head>/i); }

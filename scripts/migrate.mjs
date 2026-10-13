@@ -19,7 +19,12 @@ import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import pg from "pg";
-import { pendingMigrations } from "./migration-plan.mjs";
+import { pendingMigrations, shouldRunDeployMigrations } from "./migration-plan.mjs";
+
+if (!shouldRunDeployMigrations()) {
+  console.log("[migrate] Vercel Preview deployment — skipping shared database migrations.");
+  process.exit(0);
+}
 
 const databaseUrl =
   process.env.DATABASE_URL ??
