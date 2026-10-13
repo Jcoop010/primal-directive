@@ -498,8 +498,8 @@ export function buildAdvisorContext() {
     .slice(0, 10)
     .map((task) => {
       const gig = s.gigs.find((item) => item.id === task.gigId);
-      const title = task.title.replace(/[|\\n\\r]/g, " ").slice(0, 100);
-      const description = task.description.replace(/[|\\n\\r]/g, " ").slice(0, 120);
+      const title = task.title.replace(/[|\n\r]/g, " ").slice(0, 100);
+      const description = task.description.replace(/[|\n\r]/g, " ").slice(0, 120);
       return `- due:${task.dueDate || "unscheduled"} | ${task.status} | ${task.category} | ${title} | gig:${gig?.name || "general"} | ${description}`;
     })
     .join("\n");
