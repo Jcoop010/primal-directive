@@ -51,7 +51,16 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
   const asksMerch = /(merch|inventory|stock|shirt|product|sell-through)/.test(q);
   const asksFinance = /(financial|finance|revenue|income|expense|cash flow|profit|settlement|payout|money|collected|outstanding|\bspent\b|\bearned\b|\bmade\b)/.test(q) && !asksMerch;
 
-  if (asksFinance) {
+  const asksGigFinance = /(by gig|per gig|each gig|which gigs?|show[- ]level|tour profitability|profit.*gig|gig.*profit)/.test(q);
+
+  if (asksFinance && asksGigFinance) {
+    focus = "I can see the overall recorded money totals, but the context supplied to the offline advisor does not include a reconciled income-and-cost breakdown for each gig. I can’t reliably rank gig profitability from pipeline fees alone: those fees may be unconfirmed, and expenses may not be linked to the right show. Link collected income and every relevant cost to each gig in Money, then reconcile settlement before comparing shows.";
+    moves = [
+      "Open each completed gig and confirm its actual collected income, not its proposed fee.",
+      "Link travel, lodging, production, and other costs to the correct gig where applicable.",
+      "Reconcile the final settlement, then compare collected income minus recorded gig costs.",
+    ];
+  } else if (asksFinance) {
     const moneyLine = context.match(/^MONEY:.*$/m)?.[0];
     const readAmount = (label: string): number | undefined => {
       if (!moneyLine) return undefined;
