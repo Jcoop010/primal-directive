@@ -22,7 +22,7 @@ test("offline financial advice reports only the app-provided totals and labels l
   assert.match(result.answer, /Collected: \$1,200\.00/);
   assert.match(result.answer, /Outstanding: \$300\.00/);
   assert.match(result.answer, /Recorded costs: \$450\.00/);
-  assert.match(result.answer, /Recorded profit: \$750\.00/);
+  assert.match(result.answer, /Cash-based difference \\(collected minus recorded costs\\): \\$750\\.00/);
   assert.match(result.answer, /not independently verified against bank statements/i);
   assert.match(result.answer, /outstanding amounts are not collected cash/i);
 });
