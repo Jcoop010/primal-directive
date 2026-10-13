@@ -99,10 +99,10 @@ function TourPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Metric label="Baseline gross" value={money(tour.expectedGross)} detail="Guarantees only; other income is unentered" />
-        <Metric label="Linked costs" value={money(tour.expectedCosts)} detail="Recorded net expenses only" />
-        <Metric label="Baseline net" value={money(tour.expectedNet)} detail="Before unrecorded show costs" />
-        <Metric label="Confidence-weighted baseline" value={money(tour.riskAdjustedNet)} detail="Not a guarantee of profit" />
+        <Metric label="Entered gig fees" value={money(tour.expectedGross)} detail="Saved fees for holds, booked, and completed shows" />
+        <Metric label="Linked costs" value={money(tour.expectedCosts)} detail="Recorded expenses and reversals only" />
+        <Metric label="Fee-minus-cost baseline" value={money(tour.expectedNet)} detail="Not collected cash or verified profit" />
+        <Metric label="Confidence-weighted estimate" value={money(tour.riskAdjustedNet)} detail="Planning estimate, not guaranteed income" />
         <Metric label="Actual merch sales" value={money(actualMerchRevenue)} detail={`${actualMerchUnits} units recorded`} />
         <Metric label="Merch gross profit" value={money(actualMerchProfit)} detail="Recorded sales less saved item costs" />
       </div>
@@ -113,7 +113,7 @@ function TourPage() {
           <div>
             <div className="text-sm font-semibold">What these numbers mean</div>
             <p className="mt-1 text-xs leading-relaxed text-muted">
-              These are incomplete planning baselines, not verified profit forecasts. Gross includes saved gig guarantees only; linked costs include recorded expenses and reversals. Door income, merch projections, fuel, lodging, crew, production, taxes, and other unentered items are missing—not assumed to be zero. Add those amounts to the linked show records before relying on the net figure. Actual merch totals exclude refunded orders and are reported separately from projected show income.
+              These are incomplete planning baselines, not verified profit forecasts. The gig-fee figure includes saved fee amounts for holds, booked shows, and completed shows; it is not proof that the money was collected. Linked costs include recorded expenses and reversals. Door income, merch projections, fuel, lodging, crew, production, taxes, and other unentered items are missing—not assumed to be zero. Add those amounts to the linked show records before relying on the net figure. Actual merch totals exclude refunded orders and are reported separately from projected show income.
             </p>
           </div>
         </div>
