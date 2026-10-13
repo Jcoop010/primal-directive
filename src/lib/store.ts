@@ -494,7 +494,7 @@ export function buildAdvisorContext() {
     .join("\n");
   const openTasks = s.tasks
     .filter((task) => task.status === "open")
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+    .sort((a, b) => (a.dueDate || "9999-12-31").localeCompare(b.dueDate || "9999-12-31"))
     .slice(0, 10)
     .map((task) => {
       const gig = s.gigs.find((item) => item.id === task.gigId);
