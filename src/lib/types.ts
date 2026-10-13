@@ -92,6 +92,7 @@ export type OperationalTask = {
   category: "booking" | "advancing" | "promotion" | "merch" | "finance";
   gigId: string;
   dueDate: string;
+  dueDateOverridden?: boolean;
   status: OperationalTaskStatus;
   sourceKey: string;
   createdAt: string;

@@ -4,6 +4,7 @@ import { ArrowUpRight, MapPin, Route as RouteIcon, Wallet } from "lucide-react";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { money, longDate } from "@/lib/format";
 import { summarizeTour } from "@/lib/tour-economics";
+import { summarizeMerch } from "@/lib/merch-ops";
 import { useMusician } from "@/lib/store";
 
 export const Route = createFileRoute("/tour")({ component: TourPage });
@@ -22,6 +23,9 @@ function TourPage() {
   const gigs = useMusician((s) => s.gigs);
   const entries = useMusician((s) => s.money);
   const merchSales = useMusician((s) => s.merchSales);
+  const merchProducts = useMusician((s) => s.merchProducts);
+  const merchOrders = useMusician((s) => s.merchOrders);
+  const merchRefunds = useMusician((s) => s.merchRefunds);
 
   const tour = useMemo(() => {
     const stops = gigs
@@ -29,7 +33,8 @@ function TourPage() {
       .map((gig) => {
         const costs = entries
           .filter((entry) => entry.gigId === gig.id && entry.type === "cost")
-          .reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? Math.max(0, entry.amount) : 0), 0);
+          .reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0);
+        const netRecordedCosts = Math.max(0, costs);
         return {
           id: gig.id,
           label: [gig.venue || gig.name, gig.city].filter(Boolean).join(" · "),
@@ -41,24 +46,35 @@ function TourPage() {
           lodgingCost: 0,
           crewCost: 0,
           productionCost: 0,
-          otherCosts: costs,
+          otherCosts: netRecordedCosts,
           confidence: Math.min(1, Math.max(0, Number.isFinite(gig.conf) ? gig.conf : 0)),
         };
       });
     return summarizeTour(stops);
   }, [gigs, entries]);
 
-  const actualMerchRevenue = merchSales.reduce((sum, sale) => sum + sale.quantity * sale.unitPrice, 0);
-  const actualMerchProfit = merchSales.reduce((sum, sale) => sum + sale.quantity * (sale.unitPrice - sale.unitCost), 0);
-  const actualMerchUnits = merchSales.reduce((sum, sale) => sum + sale.quantity, 0);
+  const actualMerch = useMemo(
+    () => summarizeMerch(merchProducts, merchSales, merchOrders, merchRefunds),
+    [merchProducts, merchSales, merchOrders, merchRefunds],
+  );
+  const actualMerchRevenue = actualMerch.netSales;
+  const actualMerchProfit = actualMerch.grossProfit;
+  const actualMerchUnits = actualMerch.unitsSold;
   const merchByGig = new Map<string, { revenue: number; grossProfit: number; units: number }>();
-  for (const sale of merchSales) {
-    if (!sale.gigId) continue;
-    const current = merchByGig.get(sale.gigId) ?? { revenue: 0, grossProfit: 0, units: 0 };
-    current.revenue += sale.quantity * sale.unitPrice;
-    current.grossProfit += sale.quantity * (sale.unitPrice - sale.unitCost);
-    current.units += sale.quantity;
-    merchByGig.set(sale.gigId, current);
+  for (const gig of gigs) {
+    const summary = summarizeMerch(
+      merchProducts,
+      merchSales.filter((sale) => sale.gigId === gig.id),
+      merchOrders,
+      merchRefunds,
+    );
+    if (summary.unitsSold || summary.netSales || summary.grossProfit) {
+      merchByGig.set(gig.id, {
+        revenue: summary.netSales,
+        grossProfit: summary.grossProfit,
+        units: summary.unitsSold,
+      });
+    }
   }
 
   const stopsByDate = [...tour.stops].sort((a, b) => {
@@ -83,10 +99,10 @@ function TourPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Metric label="Expected gross" value={money(tour.expectedGross)} detail="Gig fees entered in your pipeline" />
-        <Metric label="Recorded costs" value={money(tour.expectedCosts)} detail="Expenses linked to these shows" />
-        <Metric label="Expected net" value={money(tour.expectedNet)} detail="Gross minus linked costs" />
-        <Metric label="Risk-adjusted net" value={money(tour.riskAdjustedNet)} detail="Net weighted by each gig's confidence" />
+        <Metric label="Baseline gross" value={money(tour.expectedGross)} detail="Guarantees only; other income is unentered" />
+        <Metric label="Linked costs" value={money(tour.expectedCosts)} detail="Recorded net expenses only" />
+        <Metric label="Baseline net" value={money(tour.expectedNet)} detail="Before unrecorded show costs" />
+        <Metric label="Confidence-weighted baseline" value={money(tour.riskAdjustedNet)} detail="Not a guarantee of profit" />
         <Metric label="Actual merch sales" value={money(actualMerchRevenue)} detail={`${actualMerchUnits} units recorded`} />
         <Metric label="Merch gross profit" value={money(actualMerchProfit)} detail="Recorded sales less saved item costs" />
       </div>
@@ -97,7 +113,7 @@ function TourPage() {
           <div>
             <div className="text-sm font-semibold">What these numbers mean</div>
             <p className="mt-1 text-xs leading-relaxed text-muted">
-              Expected show economics use saved gig fees and confidence plus linked expenses. Actual merch sales are reported separately from projected show income, and show-linked merch is attributed only when you link a sale to a gig. Fuel, lodging, taxes, door deals, and unrecorded merch are not guessed.
+              These are incomplete planning baselines, not verified profit forecasts. Gross includes saved gig guarantees only; linked costs include recorded expenses and reversals. Door income, merch projections, fuel, lodging, crew, production, taxes, and other unentered items are missing—not assumed to be zero. Add those amounts to the linked show records before relying on the net figure. Actual merch totals exclude refunded orders and are reported separately from projected show income.
             </p>
           </div>
         </div>
@@ -139,7 +155,7 @@ function TourPage() {
                     </div>
                     <div className="shrink-0 text-right">
                       <div className="text-sm font-bold tabular">{money(stop.expectedNet)}</div>
-                      <div className="mt-1 text-[10px] text-muted">est. net</div>
+                      <div className="mt-1 text-[10px] text-muted">baseline net</div>
                     </div>
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">

@@ -124,3 +124,32 @@ test("refunds a manual order once and optionally restores stock with audit entri
     ledgerIds: ["r", "t", "c"], adjustmentIds: ["a", "b"],
   }), /already/);
 });
+
+
+test("excludes refunded orders from sales and units while honoring restock state", () => {
+  const paid = recordMerchOrder(products, [], [], orderInput, {
+    orderId: "order-summary", saleIds: ["summary-a", "summary-b"],
+    ledgerIds: ["summary-ra", "summary-ca", "summary-rb", "summary-cb"],
+  });
+  const refund = refundMerchOrder(paid.products, paid.orders, [], {
+    orderId: "order-summary", refundId: "refund-summary", date: "2026-10-13",
+    restock: true, note: "Returned", ledgerIds: ["summary-refund", "summary-tax", "summary-cogs"],
+    adjustmentIds: ["summary-adj-a", "summary-adj-b"],
+  });
+  const summary = summarizeMerch(refund.products, paid.sales, refund.orders, refund.refunds);
+  assert.equal(summary.unitsSold, 0);
+  assert.equal(summary.grossSales, 0);
+  assert.equal(summary.netSales, 0);
+  assert.equal(summary.costOfGoods, 0);
+  assert.equal(summary.taxCollected, 0);
+  assert.equal(summary.processingFees, 1);
+});
+
+
+test("rejects invalid standalone sale discounts, tax, and processing fees", () => {
+  const ids = { revenueId: "revenue-check", costId: "cost-check" };
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, discountAmount: -1 }, "Logo Tee", ids), /Discount.*non-negative/);
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, discountAmount: 1000 }, "Logo Tee", ids), /cannot exceed/);
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, taxAmount: -1 }, "Logo Tee", ids), /Tax.*non-negative/);
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, processingFee: -1 }, "Logo Tee", ids), /Processing fee.*non-negative/);
+});

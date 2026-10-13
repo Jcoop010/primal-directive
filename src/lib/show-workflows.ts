@@ -54,3 +54,35 @@ export function generateShowTaskPacks(gigs: readonly Gig[], existing: readonly O
   }
   return created;
 }
+
+
+/**
+ * Recalculate generated open-task deadlines when a show date changes.
+ * Completed tasks and deadlines explicitly edited by the user are preserved.
+ */
+export function rescheduleOpenShowTasks(gig: Gig, tasks: readonly OperationalTask[]): OperationalTask[] {
+  const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(gig.date);
+  const year = dateParts ? Number(dateParts[1]) : 0;
+  const month = dateParts ? Number(dateParts[2]) : 0;
+  const day = dateParts ? Number(dateParts[3]) : 0;
+  const showDate = dateParts && year >= 1000 ? new Date(year, month - 1, day) : null;
+  if (
+    !showDate ||
+    !Number.isFinite(showDate.getTime()) ||
+    showDate.getFullYear() !== year ||
+    showDate.getMonth() !== month - 1 ||
+    showDate.getDate() !== day
+  ) return [...tasks];
+
+  const deadlines = new Map(
+    TEMPLATES.map((template) => [
+      `show:${gig.id}:${template.key}:v1`,
+      toIsoDay(addDays(showDate, -template.daysBefore)),
+    ]),
+  );
+  return tasks.map((task) => {
+    if (task.gigId !== gig.id || task.status !== "open" || task.dueDateOverridden) return task;
+    const dueDate = deadlines.get(task.sourceKey);
+    return dueDate ? { ...task, dueDate } : task;
+  });
+}

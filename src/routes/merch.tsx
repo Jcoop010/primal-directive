@@ -24,6 +24,7 @@ function MerchPage() {
   const products = useMusician((s) => s.merchProducts);
   const sales = useMusician((s) => s.merchSales);
   const orders = useMusician((s) => s.merchOrders);
+  const refunds = useMusician((s) => s.merchRefunds);
   const adjustments = useMusician((s) => s.merchInventoryAdjustments);
   const recordOrder = useMusician((s) => s.recordMerchOrder);
   const gigs = useMusician((s) => s.gigs);
@@ -59,7 +60,7 @@ function MerchPage() {
   const [member, setMember] = useState("");
   const [orderQuery, setOrderQuery] = useState("");
 
-  const summary = useMemo(() => summarizeMerch(products, sales), [products, sales]);
+  const summary = useMemo(() => summarizeMerch(products, sales, orders, refunds), [products, sales, orders, refunds]);
   const activeProducts = products.filter((product) => product.active);
   const selectedProduct = products.find((product) => product.id === saleProductId);
   const lowStock = activeProducts.filter((product) => product.stockOnHand <= product.reorderAt);

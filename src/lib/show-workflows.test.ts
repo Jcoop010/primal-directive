@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildShowTaskPack, generateShowTaskPacks } from "./show-workflows.ts";
+import { buildShowTaskPack, generateShowTaskPacks, rescheduleOpenShowTasks } from "./show-workflows.ts";
 import type { Gig, OperationalTask } from "./types.ts";
 
 const gig: Gig = {
@@ -45,4 +45,27 @@ test("generates only missing task steps across multiple shows", () => {
   const tasks = generateShowTaskPacks([gig, { ...gig, id: "gig-2", venue: "Other Room" }], existing);
   assert.equal(tasks.length, 11);
   assert.equal(tasks.some((task) => task.sourceKey === existing[0]?.sourceKey), false);
+});
+
+
+test("reschedules only untouched open tasks when a show date changes", () => {
+  const generated = buildShowTaskPack(gig, [], new Date("2026-10-01T12:00:00.000Z"));
+  const tasks: OperationalTask[] = generated.map((task, index) => ({
+    ...task,
+    id: `task-${index}`,
+    ...(index === 1 ? { dueDateOverridden: true, dueDate: "2026-10-25" } : {}),
+    ...(index === 2 ? { status: "done" as const } : {}),
+  }));
+  const moved = rescheduleOpenShowTasks({ ...gig, date: "2026-11-22" }, tasks);
+  assert.equal(moved[0]?.dueDate, "2026-10-23");
+  assert.equal(moved[1]?.dueDate, "2026-10-25");
+  assert.equal(moved[2]?.dueDate, tasks[2]?.dueDate);
+  assert.equal(moved[2]?.status, "done");
+});
+
+test("leaves task deadlines unchanged for an invalid replacement show date", () => {
+  const generated = buildShowTaskPack(gig, [], new Date("2026-10-01T12:00:00.000Z"));
+  const tasks: OperationalTask[] = generated.map((task, index) => ({ ...task, id: `task-${index}` }));
+  const moved = rescheduleOpenShowTasks({ ...gig, date: "2026-02-30" }, tasks);
+  assert.deepEqual(moved, tasks);
 });
