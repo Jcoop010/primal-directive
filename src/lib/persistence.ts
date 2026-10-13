@@ -55,7 +55,6 @@ const moneySchema = z.object({
   sourceOrderId: z.string().optional(),
 });
 
-
 const merchProductSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -177,7 +176,10 @@ const stateSchema = z.object({
 });
 
 const loadInput = z.object({});
-const saveInput = z.object({ state: stateSchema });
+const saveInput = z.object({
+  state: stateSchema,
+  expectedVersion: z.number().int().nonnegative(),
+});
 
 export const loadAppState = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
@@ -204,15 +206,28 @@ export const saveAppState = createServerFn({ method: "POST" })
     if (serialized.length > 2_000_000) {
       throw new Error("App state exceeds the 2 MB safety limit");
     }
-    const rows = await sql.query<{ version: number }>(
-      `insert into app_state (user_id, state, version, updated_at)
-       values ($1, $2::jsonb, 1, current_timestamp)
-       on conflict (user_id) do update
-       set state = excluded.state,
-           version = app_state.version + 1,
-           updated_at = current_timestamp
-       returning version`,
-      [context.userId, serialized],
-    );
-    return { ok: true, version: Number(rows[0]?.version ?? 1) };
+
+    // Compare-and-swap prevents one browser tab from silently replacing a newer workspace.
+    const rows = data.expectedVersion === 0
+      ? await sql.query<{ version: number }>(
+          `insert into app_state (user_id, state, version, updated_at)
+           values ($1, $2::jsonb, 1, current_timestamp)
+           on conflict (user_id) do nothing
+           returning version`,
+          [context.userId, serialized],
+        )
+      : await sql.query<{ version: number }>(
+          `update app_state
+           set state = $2::jsonb,
+               version = version + 1,
+               updated_at = current_timestamp
+           where user_id = $1 and version = $3
+           returning version`,
+          [context.userId, serialized, data.expectedVersion],
+        );
+
+    if (!rows.length) {
+      throw new Error("Workspace changed in another session. Reload before saving to avoid overwriting newer data.");
+    }
+    return { ok: true, version: Number(rows[0].version) };
   });
