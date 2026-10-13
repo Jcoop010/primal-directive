@@ -56,17 +56,17 @@ testCase("never allocates a negative pool and preserves cent totals", () => {
   assert.equal(positive.lines.reduce((sum, line) => sum + line.amountDue, 0), 10);
 });
 
-test("a show with linked ledger history cannot be deleted without losing reconciliation", () => {
+testCase("a show with linked ledger history cannot be deleted without losing reconciliation", () => {
   assert.equal(hasGigLinkedFinancialHistory("gig-1", [{ gigId: "gig-1" }], [], [], []), true);
 });
 
-test("linked merch sales, orders, and inventory adjustments also protect show history", () => {
+testCase("linked merch sales, orders, and inventory adjustments also protect show history", () => {
   assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [{ gigId: "gig-1" }], [], []), true);
   assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [], [{ gigId: "gig-1" }], []), true);
   assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [], [], [{ gigId: "gig-1" }]), true);
 });
 
-test("unrelated financial records do not block deletion of an empty show", () => {
+testCase("unrelated financial records do not block deletion of an empty show", () => {
   assert.equal(hasGigLinkedFinancialHistory("gig-1", [{ gigId: "gig-2" }], [], [], []), false);
   assert.equal(hasGigLinkedFinancialHistory("gig-1", [], [], [], []), false);
 });
