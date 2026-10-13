@@ -55,8 +55,11 @@ export function GigDrawer() {
           onDelete={
             editing
               ? () => {
-                  removeGig(editing.id);
-                  toast("Gig removed");
+                  if (!removeGig(editing.id)) {
+                    toast.error("This show has linked financial or merch history. Keep it to preserve reconciliation, or remove/reassign its linked records first.");
+                    return;
+                  }
+                  toast.success("Gig removed");
                   setComposer({ gigOpen: false, editingGigId: undefined });
                 }
               : undefined
