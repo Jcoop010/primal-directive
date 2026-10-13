@@ -40,6 +40,13 @@ function BoardPage() {
         gig.date >= today,
     )
     .sort((a, b) => a.date.localeCompare(b.date))[0];
+  const nextShowAllTasks = nextShow
+    ? tasks.filter((task) => task.gigId === nextShow.id)
+    : [];
+  const nextShowTaskPackCount = nextShowAllTasks.filter((task) =>
+    task.sourceKey.startsWith(`show:${nextShow?.id}:`),
+  ).length;
+  const hasCompleteTaskPack = nextShowTaskPackCount >= 6;
   const nextShowTasks = nextShow
     ? openTasks
         .filter((task) => task.gigId === nextShow.id && task.dueDate <= nextShow.date)
@@ -92,19 +99,39 @@ function BoardPage() {
                 <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Next booked show</div>
                 <div className="mt-1 truncate text-sm font-semibold">{nextShow.venue || nextShow.name}</div>
                 <div className="mt-1 text-xs text-muted">{[nextShow.city, longDate(nextShow.date)].filter(Boolean).join(" · ")}</div>
-                <div className="mt-3 flex items-center gap-2 text-xs">
-                  {nextShowTasks.length === 0 ? (
-                    <>
-                      <CheckCircle2 className="size-4 text-live" />
-                      <span className="text-muted">No open preparation tasks due before show day.</span>
-                    </>
-                  ) : (
-                    <>
-                      <CircleAlert className="size-4 text-warn" />
-                      <span className="text-muted">{nextShowTasks.length} open preparation task{nextShowTasks.length === 1 ? "" : "s"} due by show day.</span>
-                    </>
-                  )}
-                </div>
+                {!hasCompleteTaskPack ? (
+                  <div className="mt-3 rounded-md border border-dashed border-line p-3">
+                    <div className="flex items-start gap-2 text-xs">
+                      <CircleAlert className="mt-0.5 size-4 shrink-0 text-warn" />
+                      <div>
+                        <div className="font-semibold">Show checklist missing or incomplete</div>
+                        <p className="mt-1 leading-relaxed text-muted">
+                          {nextShowTaskPackCount === 0
+                            ? "No generated checklist was found. The show is not confirmed ready just because no tasks appear here."
+                            : `Only ${nextShowTaskPackCount} of the 6 standard workflow tasks were found.`}
+                          {" "}Open Tasks and generate any missing steps.
+                        </p>
+                        <Link to="/tasks" className="mt-2 inline-flex min-h-9 items-center rounded-md bg-accent px-3 text-xs font-semibold text-accent-fg">
+                          Generate missing tasks
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex items-center gap-2 text-xs">
+                    {nextShowTasks.length === 0 ? (
+                      <>
+                        <CheckCircle2 className="size-4 text-live" />
+                        <span className="text-muted">All pre-show tasks due by show day are marked complete.</span>
+                      </>
+                    ) : (
+                      <>
+                        <CircleAlert className="size-4 text-warn" />
+                        <span className="text-muted">{nextShowTasks.length} open preparation task{nextShowTasks.length === 1 ? "" : "s"} due by show day.</span>
+                      </>
+                    )}
+                  </div>
+                )}
                 {nextShowTasks.slice(0, 3).map((task) => (
                   <div key={task.id} className="mt-2 flex items-start justify-between gap-3 border-t border-line pt-2 text-xs">
                     <span>{task.title}</span>
