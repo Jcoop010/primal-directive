@@ -13,7 +13,7 @@ const HistoryItem = z.object({
 const Input = z.object({
   message: z.string().min(1).max(2000),
   history: z.array(HistoryItem).max(10),
-  context: z.string().max(4500),
+  context: z.string().max(6500),
 });
 
 const GigOut = z.object({
