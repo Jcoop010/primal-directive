@@ -5,6 +5,7 @@ import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
 import { parseLedgerAmount } from "@/lib/money-ledger";
+import { isSourceManagedMoneyEntry } from "@/lib/merch-ops";
 import { useMusician } from "@/lib/store";
 import {
   GIG_STATUS_LABEL,
@@ -326,6 +327,7 @@ export function MoneyDrawer() {
     useMusician();
   const editing = money.find((m) => m.id === composer.editingMoneyId);
   const open = composer.moneyOpen;
+  const sourceManaged = Boolean(editing && isSourceManagedMoneyEntry(editing));
   return (
     <Drawer
       open={open}
@@ -337,14 +339,27 @@ export function MoneyDrawer() {
       }
       title={editing ? "Edit entry" : "Add money"}
     >
-      {open ? (
+      {open ? sourceManaged ? (
+        <div className="space-y-3 rounded-xl border border-line bg-surface-2 p-4">
+          <p className="text-sm font-semibold">This entry is linked to a merch sale or order.</p>
+          <p className="text-sm leading-relaxed text-muted">
+            To keep inventory, refunds, and financial totals consistent, this generated ledger entry cannot be edited or deleted on its own. Manage the source sale or order in Merch instead.
+          </p>
+          <Button type="button" className="w-full" onClick={() => setComposer({ moneyOpen: false, editingMoneyId: undefined })}>
+            Close
+          </Button>
+        </div>
+      ) : (
         <MoneyForm
           key={editing?.id ?? "new"}
           initial={editing}
           gigs={gigs}
           onSave={(data) => {
             if (editing) {
-              updateMoney(editing.id, data);
+              if (!updateMoney(editing.id, data)) {
+                toast.error("This ledger entry is managed by its linked merch record.");
+                return;
+              }
               toast("Entry updated");
             } else {
               addMoney(data);
@@ -355,7 +370,10 @@ export function MoneyDrawer() {
           onDelete={
             editing
               ? () => {
-                  removeMoney(editing.id);
+                  if (!removeMoney(editing.id)) {
+                    toast.error("This ledger entry is managed by its linked merch record.");
+                    return;
+                  }
                   toast("Entry removed");
                   setComposer({ moneyOpen: false, editingMoneyId: undefined });
                 }
