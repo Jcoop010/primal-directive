@@ -228,7 +228,7 @@ function AdvisorPage() {
           {busy ? (
             <div className="flex max-w-[88%] items-center gap-2 rounded-lg border border-line bg-surface-2 px-3.5 py-3 text-sm text-muted">
               <LoaderCircle className="size-4 animate-spin text-accent" />
-              Searching the live web…
+              Thinking through your question and checking sources when needed…
             </div>
           ) : null}
         </div>
