@@ -139,8 +139,10 @@ async function complete(args: {
     model: args.provider === "groq" ? "openai/gpt-oss-120b" : "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
-    max_tokens: 2400,
   };
+  // Groq's current API uses max_completion_tokens for GPT-OSS requests;
+  // xAI retains max_tokens in this compatibility wrapper.
+  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = 2400;
   // xAI supports its own live-search parameters. Groq's free API is used
   // for reasoning only; never imply that it performed live web research.
   if (args.search && args.provider === "xai") {
