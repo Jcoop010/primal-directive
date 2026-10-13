@@ -199,7 +199,11 @@ export function PersonDrawer() {
           initial={editing}
           onSave={(data) => {
             if (editing) {
-              updatePerson(editing.id, data);
+              const saved = updatePerson(editing.id, data);
+              if (!saved) {
+                toast.error("This contact has recorded payouts. Its role cannot be changed until those records are corrected.");
+                return;
+              }
               toast("Contact updated");
             } else {
               addPerson(data);
@@ -210,7 +214,11 @@ export function PersonDrawer() {
           onDelete={
             editing
               ? () => {
-                  removePerson(editing.id);
+                  const removed = removePerson(editing.id);
+                  if (!removed) {
+                    toast.error("This contact has payout history. Remove or correct its payout records before deleting the contact.");
+                    return;
+                  }
                   toast("Contact removed");
                   setComposer({ personOpen: false, editingPersonId: undefined });
                 }
