@@ -53,6 +53,7 @@ const moneySchema = z.object({
   date: z.string(),
   gigId: z.string().optional(),
   sourceOrderId: z.string().optional(),
+  memberId: z.string().optional(),
 });
 
 const merchProductSchema = z.object({
