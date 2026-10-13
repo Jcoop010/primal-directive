@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import testCase from "node:test";
-import { hasRecordedPayouts } from "./contact-integrity.ts";
+import { changesPayoutIdentity, hasRecordedPayouts } from "./contact-integrity.ts";
 import type { MoneyEntry } from "./types.ts";
 
 const entry = (id: string, type: MoneyEntry["type"], memberId?: string): MoneyEntry => ({
@@ -17,6 +17,15 @@ testCase("keeps contacts protected when several partial payouts exist", () => {
     entry("first-part", "payout", "member-a"),
     entry("second-part", "payout", "member-a"),
   ]), true);
+});
+
+testCase("locks payout role and share after payments while allowing unrelated edits", () => {
+  const history = [entry("payout", "payout", "member-a")];
+  const current = { role: "member", settlementSharePercent: 50 };
+  assert.equal(changesPayoutIdentity("member-a", current, { settlementSharePercent: 40 }, history), true);
+  assert.equal(changesPayoutIdentity("member-a", current, { role: "band" }, history), true);
+  assert.equal(changesPayoutIdentity("member-a", current, {}, history), false);
+  assert.equal(changesPayoutIdentity("member-a", current, { settlementSharePercent: 40 }, []), false);
 });
 
 testCase("does not treat income or operating costs as member payout history", () => {
