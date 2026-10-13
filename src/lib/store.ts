@@ -230,7 +230,7 @@ export const useMusician = create<State & Actions>()(
       recordMerchSale: (sale) => {
         const id = uid();
         set((s) => {
-          const result = applyMerchSale(s.merchProducts, s.merchSales, sale, id);
+          const result = applyMerchSale(s.merchProducts, s.merchSales, sale, id, uid());
           const product = s.merchProducts.find((item) => item.id === sale.productId);
           if (!product) throw new Error("Product not found while recording sale.");
           // Keep the sale, inventory movement, and cash ledger entry in one state update.
@@ -242,6 +242,7 @@ export const useMusician = create<State & Actions>()(
           return {
             merchProducts: result.products,
             merchSales: result.sales,
+            merchInventoryAdjustments: [...result.adjustments, ...s.merchInventoryAdjustments],
             // Record revenue and its inventory cost together so show-level net
             // reflects merch margin rather than treating all merch receipts as profit.
             money: [...ledgerEntries, ...s.money],
