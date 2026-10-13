@@ -126,7 +126,7 @@ function citationsFrom(body: Record<string, unknown>): string[] {
 function shouldSearchWeb(message: string, history: { role: "user" | "ai"; text: string }[]): boolean {
   const recent = history.slice(-3).map((item) => item.text).join("\n");
   const query = `${message}\n${recent}`;
-  return /\b(current|latest|today|tonight|this week|this month|recent|news|research|search|find|look up|venue|booker|promoter|contact|email|phone|availability|available|lineup|festival|tour routing|routing|market|competitor|competition|local draw|nearby|press|playlist|radio|ticket sales|ticket price|capacity|guarantee|booking|release date|trend|who books|where can we play)\b/i.test(query);
+  return /\b(current|latest|today|tonight|this week|this month|recent|news|research|search|find|look up|venue|booker|promoter|contact|email|phone|availability|available|lineup|festival|tour routing|routing|market|competitor|competition|local draw|nearby|press|playlist|radio|ticket sales|ticket price|capacity|guarantee|booking|release date|trend|who books|where can we play|compare|best|top|recommend|support bill|opening act|support act|similar artists|comparable artists|spotify|instagram|youtube|tiktok|social media|streaming|charts)\b/i.test(query);
 }
 
 async function complete(args: {
