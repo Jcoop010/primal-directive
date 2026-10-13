@@ -4,7 +4,7 @@ import type { MerchInventoryAdjustment, MerchOrder, MerchProduct, MerchRefund, M
 export function buildMerchLedgerEntries(
   sale: Omit<MerchSale, "id">,
   productName: string,
-  ids: { revenueId: string; costId: string },
+  ids: { revenueId: string; costId: string; sourceSaleId?: string },
 ): MoneyEntry[] {
   if (!productName.trim()) throw new Error("Product name is required for merch ledger entries.");
   if (!ids.revenueId.trim() || !ids.costId.trim() || ids.revenueId === ids.costId) {
@@ -29,6 +29,7 @@ export function buildMerchLedgerEntries(
       label: `Merch sale: ${productName} × ${sale.quantity}`,
       date: sale.date,
       gigId: sale.gigId,
+      sourceSaleId: ids.sourceSaleId,
     },
     {
       id: ids.costId,
@@ -37,6 +38,7 @@ export function buildMerchLedgerEntries(
       label: `Merch cost of goods: ${productName} × ${sale.quantity}`,
       date: sale.date,
       gigId: sale.gigId,
+      sourceSaleId: ids.sourceSaleId,
     },
     // Sales tax collected is a liability, not revenue or an operating expense.
     // It remains visible in merch reporting and is intentionally excluded from the money ledger's profit calculation.
@@ -47,8 +49,15 @@ export function buildMerchLedgerEntries(
       label: `Merch processing fee: ${productName}`,
       date: sale.date,
       gigId: sale.gigId,
+      sourceSaleId: ids.sourceSaleId,
     }] : []),
   ];
+}
+
+
+/** True for ledger rows generated from a merch sale/order and therefore not safe to edit independently. */
+export function isSourceManagedMoneyEntry(entry: Pick<MoneyEntry, "sourceOrderId" | "sourceSaleId">): boolean {
+  return Boolean(entry.sourceOrderId || entry.sourceSaleId);
 }
 
 export type MerchSummary = {
@@ -184,6 +193,7 @@ export function recordMerchOrder(
   const ledgerEntries = nextSales.flatMap((sale, index) => buildMerchLedgerEntries(sale, products.find((product) => product.id === sale.productId)!.name, {
     revenueId: ids.ledgerIds[index * 2]!,
     costId: ids.ledgerIds[index * 2 + 1]!,
+    sourceSaleId: sale.id,
   }).map((entry) => ({ ...entry, sourceOrderId: ids.orderId })));
   return { products: nextProducts, orders: [order, ...orders], sales: [...nextSales, ...sales], ledgerEntries };
 }
