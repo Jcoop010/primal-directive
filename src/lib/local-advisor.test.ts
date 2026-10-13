@@ -8,7 +8,7 @@ GENRE: Jam
 TYPICAL DRAW: 80
 FEE TARGET: $500
 
-MONEY: collected 1200, outstanding 300, costs 450, profit 750, member payouts 200
+MONEY: collected 1200, outstanding 300, costs 450, profit 750, reserve percent 10, member payouts 200
 MERCH: recorded sales 200, gross profit 120, units sold 10, low-stock items 1
 
 GIG PIPELINE:
@@ -22,6 +22,7 @@ test("offline financial advice reports only the app-provided totals and labels l
   assert.match(result.answer, /Collected: \$1,200\.00/);
   assert.match(result.answer, /Outstanding: \$300\.00/);
   assert.match(result.answer, /Recorded costs: \$450\.00/);
+  assert.match(result.answer, /Configured show reserve: 10% of each gig.s pre-reserve cash pool/i);
   assert.match(result.answer, /Cash-based difference \(collected minus recorded costs\): \$750\.00/);
   assert.match(result.answer, /Member payouts \(tracked separately from operating costs\): \$200\.00/);
   assert.match(result.answer, /Difference after recorded payouts: \$550\.00/);
