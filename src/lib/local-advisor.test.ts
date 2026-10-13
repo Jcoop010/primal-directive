@@ -27,6 +27,15 @@ test("offline financial advice reports only the app-provided totals and labels l
   assert.match(result.answer, /outstanding amounts are not collected cash/i);
 });
 
+test("offline advisor flags a profit total that conflicts with collected minus recorded costs", () => {
+  const context = financialContext.replace("profit 750", "profit 900");
+  const result = localGrowthAdvice("Give me our financial summary", context);
+  assert.match(result.answer, /Cash-based difference \\(collected minus recorded costs\\): \\$750\\.00/);
+  assert.match(result.answer, /App-reported profit: \\$900\\.00/);
+  assert.match(result.answer, /does not match collected minus recorded costs/i);
+  assert.match(result.answer, /not necessarily accounting profit or taxable income/i);
+});
+
 test("offline financial advice refuses to invent totals when the money summary is missing", () => {
   const result = localGrowthAdvice("How much profit did we make?", "ARTIST: Example Band\nGIG PIPELINE:\n(empty)");
   assert.match(result.answer, /can't calculate a trustworthy financial summary/i);
