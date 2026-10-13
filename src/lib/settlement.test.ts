@@ -4,10 +4,16 @@ import { calculateSettlement, isPayoutMember } from "./settlement.ts";
 import type { MoneyEntry, Person } from "./types.ts";
 const members: Person[] = [
   { id: "a", name: "Alex", role: "member", city: "", contact: "", notes: "", settlementSharePercent: 50 },
-  { id: "b", name: "Blair", role: "band", city: "", contact: "", notes: "", settlementSharePercent: 50 },
+  { id: "b", name: "Blair", role: "member", city: "", contact: "", notes: "", settlementSharePercent: 50 },
 ];
 const entry = (id: string, type: MoneyEntry["type"], amount: number, extra: Partial<MoneyEntry> = {}): MoneyEntry => ({ id, type, amount, label: id, date: "2026-10-13", gigId: "show-1", ...extra });
-testCase("only individual members or explicitly configured legacy contacts are payout eligible", () => {\n  assert.equal(isPayoutMember({ role: "member", settlementSharePercent: undefined }), true);\n  assert.equal(isPayoutMember({ role: "band", settlementSharePercent: undefined }), false);\n  assert.equal(isPayoutMember({ role: "band", settlementSharePercent: 50 }), true);\n  assert.equal(isPayoutMember({ role: "booker", settlementSharePercent: 50 }), false);\n});\ntestCase("splits collected cash after linked operating costs", () => {
+testCase("only individual members or explicitly configured legacy contacts are payout eligible", () => {
+  assert.equal(isPayoutMember({ role: "member", settlementSharePercent: undefined }), true);
+  assert.equal(isPayoutMember({ role: "band", settlementSharePercent: undefined }), false);
+  assert.equal(isPayoutMember({ role: "band", settlementSharePercent: 50 }), true);
+  assert.equal(isPayoutMember({ role: "booker", settlementSharePercent: 50 }), false);
+});
+testCase("splits collected cash after linked operating costs", () => {
   const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 1000), entry("fuel", "cost", 100), entry("owed", "outstanding", 500)]);
   assert.equal(result.netPool, 900); assert.equal(result.sharesValid, true); assert.deepEqual(result.lines.map((line) => line.amountDue), [450, 450]); assert.equal(result.totalRemaining, 900);
 });
