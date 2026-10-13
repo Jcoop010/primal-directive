@@ -93,7 +93,11 @@ export function renderInstallPageHtml(template, { host, url } = {}) {
 
 export function renderWebManifest(hostHeader, site = readOgSite()) {
   const siteName = String(site?.title ?? "").trim();
-  const name = isGrokPlatformHost(hostHeader) ? appNameFromHost(hostHeader) : siteName || appNameFromHost(hostHeader);
+  const host = String(hostHeader ?? "").split(",")[0].trim().split(":")[0].toLowerCase();
+  const standaloneVercelHost = host === "vercel.app" || host.endsWith(".vercel.app");
+  const name = isGrokPlatformHost(hostHeader)
+    ? appNameFromHost(hostHeader)
+    : siteName || (standaloneVercelHost ? "Primal Directive" : appNameFromHost(hostHeader));
   return JSON.stringify({ name, short_name: name, id: "/", start_url: "/", scope: "/", display: "standalone", background_color: "#000000", theme_color: "#000000", icons: [{ src: "/__grok/icon-180.png", sizes: "180x180", type: "image/png" }] }, null, 2);
 }
 
