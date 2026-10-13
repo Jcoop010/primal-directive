@@ -37,11 +37,15 @@ test("rejects invalid merch ledger identities and amounts", () => {
   }), /non-negative/);
 });
 
-test("records a sale, snapshots unit economics, and reduces stock", () => {
-  const result = recordMerchSale(products, [], sale, "sale-1");
+test("records a sale, snapshots unit economics, reduces stock, and audits the inventory movement", () => {
+  const result = recordMerchSale(products, [], sale, "sale-1", "adjustment-1");
   assert.equal(result.products[0]?.stockOnHand, 10);
   assert.equal(result.sales[0]?.unitCost, 10);
   assert.equal(result.sales[0]?.gigId, "show-1");
+  assert.deepEqual(result.adjustments, [{
+    id: "adjustment-1", productId: "tee", quantityDelta: -2, reason: "sale",
+    date: "2026-10-11", gigId: "show-1", note: "Manual sale sale-1",
+  }]);
 });
 
 test("rejects overselling and invalid quantities", () => {

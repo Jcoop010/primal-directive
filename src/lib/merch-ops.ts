@@ -82,7 +82,8 @@ export function recordMerchSale(
   sales: readonly MerchSale[],
   input: Omit<MerchSale, "id">,
   id: string,
-): { products: MerchProduct[]; sales: MerchSale[] } {
+  inventoryAdjustmentId = `${id}:inventory`,
+): { products: MerchProduct[]; sales: MerchSale[]; adjustments: MerchInventoryAdjustment[] } {
   if (!id.trim()) throw new Error("Sale ID is required.");
   if (sales.some((sale) => sale.id === id)) throw new Error("Sale ID already exists.");
   if (!input.productId.trim()) throw new Error("Choose a merch product.");
@@ -97,11 +98,22 @@ export function recordMerchSale(
     throw new Error(`Not enough stock: ${product.stockOnHand} available, ${input.quantity} requested.`);
   }
   const sale: MerchSale = { ...input, id };
+  if (!inventoryAdjustmentId.trim()) throw new Error("Inventory adjustment ID is required.");
   return {
     products: products.map((item) =>
       item.id === product.id ? { ...item, stockOnHand: item.stockOnHand - input.quantity } : item,
     ),
     sales: [sale, ...sales],
+    // Every manual sale must have a matching stock movement for inventory auditability.
+    adjustments: [{
+      id: inventoryAdjustmentId,
+      productId: product.id,
+      quantityDelta: -input.quantity,
+      reason: "sale",
+      date: input.date,
+      gigId: input.gigId,
+      note: `Manual sale ${id}`,
+    }],
   };
 }
 
