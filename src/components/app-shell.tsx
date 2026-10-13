@@ -33,7 +33,7 @@ const NAV = [
   { to: "/people", label: "People", icon: Users },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/money", label: "Money", icon: Banknote },
-  { to: "/settlement", label: "Settlement", icon: ClipboardCheck },
+  { to: "/settlement", label: "Gig Closeout", icon: ClipboardCheck },
   { to: "/tour", label: "Tour", icon: RouteIcon },
   { to: "/merch", label: "Merch", icon: ShoppingBag },
   { to: "/tasks", label: "Tasks", icon: ListChecks },

@@ -8,7 +8,7 @@ GENRE: Jam
 TYPICAL DRAW: 80
 FEE TARGET: $500
 
-MONEY: collected 1200, outstanding 300, costs 450, profit 750
+MONEY: collected 1200, outstanding 300, costs 450, profit 750, member payouts 200
 MERCH: recorded sales 200, gross profit 120, units sold 10, low-stock items 1
 
 GIG PIPELINE:
@@ -23,6 +23,8 @@ test("offline financial advice reports only the app-provided totals and labels l
   assert.match(result.answer, /Outstanding: \$300\.00/);
   assert.match(result.answer, /Recorded costs: \$450\.00/);
   assert.match(result.answer, /Cash-based difference \(collected minus recorded costs\): \$750\.00/);
+  assert.match(result.answer, /Member payouts \(tracked separately from operating costs\): \$200\.00/);
+  assert.match(result.answer, /Difference after recorded payouts: \$550\.00/);
   assert.match(result.answer, /not independently verified against bank statements/i);
   assert.match(result.answer, /outstanding amounts are not collected cash/i);
 });
@@ -51,6 +53,7 @@ test("offline advisor ranks gigs from linked collected income and cost records o
     "- date:2026-10-01 | type:cost | amount:400 | gigId:gig-a | gig:Show A | label:travel",
     "- date:2026-10-02 | type:collected | amount:800 | gigId:gig-b | gig:Show B | label:guarantee",
     "- date:2026-10-02 | type:cost | amount:100 | gigId:gig-b | gig:Show B | label:lodging",
+    "- date:2026-10-02 | type:payout | amount:200 | gigId:gig-b | gig:Show B | member:Alex | label:member payout",
     "- date:2026-10-02 | type:outstanding | amount:500 | gigId:gig-b | gig:Show B | label:unpaid balance",
     "- date:2026-10-02 | type:cost | amount:999 | gigId:none | gig:unlinked | label:unassigned expense",
   ].join("\n");
