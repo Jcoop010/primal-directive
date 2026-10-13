@@ -42,13 +42,14 @@ export const PERSON_ROLE_LABEL: Record<PersonRole, string> = {
   other: "Other",
 };
 
-export const MONEY_TYPES = ["collected", "outstanding", "cost"] as const;
+export const MONEY_TYPES = ["collected", "outstanding", "cost", "payout"] as const;
 export type MoneyType = (typeof MONEY_TYPES)[number];
 
 export const MONEY_TYPE_LABEL: Record<MoneyType, string> = {
   collected: "Collected",
   outstanding: "Outstanding",
   cost: "Cost",
+  payout: "Member payout",
 };
 
 export type Gig = {
@@ -81,6 +82,7 @@ export type MoneyEntry = {
   date: string;
   gigId?: string;
   sourceOrderId?: string;
+  memberId?: string;
 };
 
 export type OperationalTaskStatus = "open" | "done";
