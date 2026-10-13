@@ -32,12 +32,12 @@ type LinkedMoneyRecord = {
 };
 
 function parseLinkedMoneyLedger(context: string): LinkedMoneyRecord[] {
-  const section = context.match(/^MONEY LEDGER[^\\n]*\\n([\\s\\S]*?)(?=\\n\\n|$)/m)?.[1];
+  const section = context.match(/^MONEY LEDGER[^\n]*\n([\s\S]*?)(?=\n\n|$)/m)?.[1];
   if (!section || section.trim() === "(empty)") return [];
   const records: LinkedMoneyRecord[] = [];
 
-  for (const line of section.split("\\n")) {
-    const match = line.match(/^- date:([^|]*) \\| type:(collected|outstanding|cost) \\| amount:(-?\\d+(?:\\.\\d+)?) \\| gigId:([^|]+) \\| gig:([^|]+) \\| label:(.*)$/);
+  for (const line of section.split("\n")) {
+    const match = line.match(/^- date:([^|]*) \| type:(collected|outstanding|cost) \| amount:(-?\d+(?:\.\d+)?) \| gigId:([^|]+) \| gig:([^|]+) \| label:(.*)$/);
     if (!match) continue;
     const amount = Number(match[3]);
     const gigId = match[4].trim();
