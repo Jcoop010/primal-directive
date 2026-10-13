@@ -12,6 +12,7 @@ export function DurableSync() {
   const loading = useRef(false);
   const loadRequest = useRef(0);
   const activeUserId = useRef<string | null>(null);
+  const version = useRef(0);
   const saveQueue = useRef<Promise<void>>(Promise.resolve());
 
   // Keep queued work from a previous account from starting after an account switch.
@@ -20,6 +21,7 @@ export function DurableSync() {
   useEffect(() => {
     if (isPending || !user) {
       readyFor.current = null;
+      version.current = 0;
       return;
     }
     if (readyFor.current === user.id || loading.current) return;
@@ -29,8 +31,9 @@ export function DurableSync() {
     loading.current = true;
 
     void loadAppState({ data: {} })
-      .then(({ state }) => {
+      .then(({ state, version: loadedVersion }) => {
         if (activeUserId.current !== userId || loadRequest.current !== requestId) return;
+        version.current = loadedVersion;
         if (state) {
           useMusician.setState((current) => ({
             ...current,
@@ -114,17 +117,24 @@ export function DurableSync() {
           profile: current.profile,
         };
 
-        // Serialize writes so an older request cannot finish after and overwrite a newer save.
+        // Serialize writes and compare server versions so stale tabs cannot overwrite newer saves.
         saveQueue.current = saveQueue.current
           .catch(() => undefined)
           .then(async () => {
             if (activeUserId.current !== userId || readyFor.current !== userId) return;
-            await saveAppState({ data: { state } });
+            const result = await saveAppState({
+              data: { state, expectedVersion: version.current },
+            });
+            version.current = result.version;
           })
           .catch((error) => {
             console.error("[primal-directive] durable save failed", error);
             if (activeUserId.current === userId) {
-              toast.error("Couldn't save your latest changes. Keep this tab open and retry.");
+              toast.error(
+                error instanceof Error && error.message.includes("Workspace changed in another session")
+                  ? "This workspace changed in another session. Reload before making more edits."
+                  : "Couldn't save your latest changes. Keep this tab open and retry.",
+              );
             }
           });
       }, 650);
