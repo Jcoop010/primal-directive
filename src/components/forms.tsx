@@ -393,6 +393,10 @@ function MoneyForm({
           toast.error("Enter a non-zero amount. Use a negative value for a refund or reversal.");
           return;
         }
+        if (type === "payout" && parsedAmount < 0) {
+          toast.error("Member payouts must be positive. Correct or remove the original payout instead.");
+          return;
+        }
         onSave({
           type,
           amount: parsedAmount,
