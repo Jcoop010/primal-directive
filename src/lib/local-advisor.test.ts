@@ -68,7 +68,7 @@ test("offline advisor ranks gigs from linked collected income and cost records o
 
 test("offline advisor refuses to rank gig profitability without gig-linked records", () => {
   const result = localGrowthAdvice("Which gigs are most profitable?", financialContext);
-  assert.match(result.answer, /does not include a reconciled income-and-cost breakdown for each gig/i);
+  assert.match(result.answer, /can.t reliably rank gig profitability because no collected-income or cost entries linked to individual gigs were included/i);
   assert.match(result.answer, /can.t reliably rank gig profitability/i);
 });
 
