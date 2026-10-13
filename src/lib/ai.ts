@@ -172,7 +172,19 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     };
 
-    if (!apiKey) return fallback();
+    if (!apiKey) {
+      const local = fallback();
+      return {
+        ...local,
+        source: "OFFLINE MODE — XAI_API_KEY NOT CONFIGURED",
+        answer: `Live AI and web search are not configured on this deployment because the XAI_API_KEY environment variable is missing. I can still help with saved pipeline data and offline planning, but I cannot verify current venues, contacts, lineups, availability, or deal terms until the key is added to the production environment and the app is redeployed.\n\n${local.answer}`,
+        moves: [
+          "Add XAI_API_KEY to the existing Vercel project's Production environment using your xAI API key.",
+          "Redeploy the existing primal-directive project.",
+          "Retry this question and confirm the response includes source URLs before acting on live booking leads.",
+        ],
+      };
+    }
 
     const messages = [
       { role: "system", content: SYSTEM },
