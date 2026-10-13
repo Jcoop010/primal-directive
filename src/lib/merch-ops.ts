@@ -253,6 +253,8 @@ export function adjustMerchInventory(
 export function summarizeMerch(
   products: readonly MerchProduct[],
   sales: readonly MerchSale[],
+  orders: readonly MerchOrder[] = [],
+  refunds: readonly MerchRefund[] = [],
 ): MerchSummary {
   let unitsSold = 0;
   let grossSales = 0;
@@ -260,15 +262,29 @@ export function summarizeMerch(
   let costOfGoods = 0;
   let taxCollected = 0;
   let processingFees = 0;
+  const refundedOrderIds = new Set(
+    orders.filter((order) => order.status === "refunded").map((order) => order.id),
+  );
+  const restockedRefundIds = new Set(
+    refunds.filter((refund) => refund.restocked).map((refund) => refund.orderId),
+  );
   for (const sale of sales) {
     if (!Number.isInteger(sale.quantity) || sale.quantity < 1) throw new Error("Sale quantity must be a positive whole number.");
     validAmount(sale.unitPrice, "Sale price");
     validAmount(sale.unitCost, "Unit cost");
-    unitsSold += sale.quantity;
-    grossSales += sale.quantity * sale.unitPrice;
-    discounts += sale.discountAmount ?? 0;
-    costOfGoods += sale.quantity * sale.unitCost;
-    taxCollected += sale.taxAmount ?? 0;
+    const refunded = sale.orderId !== undefined && refundedOrderIds.has(sale.orderId);
+    // Refunded orders no longer count as revenue or sold units.
+    if (!refunded) {
+      unitsSold += sale.quantity;
+      grossSales += sale.quantity * sale.unitPrice;
+      discounts += sale.discountAmount ?? 0;
+      taxCollected += sale.taxAmount ?? 0;
+      costOfGoods += sale.quantity * sale.unitCost;
+    } else if (!restockedRefundIds.has(sale.orderId!)) {
+      // Keep COGS as an expense unless returned items were actually restocked.
+      costOfGoods += sale.quantity * sale.unitCost;
+    }
+    // Processor fees remain expenses unless a fee reversal is recorded.
     processingFees += sale.processingFee ?? 0;
   }
   const inventoryCostValue = products.reduce((sum, product) => {
