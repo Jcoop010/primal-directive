@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { loadAppState, saveAppState } from "@/lib/persistence";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { useMusician } from "@/lib/store";
@@ -9,6 +10,12 @@ export function DurableSync() {
   const readyFor = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loading = useRef(false);
+  const loadRequest = useRef(0);
+  const activeUserId = useRef<string | null>(null);
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
+
+  // Keep queued work from a previous account from starting after an account switch.
+  activeUserId.current = !isPending && user ? user.id : null;
 
   useEffect(() => {
     if (isPending || !user) {
@@ -16,10 +23,14 @@ export function DurableSync() {
       return;
     }
     if (readyFor.current === user.id || loading.current) return;
+
+    const userId = user.id;
+    const requestId = ++loadRequest.current;
     loading.current = true;
 
     void loadAppState({ data: {} })
       .then(({ state }) => {
+        if (activeUserId.current !== userId || loadRequest.current !== requestId) return;
         if (state) {
           useMusician.setState((current) => ({
             ...current,
@@ -59,45 +70,70 @@ export function DurableSync() {
             },
           }));
         }
-        readyFor.current = user.id;
+        readyFor.current = userId;
       })
       .catch((error) => {
+        if (activeUserId.current !== userId || loadRequest.current !== requestId) return;
         console.error("[primal-directive] durable load failed", error);
+        toast.error("Your saved workspace couldn't load. Refresh and try again before editing.");
       })
       .finally(() => {
-        loading.current = false;
+        if (loadRequest.current === requestId) loading.current = false;
       });
+
+    return () => {
+      if (loadRequest.current === requestId) {
+        loadRequest.current += 1;
+        loading.current = false;
+      }
+    };
   }, [user, isPending]);
 
   useEffect(() => {
     if (!user || isPending) return;
+    const userId = user.id;
     const unsubscribe = useMusician.subscribe(() => {
-      if (readyFor.current !== user.id || loading.current) return;
+      if (readyFor.current !== userId || activeUserId.current !== userId || loading.current) return;
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
+        timer.current = null;
+        if (activeUserId.current !== userId || readyFor.current !== userId) return;
+
         const current = useMusician.getState();
-        void saveAppState({
-          data: {
-            state: {
-              gigs: current.gigs,
-              people: current.people,
-              money: current.money,
-              merchProducts: current.merchProducts,
-              merchSales: current.merchSales,
-              merchOrders: current.merchOrders,
-              merchInventoryAdjustments: current.merchInventoryAdjustments,
-              merchRefunds: current.merchRefunds,
-              tasks: current.tasks,
-              chat: current.chat,
-              profile: current.profile,
-            },
-          },
-        }).catch((error) => console.error("[primal-directive] durable save failed", error));
+        const state = {
+          gigs: current.gigs,
+          people: current.people,
+          money: current.money,
+          merchProducts: current.merchProducts,
+          merchSales: current.merchSales,
+          merchOrders: current.merchOrders,
+          merchInventoryAdjustments: current.merchInventoryAdjustments,
+          merchRefunds: current.merchRefunds,
+          tasks: current.tasks,
+          chat: current.chat,
+          profile: current.profile,
+        };
+
+        // Serialize writes so an older request cannot finish after and overwrite a newer save.
+        saveQueue.current = saveQueue.current
+          .catch(() => undefined)
+          .then(async () => {
+            if (activeUserId.current !== userId || readyFor.current !== userId) return;
+            await saveAppState({ data: { state } });
+          })
+          .catch((error) => {
+            console.error("[primal-directive] durable save failed", error);
+            if (activeUserId.current === userId) {
+              toast.error("Couldn't save your latest changes. Keep this tab open and retry.");
+            }
+          });
       }, 650);
     });
+
     return () => {
       unsubscribe();
       if (timer.current) clearTimeout(timer.current);
+      timer.current = null;
     };
   }, [user, isPending]);
 
