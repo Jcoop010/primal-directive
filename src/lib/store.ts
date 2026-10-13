@@ -485,6 +485,27 @@ export function buildAdvisorContext() {
     .slice(0, 12)
     .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | payout share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
     .join("\n");
+  const today = new Date().toISOString().slice(0, 10);
+  const bookedLines = s.gigs
+    .filter((gig) => gig.status === "booked" && gig.date && gig.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 8)
+    .map((gig) => `- ${gig.date} | ${gig.name} @ ${gig.venue}, ${gig.city} | fee ${gig.fee} | ${gig.notes}`)
+    .join("\n");
+  const openTasks = s.tasks
+    .filter((task) => task.status === "open")
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+    .slice(0, 10)
+    .map((task) => {
+      const gig = s.gigs.find((item) => item.id === task.gigId);
+      const title = task.title.replace(/[|\\n\\r]/g, " ").slice(0, 100);
+      const description = task.description.replace(/[|\\n\\r]/g, " ").slice(0, 120);
+      return `- due:${task.dueDate || "unscheduled"} | ${task.status} | ${task.category} | ${title} | gig:${gig?.name || "general"} | ${description}`;
+    })
+    .join("\n");
+  const activePipeline = pipelineGigs(s.gigs);
+  const activePipelineValue = activePipeline.reduce((sum, gig) => sum + (Number(gig.fee) || 0), 0);
+  const activeWeightedValue = activePipeline.reduce((sum, gig) => sum + (Number(gig.fee) || 0) * Math.max(0, Math.min(1, Number(gig.conf) || 0)), 0);
   const gigNames = new Map(s.gigs.map((gig) => [gig.id, gig.name]));
   const moneyLedgerLines = [...s.money]
     .sort((a, b) => Number(Boolean(b.gigId)) - Number(Boolean(a.gigId)))
@@ -508,7 +529,14 @@ NOTES: ${s.profile.notes}
 MONEY: collected ${collected}, outstanding ${outstanding}, operating costs ${costs}, operating difference ${profit}, member payouts ${payouts} (tracked separately from operating costs)
 MONEY LEDGER (up to 18 app records; linked gigs prioritized; may be incomplete; not bank-verified):
 ${moneyLedgerLines || "(empty)"}
-MERCH: recorded sales \${merchRevenue}, gross profit \${merchGrossProfit}, units sold \${merchUnitsSold}, low-stock items \${lowStock.length}
+MERCH: recorded sales ${merchRevenue}, gross profit ${merchGrossProfit}, units sold ${merchUnitsSold}, low-stock items ${lowStock.length}
+
+PIPELINE SUMMARY: ${activePipeline.length} active records, unweighted listed fees ${activePipelineValue}, confidence-weighted listed value ${activeWeightedValue}. These are pipeline estimates, not booked or collected revenue.
+UPCOMING BOOKED SHOWS:
+${bookedLines || "(none recorded)"}
+
+OPEN OPERATIONAL TASKS (earliest due dates first; list may be incomplete):
+${openTasks || "(none recorded)"}
 
 MERCH INVENTORY:
 ${merchLines || "(empty)"}
