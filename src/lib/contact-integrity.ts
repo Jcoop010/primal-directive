@@ -5,15 +5,14 @@ export function hasRecordedPayouts(personId: string, entries: readonly MoneyEntr
   return entries.some((entry) => entry.type === "payout" && entry.memberId === personId);
 }
 
-import type { MerchInventoryAdjustment, MerchOrder, MerchSale } from "./types";
 
 /** Keep a show linked while any financial or merch history depends on it. */
 export function hasGigLinkedFinancialHistory(
   gigId: string,
   entries: readonly MoneyEntry[],
-  sales: readonly MerchSale[],
-  orders: readonly MerchOrder[],
-  adjustments: readonly MerchInventoryAdjustment[],
+  sales: readonly { gigId?: string }[],
+  orders: readonly { gigId?: string }[],
+  adjustments: readonly { gigId?: string }[],
 ): boolean {
   if (!gigId.trim()) return false;
   return entries.some((entry) => entry.gigId === gigId)
