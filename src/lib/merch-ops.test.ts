@@ -96,9 +96,12 @@ test("records a multi-item order with exact discount, tax, fee, stock, and ledge
   assert.equal(result.products[1]?.stockOnHand, 1);
   assert.equal(result.sales.reduce((sum, item) => sum + item.discountAmount!, 0), 3);
   assert.equal(result.ledgerEntries.filter((entry) => entry.type === "collected").reduce((sum, entry) => sum + entry.amount, 0), 60);
-  assert.equal(result.ledgerEntries.filter((entry) => entry.label.startsWith("Merch sales tax")).reduce((sum, entry) => sum + entry.amount, 0), 5);
+  assert.equal(result.ledgerEntries.some((entry) => /sales tax/i.test(entry.label)), false, "tax collected is not an operating expense");
   assert.equal(result.ledgerEntries.filter((entry) => entry.label.startsWith("Merch processing fee")).reduce((sum, entry) => sum + entry.amount, 0), 1);
   assert.ok(result.ledgerEntries.every((entry) => entry.sourceOrderId === "order-1"));
+  const summary = summarizeMerch(products, result.sales, result.orders, []);
+  assert.equal(summary.taxCollected, 5, "sales tax remains visible in merch reporting");
+  assert.equal(result.ledgerEntries.filter((entry) => entry.type === "cost").reduce((sum, entry) => sum + entry.amount, 0), 21.5, "only cost of goods and processing fees affect operating costs");
 });
 
 test("rejects duplicate and oversold multi-item orders without mutating source inventory", () => {
@@ -123,6 +126,8 @@ test("refunds a manual order once and optionally restores stock with audit entri
   assert.equal(refunded.products[0]?.stockOnHand, 12);
   assert.equal(refunded.adjustments.length, 2);
   assert.equal(refunded.ledgerEntries.find((entry) => entry.type === "collected")?.amount, -60);
+  assert.equal(refunded.ledgerEntries.some((entry) => /tax/i.test(entry.label)), false, "tax reversal must not flow through operating costs");
+  assert.equal(refunded.ledgerEntries.find((entry) => entry.label.startsWith("Reverse merch cost of goods"))?.amount, -20.5);
   assert.throws(() => refundMerchOrder(refunded.products, refunded.orders, refunded.refunds, {
     orderId: "order-4", refundId: "refund-2", date: "2026-10-12", restock: true, note: "duplicate",
     ledgerIds: ["r", "t", "c"], adjustmentIds: ["a", "b"],
