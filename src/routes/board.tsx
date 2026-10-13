@@ -52,6 +52,15 @@ function BoardPage() {
         .filter((task) => task.gigId === nextShow.id && task.dueDate <= nextShow.date)
         .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     : [];
+  const latestCompletedShow = gigs
+    .filter((gig) => gig.status === "completed" && /^\\d{4}-\\d{2}-\\d{2}$/.test(gig.date))
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  const settlementTask = latestCompletedShow
+    ? tasks.find((task) => task.gigId === latestCompletedShow.id && task.sourceKey === `show:${latestCompletedShow.id}:reconcile:v1`)
+    : undefined;
+  const completedShowOutstanding = latestCompletedShow
+    ? sumMoney(moneyEntries.filter((entry) => entry.gigId === latestCompletedShow.id), "outstanding")
+    : 0;
 
   return (
     <div>
@@ -146,6 +155,54 @@ function BoardPage() {
             No future booked show found. Confirm a dated gig to activate show-readiness tracking.
           </p>
         )}
+
+        {latestCompletedShow ? (
+          <div className="mt-4 rounded-lg border border-line p-3">
+            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Latest completed show · settlement</div>
+            <div className="mt-1 text-sm font-semibold">{latestCompletedShow.venue || latestCompletedShow.name}</div>
+            <div className="mt-1 text-xs text-muted">{[latestCompletedShow.city, longDate(latestCompletedShow.date)].filter(Boolean).join(" · ")}</div>
+            <div className="mt-3 flex items-start gap-2 text-xs">
+              {!settlementTask ? (
+                <>
+                  <CircleAlert className="mt-0.5 size-4 shrink-0 text-warn" />
+                  <div>
+                    <div className="font-semibold">Settlement checklist not found</div>
+                    <p className="mt-1 leading-relaxed text-muted">Generate the missing show task pack before treating this show as reconciled.</p>
+                  </div>
+                </>
+              ) : settlementTask.status === "open" ? (
+                <>
+                  <CircleAlert className="mt-0.5 size-4 shrink-0 text-warn" />
+                  <div>
+                    <div className="font-semibold">Show reconciliation still open</div>
+                    <p className="mt-1 leading-relaxed text-muted">
+                      {completedShowOutstanding > 0
+                        ? `${money(completedShowOutstanding)} is recorded as outstanding for this show.`
+                        : "Verify actual income, costs, and merch results; no outstanding amount is currently recorded against this show."}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-live" />
+                  <div>
+                    <div className="font-semibold">Reconciliation task marked complete</div>
+                    <p className="mt-1 leading-relaxed text-muted">
+                      {completedShowOutstanding > 0
+                        ? `${money(completedShowOutstanding)} is still recorded as outstanding; follow up on collection.`
+                        : "Confirm all actual income, costs, and merch results were recorded before closing the books."}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+            {(!settlementTask || settlementTask.status === "open" || completedShowOutstanding > 0) && (
+              <Link to="/tasks" className="mt-3 inline-flex min-h-9 items-center rounded-md bg-accent px-3 text-xs font-semibold text-accent-fg">
+                Review settlement tasks
+              </Link>
+            )}
+          </div>
+        ) : null}
 
         {overdueTasks.length > 0 ? (
           <div className="mt-4">
