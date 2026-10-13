@@ -144,3 +144,12 @@ test("excludes refunded orders from sales and units while honoring restock state
   assert.equal(summary.taxCollected, 0);
   assert.equal(summary.processingFees, 1);
 });
+
+
+test("rejects invalid standalone sale discounts, tax, and processing fees", () => {
+  const ids = { revenueId: "revenue-check", costId: "cost-check" };
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, discountAmount: -1 }, "Logo Tee", ids), /Discount.*non-negative/);
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, discountAmount: 1000 }, "Logo Tee", ids), /cannot exceed/);
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, taxAmount: -1 }, "Logo Tee", ids), /Tax.*non-negative/);
+  assert.throws(() => buildMerchLedgerEntries({ ...sale, processingFee: -1 }, "Logo Tee", ids), /Processing fee.*non-negative/);
+});
