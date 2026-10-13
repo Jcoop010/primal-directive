@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { money, longDate, toIsoDay, downloadCsv } from "@/lib/format";
-import { calculateSettlement } from "@/lib/settlement";
+import { calculateSettlement, isPayoutMember } from "@/lib/settlement";
 import { useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ function SettlementPage() {
   const [selectedGigId, setSelectedGigId] = useState("");
   const completedGigs = useMemo(() => gigs.filter((gig) => gig.status === "completed").sort((a, b) => b.date.localeCompare(a.date)), [gigs]);
   const selectedGig = completedGigs.find((gig) => gig.id === selectedGigId) ?? completedGigs[0];
-  const bandMembers = people.filter((person) => person.role === "band");
+  const bandMembers = people.filter(isPayoutMember);
   const summary = selectedGig ? calculateSettlement(selectedGig.id, bandMembers, entries) : null;
   const paid = Boolean(summary?.sharesValid && summary.netPool > 0 && summary.lines.every((line) => line.remaining === 0 && line.overpaid === 0));
 
@@ -54,7 +54,7 @@ function SettlementPage() {
         </div>
         <p className="text-xs leading-relaxed text-muted">Only entries linked to this show count. Outstanding income is excluded until collected. Taxes, reserves, commissions, and unrecorded expenses are not automatically deducted; enter applicable costs before paying members.</p>
       </Card>
-      {!summary?.sharesValid ? <Card className="p-4"><div className="flex items-start gap-2"><TriangleAlert className="mt-0.5 size-4 shrink-0 text-accent" /><div><h3 className="text-sm font-bold">Band shares need setup</h3><p className="mt-1 text-sm leading-relaxed text-muted">Add a payout share to every Band contact and make sure all percentages total exactly 100%. Payout recording stays disabled until the split is valid.</p>{summary?.missingShareNames.length ? <p className="mt-2 text-xs text-muted">Missing shares: {summary.missingShareNames.join(", ")}</p> : summary ? <p className="mt-2 text-xs text-muted">Current total: {summary.shareTotal.toFixed(2)}% (must equal 100%).</p> : null}<a href="/people" className="mt-3 inline-flex text-sm font-semibold text-accent">Configure member shares →</a></div></div></Card> : null}
+      {!summary?.sharesValid ? <Card className="p-4"><div className="flex items-start gap-2"><TriangleAlert className="mt-0.5 size-4 shrink-0 text-accent" /><div><h3 className="text-sm font-bold">Member payout shares need setup</h3><p className="mt-1 text-sm leading-relaxed text-muted">Add each individual musician as a Band Member contact in People. Band/act contacts stay separate. Member shares must total exactly 100% before payouts can be recorded.</p>{bandMembers.length === 0 ? <p className="mt-2 text-xs text-muted">No individual band members are configured yet.</p> : summary?.missingShareNames.length ? <p className="mt-2 text-xs text-muted">Missing shares: {summary.missingShareNames.join(", ")}</p> : summary ? <p className="mt-2 text-xs text-muted">Current total: {summary.shareTotal.toFixed(2)}% (must equal 100%).</p> : null}<a href="/people" className="mt-3 inline-flex text-sm font-semibold text-accent">Configure member shares →</a></div></div></Card> : null}
       <div className="flex items-center justify-between gap-3"><h3 className="text-sm font-bold">Member allocations</h3><button type="button" onClick={exportSettlement} className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-fg"><Download className="size-3.5" /> Export CSV</button></div>
       {summary?.lines.map((line) => <Card key={line.memberId} className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-bold">{line.memberName}</div><div className="mt-1 text-xs text-muted">{line.sharePercent === undefined ? "Share not set" : `${line.sharePercent}% share`}</div></div><div className="text-right"><div className="text-lg font-extrabold tabular">{money(line.amountDue)}</div><div className="text-[10px] uppercase tracking-wider text-muted">Allocation</div></div></div>
