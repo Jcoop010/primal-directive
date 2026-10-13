@@ -4,6 +4,15 @@ export type SettlementLine = { memberId: string; memberName: string; sharePercen
 export type SettlementSummary = { collected: number; operatingCosts: number; netPool: number; shareTotal: number; sharesValid: boolean; missingShareNames: string[]; lines: SettlementLine[]; totalPaid: number; totalRemaining: number };
 function cents(value: number) { return Math.round((value + Number.EPSILON) * 100) / 100; }
 
+/** Validate and round a partial member payout against the remaining allocation. */
+export function parsePayoutAmount(input: string, remaining: number): number | null {
+  if (!input.trim() || !Number.isFinite(remaining) || remaining <= 0) return null;
+  const raw = Number(input);
+  if (!Number.isFinite(raw) || raw <= 0) return null;
+  const amount = cents(raw);
+  return amount > 0 && amount <= remaining ? amount : null;
+}
+
 /** New contacts use the explicit member role; retain legacy band contacts only when a payout share was deliberately configured. */
 export function isPayoutMember(person: Pick<Person, "role" | "settlementSharePercent">): boolean {
   return person.role === "member" || (person.role === "band" && person.settlementSharePercent !== undefined);
