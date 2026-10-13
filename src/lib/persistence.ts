@@ -135,6 +135,7 @@ const operationalTaskSchema = z.object({
   category: z.enum(["booking", "advancing", "promotion", "merch", "finance"]),
   gigId: z.string(),
   dueDate: z.string(),
+  dueDateOverridden: z.boolean().optional(),
   status: z.enum(["open", "done"]),
   sourceKey: z.string(),
   createdAt: z.string(),
