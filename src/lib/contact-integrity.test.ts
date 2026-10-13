@@ -25,6 +25,7 @@ testCase("locks payout role and share after payments while allowing unrelated ed
   assert.equal(changesPayoutIdentity("member-a", current, { settlementSharePercent: 40 }, history), true);
   assert.equal(changesPayoutIdentity("member-a", current, { role: "band" }, history), true);
   assert.equal(changesPayoutIdentity("member-a", current, {}, history), false);
+  assert.equal(changesPayoutIdentity("member-a", current, { settlementSharePercent: 50 }, history), false);
   assert.equal(changesPayoutIdentity("member-a", current, { settlementSharePercent: 40 }, []), false);
 });
 
