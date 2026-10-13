@@ -247,7 +247,7 @@ function PersonForm({
         if (!name.trim()) return;
         const parsedShare = sharePercent.trim() === "" ? undefined : Number(sharePercent);
         if (parsedShare !== undefined && (!Number.isFinite(parsedShare) || parsedShare < 0 || parsedShare > 100)) {
-          toast.error("Settlement share must be between 0 and 100.");
+          toast.error("Payout share must be between 0 and 100.");
           return;
         }
         onSave({
@@ -281,7 +281,7 @@ function PersonForm({
         </Field>
       </div>
       {role === "band" ? (
-        <Field label="Show settlement share (%)">
+        <Field label="Show payout share (%)">
           <Input type="number" min="0" max="100" step="0.01" value={sharePercent} onChange={(e) => setSharePercent(e.target.value)} placeholder="e.g. 25" />
         </Field>
       ) : null}
