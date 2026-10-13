@@ -471,6 +471,15 @@ export function buildAdvisorContext() {
     .slice(0, 12)
     .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
     .join("\n");
+  const gigNames = new Map(s.gigs.map((gig) => [gig.id, gig.name]));
+  const moneyLedgerLines = s.money
+    .slice(0, 18)
+    .map((entry) => {
+      const linkedGig = entry.gigId ? gigNames.get(entry.gigId) : undefined;
+      const safeLabel = entry.label.replace(/[|\\n\\r]/g, " ").slice(0, 80);
+      return `- date:${entry.date || "undated"} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${linkedGig || (entry.gigId ? "unknown" : "unlinked")} | label:${safeLabel}`;
+    })
+    .join("\n");
   return `ARTIST: ${s.profile.artistName}
 HOME: ${s.profile.city}
 GENRE: ${s.profile.genre}
@@ -479,6 +488,8 @@ FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
 MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
+MONEY LEDGER (up to 18 records; may be incomplete; app-recorded, not bank-verified):
+${moneyLedgerLines || "(empty)"}
 MERCH: recorded sales ${merchRevenue}, gross profit ${merchGrossProfit}, units sold ${merchUnitsSold}, low-stock items ${lowStock.length}
 
 MERCH INVENTORY:
