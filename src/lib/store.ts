@@ -519,7 +519,7 @@ export function buildAdvisorContext() {
       return `- date:${safeDate} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${safeGigName} | member:${member} | label:${safeLabel}`;
     })
     .join("\n");
-  return `ARTIST: ${s.profile.artistName}
+  const context = `ARTIST: ${s.profile.artistName}
 HOME: ${s.profile.city}
 GENRE: ${s.profile.genre}
 TYPICAL DRAW: ${s.profile.draw}
@@ -546,4 +546,7 @@ ${gigLines || "(empty)"}
 
 PEOPLE:
 ${peopleLines || "(empty)"}`;
+  if (context.length <= 15000) return context;
+  const trimmed = context.slice(0, 14800).replace(/\n[^\n]*$/, "");
+  return `${trimmed}\n[Some lower-priority workspace context was omitted to fit the Advisor request limit.]`;
 }
