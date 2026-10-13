@@ -473,7 +473,7 @@ export function buildAdvisorContext() {
   const merchLines = s.merchProducts
     .slice(0, 15)
     .map((product) => `- ${product.name} [${product.sku || "no SKU"}] | stock ${product.stockOnHand} | price ${product.price} | cost ${product.unitCost}${product.active && product.stockOnHand <= product.reorderAt ? " | REORDER" : ""}`)
-    .join("\\n");
+    .join("\n");
   const gigLines = s.gigs
     .slice(0, 12)
     .map(
