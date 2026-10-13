@@ -214,12 +214,41 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
+    let activeProvider = provider;
+    let res: Response | null = null;
+
     try {
-      let res = await complete({ apiKey, messages, search: provider === "xai", provider });
-    if (!res.ok && provider === "xai") {
-      res = await complete({ apiKey, messages, search: false, provider });
+      res = await complete({ apiKey, messages, search: provider === "xai", provider });
+      if (!res.ok && provider === "xai") {
+        res = await complete({ apiKey, messages, search: false, provider });
+      }
+    } catch {
+      // A provider/network exception should still allow the other configured provider.
     }
-    if (!res.ok) return fallback();
+
+    // If xAI is configured but unavailable, use Groq when its free-tier key exists.
+    // Keep the no-web-search limitation explicit so fallback answers never imply live research.
+    if ((!res || !res.ok) && provider === "xai" && groqKey) {
+      activeProvider = "groq";
+      try {
+        res = await complete({
+          apiKey: groqKey,
+          messages: [
+            ...messages,
+            {
+              role: "system",
+              content: "PROVIDER LIMITATION: This request uses Groq without a web-search tool. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
+            }
+          ],
+          search: false,
+          provider: "groq",
+        });
+      } catch {
+        res = null;
+      }
+    }
+
+    if (!res?.ok) return fallback();
 
     const body = (await res.json()) as Record<string, unknown>;
     const choices = body.choices as
@@ -229,10 +258,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const parsed = extractJson(raw);
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
-    const citations = citationsFrom(body);
+    const citations = activeProvider === "xai" ? citationsFrom(body) : [];
     const source = citations.length
       ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
-      : provider === "groq"
+      : activeProvider === "groq"
         ? "GROQ AI — NO LIVE WEB SOURCES; CURRENT FACTS NOT VERIFIED"
         : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
 
@@ -269,10 +298,6 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-      // Never show malformed or schema-invalid model output as if it were a vetted answer.
-      return fallback();
-    } catch {
-      // Network failures, invalid JSON, and provider-side response changes must not crash the advisor.
-      return fallback();
-    }
+    // Never show malformed or schema-invalid model output as if it were a vetted answer.
+    return fallback();
   });
