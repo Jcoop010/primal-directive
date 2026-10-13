@@ -14,13 +14,14 @@ function SettlementPage() {
   const gigs = useMusician((state) => state.gigs);
   const people = useMusician((state) => state.people);
   const entries = useMusician((state) => state.money);
+  const profile = useMusician((state) => state.profile);
   const addMoney = useMusician((state) => state.addMoney);
   const [selectedGigId, setSelectedGigId] = useState("");
   const [payoutAmounts, setPayoutAmounts] = useState<Record<string, string>>({});
   const completedGigs = useMemo(() => gigs.filter((gig) => gig.status === "completed").sort((a, b) => b.date.localeCompare(a.date)), [gigs]);
   const selectedGig = completedGigs.find((gig) => gig.id === selectedGigId) ?? completedGigs[0];
   const bandMembers = people.filter(isPayoutMember);
-  const summary = selectedGig ? calculateSettlement(selectedGig.id, bandMembers, entries) : null;
+  const summary = selectedGig ? calculateSettlement(selectedGig.id, bandMembers, entries, profile.reservePercent ?? 0) : null;
   const paid = Boolean(summary?.sharesValid && summary.netPool > 0 && summary.lines.every((line) => line.remaining === 0 && line.overpaid === 0));
 
   function recordPayout(memberId: string, memberName: string, amount: number) {
@@ -51,10 +52,11 @@ function SettlementPage() {
         <div className="grid grid-cols-2 gap-2">
           <Metric label="Collected cash" value={money(summary?.collected ?? 0)} />
           <Metric label="Operating costs" value={money(summary?.operatingCosts ?? 0)} />
+          <Metric label="Reserve held" value={money(summary?.reserveAmount ?? 0)} />
           <Metric label="Available pool" value={money(summary?.netPool ?? 0)} />
           <Metric label="Still to pay" value={money(summary?.totalRemaining ?? 0)} />
         </div>
-        <p className="text-xs leading-relaxed text-muted">Only entries linked to this show count. Outstanding income is excluded until collected. Taxes, reserves, commissions, and unrecorded expenses are not automatically deducted; enter applicable costs before paying members.</p>
+        <p className="text-xs leading-relaxed text-muted">Only entries linked to this show count. Outstanding income is excluded until collected. The configured reserve is held back before member shares; this is a planning allocation, not a money transfer. Taxes, commissions, and unrecorded expenses are not automatically deducted, so enter applicable costs before paying members.</p>
       </Card>
       {!summary?.sharesValid ? <Card className="p-4"><div className="flex items-start gap-2"><TriangleAlert className="mt-0.5 size-4 shrink-0 text-accent" /><div><h3 className="text-sm font-bold">Member payout shares need setup</h3><p className="mt-1 text-sm leading-relaxed text-muted">Add each individual musician as a Band Member contact in People. Band/act contacts stay separate. Member shares must total exactly 100% before payouts can be recorded.</p>{bandMembers.length === 0 ? <p className="mt-2 text-xs text-muted">No individual band members are configured yet.</p> : summary?.missingShareNames.length ? <p className="mt-2 text-xs text-muted">Missing shares: {summary.missingShareNames.join(", ")}</p> : summary ? <p className="mt-2 text-xs text-muted">Current total: {summary.shareTotal.toFixed(2)}% (must equal 100%).</p> : null}<a href="/people" className="mt-3 inline-flex text-sm font-semibold text-accent">Configure member shares →</a></div></div></Card> : null}
       <div className="flex items-center justify-between gap-3"><h3 className="text-sm font-bold">Member allocations</h3><button type="button" onClick={exportSettlement} className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-fg"><Download className="size-3.5" /> Export CSV</button></div>
