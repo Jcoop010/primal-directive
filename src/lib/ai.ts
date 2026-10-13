@@ -280,7 +280,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // A live-search request can be rejected even when ordinary chat works.
     // Retry once without search so the user still gets model reasoning, while
     // explicitly disabling any claim of live verification.
-    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && res?.status === 400) {
+    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && (!res || res.status === 400)) {
       console.warn("[advisor] Groq rejected browser search (HTTP 400); retrying without live search.");
       searchUsed = false;
       try {
@@ -308,7 +308,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
-        answer: `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.\\n\\n${local.answer}`,
+        answer: `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.\n\n${local.answer}`,
       };
     }
 
