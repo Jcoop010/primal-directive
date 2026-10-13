@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
 import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
-import { generateShowTaskPacks } from "@/lib/show-workflows";
+import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -139,10 +139,13 @@ export const useMusician = create<State & Actions>()(
           const gigs = s.gigs.map((gig) => (gig.id === id ? { ...gig, ...patch } : gig));
           const updated = gigs.find((gig) => gig.id === id);
           const newlyBooked = previous?.status !== "booked" && updated?.status === "booked";
+          const existingTasks = updated && previous?.date !== updated.date
+            ? rescheduleOpenShowTasks(updated, s.tasks)
+            : s.tasks;
           const tasks = newlyBooked && updated
-            ? generateShowTaskPacks([updated], s.tasks).map((task) => ({ ...task, id: uid() }))
+            ? generateShowTaskPacks([updated], existingTasks).map((task) => ({ ...task, id: uid() }))
             : [];
-          return { gigs, tasks: [...tasks, ...s.tasks] };
+          return { gigs, tasks: [...tasks, ...existingTasks] };
         }),
       removeGig: (id) =>
         set((s) => ({
@@ -289,7 +292,9 @@ export const useMusician = create<State & Actions>()(
       },
       updateOperationalTask: (id, patch) =>
         set((s) => ({
-          tasks: s.tasks.map((task) => task.id === id ? { ...task, ...patch } : task),
+          tasks: s.tasks.map((task) => task.id === id
+            ? { ...task, ...patch, ...(patch.dueDate !== undefined ? { dueDateOverridden: true } : {}) }
+            : task),
         })),
       updateProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
