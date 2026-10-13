@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { loadAppState, saveAppState } from "@/lib/persistence";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -14,6 +14,7 @@ export function DurableSync() {
   const activeUserId = useRef<string | null>(null);
   const version = useRef(0);
   const saveQueue = useRef<Promise<void>>(Promise.resolve());
+  const [syncStatus, setSyncStatus] = useState<"loading" | "ready" | "error">("loading");
 
   // Keep queued work from a previous account from starting after an account switch.
   activeUserId.current = !isPending && user ? user.id : null;
@@ -22,6 +23,7 @@ export function DurableSync() {
     if (isPending || !user) {
       readyFor.current = null;
       version.current = 0;
+      setSyncStatus("loading");
       return;
     }
     if (readyFor.current === user.id || loading.current) return;
@@ -29,6 +31,7 @@ export function DurableSync() {
     const userId = user.id;
     const requestId = ++loadRequest.current;
     loading.current = true;
+    setSyncStatus("loading");
 
     void loadAppState({ data: {} })
       .then(({ state, version: loadedVersion }) => {
@@ -74,10 +77,12 @@ export function DurableSync() {
           }));
         }
         readyFor.current = userId;
+        setSyncStatus("ready");
       })
       .catch((error) => {
         if (activeUserId.current !== userId || loadRequest.current !== requestId) return;
         console.error("[primal-directive] durable load failed", error);
+        setSyncStatus("error");
         toast.error("Your saved workspace couldn't load. Refresh and try again before editing.");
       })
       .finally(() => {
@@ -147,5 +152,34 @@ export function DurableSync() {
     };
   }, [user, isPending]);
 
-  return null;
+  if (syncStatus === "ready") return null;
+
+  return (
+    <div
+      role="alert"
+      aria-live="assertive"
+      className="fixed inset-0 z-[100] grid place-items-center bg-bg/95 px-5 py-8 backdrop-blur-sm"
+    >
+      <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-card">
+        <div className="text-[11px] font-bold tracking-[0.22em] text-accent">PRIMAL DIRECTIVE</div>
+        <h2 className="mt-3 text-xl font-extrabold tracking-tight">
+          {syncStatus === "error" ? "Workspace not loaded" : "Loading your workspace"}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          {syncStatus === "error"
+            ? "Your saved data could not be verified. Editing is paused to protect your work. Check your connection and reload to try again."
+            : "We're retrieving your saved workspace before enabling edits."}
+        </p>
+        {syncStatus === "error" && (
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-bold text-white"
+          >
+            Reload workspace
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
