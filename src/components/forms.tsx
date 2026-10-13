@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
+import { parseLedgerAmount } from "@/lib/money-ledger";
 import { useMusician } from "@/lib/store";
 import {
   GIG_STATUS_LABEL,
@@ -379,9 +380,14 @@ function MoneyForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!label.trim()) return;
+        const parsedAmount = parseLedgerAmount(amount);
+        if (parsedAmount === null) {
+          toast.error("Enter a non-zero amount. Use a negative value for a refund or reversal.");
+          return;
+        }
         onSave({
           type,
-          amount: Number(amount) || 0,
+          amount: parsedAmount,
           label: label.trim(),
           date,
           gigId: gigId || undefined,
@@ -404,12 +410,12 @@ function MoneyForm({
         <Field label="Amount">
           <Input
             type="number"
-            min={0}
-            step="1"
+            step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required
           />
+          <p className="mt-1 text-[11px] leading-relaxed text-muted">Cents are supported. Use a negative amount for a refund or reversal; record member payouts in Gig Closeout.</p>
         </Field>
       </div>
       <Field label="Label">
