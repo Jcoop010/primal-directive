@@ -45,8 +45,10 @@ const allowPreviewOAuthFallback = process.env.NODE_ENV !== "production" && env("
 const grokClientId = env("GROK_AUTH_CLIENT_ID") ?? (allowPreviewOAuthFallback ? PREVIEW_CLIENT_ID : undefined);
 const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? (allowPreviewOAuthFallback ? PREVIEW_CLIENT_SECRET : undefined);
 
-export const authConfigured =
-  !authDisabled && Boolean(grokClientId && grokClientSecret);
+// Email/password is a first-party production auth path and does not depend
+// on the optional OAuth broker credentials. Keep OAuth gated separately.
+const oauthConfigured = Boolean(grokClientId && grokClientSecret);
+export const authConfigured = !authDisabled && (emailAndPasswordEnabled || oauthConfigured);
 
 const explicitBaseURL = env("BETTER_AUTH_URL");
 const originForHost = (value: string): string => {
@@ -125,7 +127,7 @@ const database = databaseUrl
 
 export const SESSION_TOKEN_COOKIE = "__Host-grok-auth.session_token";
 
-const grokOAuthPlugin = authConfigured
+const grokOAuthPlugin = !authDisabled && oauthConfigured
   ? genericOAuth({
       config: GROK_PROVIDERS.map(({ providerId, idp }) => ({
         providerId,
