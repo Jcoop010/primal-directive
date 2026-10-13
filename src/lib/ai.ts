@@ -124,7 +124,9 @@ function citationsFrom(body: Record<string, unknown>): string[] {
 }
 
 function shouldSearchWeb(message: string, history: { role: "user" | "ai"; text: string }[]): boolean {
-  // Use prior user turns to resolve short follow-ups without letting our own\n  // answers (which often mention venues or booking) trigger search forever.\n  const recent = history.filter((item) => item.role === "user").slice(-3).map((item) => item.text).join("\n");
+  // Use prior user turns to resolve short follow-ups without letting our own
+  // answers (which often mention venues or booking) trigger search forever.
+  const recent = history.filter((item) => item.role === "user").slice(-3).map((item) => item.text).join("\n");
   const query = `${message}\n${recent}`;
   return /\b(current|latest|today|tonight|this week|this month|recent|news|research|search|find|look up|venue|booker|promoter|contact|email|phone|availability|available|lineup|festival|tour routing|routing|market|competitor|competition|local draw|nearby|press|playlist|radio|ticket sales|ticket price|capacity|guarantee|booking|release date|trend|who books|where can we play|compare|best|top|recommend|3[- ]band bill|band bill|build.*bill|bands for|artists for|support bill|opening act|support act|similar bands|similar artists|comparable artists|spotify|instagram|youtube|tiktok|social media|streaming|charts)\b/i.test(query);
 }
