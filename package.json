@@ -27,7 +27,7 @@
     "preview:stop": "node scripts/preview.mjs stop",
     "typecheck": "tsc --noEmit",
     "check:auth": "node scripts/check-auth-invariant.mjs",
-    "test": "node scripts/run-tests.mjs && node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/lib/band-ops.test.ts src/lib/automation-policy.test.ts src/lib/tour-economics.test.ts src/lib/automation-runner.test.ts src/lib/merch-ops.test.ts src/lib/show-workflows.test.ts",
+    "test": "node scripts/run-tests.mjs && node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/lib/band-ops.test.ts src/lib/automation-policy.test.ts src/lib/tour-economics.test.ts src/lib/automation-runner.test.ts src/lib/merch-ops.test.ts src/lib/show-workflows.test.ts src/lib/local-advisor.test.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
