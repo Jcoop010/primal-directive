@@ -15,11 +15,17 @@ export function buildMerchLedgerEntries(
   }
   validAmount(sale.unitPrice, "Sale price");
   validAmount(sale.unitCost, "Unit cost");
+  const subtotal = sale.quantity * sale.unitPrice;
+  const discount = sale.discountAmount ?? 0;
+  validAmount(discount, "Discount");
+  validAmount(sale.taxAmount ?? 0, "Tax");
+  validAmount(sale.processingFee ?? 0, "Processing fee");
+  if (discount > subtotal) throw new Error("Discount cannot exceed the sale subtotal.");
   return [
     {
       id: ids.revenueId,
       type: "collected",
-      amount: Math.max(0, roundCents(sale.quantity * sale.unitPrice - (sale.discountAmount ?? 0))),
+      amount: roundCents(subtotal - discount),
       label: `Merch sale: ${productName} × ${sale.quantity}`,
       date: sale.date,
       gigId: sale.gigId,
