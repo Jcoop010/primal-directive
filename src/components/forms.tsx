@@ -235,6 +235,9 @@ function PersonForm({
   const [city, setCity] = useState(initial?.city ?? "");
   const [contact, setContact] = useState(initial?.contact ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [sharePercent, setSharePercent] = useState(
+    initial?.settlementSharePercent === undefined ? "" : String(initial.settlementSharePercent),
+  );
 
   return (
     <form
@@ -242,12 +245,18 @@ function PersonForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!name.trim()) return;
+        const parsedShare = sharePercent.trim() === "" ? undefined : Number(sharePercent);
+        if (parsedShare !== undefined && (!Number.isFinite(parsedShare) || parsedShare < 0 || parsedShare > 100)) {
+          toast.error("Settlement share must be between 0 and 100.");
+          return;
+        }
         onSave({
           name: name.trim(),
           role,
           city: city.trim(),
           contact: contact.trim(),
           notes: notes.trim(),
+          settlementSharePercent: role === "band" ? parsedShare : undefined,
         });
       }}
     >
@@ -271,6 +280,11 @@ function PersonForm({
           <Input value={city} onChange={(e) => setCity(e.target.value)} />
         </Field>
       </div>
+      {role === "band" ? (
+        <Field label="Show settlement share (%)">
+          <Input type="number" min="0" max="100" step="0.01" value={sharePercent} onChange={(e) => setSharePercent(e.target.value)} placeholder="e.g. 25" />
+        </Field>
+      ) : null}
       <Field label="Contact">
         <Input
           value={contact}
@@ -357,6 +371,7 @@ function MoneyForm({
   const [label, setLabel] = useState(initial?.label ?? "");
   const [date, setDate] = useState(initial?.date ?? todayIso());
   const [gigId, setGigId] = useState(initial?.gigId ?? "");
+  const selectableMoneyTypes = MONEY_TYPES.filter((item) => item !== "payout" || initial?.type === "payout");
 
   return (
     <form
@@ -379,7 +394,7 @@ function MoneyForm({
             value={type}
             onChange={(e) => setType(e.target.value as MoneyType)}
           >
-            {MONEY_TYPES.map((t) => (
+            {selectableMoneyTypes.map((t) => (
               <option key={t} value={t}>
                 {MONEY_TYPE_LABEL[t]}
               </option>

@@ -20,6 +20,7 @@ import { Route as PeopleRouteImport } from './routes/people'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as MerchRouteImport } from './routes/merch'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as SettlementRouteImport } from './routes/settlement'
 import { Route as ApiAuthRouteImport } from './routes/api.auth.$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +78,11 @@ const TasksRoute = TasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettlementRoute = SettlementRouteImport.update({
+  id: '/settlement',
+  path: '/settlement',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthRoute = ApiAuthRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/tour': typeof TourRoute
   '/merch': typeof MerchRoute
   '/tasks': typeof TasksRoute
+  '/settlement': typeof SettlementRoute
 }
 export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/tour': typeof TourRoute
   '/merch': typeof MerchRoute
   '/tasks': typeof TasksRoute
+  '/settlement': typeof SettlementRoute
 }
 export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthRoute
@@ -123,13 +131,14 @@ export interface FileRoutesById {
   '/tour': typeof TourRoute
   '/merch': typeof MerchRoute
   '/tasks': typeof TasksRoute
+  '/settlement': typeof SettlementRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  fullPaths: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/settlement' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
-  id: '__root__' | '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  to: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/settlement' | '/api/auth/$'
+  id: '__root__' | '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/settlement' | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -144,6 +153,7 @@ export interface RootRouteChildren {
   TourRoute: typeof TourRoute
   MerchRoute: typeof MerchRoute
   TasksRoute: typeof TasksRoute
+  SettlementRoute: typeof SettlementRoute
   ApiAuthRoute: typeof ApiAuthRoute
 }
 
@@ -226,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settlement': {
+      id: '/settlement'
+      path: '/settlement'
+      fullPath: '/settlement'
+      preLoaderRoute: typeof SettlementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -248,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   TourRoute: TourRoute,
   MerchRoute: MerchRoute,
   TasksRoute: TasksRoute,
+  SettlementRoute: SettlementRoute,
   ApiAuthRoute: ApiAuthRoute,
 }
 export const routeTree = rootRouteImport

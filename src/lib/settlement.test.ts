@@ -1,0 +1,30 @@
+import assert from "node:assert/strict";
+import testCase from "node:test";
+import { calculateSettlement } from "./settlement.ts";
+import type { MoneyEntry, Person } from "./types.ts";
+const members: Person[] = [
+  { id: "a", name: "Alex", role: "band", city: "", contact: "", notes: "", settlementSharePercent: 50 },
+  { id: "b", name: "Blair", role: "band", city: "", contact: "", notes: "", settlementSharePercent: 50 },
+];
+const entry = (id: string, type: MoneyEntry["type"], amount: number, extra: Partial<MoneyEntry> = {}): MoneyEntry => ({ id, type, amount, label: id, date: "2026-10-13", gigId: "show-1", ...extra });
+testCase("splits collected cash after linked operating costs", () => {
+  const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 1000), entry("fuel", "cost", 100), entry("owed", "outstanding", 500)]);
+  assert.equal(result.netPool, 900); assert.equal(result.sharesValid, true); assert.deepEqual(result.lines.map((line) => line.amountDue), [450, 450]); assert.equal(result.totalRemaining, 900);
+});
+testCase("tracks partial payouts separately from operating costs", () => {
+  const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 100), entry("payout-a", "payout", 20, { memberId: "a" })]);
+  assert.equal(result.lines[0].amountPaid, 20); assert.equal(result.lines[0].remaining, 30); assert.equal(result.operatingCosts, 0); assert.equal(result.totalPaid, 20);
+});
+testCase("refuses allocations when shares are missing or do not total 100 percent", () => {
+  const missing = calculateSettlement("show-1", [members[0], { id: "b", name: "Blair", role: "band", city: "", contact: "", notes: "" }], [entry("guarantee", "collected", 100)]);
+  assert.equal(missing.sharesValid, false); assert.deepEqual(missing.missingShareNames, ["Blair"]); assert.equal(missing.totalRemaining, 0);
+  const invalid = calculateSettlement("show-1", members.map((person) => ({ ...person, settlementSharePercent: 40 })), [entry("guarantee", "collected", 100)]);
+  assert.equal(invalid.sharesValid, false);
+});
+testCase("never allocates a negative pool and preserves cent totals", () => {
+  const splitMembers: Person[] = [{ ...members[0], settlementSharePercent: 33.33 }, { ...members[1], settlementSharePercent: 33.33 }, { id: "c", name: "Casey", role: "band", city: "", contact: "", notes: "", settlementSharePercent: 33.34 }];
+  const result = calculateSettlement("show-1", splitMembers, [entry("guarantee", "collected", 10), entry("cost", "cost", 25)]);
+  assert.equal(result.netPool, 0); assert.equal(result.totalRemaining, 0);
+  const positive = calculateSettlement("show-1", splitMembers, [entry("guarantee", "collected", 10)]);
+  assert.equal(positive.lines.reduce((sum, line) => sum + line.amountDue, 0), 10);
+});
