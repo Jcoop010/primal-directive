@@ -4,7 +4,7 @@ import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
 import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
-import { hasRecordedPayouts } from "@/lib/contact-integrity";
+import { changesPayoutIdentity, hasRecordedPayouts } from "@/lib/contact-integrity";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -176,7 +176,7 @@ export const useMusician = create<State & Actions>()(
         let blocked = false;
         set((s) => {
           const current = s.people.find((person) => person.id === id);
-          if (current && patch.role !== undefined && patch.role !== current.role && hasRecordedPayouts(id, s.money)) {
+          if (current && changesPayoutIdentity(id, current, patch, s.money)) {
             blocked = true;
             return s;
           }
