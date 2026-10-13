@@ -415,7 +415,7 @@ function MoneyForm({
             onChange={(e) => setAmount(e.target.value)}
             required
           />
-          <p className="mt-1 text-[11px] leading-relaxed text-muted">Cents are supported. Enter a negative amount to record a refund or reversal.</p>
+          <p className="mt-1 text-[11px] leading-relaxed text-muted">Cents are supported. Use a negative amount for a refund or reversal; record member payouts in Gig Closeout.</p>
         </Field>
       </div>
       <Field label="Label">
