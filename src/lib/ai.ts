@@ -312,17 +312,65 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-    const body = (await res.json()) as Record<string, unknown>;
-    const choices = body.choices as
-      | Array<{ message?: { content?: string } }>
-      | undefined;
-    const raw = choices?.[0]?.message?.content ?? "";
-    const parsed = extractJson(raw);
-    const safe = parsed ? AiJson.safeParse(parsed) : null;
+    let body = (await res.json()) as Record<string, unknown>;
+    const readSafeAnswer = (value: Record<string, unknown>) => {
+      const choices = value.choices as
+        | Array<{ message?: { content?: string } }>
+        | undefined;
+      const raw = choices?.[0]?.message?.content ?? "";
+      const parsed = extractJson(raw);
+      return { raw, safe: parsed ? AiJson.safeParse(parsed) : null };
+    };
+    let { safe } = readSafeAnswer(body);
+
+    // Providers occasionally return truncated or non-JSON text despite HTTP 200.
+    // Retry once with a compact, JSON-only request and no live search; if xAI's
+    // format fails, use the already-configured Groq key before falling back.
+    if (!safe?.success) {
+      const retryProvider: "xai" | "groq" =
+        activeProvider === "xai" && groqKey ? "groq" : activeProvider;
+      const retryKey = retryProvider === "groq" ? groqKey || apiKey : apiKey;
+      console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
+      try {
+        const retry = await complete({
+          apiKey: retryKey,
+          messages: [
+            ...messages,
+            {
+              role: "system",
+              content: "Your previous response could not be parsed as the required JSON schema. Retry now. Return exactly one valid JSON object matching the system OUTPUT CONTRACT, with keys answer, citations, gigs, people, moves. No markdown fences or extra text. Use empty arrays where evidence is unavailable. Do not claim live research; current external facts must be marked unverified."
+            }
+          ],
+          search: false,
+          provider: retryProvider,
+        });
+        if (retry.ok) {
+          const retryBody = (await retry.json()) as Record<string, unknown>;
+          const retryParsed = readSafeAnswer(retryBody);
+          if (retryParsed.safe?.success) {
+            body = retryBody;
+            safe = retryParsed.safe;
+            activeProvider = retryProvider;
+            searchUsed = false;
+          }
+        }
+      } catch {
+        // The local workspace fallback below remains available if retry fails.
+      }
+    }
+
+    if (!safe?.success) {
+      const local = fallback();
+      return {
+        ...local,
+        source: "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
+        answer: "The AI provider responded, but its answer was not usable. I retried once with a stricter JSON-only request and without live search; that retry did not produce a valid answer either. I’m using conservative workspace rules instead. Live research was not verified.\n\n" + local.answer,
+      };
+    }
 
     const citations = normalizeCitationUrls([
-      ...((activeProvider === "xai" || (activeProvider === "groq" && searchUsed)) ? citationsFrom(body) : []),
-      ...(activeProvider === "groq" && searchUsed && safe?.success ? safe.data.citations ?? [] : []),
+      ...(searchUsed && (activeProvider === "xai" || activeProvider === "groq") ? citationsFrom(body) : []),
+      ...(activeProvider === "groq" && searchUsed ? safe.data.citations ?? [] : []),
     ]);
     const source = citations.length
       ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
