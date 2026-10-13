@@ -470,7 +470,7 @@ export function buildAdvisorContext() {
     .join("\n");
   const peopleLines = s.people
     .slice(0, 12)
-    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
+    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | payout share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
     .join("\n");
   const gigNames = new Map(s.gigs.map((gig) => [gig.id, gig.name]));
   const moneyLedgerLines = [...s.money]
