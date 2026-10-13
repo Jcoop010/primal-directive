@@ -34,6 +34,12 @@ test("offline financial advice refuses to invent totals when the money summary i
   assert.doesNotMatch(result.answer, /\$\d/);
 });
 
+test("offline advisor refuses to rank gig profitability without gig-linked records", () => {
+  const result = localGrowthAdvice("Which gigs are most profitable?", financialContext);
+  assert.match(result.answer, /does not include a reconciled income-and-cost breakdown for each gig/i);
+  assert.match(result.answer, /can't reliably rank gig profitability/i);
+});
+
 test("offline booking advice never fabricates venues or people", () => {
   const result = localGrowthAdvice("Find me a booker and available venue", "ARTIST: Example Band\nGIG PIPELINE:\n(empty)");
   assert.equal(result.gigs.length, 0);
