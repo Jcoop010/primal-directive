@@ -37,6 +37,7 @@ const PersonOut = z.object({
 
 const AiJson = z.object({
   answer: z.string(),
+  citations: z.array(z.string()).optional(),
   gigs: z.array(GigOut).optional(),
   people: z.array(PersonOut).optional(),
   moves: z.array(z.string()).optional(),
@@ -79,6 +80,7 @@ OUTPUT CONTRACT:
 Return one valid JSON object and no markdown fences:
 {
   "answer": "Plain text with short paragraphs. Clearly separate verified facts, estimates, and recommendations where relevant.",
+  "citations": ["direct HTTPS URLs actually retrieved during this turn; empty if no web search was used"],
   "gigs": [{ "name", "venue", "city", "date", "fee", "conf", "reason", "status" }],
   "people": [{ "name", "role", "city", "detail", "reason" }],
   "moves": ["short, concrete next action"]
@@ -121,6 +123,12 @@ function citationsFrom(body: Record<string, unknown>): string[] {
   return normalizeCitationUrls(bags);
 }
 
+function shouldSearchWeb(message: string, history: { role: "user" | "ai"; text: string }[]): boolean {
+  const recent = history.slice(-3).map((item) => item.text).join("\n");
+  const query = `${message}\n${recent}`;
+  return /\b(current|latest|today|tonight|this week|this month|recent|news|research|search|find|look up|venue|booker|promoter|contact|email|phone|availability|available|lineup|festival|tour routing|routing|market|competitor|competition|local draw|nearby|press|playlist|radio|ticket sales|ticket price|capacity|guarantee|booking|release date|trend|who books|where can we play)\b/i.test(query);
+}
+
 async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
@@ -142,6 +150,11 @@ async function complete(args: {
       max_search_results: 8,
       sources: [{ type: "web" }, { type: "news" }],
     };
+  }
+  // GPT-OSS 120B supports Groq's built-in browser_search tool. Enable it only
+  // when current external evidence can materially improve the answer.
+  if (args.search && args.provider === "groq") {
+    body.tools = [{ type: "browser_search" }];
   }
   const endpoint = args.provider === "groq"
     ? "https://api.groq.com/openai/v1/chat/completions"
@@ -167,6 +180,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const groqKey = process.env.GROQ_API_KEY;
     const provider: "xai" | "groq" | null = xaiKey ? "xai" : groqKey ? "groq" : null;
     const apiKey = provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
+    const searchRequested = shouldSearchWeb(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
@@ -196,9 +210,13 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     const messages = [
       { role: "system", content: SYSTEM },
-      ...(provider === "groq" ? [{
+      ...(provider === "groq" && !searchRequested ? [{
         role: "system",
-        content: "PROVIDER LIMITATION: This request uses Groq without a web-search tool. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
+        content: "PROVIDER LIMITATION: No browser search was enabled for this turn. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
+      }] : []),
+      ...(provider === "groq" && searchRequested ? [{
+        role: "system",
+        content: "BROWSER SEARCH ENABLED: Use the built-in browser_search tool for current external claims. Include direct HTTPS URLs in the citations array only when they were actually returned by the search results. Never invent a source, contact, event, date, availability, guarantee, or statistic. If search results do not verify a detail, say so plainly."
       }] : []),
       {
         role: "system",
@@ -215,7 +233,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let res: Response | null = null;
 
     try {
-      res = await complete({ apiKey, messages, search: provider === "xai", provider });
+      res = await complete({ apiKey, messages, search: searchRequested, provider });
       if (!res.ok && provider === "xai") {
         res = await complete({ apiKey, messages, search: false, provider });
       }
@@ -234,10 +252,12 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
             ...messages,
             {
               role: "system",
-              content: "PROVIDER LIMITATION: This request uses Groq without a web-search tool. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
+              content: searchRequested
+                ? "BROWSER SEARCH ENABLED: Use the built-in browser_search tool for current external claims. Include direct HTTPS URLs in the citations array only when they were actually returned by the search results. Never invent sources or unverified booking facts."
+                : "PROVIDER LIMITATION: No browser search was enabled for this turn. Do not claim to have searched the web or invent source URLs. Clearly label current external facts as unverified."
             }
           ],
-          search: false,
+          search: searchRequested,
           provider: "groq",
         });
       } catch {
@@ -262,12 +282,17 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const parsed = extractJson(raw);
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
-    const citations = activeProvider === "xai" ? citationsFrom(body) : [];
+    const citations = normalizeCitationUrls([
+      ...((activeProvider === "xai" || (activeProvider === "groq" && searchRequested)) ? citationsFrom(body) : []),
+      ...(activeProvider === "groq" && searchRequested && safe?.success ? safe.data.citations ?? [] : []),
+    ]);
     const source = citations.length
-      ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
-      : activeProvider === "groq"
-        ? "GROQ AI — NO LIVE WEB SOURCES; CURRENT FACTS NOT VERIFIED"
-        : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
+      ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
+      : activeProvider === "groq" && searchRequested
+        ? "GROQ AI — SEARCH REQUESTED; NO SOURCE URLS RETURNED"
+        : activeProvider === "groq"
+          ? "GROQ AI — NO LIVE WEB SEARCH; CURRENT FACTS NOT VERIFIED"
+          : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
