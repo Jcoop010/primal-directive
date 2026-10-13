@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { adjustMerchInventory, buildMerchLedgerEntries, recordMerchOrder, recordMerchSale, refundMerchOrder, restockMerch, summarizeMerch } from "./merch-ops.ts";
+import { adjustMerchInventory, buildMerchLedgerEntries, isSourceManagedMoneyEntry, recordMerchOrder, recordMerchSale, refundMerchOrder, restockMerch, summarizeMerch } from "./merch-ops.ts";
 import type { MerchOrder, MerchProduct, MerchSale } from "./types.ts";
 
 const products: MerchProduct[] = [
@@ -16,6 +16,7 @@ test("records both merch revenue and cost of goods against the same show", () =>
   const entries = buildMerchLedgerEntries(sale, "Logo Tee", {
     revenueId: "revenue-1",
     costId: "cost-1",
+    sourceSaleId: "sale-1",
   });
   assert.equal(entries.length, 2);
   assert.deepEqual(entries.map((entry) => [entry.type, entry.amount]), [
@@ -24,6 +25,14 @@ test("records both merch revenue and cost of goods against the same show", () =>
   ]);
   assert.equal(entries[0]?.gigId, "show-1");
   assert.equal(entries[1]?.gigId, "show-1");
+  assert.ok(entries.every((entry) => entry.sourceSaleId === "sale-1"));
+  assert.ok(entries.every(isSourceManagedMoneyEntry));
+});
+
+test("identifies source-managed merch ledger entries without blocking ordinary money entries", () => {
+  assert.equal(isSourceManagedMoneyEntry({ sourceOrderId: "order-1" }), true);
+  assert.equal(isSourceManagedMoneyEntry({ sourceSaleId: "sale-1" }), true);
+  assert.equal(isSourceManagedMoneyEntry({}), false);
 });
 
 test("rejects invalid merch ledger identities and amounts", () => {
