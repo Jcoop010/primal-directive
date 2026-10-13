@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { localGrowthAdvice } from "@/lib/local-advisor";
+import { normalizeCitationUrls } from "@/lib/ai-citations";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
 import { GIG_STATUSES, PERSON_ROLES } from "@/lib/types";
 
@@ -113,15 +114,7 @@ function citationsFrom(body: Record<string, unknown>): string[] {
   const choices = body.choices as Array<{ message?: { citations?: unknown } }> | undefined;
   const msgCites = choices?.[0]?.message?.citations;
   if (Array.isArray(msgCites)) bags.push(...msgCites);
-  const urls: string[] = [];
-  for (const item of bags) {
-    if (typeof item === "string" && item.startsWith("http")) urls.push(item);
-    else if (item && typeof item === "object" && "url" in item) {
-      const u = (item as { url: unknown }).url;
-      if (typeof u === "string") urls.push(u);
-    }
-  }
-  return [...new Set(urls)].slice(0, 6);
+  return normalizeCitationUrls(bags);
 }
 
 async function complete(args: {
