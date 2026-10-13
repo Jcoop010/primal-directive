@@ -22,7 +22,7 @@ test("offline financial advice reports only the app-provided totals and labels l
   assert.match(result.answer, /Collected: \$1,200\.00/);
   assert.match(result.answer, /Outstanding: \$300\.00/);
   assert.match(result.answer, /Recorded costs: \$450\.00/);
-  assert.match(result.answer, /Cash-based difference \\(collected minus recorded costs\\): \\$750\\.00/);
+  assert.match(result.answer, /Cash-based difference \(collected minus recorded costs\): \$750\.00/);
   assert.match(result.answer, /not independently verified against bank statements/i);
   assert.match(result.answer, /outstanding amounts are not collected cash/i);
 });
@@ -30,8 +30,8 @@ test("offline financial advice reports only the app-provided totals and labels l
 test("offline advisor flags a profit total that conflicts with collected minus recorded costs", () => {
   const context = financialContext.replace("profit 750", "profit 900");
   const result = localGrowthAdvice("Give me our financial summary", context);
-  assert.match(result.answer, /Cash-based difference \\(collected minus recorded costs\\): \\$750\\.00/);
-  assert.match(result.answer, /App-reported profit: \\$900\\.00/);
+  assert.match(result.answer, /Cash-based difference \(collected minus recorded costs\): \$750\.00/);
+  assert.match(result.answer, /App-reported profit: \$900\.00/);
   assert.match(result.answer, /does not match collected minus recorded costs/i);
   assert.match(result.answer, /not necessarily accounting profit or taxable income/i);
 });
