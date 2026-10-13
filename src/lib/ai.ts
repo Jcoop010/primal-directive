@@ -241,6 +241,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     ];
 
     let activeProvider = provider;
+    let searchUsed = searchRequested;
     let res: Response | null = null;
 
     try {
@@ -276,12 +277,38 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       }
     }
 
+    // A live-search request can be rejected even when ordinary chat works.
+    // Retry once without search so the user still gets model reasoning, while
+    // explicitly disabling any claim of live verification.
+    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && res?.status === 400) {
+      console.warn("[advisor] Groq rejected browser search (HTTP 400); retrying without live search.");
+      searchUsed = false;
+      try {
+        res = await complete({
+          apiKey: groqKey || apiKey,
+          messages: [
+            ...messages,
+            {
+              role: "system",
+              content: "The live browser-search request failed. Answer using only supplied workspace context and general strategy. Do not claim to have searched the web, do not invent source URLs, and clearly label current venue/contact/event facts as unverified."
+            }
+          ],
+          search: false,
+          provider: "groq",
+        });
+      } catch {
+        res = null;
+      }
+    }
+
     if (!res?.ok) {
       const local = fallback();
+      const failure = res ? `HTTP ${res.status}` : "network error or timeout";
+      console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account limits; never log credentials.`);
       return {
         ...local,
-        source: "LOCAL WORKSPACE FALLBACK — AI PROVIDER UNAVAILABLE",
-        answer: `The AI provider did not return a usable response, so I’m using conservative workspace rules for this turn. I can still summarize recorded figures and prioritize saved items, but this fallback cannot replace deeper model reasoning or live research.\n\n${local.answer}`,
+        source: `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
+        answer: `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.\\n\\n${local.answer}`,
       };
     }
 
@@ -294,12 +321,12 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
     const citations = normalizeCitationUrls([
-      ...((activeProvider === "xai" || (activeProvider === "groq" && searchRequested)) ? citationsFrom(body) : []),
-      ...(activeProvider === "groq" && searchRequested && safe?.success ? safe.data.citations ?? [] : []),
+      ...((activeProvider === "xai" || (activeProvider === "groq" && searchUsed)) ? citationsFrom(body) : []),
+      ...(activeProvider === "groq" && searchUsed && safe?.success ? safe.data.citations ?? [] : []),
     ]);
     const source = citations.length
       ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
-      : activeProvider === "groq" && searchRequested
+      : activeProvider === "groq" && searchUsed
         ? "GROQ AI — SEARCH REQUESTED; NO SOURCE URLS RETURNED"
         : activeProvider === "groq"
           ? "GROQ AI — NO LIVE WEB SEARCH; CURRENT FACTS NOT VERIFIED"
