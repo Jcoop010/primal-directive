@@ -135,8 +135,13 @@ export function DurableSync() {
           .catch((error) => {
             console.error("[primal-directive] durable save failed", error);
             if (activeUserId.current === userId) {
+              const conflict = error instanceof Error && error.message.includes("Workspace changed in another session");
+              if (conflict) {
+                readyFor.current = null;
+                setSyncStatus("error");
+              }
               toast.error(
-                error instanceof Error && error.message.includes("Workspace changed in another session")
+                conflict
                   ? "This workspace changed in another session. Reload before making more edits."
                   : "Couldn't save your latest changes. Keep this tab open and retry.",
               );
