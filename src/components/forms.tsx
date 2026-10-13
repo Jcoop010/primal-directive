@@ -256,12 +256,12 @@ function PersonForm({
           city: city.trim(),
           contact: contact.trim(),
           notes: notes.trim(),
-          settlementSharePercent: role === "band" ? parsedShare : undefined,
+          settlementSharePercent: role === "member" || (role === "band" && initial?.settlementSharePercent !== undefined) ? parsedShare : undefined,
         });
       }}
     >
       <Field label="Name">
-        <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Band or person" />
+        <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Band, musician, or contact" />
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Role">
@@ -280,7 +280,7 @@ function PersonForm({
           <Input value={city} onChange={(e) => setCity(e.target.value)} />
         </Field>
       </div>
-      {role === "band" ? (
+      {role === "member" || (role === "band" && initial?.settlementSharePercent !== undefined) ? (
         <Field label="Show payout share (%)">
           <Input type="number" min="0" max="100" step="0.01" value={sharePercent} onChange={(e) => setSharePercent(e.target.value)} placeholder="e.g. 25" />
         </Field>

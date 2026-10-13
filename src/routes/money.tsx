@@ -53,9 +53,9 @@ function MoneyPage() {
         />
         <MetricCard label="Member payouts" value={money(payouts)} hint="distributions tracked separately" />
         <MetricCard
-          label="Profit"
+          label="Operating difference"
           value={money(profit)}
-          hint="collected minus costs"
+          hint="collected minus costs; before payouts"
         />
       </div>
 

@@ -22,6 +22,7 @@ export const GIG_STATUS_LABEL: Record<GigStatus, string> = {
 
 export const PERSON_ROLES = [
   "band",
+  "member",
   "booker",
   "promoter",
   "venue",
@@ -33,7 +34,8 @@ export const PERSON_ROLES = [
 export type PersonRole = (typeof PERSON_ROLES)[number];
 
 export const PERSON_ROLE_LABEL: Record<PersonRole, string> = {
-  band: "Band",
+  band: "Band / act",
+  member: "Band Member",
   booker: "Booker",
   promoter: "Promoter",
   venue: "Venue",
