@@ -44,7 +44,7 @@ function BoardPage() {
     ? tasks.filter((task) => task.gigId === nextShow.id)
     : [];
   const nextShowTaskPackCount = nextShowAllTasks.filter((task) =>
-    task.sourceKey.startsWith(`show:${nextShow?.id}:`),
+    typeof task.sourceKey === "string" && task.sourceKey.startsWith(`show:${nextShow.id}:`),
   ).length;
   const hasCompleteTaskPack = nextShowTaskPackCount >= 6;
   const nextShowTasks = nextShow
@@ -53,7 +53,7 @@ function BoardPage() {
         .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     : [];
   const latestCompletedShow = gigs
-    .filter((gig) => gig.status === "completed" && /^\\d{4}-\\d{2}-\\d{2}$/.test(gig.date))
+    .filter((gig) => gig.status === "completed" && /^\d{4}-\d{2}-\d{2}$/.test(gig.date))
     .sort((a, b) => b.date.localeCompare(a.date))[0];
   const settlementTask = latestCompletedShow
     ? tasks.find((task) => task.gigId === latestCompletedShow.id && task.sourceKey === `show:${latestCompletedShow.id}:reconcile:v1`)

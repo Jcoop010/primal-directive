@@ -66,7 +66,7 @@ function TasksPage() {
         <button type="button" onClick={generatedCount} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg">
           <RefreshCw className="size-4" /> Generate missing tasks
         </button>
-        <p className="mt-2 text-xs text-muted">Only saved, dated gigs marked Booked are used. Tasks are generated once per show and workflow step.</p>
+        <p className="mt-2 text-xs text-muted">Saved, dated gigs marked Booked or Completed can receive missing task steps. Tasks are generated once per show and workflow step.</p>
       </Card>
 
       <div className="flex gap-2">
