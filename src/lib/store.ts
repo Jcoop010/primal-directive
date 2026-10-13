@@ -450,6 +450,7 @@ export function buildAdvisorContext() {
   const collected = sumMoney(s.money, "collected");
   const outstanding = sumMoney(s.money, "outstanding");
   const costs = sumMoney(s.money, "cost");
+  const payouts = sumMoney(s.money, "payout");
   const profit = collected - costs;
   const merchSummary = summarizeMerch(s.merchProducts, s.merchSales, s.merchOrders, s.merchRefunds);
   const merchRevenue = merchSummary.netSales;
@@ -480,7 +481,8 @@ export function buildAdvisorContext() {
       const safeDate = (entry.date || "undated").replace(/[|\n\r]/g, " ").slice(0, 32);
       const safeGigName = (linkedGig || (entry.gigId ? "unknown" : "unlinked")).replace(/[|\n\r]/g, " ").slice(0, 80);
       const safeLabel = entry.label.replace(/[|\n\r]/g, " ").slice(0, 80);
-      return `- date:${safeDate} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${safeGigName} | label:${safeLabel}`;
+      const member = entry.memberId ? s.people.find((person) => person.id === entry.memberId)?.name || "unknown" : "none";
+      return `- date:${safeDate} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${safeGigName} | member:${member} | label:${safeLabel}`;
     })
     .join("\n");
   return `ARTIST: ${s.profile.artistName}
@@ -490,7 +492,7 @@ TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
-MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
+MONEY: collected ${collected}, outstanding ${outstanding}, operating costs ${costs}, operating difference ${profit}, member payouts ${payouts} (tracked separately from operating costs)
 MONEY LEDGER (up to 18 app records; linked gigs prioritized; may be incomplete; not bank-verified):
 ${moneyLedgerLines || "(empty)"}
 MERCH: recorded sales \${merchRevenue}, gross profit \${merchGrossProfit}, units sold \${merchUnitsSold}, low-stock items \${lowStock.length}
