@@ -4,6 +4,11 @@ export type SettlementLine = { memberId: string; memberName: string; sharePercen
 export type SettlementSummary = { collected: number; operatingCosts: number; netPool: number; shareTotal: number; sharesValid: boolean; missingShareNames: string[]; lines: SettlementLine[]; totalPaid: number; totalRemaining: number };
 function cents(value: number) { return Math.round((value + Number.EPSILON) * 100) / 100; }
 
+/** New contacts use the explicit member role; retain legacy band contacts only when a payout share was deliberately configured. */
+export function isPayoutMember(person: Pick<Person, "role" | "settlementSharePercent">): boolean {
+  return person.role === "member" || (person.role === "band" && person.settlementSharePercent !== undefined);
+}
+
 /** Cash-based show settlement. Only linked collected income and operating costs enter the pool. */
 export function calculateSettlement(gigId: string, bandMembers: readonly Person[], entries: readonly MoneyEntry[]): SettlementSummary {
   const linked = entries.filter((entry) => entry.gigId === gigId);
