@@ -1,12 +1,22 @@
 import assert from "node:assert/strict";
 import testCase from "node:test";
-import { calculateSettlement, isPayoutMember } from "./settlement.ts";
+import { calculateSettlement, isPayoutMember, parsePayoutAmount } from "./settlement.ts";
 import type { MoneyEntry, Person } from "./types.ts";
 const members: Person[] = [
   { id: "a", name: "Alex", role: "member", city: "", contact: "", notes: "", settlementSharePercent: 50 },
   { id: "b", name: "Blair", role: "member", city: "", contact: "", notes: "", settlementSharePercent: 50 },
 ];
 const entry = (id: string, type: MoneyEntry["type"], amount: number, extra: Partial<MoneyEntry> = {}): MoneyEntry => ({ id, type, amount, label: id, date: "2026-10-13", gigId: "show-1", ...extra });
+testCase("validates partial payouts to cents without allowing overpayment", () => {
+  assert.equal(parsePayoutAmount("12.34", 50), 12.34);
+  assert.equal(parsePayoutAmount("12.345", 50), 12.35);
+  assert.equal(parsePayoutAmount("50.01", 50), null);
+  assert.equal(parsePayoutAmount("0", 50), null);
+  assert.equal(parsePayoutAmount("-1", 50), null);
+  assert.equal(parsePayoutAmount(" ", 50), null);
+  assert.equal(parsePayoutAmount("1", 0), null);
+});
+
 testCase("only individual members or explicitly configured legacy contacts are payout eligible", () => {
   assert.equal(isPayoutMember({ role: "member", settlementSharePercent: undefined }), true);
   assert.equal(isPayoutMember({ role: "band", settlementSharePercent: undefined }), false);
