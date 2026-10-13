@@ -1,0 +1,21 @@
+import assert from "node:assert/strict";
+import testCase from "node:test";
+import { hasRecordedPayouts } from "./contact-integrity.ts";
+import type { MoneyEntry } from "./types.ts";
+
+const entry = (id: string, type: MoneyEntry["type"], memberId?: string): MoneyEntry => ({
+  id, type, amount: 25, label: id, date: "2026-10-13", memberId,
+});
+
+testCase("detects member payout history by exact contact id", () => {
+  assert.equal(hasRecordedPayouts("member-a", [entry("payout", "payout", "member-a")]), true);
+  assert.equal(hasRecordedPayouts("member-b", [entry("payout", "payout", "member-a")]), false);
+});
+
+testCase("does not treat income or operating costs as member payout history", () => {
+  assert.equal(hasRecordedPayouts("member-a", [
+    entry("income", "collected", "member-a"),
+    entry("cost", "cost", "member-a"),
+    entry("unlinked-payout", "payout"),
+  ]), false);
+});
