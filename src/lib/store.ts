@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
-import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch } from "@/lib/merch-ops";
+import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks } from "@/lib/show-workflows";
 import type {
   ArtistProfile,
@@ -446,9 +446,10 @@ export function buildAdvisorContext() {
   const outstanding = sumMoney(s.money, "outstanding");
   const costs = sumMoney(s.money, "cost");
   const profit = collected - costs;
-  const merchRevenue = s.merchSales.reduce((sum, sale) => sum + sale.quantity * sale.unitPrice, 0);
-  const merchGrossProfit = s.merchSales.reduce((sum, sale) => sum + sale.quantity * (sale.unitPrice - sale.unitCost), 0);
-  const merchUnitsSold = s.merchSales.reduce((sum, sale) => sum + sale.quantity, 0);
+  const merchSummary = summarizeMerch(s.merchProducts, s.merchSales, s.merchOrders, s.merchRefunds);
+  const merchRevenue = merchSummary.netSales;
+  const merchGrossProfit = merchSummary.grossProfit;
+  const merchUnitsSold = merchSummary.unitsSold;
   const lowStock = s.merchProducts.filter((product) => product.active && product.stockOnHand <= product.reorderAt);
   const merchLines = s.merchProducts
     .slice(0, 15)
