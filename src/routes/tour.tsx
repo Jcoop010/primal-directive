@@ -32,7 +32,8 @@ function TourPage() {
       .map((gig) => {
         const costs = entries
           .filter((entry) => entry.gigId === gig.id && entry.type === "cost")
-          .reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? Math.max(0, entry.amount) : 0), 0);
+          .reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0);
+        const netRecordedCosts = Math.max(0, costs);
         return {
           id: gig.id,
           label: [gig.venue || gig.name, gig.city].filter(Boolean).join(" · "),
@@ -44,7 +45,7 @@ function TourPage() {
           lodgingCost: 0,
           crewCost: 0,
           productionCost: 0,
-          otherCosts: costs,
+          otherCosts: netRecordedCosts,
           confidence: Math.min(1, Math.max(0, Number.isFinite(gig.conf) ? gig.conf : 0)),
         };
       });
