@@ -168,6 +168,7 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
     const costs = readAmount("costs");
     const reportedProfit = readAmount("profit");
     const memberPayouts = readAmount("member payouts");
+    const reservePercent = readAmount("reserve percent");
     const cashDifference = collected !== undefined && costs !== undefined ? collected - costs : undefined;
     const afterPayouts = cashDifference !== undefined && memberPayouts !== undefined ? cashDifference - memberPayouts : undefined;
     const money = (value: number) => new Intl.NumberFormat("en-US", {
@@ -182,7 +183,7 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
         : reportedProfit !== undefined
           ? `\n- App-reported profit: ${money(reportedProfit)}.`
           : "";
-      focus = `App-recorded financial summary (not independently verified against bank statements):\n- Collected: ${money(collected)}\n- Outstanding: ${money(outstanding)}\n- Recorded costs: ${money(costs)}\n- Cash-based difference (collected minus recorded costs): ${money(cashDifference!)}${profitNote}${memberPayouts !== undefined ? `\n- Member payouts (tracked separately from operating costs): ${money(memberPayouts)}` : ""}${afterPayouts !== undefined ? `\n- Difference after recorded payouts: ${money(afterPayouts)}` : ""}\n\nImportant limits: member payouts are distributions, not operating expenses; outstanding amounts are not collected cash; pipeline fees are not guaranteed revenue; and unrecorded transactions or missing costs can make the real result different. The cash-based difference is not necessarily accounting profit or taxable income, and the difference after payouts is not a verified bank balance. These totals describe the records supplied to the advisor, not a verified tax figure or bank balance.`;
+      focus = `App-recorded financial summary (not independently verified against bank statements):\n- Collected: ${money(collected)}\n- Outstanding: ${money(outstanding)}\n- Recorded costs: ${money(costs)}${reservePercent !== undefined ? `\n- Configured show reserve: ${reservePercent}% of each gig\'s pre-reserve cash pool.` : ""}\n- Cash-based difference (collected minus recorded costs): ${money(cashDifference!)}${profitNote}${memberPayouts !== undefined ? `\n- Member payouts (tracked separately from operating costs): ${money(memberPayouts)}` : ""}${afterPayouts !== undefined ? `\n- Difference after recorded payouts: ${money(afterPayouts)}` : ""}\n\nImportant limits: member payouts are distributions, not operating expenses; outstanding amounts are not collected cash; pipeline fees are not guaranteed revenue; and unrecorded transactions or missing costs can make the real result different. The cash-based difference is not necessarily accounting profit or taxable income, and the difference after payouts is not a verified bank balance. These totals describe the records supplied to the advisor, not a verified tax figure or bank balance.`;
       moves = [
         "Reconcile collected and outstanding amounts against invoices and payments received.",
         "Review uncategorized or missing expenses before relying on the profit figure.",
