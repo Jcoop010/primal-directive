@@ -32,7 +32,11 @@ type LinkedMoneyRecord = {
 };
 
 function parseLinkedMoneyLedger(context: string): LinkedMoneyRecord[] {
-  const section = context.match(/^MONEY LEDGER[^\n]*\n([\s\S]*?)(?=\n\n|$)/m)?.[1];
+  const header = context.match(/^MONEY LEDGER[^\n]*\n/m);
+  if (!header || header.index === undefined) return [];
+  const remainder = context.slice(header.index + header[0].length);
+  const blankLine = remainder.indexOf("\n\n");
+  const section = blankLine === -1 ? remainder : remainder.slice(0, blankLine);
   if (!section || section.trim() === "(empty)") return [];
   const records: LinkedMoneyRecord[] = [];
 
@@ -136,7 +140,7 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
       const ranking = comparable.length >= 2
         ? `Among the ${comparable.length} gigs with both collected income and costs recorded, the highest cash-based difference is ${comparable[0].name} at ${money(comparable[0].difference!)}. This ranks only the linked records supplied, not guaranteed future profit.`
         : "There are not enough gigs with both collected income and linked costs to produce a reliable ranking.";
-      focus = `Gig-linked cash summary from app records (not bank-verified):\\n${lines}\\n\\n${ranking}\\n\\nLimits: outstanding amounts are excluded from collected cash. The context includes only up to 18 ledger records and may be incomplete; unlinked expenses, missing entries, or later refunds can change the comparison. Cash-based difference is not necessarily accounting profit or taxable income.`;
+      focus = `Gig-linked cash summary from app records (not bank-verified):\n${lines}\n\n${ranking}\n\nLimits: outstanding amounts are excluded from collected cash. The context includes only up to 18 ledger records and may be incomplete; unlinked expenses, missing entries, or later refunds can change the comparison. Cash-based difference is not necessarily accounting profit or taxable income.`;
       moves = [
         "Reconcile each gig's collected payments against settlement and invoices.",
         "Link travel, lodging, production, merch cost, and other relevant costs to the correct gig.",
