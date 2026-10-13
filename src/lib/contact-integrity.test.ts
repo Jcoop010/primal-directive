@@ -12,6 +12,13 @@ testCase("detects member payout history by exact contact id", () => {
   assert.equal(hasRecordedPayouts("member-b", [entry("payout", "payout", "member-a")]), false);
 });
 
+testCase("keeps contacts protected when several partial payouts exist", () => {
+  assert.equal(hasRecordedPayouts("member-a", [
+    entry("first-part", "payout", "member-a"),
+    entry("second-part", "payout", "member-a"),
+  ]), true);
+});
+
 testCase("does not treat income or operating costs as member payout history", () => {
   assert.equal(hasRecordedPayouts("member-a", [
     entry("income", "collected", "member-a"),
