@@ -38,14 +38,8 @@ export function buildMerchLedgerEntries(
       date: sale.date,
       gigId: sale.gigId,
     },
-    ...((sale.taxAmount ?? 0) > 0 ? [{
-      id: `${ids.costId}:tax`,
-      type: "cost" as const,
-      amount: sale.taxAmount!,
-      label: `Merch sales tax payable: ${productName}`,
-      date: sale.date,
-      gigId: sale.gigId,
-    }] : []),
+    // Sales tax collected is a liability, not revenue or an operating expense.
+    // It remains visible in merch reporting and is intentionally excluded from the money ledger's profit calculation.
     ...((sale.processingFee ?? 0) > 0 ? [{
       id: `${ids.costId}:fee`,
       type: "cost" as const,
@@ -209,8 +203,8 @@ export function refundMerchOrder(
   const ledgerEntries: MoneyEntry[] = [
     { id: input.ledgerIds[0]!, type: "collected", amount: -roundCents(order.subtotal - order.discountAmount), label: `Merch refund ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id },
   ];
-  if (order.taxAmount > 0) ledgerEntries.push({ id: input.ledgerIds[1]!, type: "cost", amount: -order.taxAmount, label: `Reverse merch tax ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id });
-  if (input.restock && cogs > 0) ledgerEntries.push({ id: input.ledgerIds[2]!, type: "cost", amount: -roundCents(cogs), label: `Reverse merch cost of goods ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id });
+  // Sales tax is tracked as tax collected, not as an operating expense; never reverse it through costs.
+  if (input.restock && cogs > 0) ledgerEntries.push({ id: input.ledgerIds[1]!, type: "cost", amount: -roundCents(cogs), label: `Reverse merch cost of goods ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id });
   const nextProducts = products.map((product) => {
     if (!input.restock) return product;
     const quantity = order.lines.filter((line) => line.productId === product.id).reduce((sum, line) => sum + line.quantity, 0);
