@@ -71,7 +71,7 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
     }).format(value);
 
     if (collected !== undefined && outstanding !== undefined && costs !== undefined && profit !== undefined) {
-      focus = `App-recorded financial summary (not independently verified against bank statements):\\n- Collected: ${money(collected)}\\n- Outstanding: ${money(outstanding)}\\n- Recorded costs: ${money(costs)}\\n- Recorded profit: ${money(profit)} (collected minus recorded costs, as calculated by the app).\\n\\nImportant limits: outstanding amounts are not collected cash; pipeline fees are not guaranteed revenue; and unrecorded transactions or missing costs can make the real result different. These totals describe the records supplied to the advisor, not a verified tax figure or bank balance.`;
+      focus = `App-recorded financial summary (not independently verified against bank statements):\n- Collected: ${money(collected)}\n- Outstanding: ${money(outstanding)}\n- Recorded costs: ${money(costs)}\n- Recorded profit: ${money(profit)} (collected minus recorded costs, as calculated by the app).\n\nImportant limits: outstanding amounts are not collected cash; pipeline fees are not guaranteed revenue; and unrecorded transactions or missing costs can make the real result different. These totals describe the records supplied to the advisor, not a verified tax figure or bank balance.`;
       moves = [
         "Reconcile collected and outstanding amounts against invoices and payments received.",
         "Review uncategorized or missing expenses before relying on the profit figure.",
