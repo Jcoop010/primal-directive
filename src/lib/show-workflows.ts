@@ -21,8 +21,18 @@ const TEMPLATES: readonly TaskTemplate[] = [
 export function buildShowTaskPack(gig: Gig, existing: readonly OperationalTask[], now = new Date()): Omit<OperationalTask, "id">[] {
   if (!gig.id.trim()) throw new Error("A saved gig ID is required to generate its task pack.");
   if (gig.status !== "booked" && gig.status !== "completed") return [];
-  const showDate = /^\d{4}-\d{2}-\d{2}$/.test(gig.date) ? new Date(Number(gig.date.slice(0, 4)), Number(gig.date.slice(5, 7)) - 1, Number(gig.date.slice(8, 10))) : null;
-  if (!showDate || !Number.isFinite(showDate.getTime())) return [];
+  const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(gig.date);
+  const year = dateParts ? Number(dateParts[1]) : 0;
+  const month = dateParts ? Number(dateParts[2]) : 0;
+  const day = dateParts ? Number(dateParts[3]) : 0;
+  const showDate = dateParts && year >= 1000 ? new Date(year, month - 1, day) : null;
+  if (
+    !showDate ||
+    !Number.isFinite(showDate.getTime()) ||
+    showDate.getFullYear() !== year ||
+    showDate.getMonth() !== month - 1 ||
+    showDate.getDate() !== day
+  ) return [];
   const existingKeys = new Set(existing.map((task) => task.sourceKey));
   return TEMPLATES.filter((template) => !existingKeys.has(`show:${gig.id}:${template.key}:v1`)).map((template) => ({
     title: `${gig.venue || gig.name}: ${template.title}`,

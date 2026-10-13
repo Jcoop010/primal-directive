@@ -147,9 +147,21 @@ export const useMusician = create<State & Actions>()(
       removeGig: (id) =>
         set((s) => ({
           gigs: s.gigs.filter((g) => g.id !== id),
-          money: s.money.map((m) =>
-            m.gigId === id ? { ...m, gigId: undefined } : m,
+          // Preserve financial and merch history, but detach it from a deleted show.
+          // Show-prep tasks are operational work tied to that show and should not linger orphaned.
+          money: s.money.map((entry) =>
+            entry.gigId === id ? { ...entry, gigId: undefined } : entry,
           ),
+          merchSales: s.merchSales.map((sale) =>
+            sale.gigId === id ? { ...sale, gigId: undefined } : sale,
+          ),
+          merchOrders: s.merchOrders.map((order) =>
+            order.gigId === id ? { ...order, gigId: undefined } : order,
+          ),
+          merchInventoryAdjustments: s.merchInventoryAdjustments.map((adjustment) =>
+            adjustment.gigId === id ? { ...adjustment, gigId: undefined } : adjustment,
+          ),
+          tasks: s.tasks.filter((task) => task.gigId !== id),
         })),
       addPerson: (person) => {
         const id = uid();

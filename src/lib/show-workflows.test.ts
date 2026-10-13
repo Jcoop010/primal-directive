@@ -21,6 +21,13 @@ test("does not generate task packs for unconfirmed opportunities or undated show
   assert.equal(buildShowTaskPack({ ...gig, date: "" }, []).length, 0);
 });
 
+test("rejects impossible or malformed calendar dates instead of rolling them into another month", () => {
+  for (const date of ["2026-02-30", "2026-13-01", "2026-04-31", "26-11-15", "0001-01-01"]) {
+    assert.equal(buildShowTaskPack({ ...gig, date }, []).length, 0, `should reject ${date}`);
+  }
+  assert.equal(buildShowTaskPack({ ...gig, date: "2028-02-29" }, []).length, 6);
+});
+
 test("is idempotent and preserves existing completed tasks", () => {
   const first = buildShowTaskPack(gig, [], new Date("2026-10-01T12:00:00.000Z"));
   const existing = first.map((task, index) => ({ ...task, id: `task-${index}`, status: index === 0 ? "done" as const : task.status }));
