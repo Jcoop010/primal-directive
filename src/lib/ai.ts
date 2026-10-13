@@ -298,10 +298,6 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-      // Never show malformed or schema-invalid model output as if it were a vetted answer.
-      return fallback();
-    } catch {
-      // Network failures, invalid JSON, and provider-side response changes must not crash the advisor.
-      return fallback();
-    }
+    // Never show malformed or schema-invalid model output as if it were a vetted answer.
+    return fallback();
   });
