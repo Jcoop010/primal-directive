@@ -250,7 +250,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "LOCAL WORKSPACE FALLBACK — AI PROVIDER UNAVAILABLE",
-        answer: `The AI provider did not return a usable response, so I’m using conservative workspace rules for this turn. I can still summarize recorded figures and prioritize saved items, but this fallback cannot replace deeper model reasoning or live research.\\n\\n${local.answer}`,
+        answer: `The AI provider did not return a usable response, so I’m using conservative workspace rules for this turn. I can still summarize recorded figures and prioritize saved items, but this fallback cannot replace deeper model reasoning or live research.\n\n${local.answer}`,
       };
     }
 
