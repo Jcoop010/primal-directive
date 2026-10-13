@@ -476,7 +476,7 @@ export function buildAdvisorContext() {
     .slice(0, 18)
     .map((entry) => {
       const linkedGig = entry.gigId ? gigNames.get(entry.gigId) : undefined;
-      const safeLabel = entry.label.replace(/[|\\n\\r]/g, " ").slice(0, 80);
+      const safeLabel = entry.label.replace(/[|\n\r]/g, " ").slice(0, 80);
       return `- date:${entry.date || "undated"} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${linkedGig || (entry.gigId ? "unknown" : "unlinked")} | label:${safeLabel}`;
     })
     .join("\n");
