@@ -490,9 +490,9 @@ TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
-MONEY: collected \${collected}, outstanding \${outstanding}, costs \${costs}, profit \${profit}
+MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
 MONEY LEDGER (up to 18 app records; linked gigs prioritized; may be incomplete; not bank-verified):
-\${moneyLedgerLines || "(empty)"}
+${moneyLedgerLines || "(empty)"}
 MERCH: recorded sales \${merchRevenue}, gross profit \${merchGrossProfit}, units sold \${merchUnitsSold}, low-stock items \${lowStock.length}
 
 MERCH INVENTORY:
