@@ -14,6 +14,7 @@ const tone: Record<MoneyType, "live" | "warn" | "danger"> = {
   collected: "live",
   outstanding: "warn",
   cost: "danger",
+  payout: "warn",
 };
 
 function MoneyPage() {
@@ -22,6 +23,7 @@ function MoneyPage() {
   const collected = sumMoney(entries, "collected");
   const outstanding = sumMoney(entries, "outstanding");
   const costs = sumMoney(entries, "cost");
+  const payouts = sumMoney(entries, "payout");
   const profit = collected - costs;
 
   return (
@@ -33,13 +35,8 @@ function MoneyPage() {
           className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-fg"
           onClick={() =>
             downloadCsv("money.csv", [
-              ["type", "amount", "label", "date"],
-              ...entries.map((m) => [
-                m.type,
-                String(m.amount),
-                m.label,
-                m.date,
-              ]),
+              ["type", "amount", "label", "date", "gigId", "memberId"],
+              ...entries.map((m) => [m.type, String(m.amount), m.label, m.date, m.gigId ?? "", m.memberId ?? ""]),
             ])
           }
         >
@@ -54,6 +51,7 @@ function MoneyPage() {
           value={money(outstanding)}
           hint="still owed"
         />
+        <MetricCard label="Member payouts" value={money(payouts)} hint="distributions tracked separately" />
         <MetricCard
           label="Profit"
           value={money(profit)}
