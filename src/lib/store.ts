@@ -469,7 +469,19 @@ export function buildAdvisorContext() {
     .join("\n");
   const peopleLines = s.people
     .slice(0, 12)
-    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
+    .map((p) => \`- \${p.name} (\${p.role}) \${p.city}\${p.settlementSharePercent !== undefined ? \` | settlement share \${p.settlementSharePercent}%\` : ""} | \${p.notes}\`)
+    .join("\n");
+  const gigNames = new Map(s.gigs.map((gig) => [gig.id, gig.name]));
+  const moneyLedgerLines = [...s.money]
+    .sort((a, b) => Number(Boolean(b.gigId)) - Number(Boolean(a.gigId)))
+    .slice(0, 18)
+    .map((entry) => {
+      const linkedGig = entry.gigId ? gigNames.get(entry.gigId) : undefined;
+      const safeDate = (entry.date || "undated").replace(/[|\n\r]/g, " ").slice(0, 32);
+      const safeGigName = (linkedGig || (entry.gigId ? "unknown" : "unlinked")).replace(/[|\n\r]/g, " ").slice(0, 80);
+      const safeLabel = entry.label.replace(/[|\n\r]/g, " ").slice(0, 80);
+      return \`- date:\${safeDate} | type:\${entry.type} | amount:\${Number(entry.amount)} | gigId:\${entry.gigId || "none"} | gig:\${safeGigName} | label:\${safeLabel}\`;
+    })
     .join("\n");
   return `ARTIST: ${s.profile.artistName}
 HOME: ${s.profile.city}
@@ -478,8 +490,10 @@ TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
-MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
-MERCH: recorded sales ${merchRevenue}, gross profit ${merchGrossProfit}, units sold ${merchUnitsSold}, low-stock items ${lowStock.length}
+MONEY: collected \${collected}, outstanding \${outstanding}, costs \${costs}, profit \${profit}
+MONEY LEDGER (up to 18 app records; linked gigs prioritized; may be incomplete; not bank-verified):
+\${moneyLedgerLines || "(empty)"}
+MERCH: recorded sales \${merchRevenue}, gross profit \${merchGrossProfit}, units sold \${merchUnitsSold}, low-stock items \${lowStock.length}
 
 MERCH INVENTORY:
 ${merchLines || "(empty)"}
