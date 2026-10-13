@@ -4,7 +4,7 @@ import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
 import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
-import { hasRecordedPayouts } from "@/lib/contact-integrity";
+import { hasGigLinkedFinancialHistory, hasRecordedPayouts } from "@/lib/contact-integrity";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -148,25 +148,21 @@ export const useMusician = create<State & Actions>()(
             : [];
           return { gigs, tasks: [...tasks, ...existingTasks] };
         }),
-      removeGig: (id) =>
-        set((s) => ({
-          gigs: s.gigs.filter((g) => g.id !== id),
-          // Preserve financial and merch history, but detach it from a deleted show.
-          // Show-prep tasks are operational work tied to that show and should not linger orphaned.
-          money: s.money.map((entry) =>
-            entry.gigId === id ? { ...entry, gigId: undefined } : entry,
-          ),
-          merchSales: s.merchSales.map((sale) =>
-            sale.gigId === id ? { ...sale, gigId: undefined } : sale,
-          ),
-          merchOrders: s.merchOrders.map((order) =>
-            order.gigId === id ? { ...order, gigId: undefined } : order,
-          ),
-          merchInventoryAdjustments: s.merchInventoryAdjustments.map((adjustment) =>
-            adjustment.gigId === id ? { ...adjustment, gigId: undefined } : adjustment,
-          ),
-          tasks: s.tasks.filter((task) => task.gigId !== id),
-        })),
+      removeGig: (id) => {
+        let blocked = false;
+        set((s) => {
+          if (hasGigLinkedFinancialHistory(id, s.money, s.merchSales, s.merchOrders, s.merchInventoryAdjustments)) {
+            blocked = true;
+            return s;
+          }
+          return {
+            gigs: s.gigs.filter((g) => g.id !== id),
+            // Operational tasks are tied to the show and should not linger after deletion.
+            tasks: s.tasks.filter((task) => task.gigId !== id),
+          };
+        });
+        return !blocked;
+      },
       addPerson: (person) => {
         const id = uid();
         set((s) => ({ people: [{ ...person, id }, ...s.people] }));
