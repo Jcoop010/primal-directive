@@ -27,6 +27,16 @@ testCase("splits collected cash after linked operating costs", () => {
   const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 1000), entry("fuel", "cost", 100), entry("owed", "outstanding", 500)]);
   assert.equal(result.netPool, 900); assert.equal(result.sharesValid, true); assert.deepEqual(result.lines.map((line) => line.amountDue), [450, 450]); assert.equal(result.totalRemaining, 900);
 });
+testCase("payout reversals cannot create negative paid totals or inflate remaining allocation", () => {
+  const result = calculateSettlement("show-1", members, [
+    entry("guarantee", "collected", 100),
+    entry("payout-a", "payout", 10, { memberId: "a" }),
+    entry("reversal-a", "payout", -20, { memberId: "a" }),
+  ]);
+  assert.equal(result.lines[0].amountPaid, 0);
+  assert.equal(result.lines[0].remaining, result.lines[0].amountDue);
+});
+
 testCase("tracks partial payouts separately from operating costs", () => {
   const result = calculateSettlement("show-1", members, [entry("guarantee", "collected", 100), entry("payout-a", "payout", 20, { memberId: "a" })]);
   assert.equal(result.lines[0].amountPaid, 20); assert.equal(result.lines[0].remaining, 30); assert.equal(result.operatingCosts, 0); assert.equal(result.totalPaid, 20);
