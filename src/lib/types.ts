@@ -84,6 +84,7 @@ export type MoneyEntry = {
   date: string;
   gigId?: string;
   sourceOrderId?: string;
+  sourceSaleId?: string;
   memberId?: string;
 };
 

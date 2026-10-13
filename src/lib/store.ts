@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
-import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
+import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, isSourceManagedMoneyEntry, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
 import { changesPayoutIdentity, hasGigLinkedFinancialHistory, hasRecordedPayouts } from "@/lib/contact-integrity";
 import type {
@@ -55,8 +55,8 @@ type Actions = {
   updatePerson: (id: string, patch: Partial<Person>) => boolean;
   removePerson: (id: string) => boolean;
   addMoney: (entry: Omit<MoneyEntry, "id">) => string;
-  updateMoney: (id: string, patch: Partial<MoneyEntry>) => void;
-  removeMoney: (id: string) => void;
+  updateMoney: (id: string, patch: Partial<MoneyEntry>) => boolean;
+  removeMoney: (id: string) => boolean;
   addMerchProduct: (product: Omit<MerchProduct, "id">) => string;
   updateMerchProduct: (id: string, patch: Partial<MerchProduct>) => void;
   restockMerchProduct: (id: string, quantity: number) => void;
@@ -195,12 +195,30 @@ export const useMusician = create<State & Actions>()(
         set((s) => ({ money: [{ ...entry, id }, ...s.money] }));
         return id;
       },
-      updateMoney: (id, patch) =>
-        set((s) => ({
-          money: s.money.map((m) => (m.id === id ? { ...m, ...patch } : m)),
-        })),
-      removeMoney: (id) =>
-        set((s) => ({ money: s.money.filter((m) => m.id !== id) })),
+      updateMoney: (id, patch) => {
+        let blocked = false;
+        set((s) => {
+          const current = s.money.find((entry) => entry.id === id);
+          if (current && isSourceManagedMoneyEntry(current)) {
+            blocked = true;
+            return s;
+          }
+          return { money: s.money.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)) };
+        });
+        return !blocked;
+      },
+      removeMoney: (id) => {
+        let blocked = false;
+        set((s) => {
+          const current = s.money.find((entry) => entry.id === id);
+          if (current && isSourceManagedMoneyEntry(current)) {
+            blocked = true;
+            return s;
+          }
+          return { money: s.money.filter((entry) => entry.id !== id) };
+        });
+        return !blocked;
+      },
       addMerchProduct: (product) => {
         const id = uid();
         set((s) => ({
@@ -238,6 +256,7 @@ export const useMusician = create<State & Actions>()(
           const ledgerEntries = buildMerchLedgerEntries(sale, product.name, {
             revenueId: uid(),
             costId: uid(),
+            sourceSaleId: id,
           });
           return {
             merchProducts: result.products,
