@@ -48,7 +48,44 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
   let focus: string;
   let moves: string[];
 
-  if (/(contact|booker|promoter|email|phone|venue|room|gig|show|booking|available|availability|lineup|bill|tour|rout|date|guarantee|fee)/.test(q)) {
+  const asksMerch = /(merch|inventory|stock|shirt|product|sell-through)/.test(q);
+  const asksFinance = /(financial|finance|revenue|income|expense|cash flow|profit|settlement|payout|money|collected|outstanding|\bspent\b|\bearned\b|\bmade\b)/.test(q) && !asksMerch;
+
+  if (asksFinance) {
+    const moneyLine = context.match(/^MONEY:.*$/m)?.[0];
+    const readAmount = (label: string): number | undefined => {
+      if (!moneyLine) return undefined;
+      const match = moneyLine.match(new RegExp(`(?:^|[, ])${label}\\s+(-?\\d+(?:\\.\\d+)?)`, "i"));
+      if (!match) return undefined;
+      const value = Number(match[1]);
+      return Number.isFinite(value) ? value : undefined;
+    };
+    const collected = readAmount("collected");
+    const outstanding = readAmount("outstanding");
+    const costs = readAmount("costs");
+    const profit = readAmount("profit");
+    const money = (value: number) => new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 2,
+    }).format(value);
+
+    if (collected !== undefined && outstanding !== undefined && costs !== undefined && profit !== undefined) {
+      focus = `App-recorded financial summary (not independently verified against bank statements):\\n- Collected: ${money(collected)}\\n- Outstanding: ${money(outstanding)}\\n- Recorded costs: ${money(costs)}\\n- Recorded profit: ${money(profit)} (collected minus recorded costs, as calculated by the app).\\n\\nImportant limits: outstanding amounts are not collected cash; pipeline fees are not guaranteed revenue; and unrecorded transactions or missing costs can make the real result different. These totals describe the records supplied to the advisor, not a verified tax figure or bank balance.`;
+      moves = [
+        "Reconcile collected and outstanding amounts against invoices and payments received.",
+        "Review uncategorized or missing expenses before relying on the profit figure.",
+        "For a gig-level result, link each income and cost entry to the correct gig and reconcile after settlement.",
+      ];
+    } else {
+      focus = "I can't calculate a trustworthy financial summary because one or more required totals are missing from the context supplied to the advisor. I won't fill the gaps with guesses. Open the Money view, verify collected income, outstanding amounts, and recorded costs, then ask again.";
+      moves = [
+        "Open Money and verify the income and cost entries are recorded.",
+        "Mark amounts as collected only after payment is received; keep unpaid amounts outstanding.",
+        "Re-run the summary after the records are complete.",
+      ];
+    }
+  } else if (/(contact|booker|promoter|email|phone|venue|room|gig|show|booking|available|availability|lineup|bill|tour|rout|date|guarantee|fee)/.test(q)) {
     const profile = [
       artist ? `Artist: ${artist}.` : "",
       home ? `Home market: ${home}.` : "",
