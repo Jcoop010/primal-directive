@@ -151,7 +151,7 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
       moves = [
         "Open Money and link collected income entries to the gig they belong to.",
         "Link costs to the relevant gig; keep unpaid fees in outstanding rather than collected.",
-        "Reconcile each settlement before comparing shows.",
+        "Reconcile each gig closeout before comparing shows.",
       ];
     }
   } else if (asksFinance) {
@@ -167,7 +167,9 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
     const outstanding = readAmount("outstanding");
     const costs = readAmount("costs");
     const reportedProfit = readAmount("profit");
+    const memberPayouts = readAmount("member payouts");
     const cashDifference = collected !== undefined && costs !== undefined ? collected - costs : undefined;
+    const afterPayouts = cashDifference !== undefined && memberPayouts !== undefined ? cashDifference - memberPayouts : undefined;
     const money = (value: number) => new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -184,7 +186,7 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
       moves = [
         "Reconcile collected and outstanding amounts against invoices and payments received.",
         "Review uncategorized or missing expenses before relying on the profit figure.",
-        "For a gig-level result, link each income and cost entry to the correct gig and reconcile after settlement.",
+        "For a gig-level result, link each income and cost entry to the correct gig and reconcile its closeout.",
       ];
     } else {
       focus = "I can't calculate a trustworthy financial summary because one or more required totals are missing from the context supplied to the advisor. I won't fill the gaps with guesses. Open the Money view, verify collected income, outstanding amounts, and recorded costs, then ask again.";
