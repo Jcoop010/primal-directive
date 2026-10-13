@@ -22,7 +22,7 @@ import { renderInstallPage } from "./grok-pwa-plugin.mjs";
 const TEMPLATE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 test("injects before </head>", () => {
-  const out = injectGrokPwaHead("<html><head><title>x</title></head><body></body></html>");
+  const out = injectGrokPwaHead("<html><head><title>x</title></head><body></body></html>", { host: "demo.grok-sandbox.com" });
   assert.match(out, /rel="manifest"/);
   assert.match(out, /apple-touch-icon/);
   assert.match(out, /grok-app-builder\/extensions\.js/);
@@ -33,6 +33,7 @@ test("injects the extensions script without a project id", () => {
   const out = injectGrokPwaHead("<html><head></head></html>", {
     appName: "Demo",
     projectId: "",
+    host: "demo.grok-sandbox.com",
   });
   assert.match(out, /src="https:\/\/grok\.com\/grok-app-builder\/extensions\.js" defer/);
   assert.doesNotMatch(out, /grok-project-id/);
@@ -44,6 +45,7 @@ test("injects project id on the script and meta when provided", () => {
   const out = injectGrokPwaHead("<html><head></head></html>", {
     appName: "Demo",
     projectId: "proj-123",
+    host: "demo.grok-sandbox.com",
   });
   assert.match(out, /name="grok-project-id" content="proj-123"/);
   assert.match(out, /data-project-id="proj-123"/);
@@ -51,7 +53,7 @@ test("injects project id on the script and meta when provided", () => {
 });
 
 test("does not duplicate grok:app_id", () => {
-  const ctx = { appName: "Demo", projectId: "proj-123" };
+  const ctx = { appName: "Demo", projectId: "proj-123", host: "demo.grok-sandbox.com" };
   const once = injectGrokPwaHead("<html><head></head></html>", ctx);
   const twice = injectGrokPwaHead(once, ctx);
   assert.equal(once, twice);
@@ -76,6 +78,7 @@ test("injects x:creator tags when both creator values are set", () => {
     projectId: "",
     creator: "@alice",
     creatorId: "42",
+    host: "demo.grok-sandbox.com",
   });
   assert.match(out, /property="x:creator" content="@alice"/);
   assert.match(out, /property="x:creator:id" content="42"/);
@@ -94,7 +97,7 @@ test("escapes x:creator values", () => {
 });
 
 test("does not duplicate x:creator tags", () => {
-  const ctx = { appName: "Demo", projectId: "", creator: "@alice", creatorId: "42" };
+  const ctx = { appName: "Demo", projectId: "", creator: "@alice", creatorId: "42", host: "demo.grok-sandbox.com" };
   const once = injectGrokPwaHead("<html><head></head></html>", ctx);
   const twice = injectGrokPwaHead(once, ctx);
   assert.equal(once, twice);
@@ -381,7 +384,7 @@ test("streaming injector matches </HEAD> case-insensitively", () => {
 });
 
 test("does not duplicate the extensions script", () => {
-  const ctx = { appName: "Demo", projectId: "proj-123" };
+  const ctx = { appName: "Demo", projectId: "proj-123", host: "demo.grok-sandbox.com" };
   const once = injectGrokPwaHead("<html><head></head></html>", ctx);
   const twice = injectGrokPwaHead(once, ctx);
   assert.equal(once, twice);
@@ -504,3 +507,25 @@ test("vite plugin bakes og identity as a virtual module", () => {
   assert.match(plugin, /snapshotOgIdentity/);
 });
 
+
+test("standalone app documents do not load Grok platform extensions", () => {
+  const out = injectGrokPwaHead("<html><head></head></html>", {
+    host: "primal-directive.vercel.app",
+    projectId: "platform-project-id",
+    site: { title: "Primal Directive" },
+  });
+  assert.match(out, /apple-mobile-web-app-title" content="Primal Directive"/);
+  assert.match(out, /property="og:title" content="Primal Directive"/);
+  assert.doesNotMatch(out, /grok-app-builder\/extensions\.js|grok-project-id|grok:app_id/);
+});
+
+test("standalone app manifest uses the app's configured title", () => {
+  const manifest = JSON.parse(renderWebManifest("primal-directive.vercel.app", { title: "Primal Directive" }));
+  assert.equal(manifest.name, "Primal Directive");
+  assert.equal(manifest.short_name, "Primal Directive");
+});
+
+test("Grok sandbox remains eligible for platform extensions", () => {
+  const out = injectGrokPwaHead("<html><head></head></html>", { host: "demo.grok-sandbox.com", projectId: "" });
+  assert.match(out, /grok-app-builder\/extensions\.js/);
+});
