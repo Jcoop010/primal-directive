@@ -371,6 +371,7 @@ function MoneyForm({
   const [label, setLabel] = useState(initial?.label ?? "");
   const [date, setDate] = useState(initial?.date ?? todayIso());
   const [gigId, setGigId] = useState(initial?.gigId ?? "");
+  const selectableMoneyTypes = MONEY_TYPES.filter((item) => item !== "payout" || initial?.type === "payout");
 
   return (
     <form
@@ -393,7 +394,7 @@ function MoneyForm({
             value={type}
             onChange={(e) => setType(e.target.value as MoneyType)}
           >
-            {MONEY_TYPES.map((t) => (
+            {selectableMoneyTypes.map((t) => (
               <option key={t} value={t}>
                 {MONEY_TYPE_LABEL[t]}
               </option>
