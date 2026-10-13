@@ -459,7 +459,7 @@ export function buildAdvisorContext() {
   const merchLines = s.merchProducts
     .slice(0, 15)
     .map((product) => `- ${product.name} [${product.sku || "no SKU"}] | stock ${product.stockOnHand} | price ${product.price} | cost ${product.unitCost}${product.active && product.stockOnHand <= product.reorderAt ? " | REORDER" : ""}`)
-    .join("\\n");
+    .join("\n");
   const gigLines = s.gigs
     .slice(0, 12)
     .map(
@@ -469,16 +469,58 @@ export function buildAdvisorContext() {
     .join("\n");
   const peopleLines = s.people
     .slice(0, 12)
-    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
+    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | payout share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
     .join("\n");
-  return `ARTIST: ${s.profile.artistName}
+  const today = new Date().toISOString().slice(0, 10);
+  const bookedLines = s.gigs
+    .filter((gig) => gig.status === "booked" && gig.date && gig.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 8)
+    .map((gig) => `- ${gig.date} | ${gig.name} @ ${gig.venue}, ${gig.city} | fee ${gig.fee} | ${gig.notes}`)
+    .join("\n");
+  const openTasks = s.tasks
+    .filter((task) => task.status === "open")
+    .sort((a, b) => (a.dueDate || "9999-12-31").localeCompare(b.dueDate || "9999-12-31"))
+    .slice(0, 10)
+    .map((task) => {
+      const gig = s.gigs.find((item) => item.id === task.gigId);
+      const title = task.title.replace(/[|\n\r]/g, " ").slice(0, 100);
+      const description = task.description.replace(/[|\n\r]/g, " ").slice(0, 120);
+      return `- due:${task.dueDate || "unscheduled"} | ${task.status} | ${task.category} | ${title} | gig:${gig?.name || "general"} | ${description}`;
+    })
+    .join("\n");
+  const activePipeline = pipelineGigs(s.gigs);
+  const activePipelineValue = activePipeline.reduce((sum, gig) => sum + (Number(gig.fee) || 0), 0);
+  const activeWeightedValue = activePipeline.reduce((sum, gig) => sum + (Number(gig.fee) || 0) * Math.max(0, Math.min(1, Number(gig.conf) || 0)), 0);
+  const gigNames = new Map(s.gigs.map((gig) => [gig.id, gig.name]));
+  const moneyLedgerLines = [...s.money]
+    .sort((a, b) => Number(Boolean(b.gigId)) - Number(Boolean(a.gigId)))
+    .slice(0, 18)
+    .map((entry) => {
+      const linkedGig = entry.gigId ? gigNames.get(entry.gigId) : undefined;
+      const safeDate = (entry.date || "undated").replace(/[|\n\r]/g, " ").slice(0, 32);
+      const safeGigName = (linkedGig || (entry.gigId ? "unknown" : "unlinked")).replace(/[|\n\r]/g, " ").slice(0, 80);
+      const safeLabel = entry.label.replace(/[|\n\r]/g, " ").slice(0, 80);
+          return `- date:${safeDate} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${safeGigName} | label:${safeLabel}`;
+    })
+    .join("\n");
+  const context = `ARTIST: ${s.profile.artistName}
 HOME: ${s.profile.city}
 GENRE: ${s.profile.genre}
 TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
-MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
+PIPELINE SUMMARY: ${activePipeline.length} active records, unweighted listed fees ${activePipelineValue}, confidence-weighted listed value ${activeWeightedValue}. These are pipeline estimates, not booked or collected revenue.
+UPCOMING BOOKED SHOWS:
+${bookedLines || "(none recorded)"}
+
+OPEN OPERATIONAL TASKS (earliest due dates first; list may be incomplete):
+${openTasks || "(none recorded)"}
+
+MONEY: collected ${collected}, outstanding ${outstanding}, operating costs ${costs}, operating difference ${profit}
+MONEY LEDGER (up to 18 app records; linked gigs prioritized; may be incomplete; not bank-verified):
+${moneyLedgerLines || "(empty)"}
 MERCH: recorded sales ${merchRevenue}, gross profit ${merchGrossProfit}, units sold ${merchUnitsSold}, low-stock items ${lowStock.length}
 
 MERCH INVENTORY:
@@ -489,4 +531,7 @@ ${gigLines || "(empty)"}
 
 PEOPLE:
 ${peopleLines || "(empty)"}`;
+  if (context.length <= 15000) return context;
+  const trimmed = context.slice(0, 14800).replace(/\n[^\n]*$/, "");
+  return `${trimmed}\n[Some lower-priority workspace context was omitted to fit the Advisor request limit.]`;
 }
