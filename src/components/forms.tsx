@@ -530,6 +530,17 @@ export function ProfileDrawer() {
               />
             </Field>
           </div>
+          <Field label="Show reserve (%)">
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              step="0.01"
+              value={draft.reservePercent ?? 0}
+              onChange={(e) => setDraft({ ...draft, reservePercent: Number(e.target.value) || 0 })}
+            />
+            <p className="mt-1 text-[11px] leading-relaxed text-muted">Held from each show's recorded cash pool before member payouts. This is a band-fund allocation, not an expense or tax calculation.</p>
+          </Field>
           <Field label="Growth notes">
             <Textarea
               value={draft.notes}
