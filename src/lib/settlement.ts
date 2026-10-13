@@ -1,7 +1,7 @@
 import type { MoneyEntry, Person } from "./types";
 
 export type SettlementLine = { memberId: string; memberName: string; sharePercent: number | undefined; amountDue: number; amountPaid: number; remaining: number; overpaid: number };
-export type SettlementSummary = { collected: number; operatingCosts: number; netPool: number; shareTotal: number; sharesValid: boolean; missingShareNames: string[]; lines: SettlementLine[]; totalPaid: number; totalRemaining: number };
+export type SettlementSummary = { collected: number; operatingCosts: number; preReservePool: number; reservePercent: number; reserveAmount: number; netPool: number; shareTotal: number; sharesValid: boolean; missingShareNames: string[]; lines: SettlementLine[]; totalPaid: number; totalRemaining: number };
 function cents(value: number) { return Math.round((value + Number.EPSILON) * 100) / 100; }
 
 /** Validate and round a partial member payout against the remaining allocation. */
@@ -19,11 +19,14 @@ export function isPayoutMember(person: Pick<Person, "role" | "settlementSharePer
 }
 
 /** Cash-based show settlement. Only linked collected income and operating costs enter the pool. */
-export function calculateSettlement(gigId: string, bandMembers: readonly Person[], entries: readonly MoneyEntry[]): SettlementSummary {
+export function calculateSettlement(gigId: string, bandMembers: readonly Person[], entries: readonly MoneyEntry[], reservePercent = 0): SettlementSummary {
   const linked = entries.filter((entry) => entry.gigId === gigId);
   const collected = cents(linked.filter((entry) => entry.type === "collected").reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0));
   const operatingCosts = cents(linked.filter((entry) => entry.type === "cost").reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0));
-  const netPool = cents(Math.max(0, collected - operatingCosts));
+  const preReservePool = cents(Math.max(0, collected - operatingCosts));
+  const normalizedReservePercent = Number.isFinite(reservePercent) ? Math.min(100, Math.max(0, reservePercent)) : 0;
+  const reserveAmount = cents(preReservePool * normalizedReservePercent / 100);
+  const netPool = cents(Math.max(0, preReservePool - reserveAmount));
   const shareTotal = cents(bandMembers.reduce((sum, person) => sum + (person.settlementSharePercent ?? 0), 0));
   const missingShareNames = bandMembers.filter((person) => person.settlementSharePercent === undefined || !Number.isFinite(person.settlementSharePercent)).map((person) => person.name);
   const sharesValid = bandMembers.length > 0 && missingShareNames.length === 0 && bandMembers.every((person) => person.settlementSharePercent! >= 0 && person.settlementSharePercent! <= 100) && Math.abs(shareTotal - 100) < 0.011;
@@ -40,5 +43,5 @@ export function calculateSettlement(gigId: string, bandMembers: readonly Person[
     const overpaid = cents(Math.max(0, amountPaid - amountDue));
     return { memberId: person.id, memberName: person.name, sharePercent: share, amountDue, amountPaid, remaining, overpaid };
   });
-  return { collected, operatingCosts, netPool, shareTotal, sharesValid, missingShareNames, lines, totalPaid: cents(lines.reduce((sum, line) => sum + line.amountPaid, 0)), totalRemaining: cents(lines.reduce((sum, line) => sum + line.remaining, 0)) };
+  return { collected, operatingCosts, preReservePool, reservePercent: normalizedReservePercent, reserveAmount, netPool, shareTotal, sharesValid, missingShareNames, lines, totalPaid: cents(lines.reduce((sum, line) => sum + line.amountPaid, 0)), totalRemaining: cents(lines.reduce((sum, line) => sum + line.remaining, 0)) };
 }
