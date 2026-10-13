@@ -469,7 +469,7 @@ export function buildAdvisorContext() {
     .join("\n");
   const peopleLines = s.people
     .slice(0, 12)
-    .map((p) => \`- \${p.name} (\${p.role}) \${p.city}\${p.settlementSharePercent !== undefined ? \` | settlement share \${p.settlementSharePercent}%\` : ""} | \${p.notes}\`)
+    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
     .join("\n");
   const gigNames = new Map(s.gigs.map((gig) => [gig.id, gig.name]));
   const moneyLedgerLines = [...s.money]
@@ -480,7 +480,7 @@ export function buildAdvisorContext() {
       const safeDate = (entry.date || "undated").replace(/[|\n\r]/g, " ").slice(0, 32);
       const safeGigName = (linkedGig || (entry.gigId ? "unknown" : "unlinked")).replace(/[|\n\r]/g, " ").slice(0, 80);
       const safeLabel = entry.label.replace(/[|\n\r]/g, " ").slice(0, 80);
-      return \`- date:\${safeDate} | type:\${entry.type} | amount:\${Number(entry.amount)} | gigId:\${entry.gigId || "none"} | gig:\${safeGigName} | label:\${safeLabel}\`;
+      return `- date:${safeDate} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${safeGigName} | label:${safeLabel}`;
     })
     .join("\n");
   return `ARTIST: ${s.profile.artistName}
