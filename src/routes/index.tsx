@@ -50,14 +50,14 @@ function AdvisorPage() {
   async function send(text: string) {
     const q = text.trim();
     if (!q || busy) return;
+    const history = useMusician.getState().chat.slice(-8).map((m) => ({
+      role: m.role,
+      text: m.text,
+    }));
     setInput("");
     addUserMessage(q);
     setBusy(true);
     try {
-      const history = useMusician.getState().chat.slice(-8).map((m) => ({
-        role: m.role,
-        text: m.text,
-      }));
       const res = await askGrowthAdvisor({
         data: {
           message: q,
@@ -109,7 +109,7 @@ function AdvisorPage() {
               Clear
             </button>
             <span className="text-[10px] font-bold tracking-[0.12em] text-live">
-              {busy ? "SEARCHING" : "READY"}
+              {busy ? "THINKING" : "READY"}
             </span>
           </div>
         </div>
@@ -228,7 +228,7 @@ function AdvisorPage() {
           {busy ? (
             <div className="flex max-w-[88%] items-center gap-2 rounded-lg border border-line bg-surface-2 px-3.5 py-3 text-sm text-muted">
               <LoaderCircle className="size-4 animate-spin text-accent" />
-              Searching the live web…
+              Analyzing your workspace and weighing next steps…
             </div>
           ) : null}
         </div>
