@@ -35,7 +35,7 @@ export function calculateSettlement(gigId: string, bandMembers: readonly Person[
       amountDue = index === bandMembers.length - 1 ? cents(netPool - allocated) : cents(netPool * share / 100);
       allocated = cents(allocated + amountDue);
     }
-    const amountPaid = cents(linked.filter((entry) => entry.type === "payout" && entry.memberId === person.id).reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0));
+    const amountPaid = cents(Math.max(0, linked.filter((entry) => entry.type === "payout" && entry.memberId === person.id).reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0)));
     const remaining = cents(Math.max(0, amountDue - amountPaid));
     const overpaid = cents(Math.max(0, amountPaid - amountDue));
     return { memberId: person.id, memberName: person.name, sharePercent: share, amountDue, amountPaid, remaining, overpaid };
