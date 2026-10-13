@@ -20,7 +20,7 @@ function SettlementPage() {
   const selectedGig = completedGigs.find((gig) => gig.id === selectedGigId) ?? completedGigs[0];
   const bandMembers = people.filter((person) => person.role === "band");
   const summary = selectedGig ? calculateSettlement(selectedGig.id, bandMembers, entries) : null;
-  const paid = Boolean(summary?.sharesValid && summary.lines.every((line) => line.remaining === 0 && line.overpaid === 0));
+  const paid = Boolean(summary?.sharesValid && summary.netPool > 0 && summary.lines.every((line) => line.remaining === 0 && line.overpaid === 0));
 
   function recordPayout(memberId: string, memberName: string, amount: number) {
     if (!selectedGig || !summary?.sharesValid || amount <= 0) return;
@@ -59,7 +59,7 @@ function SettlementPage() {
       {summary?.lines.map((line) => <Card key={line.memberId} className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-bold">{line.memberName}</div><div className="mt-1 text-xs text-muted">{line.sharePercent === undefined ? "Share not set" : `${line.sharePercent}% share`}</div></div><div className="text-right"><div className="text-lg font-extrabold tabular">{money(line.amountDue)}</div><div className="text-[10px] uppercase tracking-wider text-muted">Allocation</div></div></div>
         <div className="grid grid-cols-2 gap-2 text-xs"><div className="rounded-lg bg-surface-2 p-3"><div className="text-muted">Paid</div><div className="mt-1 font-bold">{money(line.amountPaid)}</div></div><div className="rounded-lg bg-surface-2 p-3"><div className="text-muted">Remaining</div><div className="mt-1 font-bold">{money(line.remaining)}</div></div></div>
-        {line.overpaid > 0 ? <div className="text-xs text-danger">Recorded payouts exceed this allocation by {money(line.overpaid)}. Review the ledger before recording another payout.</div> : <button type="button" disabled={!summary?.sharesValid || line.remaining <= 0} onClick={() => recordPayout(line.memberId, line.memberName, line.remaining)} className={cn("flex h-10 w-full items-center justify-center gap-2 rounded-lg text-sm font-bold", line.remaining > 0 && summary?.sharesValid ? "bg-accent text-accent-fg" : "bg-surface-2 text-muted")}>{line.remaining > 0 ? `Record payout · ${money(line.remaining)}` : <><CheckCircle2 className="size-4" /> Fully paid</>}</button>}
+        {line.overpaid > 0 ? <div className="text-xs text-danger">Recorded payouts exceed this allocation by {money(line.overpaid)}. Review the ledger before recording another payout.</div> : <button type="button" disabled={!summary?.sharesValid || line.remaining <= 0} onClick={() => recordPayout(line.memberId, line.memberName, line.remaining)} className={cn("flex h-10 w-full items-center justify-center gap-2 rounded-lg text-sm font-bold", line.remaining > 0 && summary?.sharesValid ? "bg-accent text-accent-fg" : "bg-surface-2 text-muted")}>{line.remaining > 0 ? `Record payout · ${money(line.remaining)}` : line.amountDue === 0 ? "No payout due" : <><CheckCircle2 className="size-4" /> Fully paid</>}</button>}
       </Card>)}
       {paid ? <Card className="p-4"><div className="flex items-center gap-2 text-sm font-semibold"><CheckCircle2 className="size-4 text-live" /> All member allocations recorded as paid.</div><p className="mt-1 text-xs text-muted">This confirms entries in Primal Directive's ledger, not bank transfer completion.</p></Card> : null}
     </>}
