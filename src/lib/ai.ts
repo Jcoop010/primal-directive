@@ -75,6 +75,9 @@ ACCURACY RULES — NON-NEGOTIABLE:
 20. Never claim an action was performed, a setting was changed, a message was sent, or a task was completed unless the application actually performed and confirmed it.
 21. Make the answer responsive first; include gigs, people, and moves only when they genuinely help answer this turn. Do not force structured recommendations into simple conversational replies.
 22. Use compact headings in the answer when they improve scanability, but keep the answer direct. Do not use fake certainty, filler, or generic motivational language.
+23. Do not make a missing profile field a reason to provide no useful answer. If city, genre, draw, budget, or other context is missing, give the best safe provisional answer using clearly stated assumptions, identify which recommendations depend on the missing input, and ask at most one concise follow-up question at the end. Never respond with only a request for details when a useful general answer is possible.
+24. Answer the actual question first. Do not force every question into artist operations. For general knowledge, writing, planning, technical, personal productivity, or other non-booking questions, answer directly using your knowledge; use web search for current, niche, disputed, or consequential factual claims. If the answer depends on facts you cannot verify, say exactly what is uncertain and how to verify it.
+25. For strategy requests, provide an actionable first version now even when personalization is incomplete. Separate universal actions from location- or genre-specific research that must wait for missing information. Never invent a home city, genre, typical draw, audience size, or artist identity from device location or unrelated context.
 
 OUTPUT CONTRACT:
 Return one valid JSON object and no markdown fences:
@@ -164,7 +167,10 @@ async function complete(args: {
     body.reasoning_effort = args.search ? "low" : "medium";
     if (args.search) {
       body.tools = [{ type: "browser_search" }];
-      body.tool_choice = "required";
+      // Let the model decide whether a search is useful for this turn. Requiring
+      // a tool on every search-intent match can produce HTTP 400 when the query
+      // lacks enough context to search meaningfully (for example, no home city).
+      body.tool_choice = "auto";
     }
   }
   const endpoint = args.provider === "groq"
@@ -368,10 +374,14 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-    const citations = normalizeCitationUrls([
-      ...(searchUsed && (activeProvider === "xai" || activeProvider === "groq") ? citationsFrom(body) : []),
-      ...(activeProvider === "groq" && searchUsed ? safe.data.citations ?? [] : []),
-    ]);
+    // Trust only citation URLs returned in provider response metadata. The
+    // model's JSON "citations" field is ordinary generated text and is not
+    // proof that a source was retrieved; never promote it into verified sources.
+    const citations = normalizeCitationUrls(
+      searchUsed && (activeProvider === "xai" || activeProvider === "groq")
+        ? citationsFrom(body)
+        : [],
+    );
     const source = citations.length
       ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
       : activeProvider === "groq" && searchUsed
