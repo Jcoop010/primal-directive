@@ -128,14 +128,17 @@ async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
   search: boolean;
+  provider: "xai" | "groq";
 }) {
   const body: Record<string, unknown> = {
-    model: "grok-4.7",
+    model: args.provider === "groq" ? "openai/gpt-oss-120b" : "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
     max_tokens: 1600,
   };
-  if (args.search) {
+  // xAI supports its own live-search parameters. Groq's free API is used
+  // for reasoning only; never imply that it performed live web research.
+  if (args.search && args.provider === "xai") {
     body.search_parameters = {
       mode: "on",
       return_citations: true,
@@ -143,7 +146,10 @@ async function complete(args: {
       sources: [{ type: "web" }, { type: "news" }],
     };
   }
-  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+  const endpoint = args.provider === "groq"
+    ? "https://api.groq.com/openai/v1/chat/completions"
+    : "https://api.x.ai/v1/chat/completions";
+  const res = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -158,7 +164,12 @@ async function complete(args: {
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
-    const apiKey = process.env.XAI_API_KEY;
+    // Prefer xAI if the user already configured it; otherwise use Groq's free
+    // API tier. No paid provider is required to enable AI responses.
+    const xaiKey = process.env.XAI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
+    const provider: "xai" | "groq" | null = xaiKey ? "xai" : groqKey ? "groq" : null;
+    const apiKey = provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
@@ -172,16 +183,16 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     };
 
-    if (!apiKey) {
+    if (!apiKey || !provider) {
       const local = fallback();
       return {
         ...local,
-        source: "OFFLINE MODE — XAI_API_KEY NOT CONFIGURED",
-        answer: `Live AI and web search are not configured on this deployment because the XAI_API_KEY environment variable is missing. I can still help with saved pipeline data and offline planning, but I cannot verify current venues, contacts, lineups, availability, or deal terms until the key is added to the production environment and the app is redeployed.\n\n${local.answer}`,
+        source: "OFFLINE MODE — FREE AI KEY NOT CONFIGURED",
+        answer: `AI responses are not connected yet because no provider API key is configured. You do not need to buy xAI credits: Groq offers a free API tier. Add a GROQ_API_KEY from https://console.groq.com/keys to the existing Vercel project's Production environment, then redeploy. Groq can generate AI strategy and planning, but this connection does not provide live web search or verify current venues, contacts, lineups, availability, or deal terms.\n\n${local.answer}`,
         moves: [
-          "Add XAI_API_KEY to the existing Vercel project's Production environment using your xAI API key.",
-          "Redeploy the existing primal-directive project.",
-          "Retry this question and confirm the response includes source URLs before acting on live booking leads.",
+          "Create a free Groq API key at https://console.groq.com/keys; do not upgrade to a paid plan.",
+          "Add GROQ_API_KEY to the existing primal-directive Vercel project's Production environment.",
+          "Redeploy the existing project and test a general strategy question; verify external booking facts separately.",
         ],
       };
     }
@@ -200,9 +211,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     ];
 
     try {
-      let res = await complete({ apiKey, messages, search: true });
-    if (!res.ok) {
-      res = await complete({ apiKey, messages, search: false });
+      let res = await complete({ apiKey, messages, search: provider === "xai", provider });
+    if (!res.ok && provider === "xai") {
+      res = await complete({ apiKey, messages, search: false, provider });
     }
     if (!res.ok) return fallback();
 
@@ -215,7 +226,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
     const citations = citationsFrom(body);
-    const source = citations.length ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
+    const source = citations.length
+      ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
+      : provider === "groq"
+        ? "GROQ AI — NO LIVE WEB SOURCES; CURRENT FACTS NOT VERIFIED"
+        : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
