@@ -111,7 +111,11 @@ function main(argv) {
     process.exit(2);
   }
   const env = mergeAppEnv(readAppEnv(projectRoot()), process.env);
-  const child = spawn(command, args, { stdio: "inherit", env });
+  // Windows cannot spawn npm's .cmd shims without a shell. Invoke Vite's
+  // JavaScript entry directly, keeping arguments out of shell interpolation.
+  const child = process.platform === "win32" && command === "vite"
+    ? spawn(process.execPath, [join(projectRoot(), "node_modules/vite/bin/vite.js"), ...args], { stdio: "inherit", env })
+    : spawn(command, args, { stdio: "inherit", env });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
     process.on(signal, () => child.kill(signal));

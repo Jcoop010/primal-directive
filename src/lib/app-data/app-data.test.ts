@@ -65,7 +65,7 @@ describe("callTool failure memo", () => {
     });
   });
 
-  it("keys by token identity so a reminted token shares the memo entry", async () => {
+  it("isolates failure cache by bearer token even for identical unverified user claims", async () => {
     await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async (calls) => {
       const first = await callTool(
         "google_drive_search",
@@ -85,7 +85,7 @@ describe("callTool failure memo", () => {
       );
       assert.equal(first.ok, false);
       assert.deepEqual(second, first);
-      assert.equal(calls(), 1);
+      assert.equal(calls(), 2);
 
       const other = await callTool(
         "google_drive_search",
@@ -96,7 +96,7 @@ describe("callTool failure memo", () => {
         },
       );
       assert.equal(other.ok, false);
-      assert.equal(calls(), 2);
+      assert.equal(calls(), 3);
     });
   });
 
@@ -126,6 +126,35 @@ describe("callTool failure memo", () => {
     });
   });
 
+  it("bounds the number of cached failures under distinct requests", async () => {
+    await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async () => {
+      const options = {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "bounded-failure-memo-token",
+      };
+      for (let i = 0; i < 1_010; i += 1) {
+        const result = await callTool("google_drive_search", { q: `bounded-${i}` }, options);
+        assert.equal(result.ok, false);
+      }
+      assert.ok(failureMemoSize() <= 1_000);
+    });
+  });
+
+  it("does not cache failures using oversized argument keys", async () => {
+    await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async (calls) => {
+      const before = failureMemoSize();
+      const options = {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "oversized-memo-key-token",
+      };
+      const args = { q: "x".repeat(20_000) };
+      assert.equal((await callTool("google_drive_search", args, options)).ok, false);
+      assert.equal((await callTool("google_drive_search", args, options)).ok, false);
+      assert.equal(calls(), 2, "large keys must not be memoized");
+      assert.equal(failureMemoSize(), before);
+    });
+  });
+
   it("never memoizes login-required 401s", async () => {
     await withStubbedGate(401, { errorMessage: "login required" }, async (calls) => {
       const options = {
@@ -139,6 +168,168 @@ describe("callTool failure memo", () => {
       assert.equal(second.loginRequired, true);
       assert.equal(calls(), 2);
     });
+  });
+});
+
+describe("connector request deadline", () => {
+  it("passes a 15-second abort signal to outbound gate calls", async () => {
+    const signalTimeout = mock.method(AbortSignal, "timeout", (ms: number) => {
+      assert.equal(ms, 15_000);
+      return AbortSignal.abort(new DOMException("deadline", "TimeoutError"));
+    });
+    try {
+      await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async () => {
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = (async (_url, init) => {
+          assert.ok(init?.signal instanceof AbortSignal);
+          assert.equal(init.signal.aborted, true);
+          throw init.signal.reason;
+        }) as typeof fetch;
+        try {
+          const result = await callTool("google_drive_search", { q: "deadline-case" }, {
+            connectorType: ConnectorType.GoogleDrive, token: "deadline-credential",
+          });
+          assert.equal(result.ok, false);
+          assert.match(result.errorMessage ?? "", /deadline/);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      });
+    } finally {
+      signalTimeout.mock.restore();
+    }
+  });
+});
+
+describe("connector response safety", () => {
+  it("rejects oversized upstream responses without parsing them", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const saved = globalThis.fetch;
+    globalThis.fetch = (async () => new Response("x".repeat(257 * 1024), { status: 200 })) as typeof fetch;
+    try {
+      const result = await callTool("google_drive_search", { q: "oversize-response-test" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "oversize-response-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /Connector response exceeds safety limit/);
+    } finally {
+      globalThis.fetch = saved;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
+  });
+});
+
+describe("connector redirect safety", () => {
+  it("treats a gateway redirect as failure rather than a successful tool result", async () => {
+    await withStubbedGate(302, {}, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "redirect-case" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "connector-redirect-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /redirect.*HTTP 302/);
+      assert.equal(calls(), 1);
+    });
+  });
+});
+
+describe("connector gateway success validation", () => {
+  it("rejects HTTP 200 with missing success confirmation", async () => {
+    await withStubbedGate(200, {}, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "empty-success-marker" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "missing-success-marker-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /no success confirmation/);
+      assert.equal(calls(), 1);
+    });
+  });
+
+  it("never treats HTTP 500 as success even with ok true in the body", async () => {
+    await withStubbedGate(500, { ok: true, data: { misleading: true } }, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "error-status-success-body" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "http-error-success-body-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /HTTP 500/);
+      assert.equal(calls(), 1);
+    });
+  });
+
+  it("preserves confirmed successful tool responses", async () => {
+    await withStubbedGate(200, { ok: true, data: { items: [1] } }, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "confirmed-success" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "confirmed-success-test-token",
+      });
+      assert.deepEqual(result, { ok: true, data: { items: [1] } });
+      assert.equal(calls(), 1);
+    });
+  });
+});
+
+describe("connector error confidentiality", () => {
+  it("does not echo untrusted non-JSON gateway response contents", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const originalFetch = globalThis.fetch;
+    const secret = "SENSITIVE_GATEWAY_BODY_DO_NOT_ECHO";
+    globalThis.fetch = (async () => new Response(`Gateway broke: ${secret}`, { status: 502 })) as typeof fetch;
+    try {
+      const result = await callTool("google_drive_search", { q: "redaction-case" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "redaction-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /invalid JSON.*HTTP 502/);
+      assert.doesNotMatch(result.errorMessage ?? "", /SENSITIVE_GATEWAY_BODY_DO_NOT_ECHO/);
+    } finally {
+      globalThis.fetch = originalFetch;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
+  });
+});
+
+describe("connector JSON shape validation", () => {
+  it("rejects JSON null and arrays without throwing or reporting success", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const saved = globalThis.fetch;
+    try {
+      for (const [i, body] of ["null", "[]", "42"].entries()) {
+        globalThis.fetch = (async () => new Response(body, { status: 200 })) as typeof fetch;
+        const result = await callTool("google_drive_search", { q: `json-shape-${i}` }, {
+          connectorType: ConnectorType.GoogleDrive,
+          token: "invalid-json-shape-test-token",
+        });
+        assert.equal(result.ok, false);
+        assert.match(result.errorMessage ?? "", /invalid JSON object/);
+      }
+    } finally {
+      globalThis.fetch = saved;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
+  });
+});
+
+describe("connector redirect without response body", () => {
+  it("rejects a stalled 302 body without waiting for its contents", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const saved = globalThis.fetch;
+    globalThis.fetch = (async () => new Response(new ReadableStream({ start() {} }), {
+      status: 302, headers: { location: "https://example.invalid/signin" },
+    })) as typeof fetch;
+    try {
+      const result = await callTool("google_drive_search", { q: "stalled-redirect-test" }, {
+        connectorType: ConnectorType.GoogleDrive, token: "stalled-redirect-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /redirect.*HTTP 302/);
+    } finally {
+      globalThis.fetch = saved;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
   });
 });
 

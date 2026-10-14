@@ -124,17 +124,51 @@ async function gatePost(
     headers,
     body: JSON.stringify(body),
     redirect: "manual",
+    signal: AbortSignal.timeout(15_000),
   });
 
+  // Reject redirects from the response headers before reading any body.
+  // An HTML login redirect must never stall connector calls or masquerade as
+  // a completed tool operation.
+  if (res.status >= 300 && res.status < 400) {
+    void res.body?.cancel().catch(() => undefined);
+    return { status: res.status, json: {} };
+  }
+
   let json: GateJson = {};
-  const text = await res.text();
+  // The fetch signal remains active while consuming a streaming response body.
+  const maxResponseBytes = 256 * 1024;
+  let text = "";
+  if (res.body) {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let received = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        received += value.byteLength;
+        if (received > maxResponseBytes) {
+          void reader.cancel().catch(() => undefined);
+          throw new Error("Connector response exceeds safety limit");
+        }
+        text += decoder.decode(value, { stream: true });
+      }
+      text += decoder.decode();
+    } finally {
+      reader.releaseLock();
+    }
+  }
   if (text) {
     try {
-      json = JSON.parse(text) as GateJson;
+      const parsed: unknown = JSON.parse(text);
+      json = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+        ? parsed as GateJson
+        : { ok: false, errorMessage: `Connector gate returned invalid JSON object (HTTP ${res.status})` };
     } catch {
       json = {
         ok: false,
-        errorMessage: `gate non-JSON response (HTTP ${res.status}): ${text.slice(0, 200)}`,
+        errorMessage: `Connector gate returned invalid JSON (HTTP ${res.status})`,
       };
     }
   }
@@ -189,32 +223,14 @@ function crossSiteBlockedResult(): CallToolResult | null {
 }
 
 const FAILURE_MEMO_TTL_MS = 5_000;
+const FAILURE_MEMO_MAX_ENTRIES = 1_000;
 const failureMemo = new Map<string, { at: number; result: CallToolResult }>();
 
 function tokenIdentityKey(token: string): string {
-  const payload = token.split(".")[1];
-  if (payload) {
-    try {
-      const claims: unknown = JSON.parse(
-        Buffer.from(payload, "base64url").toString("utf8"),
-      );
-      if (claims && typeof claims === "object" && !Array.isArray(claims)) {
-        const { sub, team_id: teamId } = claims as {
-          sub?: unknown;
-          team_id?: unknown;
-        };
-        if (typeof sub === "string" && sub) {
-          return createHash("sha256")
-            .update(
-              JSON.stringify([sub, typeof teamId === "string" ? teamId : null]),
-            )
-            .digest("base64url");
-        }
-      }
-    } catch {
-      // Malformed token payload: fall back to hashing the full token.
-    }
-  }
+  // Token claims are not verified here: distinct bearer tokens can declare
+  // the same sub/team_id. Cache failures per credential, not per claimed user,
+  // so one token cannot poison another credential's short-lived failure cache.
+  // Only the digest is stored; never retain or log the raw bearer token.
   return createHash("sha256").update(token).digest("base64url");
 }
 
@@ -238,7 +254,15 @@ function memoizeFailure(
   for (const [staleKey, entry] of failureMemo) {
     if (now - entry.at > FAILURE_MEMO_TTL_MS) failureMemo.delete(staleKey);
   }
+  // Bound short-lived failures even when every request has a unique cache key.
+  // Map iteration preserves insertion order, so evict the oldest entry first.
+  failureMemo.delete(key);
   failureMemo.set(key, { at: now, result });
+  while (failureMemo.size > FAILURE_MEMO_MAX_ENTRIES) {
+    const oldest = failureMemo.keys().next().value;
+    if (oldest === undefined) break;
+    failureMemo.delete(oldest);
+  }
   return result;
 }
 
@@ -248,7 +272,10 @@ export function failureMemoSize(): number {
 
 function safeMemoKey(parts: unknown[]): string | null {
   try {
-    return JSON.stringify(parts);
+    const serialized = JSON.stringify(parts);
+    // Do not retain potentially multi-megabyte request arguments as cache keys.
+    // Large calls still execute; only memoization is skipped.
+    return serialized.length <= 16_384 ? serialized : null;
   } catch {
     return null;
   }
@@ -325,6 +352,11 @@ export async function callTool(
       token,
     );
 
+    // Redirects are not connector tool results. With redirect: "manual",
+    // an authentication redirect must not become a false successful call.
+    if (status >= 300 && status < 400) {
+      return fail(`Connector gate returned redirect (HTTP ${status})`);
+    }
     if (status === 401) {
       const loginUrl =
         gateSigninUrl(ctx) ??
@@ -345,11 +377,13 @@ export async function callTool(
     if (json.errorMessage && json.ok === false) {
       return fail(json.errorMessage);
     }
-    if (status >= 400 && json.ok !== true) {
+    if (status >= 400) {
       return fail(json.errorMessage ?? `HTTP ${status}`);
     }
-    if (json.ok === false) {
-      return fail(json.errorMessage ?? "tool error");
+    // An empty/partial 2xx response is not confirmation that a connector
+    // tool ran successfully. Require the gateway's explicit success marker.
+    if (json.ok !== true) {
+      return fail(json.errorMessage ?? "Connector gate returned no success confirmation");
     }
     return { ok: true, data: json.data ?? null };
   } catch (e) {

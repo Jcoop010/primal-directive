@@ -62,6 +62,8 @@ jobs:
             if curl --silent --fail http://127.0.0.1:8080/__app-env > /dev/null; then
               npm run check:auth
               node scripts/ci-auth-smoke.mjs
+              npx playwright install chromium --with-deps
+              node scripts/ci-browser-auth-smoke.mjs
               exit $?
             fi
             if ! kill -0 "$DEV_PID" 2>/dev/null; then

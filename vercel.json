@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "advisor-intelligence-production": false
+      "advisor-intelligence-production": false,
+      "fix/advisor-release-reliability": false
     }
   }
 }

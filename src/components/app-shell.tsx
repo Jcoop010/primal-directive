@@ -164,7 +164,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <main
             className={cn(
               "mx-auto w-full max-w-3xl flex-1 px-3.5 pb-28 md:px-8 md:pb-10",
-              pathname === "/" && "flex flex-col pb-24 md:pb-8",
+              pathname === "/" && "flex flex-col pb-24 md:pb-28",
             )}
           >
             {children}

@@ -360,8 +360,8 @@ test("exitCodeFor: navigation failure in any viewport exits 1, beating errors", 
   assert.equal(exitCodeFor(verdict({ status: 404 }, { consoleErrors: ["boom"] }).viewports), 1);
 });
 
-test("exitCodeFor: 4xx boundary and missing status", () => {
-  assert.equal(exitCodeFor(verdict({ status: 399 }).viewports), 0);
+test("exitCodeFor: redirects, 4xx boundary and missing status", () => {
+  assert.equal(exitCodeFor(verdict({ status: 399 }).viewports), 1);
   assert.equal(exitCodeFor(verdict({ status: 400 }).viewports), 1);
   assert.equal(exitCodeFor(verdict({ status: undefined }).viewports), 1);
 });
@@ -413,4 +413,11 @@ test("browser-smoke file I/O only touches guarded paths", () => {
   assert.deepEqual(reads, ["baselinePath"]);
   const stats = [...src.matchAll(/statSync\(\s*([A-Za-z_$][\w$.]*)/g)].map((m) => m[1]);
   assert.deepEqual(stats, ["baselinePath"]);
+});
+
+test("browser smoke fails closed on redirected, informational, and missing statuses", () => {
+  for (const status of [0, 101, 301, 302, 307, 308, 400, 503, undefined]) {
+    assert.equal(exitCodeFor(verdict({ status }).viewports), 1, `status ${status} must fail`);
+  }
+  assert.equal(exitCodeFor(verdict().viewports), 0);
 });

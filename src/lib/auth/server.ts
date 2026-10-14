@@ -125,7 +125,12 @@ const database = databaseUrl
   ? new Pool({ connectionString: postgresConnectionString(databaseUrl) })
   : { dialect: pgliteDialect(() => getPglite()), type: "postgres" as const };
 
-export const SESSION_TOKEN_COOKIE = "__Host-grok-auth.session_token";
+// Secure __Host- cookies require HTTPS. Local HTTP development uses a
+// host-only, non-Secure name so Chromium can retain sessions across reloads.
+// Production and Vercel previews retain the strict HTTPS cookie policy.
+const secureAuthCookies = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+const cookieName = (suffix: string) => `${secureAuthCookies ? "__Host-" : ""}grok-auth.${suffix}`;
+export const SESSION_TOKEN_COOKIE = cookieName("session_token");
 
 const grokOAuthPlugin = !authDisabled && oauthConfigured
   ? genericOAuth({
@@ -162,12 +167,12 @@ export const auth = betterAuth({
   ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),
   advanced: {
     useSecureCookies: false,
-    defaultCookieAttributes: { secure: true, sameSite: "lax", path: "/" },
+    defaultCookieAttributes: { secure: secureAuthCookies, sameSite: "lax", path: "/" },
     cookies: {
       session_token: { name: SESSION_TOKEN_COOKIE },
-      session_data: { name: "__Host-grok-auth.session_data" },
-      account_data: { name: "__Host-grok-auth.account_data" },
-      dont_remember: { name: "__Host-grok-auth.dont_remember" },
+      session_data: { name: cookieName("session_data") },
+      account_data: { name: cookieName("account_data") },
+      dont_remember: { name: cookieName("dont_remember") },
     },
   },
   plugins: [
