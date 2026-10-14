@@ -360,8 +360,8 @@ test("exitCodeFor: navigation failure in any viewport exits 1, beating errors", 
   assert.equal(exitCodeFor(verdict({ status: 404 }, { consoleErrors: ["boom"] }).viewports), 1);
 });
 
-test("exitCodeFor: 4xx boundary and missing status", () => {
-  assert.equal(exitCodeFor(verdict({ status: 399 }).viewports), 0);
+test("exitCodeFor: redirects, 4xx boundary and missing status", () => {
+  assert.equal(exitCodeFor(verdict({ status: 399 }).viewports), 1);
   assert.equal(exitCodeFor(verdict({ status: 400 }).viewports), 1);
   assert.equal(exitCodeFor(verdict({ status: undefined }).viewports), 1);
 });
