@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
-import { createAdvisorTransport, retryAfterMs } from "../src/lib/ai-transport.ts";
+import { boundedHistory, createAdvisorTransport, retryAfterMs } from "../src/lib/ai-transport.ts";
 
 // Isolate the actual handler from TanStack's HTTP compiler and auth database.
 // The production middleware remains required; no provider credentials are used.
@@ -24,6 +24,13 @@ assert.match(source, /\.middleware\(\[authMiddleware\]\)/);
 const { askGrowthAdvisor } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
 const input = { message: "Explain margin", history: [], context: "Artist: Test" };
 const good = () => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ answer: "Valid strategy", gigs: [], people: [], moves: [] }) } }] }));
+
+test("long conversation history has a fixed budget and retains recent turns", () => {
+  const history = Array.from({length:8},(_,i)=>({role:"ai",text:`Turn ${i}: `+"x".repeat(20000)}));
+  const messages = boundedHistory(history);
+  assert.ok(messages.reduce((sum,item)=>sum+item.content.length,0)<=3000);
+  assert.match(messages.at(-1).content,/Turn 7/);
+});
 
 test("Advisor success, invalid bodies, repair, timeout, missing key and rate limits", async () => {
   const saved = { fetch: globalThis.fetch, xai: process.env.XAI_API_KEY, groq: process.env.GROQ_API_KEY };

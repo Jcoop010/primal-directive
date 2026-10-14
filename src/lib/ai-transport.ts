@@ -5,7 +5,7 @@ export function boundedHistory(history: { role: "user" | "ai"; text: string }[])
   let remaining = 3000;
   const result: { role: string; content: string }[] = [];
   for (const item of history.slice(-8).reverse()) {
-    if (!remaining) break;
+    if (remaining < 30) break;
     const limit = Math.min(remaining, 1500);
     const content = item.text.length > limit
       ? `${item.text.slice(0, Math.max(0, limit - 30))}\n[Earlier response truncated.]`
