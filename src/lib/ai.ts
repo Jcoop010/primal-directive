@@ -4,6 +4,7 @@ import { authMiddleware } from "@/lib/auth/middleware";
 import { boundedHistory, createAdvisorTransport, readProviderBody, providerContent } from "@/lib/ai-transport";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import { advisorWorkspaceContext } from "@/lib/advisor-workspace-context";
+import { needsLiveResearch } from "@/lib/advisor-search-intent";
 import { normalizeCitationUrls } from "@/lib/ai-citations";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
 import { GIG_STATUSES, PERSON_ROLES } from "@/lib/types";
@@ -129,13 +130,6 @@ function citationsFrom(body: Record<string, unknown>): string[] {
   return normalizeCitationUrls(bags);
 }
 
-function shouldSearchWeb(message: string, history: { role: "user" | "ai"; text: string }[]): boolean {
-  // Use prior user turns to resolve short follow-ups without letting our own
-  // answers (which often mention venues or booking) trigger search forever.
-  const recent = history.filter((item) => item.role === "user").slice(-3).map((item) => item.text).join("\n");
-  const query = `${message}\n${recent}`;
-  return /\b(current|latest|today|tonight|this week|this month|recent|news|research|search|find|look up|venue|booker|promoter|contact|email|phone|availability|available|lineup|festival|tour routing|routing|market|competitor|competition|local draw|nearby|press|playlist|radio|ticket sales|ticket price|capacity|guarantee|booking|release date|trend|who books|where can we play|compare|best|top|recommend|3[- ]band bill|band bill|build.*bill|bands for|artists for|support bill|opening act|support act|similar bands|similar artists|comparable artists|spotify|instagram|youtube|tiktok|social media|streaming|charts)\b/i.test(query);
-}
 
 async function complete(args: {
   apiKey: string;
@@ -211,7 +205,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const groqKey = process.env.GROQ_API_KEY?.trim();
     const provider: "xai" | "groq" | null = xaiKey ? "xai" : groqKey ? "groq" : null;
     const apiKey = provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
-    const searchRequested = shouldSearchWeb(data.message, data.history);
+    const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
