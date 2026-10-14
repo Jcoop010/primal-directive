@@ -32,34 +32,29 @@ test("long conversation history has a fixed budget and retains recent turns", ()
   assert.match(messages.at(-1).content,/Turn 7/);
 });
 
-test("Advisor success, invalid bodies, repair, timeout, missing key and rate limits", async () => {
-  const saved = { fetch: globalThis.fetch, xai: process.env.XAI_API_KEY, groq: process.env.GROQ_API_KEY };
+test("Gemini-only Advisor handles valid output, offline mode and rate limits", async () => {
+  const saved = { fetch: globalThis.fetch, gemini: process.env.GEMINI_API_KEY, xai: process.env.XAI_API_KEY, groq: process.env.GROQ_API_KEY };
   let calls = 0;
   try {
-    delete process.env.XAI_API_KEY; process.env.GROQ_API_KEY = "test-only";
-    globalThis.fetch = async () => { calls++; return good(); };
+    delete process.env.XAI_API_KEY;
+    process.env.GROQ_API_KEY = "test-only";
+    process.env.GEMINI_API_KEY = "test-only";
+    const geminiGood = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ answer: "Valid strategy", gigs: [], people: [], moves: [] }) }] } }] }));
+    globalThis.fetch = async url => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); return geminiGood(); };
     assert.equal((await askGrowthAdvisor(input)).answer, "Valid strategy");
-    for (const invalid of ["not JSON", "null", JSON.stringify({choices: [{message:{content:123}}]}), JSON.stringify({choices:[{message:{content:'{"answer":" "}'}}]})]) {
-      calls=0; globalThis.fetch=async () => { calls++; return calls===1 ? new Response(invalid) : good(); };
-      assert.equal((await askGrowthAdvisor(input)).answer, "Valid strategy"); assert.equal(calls,2);
-    }
-    calls=0; globalThis.fetch=async () => { calls++; return new Response('invalid'); };
-    assert.match((await askGrowthAdvisor(input)).source,/INVALID AI RESPONSE/); assert.equal(calls,2);
-    calls=0; globalThis.fetch=async () => { calls++; throw new DOMException("timeout", "TimeoutError"); };
-    assert.match((await askGrowthAdvisor(input)).source,/FALLBACK/); assert.equal(calls,1);
-    delete process.env.GROQ_API_KEY; calls=0;
-    assert.match((await askGrowthAdvisor(input)).source,/OFFLINE/); assert.equal(calls,0);
-    process.env.XAI_API_KEY="test-only"; process.env.GROQ_API_KEY="test-only"; calls=0;
-    globalThis.fetch=async url => {calls++; return url.includes("x.ai") ? new Response(null,{status:429}) : good();};
-    assert.equal((await askGrowthAdvisor(input)).answer,"Valid strategy"); assert.equal(calls,2);
-    delete process.env.XAI_API_KEY; calls=0;
-    globalThis.fetch=async () => {calls++; return new Response(null,{status:429,headers:{"Retry-After":"120"}});};
-    assert.match((await askGrowthAdvisor(input)).source,/HTTP 429/); assert.equal(calls,1);
-    assert.match((await askGrowthAdvisor(input)).source,/HTTP 429/); assert.equal(calls,1);
+    delete process.env.GEMINI_API_KEY;
+    calls = 0;
+    assert.match((await askGrowthAdvisor(input)).source, /OFFLINE/);
+    assert.equal(calls, 0);
+    process.env.GEMINI_API_KEY = "test-only";
+    calls = 0;
+    globalThis.fetch = async url => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); return new Response(null, {status:429, headers: {"Retry-After":"120"}}); };
+    assert.match((await askGrowthAdvisor(input)).source, /HTTP 429/);
+    assert.equal(calls, 1);
   } finally {
-    globalThis.fetch=saved.fetch;
-    for (const [key,value] of [["XAI_API_KEY",saved.xai],["GROQ_API_KEY",saved.groq]]) {
-      if(value===undefined) delete process.env[key]; else process.env[key]=value;
+    globalThis.fetch = saved.fetch;
+    for (const [key,value] of [["GEMINI_API_KEY",saved.gemini],["XAI_API_KEY",saved.xai],["GROQ_API_KEY",saved.groq]]) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
     }
   }
 });

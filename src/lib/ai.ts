@@ -149,7 +149,7 @@ async function complete(args: {
 }) {
   if (args.provider === "gemini") {
     const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2400, responseMimeType: args.search ? undefined : "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
+    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 4096, responseMimeType: args.search ? undefined : "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
     return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
   const body: Record<string, unknown> = {
@@ -215,9 +215,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const xaiKey = process.env.XAI_API_KEY?.trim();
-    const groqKey = process.env.GROQ_API_KEY?.trim();
-    const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : groqKey ? "groq" : null;
-    const apiKey = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
+    const groqKey: string | undefined = undefined; // Groq disabled; credential is never read.
+    const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : null;
+    const apiKey: string | undefined = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : undefined;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
@@ -237,10 +237,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "OFFLINE MODE — FREE AI KEY NOT CONFIGURED",
-        answer: `AI responses are not connected yet because no provider API key is configured. You do not need to buy xAI credits: Groq offers a free API tier. Add a GROQ_API_KEY from https://console.groq.com/keys to the existing Vercel project's Production environment, then redeploy. Groq can generate AI strategy and planning, but this connection does not provide live web search or verify current venues, contacts, lineups, availability, or deal terms.\n\n${local.answer}`,
+        answer: `AI responses are not connected because GEMINI_API_KEY is not configured. Add a Gemini API key to the existing Vercel Production environment. Live research requires a functioning Google Search grounding connection.\n\n${local.answer}`,
         moves: [
-          "Create a free Groq API key at https://console.groq.com/keys; do not upgrade to a paid plan.",
-          "Add GROQ_API_KEY to the existing primal-directive Vercel project's Production environment.",
+          "Check that GEMINI_API_KEY is configured in Vercel Production.",
+          "Confirm the Gemini API key has access to the configured model.",
           "Redeploy the existing project and test a general strategy question; verify external booking facts separately.",
         ],
       };
@@ -248,17 +248,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // Bound total context instead of sending eight full-length model answers.
     // This reduces token-limit failures; it does not bypass provider quotas.
-    const advisorContext = advisorWorkspaceContext(data.context).slice(0, 4800);
+    const advisorContext = advisorWorkspaceContext(data.context);
     const messages = [
       { role: "system", content: SYSTEM },
-      ...(provider === "groq" && !searchRequested ? [{
-        role: "system",
-        content: "PROVIDER LIMITATION: No browser search was enabled for this turn. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
-      }] : []),
-      ...(provider === "groq" && searchRequested ? [{
-        role: "system",
-        content: "BROWSER SEARCH ENABLED: Use the built-in browser_search tool for current external claims. Include direct HTTPS URLs in the citations array only when they were actually returned by the search results. Never invent a source, contact, event, date, availability, guarantee, or statistic. If search results do not verify a detail, say so plainly."
-      }] : []),
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${advisorContext}`,
@@ -267,7 +259,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let activeProvider = provider;
+    let activeProvider: "gemini" | "xai" | "groq" = provider;
     let searchUsed = searchRequested;
     let res: Response | null = null;
 
@@ -281,81 +273,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // A provider/network exception should still allow the other configured provider.
     }
 
-    // If xAI is configured but unavailable, use Groq when its free-tier key exists.
-    // Keep the no-web-search limitation explicit so fallback answers never imply live research.
-    if ((!res || !res.ok) && provider !== "groq" && groqKey) {
-      activeProvider = "groq";
-      try {
-        res = await complete({ request,
-          apiKey: groqKey,
-          messages: [
-            ...messages,
-            {
-              role: "system",
-              content: searchRequested
-                ? "BROWSER SEARCH ENABLED: Use the built-in browser_search tool for current external claims. Include direct HTTPS URLs in the citations array only when they were actually returned by the search results. Never invent sources or unverified booking facts."
-                : "PROVIDER LIMITATION: No browser search was enabled for this turn. Do not claim to have searched the web or invent source URLs. Clearly label current external facts as unverified."
-            }
-          ],
-          search: searchRequested,
-          provider: "groq",
-        });
-      } catch {
-        res = null;
-      }
-    }
-
-    // A live-search request can be rejected even when ordinary chat works.
-    // Retry once without search so the user still gets model reasoning, while
-    // explicitly disabling any claim of live verification.
-    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && (!res || res.status === 400)) {
-      console.warn("[advisor] Groq live search failed or timed out; retrying without live search.");
-      searchUsed = false;
-      try {
-        res = await complete({ request,
-          apiKey: groqKey || apiKey,
-          messages: [
-            ...messages,
-            {
-              role: "system",
-              content: "The live browser-search request failed. Answer using only supplied workspace context and general strategy. Do not claim to have searched the web, do not invent source URLs, and clearly label current venue/contact/event facts as unverified."
-            }
-          ],
-          search: false,
-          provider: "groq",
-        });
-      } catch {
-        res = null;
-      }
-    }
-
-    // A smaller Groq model has a separate model-specific token budget.
-    // Try it once after a 429, with a compact no-search prompt; never imply
-    // that this fallback verified current venues or booking contacts.
-    if (res?.status === 429 && activeProvider === "groq") {
-      try {
-        const compact = await complete({
-          request,
-          apiKey: groqKey || apiKey,
-          provider: "groq",
-          compactModel: true,
-          search: false,
-          jsonOnly: true,
-          messages: [
-            { role: "system", content: "Return only JSON with answer (nonempty string), citations (empty array), gigs (empty array), people (empty array), moves (array). Answer the user with grounded reasoning from their supplied records. Do not claim live research or invent current venues, contacts, or dates." },
-            { role: "system", content: "Saved artist context: " + advisorContext.slice(0, 2400) },
-            { role: "user", content: data.message },
-          ],
-        });
-        if (compact.ok) {
-          res = compact;
-          searchUsed = false;
-        }
-      } catch {
-        // Preserve the rate-limit fallback when the smaller model is unavailable.
-      }
-    }
-
+    if (provider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
     if (!res?.ok) {
       const local = fallback();
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
@@ -392,9 +310,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // Retry once with a compact, JSON-only request and no live search; if xAI's
     // format fails, use the already-configured Groq key before falling back.
     if (!safe?.success) {
-      const retryProvider: "gemini" | "xai" | "groq" =
-        activeProvider !== "groq" && groqKey ? "groq" : activeProvider;
-      const retryKey = retryProvider === "groq" ? groqKey || apiKey : apiKey;
+      const retryProvider: "gemini" | "xai" | "groq" = activeProvider;
+      const retryKey = apiKey;
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
         const retry = await complete({ request,
@@ -439,17 +356,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // model's JSON "citations" field is ordinary generated text and is not
     // proof that a source was retrieved; never promote it into verified sources.
     const citations = normalizeCitationUrls(
-      searchUsed && (activeProvider === "xai" || activeProvider === "groq" || activeProvider === "gemini")
+      searchUsed
         ? citationsFrom(body)
         : [],
     );
-    const source = citations.length
-      ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
-      : activeProvider === "groq" && searchUsed
-        ? "GROQ AI — SEARCH REQUESTED; NO SOURCE URLS RETURNED"
-        : activeProvider === "groq"
-          ? "GROQ AI — NO LIVE WEB SEARCH; CURRENT FACTS NOT VERIFIED"
-          : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
+    const source = citations.length ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : "GEMINI AI — CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
