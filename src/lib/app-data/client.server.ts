@@ -153,7 +153,10 @@ async function gatePost(
   }
   if (text) {
     try {
-      json = JSON.parse(text) as GateJson;
+      const parsed: unknown = JSON.parse(text);
+      json = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+        ? parsed as GateJson
+        : { ok: false, errorMessage: `Connector gate returned invalid JSON object (HTTP ${res.status})` };
     } catch {
       json = {
         ok: false,
