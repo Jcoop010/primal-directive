@@ -263,6 +263,27 @@ describe("connector error confidentiality", () => {
   });
 });
 
+describe("connector JSON shape validation", () => {
+  it("rejects JSON null and arrays without throwing or reporting success", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const saved = globalThis.fetch;
+    try {
+      for (const [i, body] of ["null", "[]", "42"].entries()) {
+        globalThis.fetch = (async () => new Response(body, { status: 200 })) as typeof fetch;
+        const result = await callTool("google_drive_search", { q: `json-shape-${i}` }, {
+          connectorType: ConnectorType.GoogleDrive,
+          token: "invalid-json-shape-test-token",
+        });
+        assert.equal(result.ok, false);
+        assert.match(result.errorMessage ?? "", /invalid JSON object/);
+      }
+    } finally {
+      globalThis.fetch = saved;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
+  });
+});
+
 describe("callTool", () => {
   it("resolves ok:false for non-serializable args instead of rejecting", async () => {
     process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
