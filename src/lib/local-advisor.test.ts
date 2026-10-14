@@ -111,9 +111,9 @@ test("offline advisor excludes unpaid fees and member distributions from gig cas
     "- date:2026-10-14 | type:payout | amount:150 | gigId:gig-one | gig:First Show | member:Alex | label:Distribution",
   ].join("\n");
   const result = localGrowthAdvice("Profit by gig?", context);
-  assert.match(result.answer, /First Show: collected \\$600\\.00; recorded costs \\$200\\.00; cash-based difference \\$400\\.00/);
+  assert.match(result.answer, /First Show: collected \$600\.00; recorded costs \$200\.00; cash-based difference \$400\.00/);
   assert.match(result.answer, /outstanding amounts are excluded from collected cash/i);
-  assert.doesNotMatch(result.answer, /\\$1,300\\.00/);
+  assert.doesNotMatch(result.answer, /\$1,300\.00/);
 });
 
 test("offline advisor labels partially linked gig records as incomplete", () => {
@@ -124,7 +124,7 @@ test("offline advisor labels partially linked gig records as incomplete", () => 
     "- date:2026-10-14 | type:cost | amount:100 | gigId:gig-b | gig:Only Costs | member:none | label:Travel",
   ].join("\n");
   const result = localGrowthAdvice("Which gigs were most profitable?", context);
-  assert.match(result.answer, /Only Income: collected \\$500\\.00; no costs linked; incomplete/i);
-  assert.match(result.answer, /Only Costs: no collected income linked; recorded costs \\$100\\.00; incomplete/i);
+  assert.match(result.answer, /Only Income: collected \$500\.00; no costs linked; incomplete/i);
+  assert.match(result.answer, /Only Costs: no collected income linked; recorded costs \$100\.00; incomplete/i);
   assert.match(result.answer, /not enough gigs with both collected income and linked costs/i);
 });
