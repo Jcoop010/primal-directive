@@ -75,6 +75,27 @@ test("real workspace SQL preserves saves, isolates accounts and rejects stale ve
     const afterRace = await loadAppState({});
     assert.equal(afterRace.version, 3);
     assert.ok(['Tab one','Tab two'].includes(afterRace.state.profile.artistName));
+    // A transient database failure must not consume the optimistic version or
+    // destroy the previously persisted workspace. Retrying should then succeed.
+    const originalQuery = globalThis[key].sql.query;
+    let failNextSave = true;
+    globalThis[key].sql.query = async (query, params) => {
+      if (failNextSave && /^update app_state/i.test(query.trim())) {
+        failNextSave = false;
+        throw new Error('simulated database write outage');
+      }
+      return originalQuery(query, params);
+    };
+    const retryState = {...state,profile:{...state.profile,artistName:'Recovered after outage'}};
+    try {
+      await assert.rejects(saveAppState({state:retryState,expectedVersion:3}), /simulated database write outage/);
+      assert.deepEqual(await loadAppState({}), afterRace);
+      const retryResult = await saveAppState({state:retryState,expectedVersion:3});
+      assert.equal(retryResult.version, 4);
+      assert.equal((await loadAppState({})).state.profile.artistName, 'Recovered after outage');
+    } finally {
+      globalThis[key].sql.query = originalQuery;
+    }
     globalThis[key].userId='account-b';
     const otherAccount = await loadAppState({});
     assert.equal(otherAccount.version, 1);
