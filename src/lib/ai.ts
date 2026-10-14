@@ -318,11 +318,24 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     if (!res?.ok) {
       const local = fallback();
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
-      console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account limits; never log credentials.`);
+      const rateLimited = res?.status === 429;
+      console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account/rate limits; never log credentials.`);
+      const diagnosis = rateLimited
+        ? `The ${activeProvider} AI provider rejected this request with HTTP 429 (rate limit or quota limit). The local workspace fallback is active, so your saved records remain available, but this turn was not answered by the AI model. Wait for the provider limit window to reset and retry, or configure another provider key you already have access to. Check usage limits before considering any paid upgrade. Live research was not verified.`
+        : `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.`;
       return {
         ...local,
-        source: `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
-        answer: `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.\n\n${local.answer}`,
+        source: rateLimited
+          ? "LOCAL WORKSPACE FALLBACK — PROVIDER RATE LIMITED (HTTP 429)"
+          : `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
+        answer: diagnosis + `\n\n${local.answer}`,
+        moves: rateLimited
+          ? [
+              "Check the configured provider's current rate limits and usage dashboard before retrying.",
+              "Wait for the limit window to reset; avoid repeatedly resubmitting the same prompt.",
+              "If another provider key is already available, configure it as a fallback; no paid upgrade is assumed."
+            ]
+          : local.moves,
       };
     }
 
