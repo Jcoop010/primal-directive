@@ -200,7 +200,7 @@ export function createSeed() {
     draw: "80–150",
     feeTarget: 1000,
     notes:
-      "Home base Pittsburgh. Grow local draw, then route WV / OH / PA / Northeast. Merch and email list matter more than vanity streams.",
+      "FICTIONAL DEMO ARTIST. All shows, booking statuses, people, contact details, fees, dates, and financial entries are invented examples, not real bookings or verified facts. Home base Pittsburgh. Grow local draw, then route WV / OH / PA / Northeast. Merch and email list matter more than vanity streams.",
   };
 
   return { gigs, people, money, profile };
