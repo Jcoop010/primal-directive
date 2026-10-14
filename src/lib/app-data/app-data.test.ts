@@ -205,6 +205,43 @@ describe("connector redirect safety", () => {
   });
 });
 
+describe("connector gateway success validation", () => {
+  it("rejects HTTP 200 with missing success confirmation", async () => {
+    await withStubbedGate(200, {}, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "empty-success-marker" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "missing-success-marker-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /no success confirmation/);
+      assert.equal(calls(), 1);
+    });
+  });
+
+  it("never treats HTTP 500 as success even with ok true in the body", async () => {
+    await withStubbedGate(500, { ok: true, data: { misleading: true } }, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "error-status-success-body" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "http-error-success-body-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /HTTP 500/);
+      assert.equal(calls(), 1);
+    });
+  });
+
+  it("preserves confirmed successful tool responses", async () => {
+    await withStubbedGate(200, { ok: true, data: { items: [1] } }, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "confirmed-success" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "confirmed-success-test-token",
+      });
+      assert.deepEqual(result, { ok: true, data: { items: [1] } });
+      assert.equal(calls(), 1);
+    });
+  });
+});
+
 describe("callTool", () => {
   it("resolves ok:false for non-serializable args instead of rejecting", async () => {
     process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";

@@ -354,11 +354,13 @@ export async function callTool(
     if (json.errorMessage && json.ok === false) {
       return fail(json.errorMessage);
     }
-    if (status >= 400 && json.ok !== true) {
+    if (status >= 400) {
       return fail(json.errorMessage ?? `HTTP ${status}`);
     }
-    if (json.ok === false) {
-      return fail(json.errorMessage ?? "tool error");
+    // An empty/partial 2xx response is not confirmation that a connector
+    // tool ran successfully. Require the gateway's explicit success marker.
+    if (json.ok !== true) {
+      return fail(json.errorMessage ?? "Connector gate returned no success confirmation");
     }
     return { ok: true, data: json.data ?? null };
   } catch (e) {
