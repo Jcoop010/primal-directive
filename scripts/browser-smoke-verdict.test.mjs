@@ -414,3 +414,10 @@ test("browser-smoke file I/O only touches guarded paths", () => {
   const stats = [...src.matchAll(/statSync\(\s*([A-Za-z_$][\w$.]*)/g)].map((m) => m[1]);
   assert.deepEqual(stats, ["baselinePath"]);
 });
+
+test("browser smoke fails closed on redirected, informational, and missing statuses", () => {
+  for (const status of [0, 101, 301, 302, 307, 308, 400, 503, undefined]) {
+    assert.equal(exitCodeFor(verdict({ status }).viewports), 1, `status ${status} must fail`);
+  }
+  assert.equal(exitCodeFor(verdict().viewports), 0);
+});
