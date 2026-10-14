@@ -284,11 +284,29 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const errorStatus = typeof errorInfo.status === "string" ? errorInfo.status : "";
       const errorMessage = typeof errorInfo.message === "string" ? errorInfo.message : "";
       const quotaExhausted = rateLimited && /quota.*(exceed|exhaust)|free.tier|limit: 0|per.day|per day|billing|resource_exhausted/i.test(errorMessage + " " + errorStatus);
+      // Only retain Google-defined quota identifiers and numeric limits, never
+      // the full provider message (which may contain user/account details).
+      const details = Array.isArray(errorInfo.details) ? errorInfo.details : [];
+      const violations = details.flatMap((detail: unknown) => {
+        if (!detail || typeof detail !== "object") return [];
+        const d = detail as Record<string, unknown>;
+        return Array.isArray(d.violations) ? d.violations : [];
+      }).filter((v: unknown) => v && typeof v === "object").slice(0, 6)
+        .map((v: unknown) => {
+          const q = v as Record<string, unknown>;
+          const dims = q.quotaDimensions && typeof q.quotaDimensions === "object" ? q.quotaDimensions as Record<string, unknown> : {};
+          const safe = (x: unknown) => typeof x === "string" && /^[a-zA-Z0-9_.:/-]{1,180}$/.test(x) ? x : undefined;
+          return { metric: safe(q.quotaMetric), id: safe(q.quotaId), model: safe(dims.model), limit: safe(q.quotaValue) };
+        });
+      const retryDetail = details.find((d: unknown) => !!d && typeof d === "object" && "retryDelay" in d) as Record<string, unknown> | undefined;
+      const retryDelay = typeof retryDetail?.retryDelay === "string" && /^\\d+(?:\\.\\d+)?s$/.test(retryDetail.retryDelay)
+        ? retryDetail.retryDelay : undefined;
+      if (rateLimited) console.warn("[advisor] Gemini quota diagnostics (safe identifiers only):", JSON.stringify({ status: errorStatus, violations, retryDelay }));
       const retryHeader = res?.headers.get("retry-after");
       const retrySeconds = retryHeader && /^\\d+$/.test(retryHeader) ? Math.min(86400, Number(retryHeader)) : null;
       console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account/rate limits; never log credentials.`);
       const diagnosis = rateLimited
-        ? `Gemini rejected this request with HTTP 429. ${quotaExhausted ? "Google reports a quota or resource limit; waiting one minute may not restore daily or project quota." : "This may be temporary throttling or an exhausted quota; the server cannot confirm which without Google quota details."} ${retrySeconds ? `Google requested a retry delay of approximately ${retrySeconds} seconds.` : "No precise retry delay was provided."} The local workspace fallback is active; this turn was not answered by Gemini. Check Google AI Studio usage and limits before retrying or spending money. Live research was not verified.`
+        ? `Gemini rejected this request with HTTP 429. ${quotaExhausted ? "Google reports a quota or resource limit; waiting one minute may not restore daily or project quota." : "This may be temporary throttling or an exhausted quota; the server cannot confirm which without Google quota details."} ${retrySeconds ? `Google requested a retry delay of approximately ${retrySeconds} seconds.` : retryDelay ? `Google requested a retry delay of ${retryDelay}.` : "No precise retry delay was provided."} The local workspace fallback is active; this turn was not answered by Gemini. Check Google AI Studio usage and limits before retrying or spending money. Live research was not verified.`
         : `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.`;
       return {
         ...local,
