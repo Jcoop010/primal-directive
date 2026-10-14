@@ -22,7 +22,7 @@ function sessionCookie(headers) {
   const cookies = headers.getSetCookie?.() ?? [];
   const session = cookies
     .map((value) => value.split(";")[0])
-    .find((value) => /(?:^|\s)(?:__Secure-)?(?:better-auth\.session_token|session_token)=/.test(value));
+    .find((value) => value.startsWith("__Host-grok-auth.session_token="));
   assert.ok(session, "sign-in must set a session cookie");
   return session;
 }
