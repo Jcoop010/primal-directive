@@ -57,5 +57,10 @@ test("real workspace SQL preserves saves, isolates accounts and rejects stale ve
     );
     assert.equal((await loadAppState({})).version, 2);
     assert.equal((await loadAppState({})).state.profile.notes, "");
+    // A corrupt DB version must never masquerade as a fresh version 1.
+    await db.query("update app_state set version = 0 where user_id = $1", ["account-a"]);
+    await assert.rejects(loadAppState({}), /Stored workspace version is invalid/);
+    await db.query("update app_state set version = 2 where user_id = $1", ["account-a"]);
+    assert.equal((await loadAppState({})).version, 2);
   } finally {delete globalThis[key];await db.close();}
 });
