@@ -1,5 +1,5 @@
 type Provider = "xai" | "groq";
-const cooldowns = new Map<Provider, number>();
+const cooldowns = new Map<string, number>();
 
 export function boundedHistory(history: { role: "user" | "ai"; text: string }[]) {
   let remaining = 3000;
@@ -28,7 +28,7 @@ export function createAdvisorTransport(options: {
   fetchImpl?: typeof fetch;
   now?: () => number;
   timeoutMs?: number;
-  cooldowns?: Map<Provider, number>;
+  cooldowns?: Map<string, number>;
 } = {}) {
   const request = options.fetchImpl ?? fetch;
   const now = options.now ?? Date.now;
@@ -36,14 +36,16 @@ export function createAdvisorTransport(options: {
   const deadline = now() + (options.timeoutMs ?? 30_000);
   let attempts = 0;
   return async (provider: Provider, endpoint: string, init: RequestInit): Promise<Response> => {
-    if ((blocked.get(provider) ?? 0) > now()) {
-      return new Response(null, { status: 429, headers: { "Retry-After": String(Math.ceil(((blocked.get(provider) ?? 0) - now()) / 1000)) } });
+    const model = (() => { try { return String(JSON.parse(String(init.body)).model || "default"); } catch { return "default"; } })();
+    const cooldownKey = `${provider}:${model}`;
+    if ((blocked.get(cooldownKey) ?? 0) > now()) {
+      return new Response(null, { status: 429, headers: { "Retry-After": String(Math.ceil(((blocked.get(cooldownKey) ?? 0) - now()) / 1000)) } });
     }
     if (attempts >= 2 || now() >= deadline) throw new Error("Advisor request budget exhausted");
     attempts += 1;
     const signal = AbortSignal.timeout(Math.max(1, deadline - now()));
     const response = await request(endpoint, { ...init, signal });
-    if (response.status === 429) blocked.set(provider, now() + retryAfterMs(response.headers.get("retry-after"), now()));
+    if (response.status === 429) blocked.set(cooldownKey, now() + retryAfterMs(response.headers.get("retry-after"), now()));
     // Consume the body while the timeout still applies. A synthetic Response
     // keeps parsing predictable and avoids a hanging stream after fetch resolves.
     const text = await response.text();
