@@ -192,29 +192,10 @@ const FAILURE_MEMO_TTL_MS = 5_000;
 const failureMemo = new Map<string, { at: number; result: CallToolResult }>();
 
 function tokenIdentityKey(token: string): string {
-  const payload = token.split(".")[1];
-  if (payload) {
-    try {
-      const claims: unknown = JSON.parse(
-        Buffer.from(payload, "base64url").toString("utf8"),
-      );
-      if (claims && typeof claims === "object" && !Array.isArray(claims)) {
-        const { sub, team_id: teamId } = claims as {
-          sub?: unknown;
-          team_id?: unknown;
-        };
-        if (typeof sub === "string" && sub) {
-          return createHash("sha256")
-            .update(
-              JSON.stringify([sub, typeof teamId === "string" ? teamId : null]),
-            )
-            .digest("base64url");
-        }
-      }
-    } catch {
-      // Malformed token payload: fall back to hashing the full token.
-    }
-  }
+  // Token claims are not verified here: distinct bearer tokens can declare
+  // the same sub/team_id. Cache failures per credential, not per claimed user,
+  // so one token cannot poison another credential's short-lived failure cache.
+  // Only the digest is stored; never retain or log the raw bearer token.
   return createHash("sha256").update(token).digest("base64url");
 }
 
