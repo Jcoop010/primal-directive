@@ -242,6 +242,27 @@ describe("connector gateway success validation", () => {
   });
 });
 
+describe("connector error confidentiality", () => {
+  it("does not echo untrusted non-JSON gateway response contents", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const originalFetch = globalThis.fetch;
+    const secret = "SENSITIVE_GATEWAY_BODY_DO_NOT_ECHO";
+    globalThis.fetch = (async () => new Response(`Gateway broke: ${secret}`, { status: 502 })) as typeof fetch;
+    try {
+      const result = await callTool("google_drive_search", { q: "redaction-case" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "redaction-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /invalid JSON.*HTTP 502/);
+      assert.doesNotMatch(result.errorMessage ?? "", /SENSITIVE_GATEWAY_BODY_DO_NOT_ECHO/);
+    } finally {
+      globalThis.fetch = originalFetch;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
+  });
+});
+
 describe("callTool", () => {
   it("resolves ok:false for non-serializable args instead of rejecting", async () => {
     process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
