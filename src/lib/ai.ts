@@ -293,30 +293,6 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       }
     }
 
-    // A live-search request can be rejected even when ordinary chat works.
-    // Retry once without search so the user still gets model reasoning, while
-    // explicitly disabling any claim of live verification.
-    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && (!res || res.status === 400)) {
-      console.warn("[advisor] Groq live search failed or timed out; retrying without live search.");
-      searchUsed = false;
-      try {
-        res = await complete({ request,
-          apiKey: groqKey || apiKey,
-          messages: [
-            ...messages,
-            {
-              role: "system",
-              content: "The live browser-search request failed. Answer using only supplied workspace context and general strategy. Do not claim to have searched the web, do not invent source URLs, and clearly label current venue/contact/event facts as unverified."
-            }
-          ],
-          search: false,
-          provider: "groq",
-        });
-      } catch {
-        res = null;
-      }
-    }
-
     // A smaller Groq model has a separate model-specific token budget.
     // Try it once after a 429, with a compact no-search prompt; never imply
     // that this fallback verified current venues or booking contacts.
@@ -341,6 +317,30 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         }
       } catch {
         // Preserve the rate-limit fallback when the smaller model is unavailable.
+      }
+    }
+
+    // A live-search request can be rejected even when ordinary chat works.
+    // Retry once without search so the user still gets model reasoning, while
+    // explicitly disabling any claim of live verification.
+    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && (!res || res.status === 400)) {
+      console.warn("[advisor] Groq live search failed or timed out; retrying without live search.");
+      searchUsed = false;
+      try {
+        res = await complete({ request,
+          apiKey: groqKey || apiKey,
+          messages: [
+            ...messages,
+            {
+              role: "system",
+              content: "The live browser-search request failed. Answer using only supplied workspace context and general strategy. Do not claim to have searched the web, do not invent source URLs, and clearly label current venue/contact/event facts as unverified."
+            }
+          ],
+          search: false,
+          provider: "groq",
+        });
+      } catch {
+        res = null;
       }
     }
 
