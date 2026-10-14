@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { authMiddleware } from "@/lib/auth/middleware";
+import { boundedHistory, createAdvisorTransport, readProviderBody, providerContent } from "@/lib/ai-transport";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import { normalizeCitationUrls } from "@/lib/ai-citations";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
@@ -7,11 +9,11 @@ import { GIG_STATUSES, PERSON_ROLES } from "@/lib/types";
 
 const HistoryItem = z.object({
   role: z.enum(["user", "ai"]),
-  text: z.string(),
+  text: z.string().max(20000),
 });
 
 const Input = z.object({
-  message: z.string().min(1).max(2000),
+  message: z.string().trim().min(1).max(2000),
   history: z.array(HistoryItem).max(10),
   context: z.string().max(16000),
 });
@@ -36,7 +38,7 @@ const PersonOut = z.object({
 });
 
 const AiJson = z.object({
-  answer: z.string(),
+  answer: z.string().trim().min(1).max(20000),
   citations: z.array(z.string()).optional(),
   gigs: z.array(GigOut).optional(),
   people: z.array(PersonOut).optional(),
@@ -121,7 +123,7 @@ function citationsFrom(body: Record<string, unknown>): string[] {
   const bags: unknown[] = [];
   if (Array.isArray(body.citations)) bags.push(...body.citations);
   const choices = body.choices as Array<{ message?: { citations?: unknown } }> | undefined;
-  const msgCites = choices?.[0]?.message?.citations;
+  const msgCites = Array.isArray(choices) ? choices[0]?.message?.citations : undefined;
   if (Array.isArray(msgCites)) bags.push(...msgCites);
   return normalizeCitationUrls(bags);
 }
@@ -140,6 +142,7 @@ async function complete(args: {
   search: boolean;
   provider: "xai" | "groq";
   jsonOnly?: boolean;
+  request: ReturnType<typeof createAdvisorTransport>;
 }) {
   const body: Record<string, unknown> = {
     model: args.provider === "groq" ? "openai/gpt-oss-120b" : "grok-4.7",
@@ -148,7 +151,7 @@ async function complete(args: {
   };
   // Groq's current API uses max_completion_tokens for GPT-OSS requests;
   // xAI retains max_tokens in this compatibility wrapper.
-  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = 2400;
+  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = 1800;
   // JSON mode is reserved for the repair attempt so the provider is constrained
   // by the API as well as the prompt when its first answer was malformed.
   if (args.jsonOnly) {
@@ -184,7 +187,7 @@ async function complete(args: {
   const endpoint = args.provider === "groq"
     ? "https://api.groq.com/openai/v1/chat/completions"
     : "https://api.x.ai/v1/chat/completions";
-  const res = await fetch(endpoint, {
+  const res = await args.request(args.provider, endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -197,12 +200,14 @@ async function complete(args: {
 }
 
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
     // Prefer xAI if the user already configured it; otherwise use Groq's free
     // API tier. No paid provider is required to enable AI responses.
-    const xaiKey = process.env.XAI_API_KEY;
-    const groqKey = process.env.GROQ_API_KEY;
+    const request = createAdvisorTransport();
+    const xaiKey = process.env.XAI_API_KEY?.trim();
+    const groqKey = process.env.GROQ_API_KEY?.trim();
     const provider: "xai" | "groq" | null = xaiKey ? "xai" : groqKey ? "groq" : null;
     const apiKey = provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
     const searchRequested = shouldSearchWeb(data.message, data.history);
@@ -233,6 +238,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
+    // Bound total context instead of sending eight full-length model answers.
+    // This reduces token-limit failures; it does not bypass provider quotas.
+    const advisorContext = data.context.length > 6000
+      ? data.context.slice(0, 5900) + "\n[Workspace excerpt truncated; do not assume omitted records are absent.]"
+      : data.context;
     const messages = [
       { role: "system", content: SYSTEM },
       ...(provider === "groq" && !searchRequested ? [{
@@ -245,12 +255,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       }] : []),
       {
         role: "system",
-        content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${data.context}`,
+        content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${advisorContext}`,
       },
-      ...data.history.slice(-8).map((h) => ({
-        role: h.role === "ai" ? "assistant" : "user",
-        content: h.text,
-      })),
+      ...boundedHistory(data.history),
       { role: "user", content: data.message },
     ];
 
@@ -259,9 +266,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let res: Response | null = null;
 
     try {
-      res = await complete({ apiKey, messages, search: searchRequested, provider });
-      if (!res.ok && provider === "xai") {
-        res = await complete({ apiKey, messages, search: false, provider });
+      res = await complete({ request, apiKey, messages, search: searchRequested, provider });
+      if (res.status === 400 && provider === "xai" && searchRequested) {
+        searchUsed = false;
+        res = await complete({ request, apiKey, messages, search: false, provider });
       }
     } catch {
       // A provider/network exception should still allow the other configured provider.
@@ -272,7 +280,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     if ((!res || !res.ok) && provider === "xai" && groqKey) {
       activeProvider = "groq";
       try {
-        res = await complete({
+        res = await complete({ request,
           apiKey: groqKey,
           messages: [
             ...messages,
@@ -294,11 +302,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // A live-search request can be rejected even when ordinary chat works.
     // Retry once without search so the user still gets model reasoning, while
     // explicitly disabling any claim of live verification.
-    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && (!res || res.status === 400)) {
+    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && res?.status === 400) {
       console.warn("[advisor] Groq rejected browser search (HTTP 400); retrying without live search.");
       searchUsed = false;
       try {
-        res = await complete({
+        res = await complete({ request,
           apiKey: groqKey || apiKey,
           messages: [
             ...messages,
@@ -321,7 +329,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const rateLimited = res?.status === 429;
       console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account/rate limits; never log credentials.`);
       const diagnosis = rateLimited
-        ? `The ${activeProvider} AI provider rejected this request with HTTP 429 (rate limit or quota limit). The local workspace fallback is active, so your saved records remain available, but this turn was not answered by the AI model. Wait for the provider limit window to reset and retry, or configure another provider key you already have access to. Check usage limits before considering any paid upgrade. Live research was not verified.`
+        ? `The ${activeProvider} AI provider rejected this request with HTTP 429 (rate limit or quota limit). The local workspace fallback is active, so your saved records remain available, but this turn was not answered by the AI model. This server pauses new calls to this provider for the reported retry window (at least one minute). Wait before retrying, or configure another provider key you already have access to. Check usage limits before considering any paid upgrade. Live research was not verified.`
         : `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.`;
       return {
         ...local,
@@ -339,12 +347,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-    let body = (await res.json()) as Record<string, unknown>;
+    let body = await readProviderBody(res);
     const readSafeAnswer = (value: Record<string, unknown>) => {
-      const choices = value.choices as
-        | Array<{ message?: { content?: string } }>
-        | undefined;
-      const raw = choices?.[0]?.message?.content ?? "";
+      const raw = providerContent(value);
       const parsed = extractJson(raw);
       return { raw, safe: parsed ? AiJson.safeParse(parsed) : null };
     };
@@ -359,7 +364,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const retryKey = retryProvider === "groq" ? groqKey || apiKey : apiKey;
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
-        const retry = await complete({
+        const retry = await complete({ request,
           apiKey: retryKey,
           messages: [
             ...messages,
@@ -373,7 +378,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           jsonOnly: true,
         });
         if (retry.ok) {
-          const retryBody = (await retry.json()) as Record<string, unknown>;
+          const retryBody = await readProviderBody(retry);
           const retryParsed = readSafeAnswer(retryBody);
           if (retryParsed.safe?.success) {
             body = retryBody;

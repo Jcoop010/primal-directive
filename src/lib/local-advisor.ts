@@ -41,7 +41,7 @@ function parseLinkedMoneyLedger(context: string): LinkedMoneyRecord[] {
   const records: LinkedMoneyRecord[] = [];
 
   for (const line of section.split("\n")) {
-    const match = line.match(/^- date:([^|]*) \| type:(collected|outstanding|cost) \| amount:(-?\d+(?:\.\d+)?) \| gigId:([^|]+) \| gig:([^|]+) \| label:(.*)$/);
+    const match = line.match(/^- date:([^|]*) \| type:(collected|outstanding|cost) \| amount:(-?\d+(?:\.\d+)?) \| gigId:([^|]+) \| gig:([^|]+) \| (?:member:[^|]* \| )?label:(.*)$/);
     if (!match) continue;
     const amount = Number(match[3]);
     const gigId = match[4].trim();
@@ -66,11 +66,11 @@ function parseLinkedMoneyLedger(context: string): LinkedMoneyRecord[] {
  */
 export function localGrowthAdvice(message: string, context: string): LocalAdvice {
   const q = message.toLowerCase();
-  const artist = pick(context, /^ARTIST:\s*(.*)$/m);
-  const home = pick(context, /^HOME:\s*(.*)$/m);
-  const genre = pick(context, /^GENRE:\s*(.*)$/m);
-  const draw = pick(context, /^TYPICAL DRAW:\s*(.*)$/m);
-  const fee = pick(context, /^FEE TARGET:\s*(.*)$/m);
+  const artist = pick(context, /^ARTIST:[ \t]*([^\r\n]*)$/m);
+  const home = pick(context, /^HOME:[ \t]*([^\r\n]*)$/m);
+  const genre = pick(context, /^GENRE:[ \t]*([^\r\n]*)$/m);
+  const draw = pick(context, /^TYPICAL DRAW:[ \t]*([^\r\n]*)$/m);
+  const fee = pick(context, /^FEE TARGET:[ \t]*([^\r\n]*)$/m);
   const pipeline = parsePipeline(context);
   const bestOpen = pipeline
     .filter((item) => OPEN_STATUSES.has(item.status))

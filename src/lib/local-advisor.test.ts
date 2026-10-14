@@ -2,6 +2,17 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { localGrowthAdvice } from "./local-advisor.ts";
 
+test("blank profile fields never consume the next field label", () => {
+  const result = localGrowthAdvice("grow local draw", "ARTIST: \nHOME: \nGENRE: \nTYPICAL DRAW: \nFEE TARGET: $0\n");
+  assert.doesNotMatch(result.answer, /HOME:|GENRE:|TYPICAL DRAW:|FEE TARGET:/);
+});
+
+test("gig financial fallback accepts the current ledger's member field", () => {
+  const result = localGrowthAdvice("profit by gig", "MONEY LEDGER (app records):\n- date:2026-10-14 | type:collected | amount:500 | gigId:show-1 | gig:Real show | member:none | label:Fee\n- date:2026-10-14 | type:cost | amount:100 | gigId:show-1 | gig:Real show | member:none | label:Travel\n\n");
+  assert.match(result.answer, /Real show/);
+  assert.match(result.answer, /400/);
+});
+
 const financialContext = `ARTIST: Example Band
 HOME: Parkersburg, WV
 GENRE: Jam
