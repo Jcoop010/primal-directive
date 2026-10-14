@@ -149,7 +149,7 @@ async function complete(args: {
 }) {
   if (args.provider === "gemini") {
     const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 4096, responseMimeType: args.search ? undefined : "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
+    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2048, ...(args.search ? {} : { responseMimeType: "application/json" }) }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
     return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
   const body: Record<string, unknown> = {
@@ -314,9 +314,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     };
     let { safe } = readSafeAnswer(body);
 
-    // Providers occasionally return truncated or non-JSON text despite HTTP 200.
-    // Retry once with a compact, JSON-only request and no live search; if xAI's
-    // format fails, use the already-configured Groq key before falling back.
+    // Do not retry malformed Gemini answers: conserve quota and use local fallback.
     if (!safe?.success) {
       const retryProvider: "gemini" | "xai" | "groq" = activeProvider;
       const retryKey = apiKey;
@@ -356,7 +354,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
-        answer: "The AI provider responded, but its answer was not usable. I retried once with a stricter JSON-only request and without live search; that retry did not produce a valid answer either. I’m using conservative workspace rules instead. Live research was not verified.\n\n" + local.answer,
+        answer: "The AI provider responded, but its answer was not usable. I did not send another AI request, to conserve quota. I’m using conservative workspace rules instead. Live research was not verified.\n\n" + local.answer,
       };
     }
 
