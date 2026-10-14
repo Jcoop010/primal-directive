@@ -48,7 +48,9 @@ const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? (allowPreviewOAuthFal
 // Email/password is a first-party production auth path and does not depend
 // on the optional OAuth broker credentials. Keep OAuth gated separately.
 const oauthConfigured = Boolean(grokClientId && grokClientSecret);
-export const authConfigured = !authDisabled && (emailAndPasswordEnabled || oauthConfigured);
+const googleOAuthConfigured = Boolean(env("GOOGLE_CLIENT_ID") && env("GOOGLE_CLIENT_SECRET"));
+const xOAuthConfigured = Boolean(env("TWITTER_CLIENT_ID") && env("TWITTER_CLIENT_SECRET"));
+export const authConfigured = !authDisabled && (emailAndPasswordEnabled || oauthConfigured || googleOAuthConfigured || xOAuthConfigured);
 
 const explicitBaseURL = env("BETTER_AUTH_URL");
 const originForHost = (value: string): string => {
