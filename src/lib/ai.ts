@@ -147,7 +147,7 @@ async function complete(args: {
   };
   // Groq's current API uses max_completion_tokens for GPT-OSS requests;
   // xAI retains max_tokens in this compatibility wrapper.
-  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = 3600;
+  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = args.jsonOnly ? 1400 : 2200;
   // JSON mode is reserved for the repair attempt so the provider is constrained
   // by the API as well as the prompt when its first answer was malformed.
   if (args.jsonOnly) {
@@ -235,7 +235,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // Bound total context instead of sending eight full-length model answers.
     // This reduces token-limit failures; it does not bypass provider quotas.
-    const advisorContext = advisorWorkspaceContext(data.context);
+    const advisorContext = advisorWorkspaceContext(data.context).slice(0, 4800);
     const messages = [
       { role: "system", content: SYSTEM },
       ...(provider === "groq" && !searchRequested ? [{
@@ -250,7 +250,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${advisorContext}`,
       },
-      ...boundedHistory(data.history),
+      ...boundedHistory(data.history).slice(-4),
       { role: "user", content: data.message },
     ];
 
@@ -363,7 +363,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           // contract can exhaust the provider's completion/reasoning budget.
           messages: [
             { role: "system", content: "Answer the user's question clearly. Return ONLY a valid JSON object with keys answer (nonempty string), citations (empty array), gigs (empty array), people (empty array), moves (array of up to 3 short strings). Do not claim live web verification. Do not invent external facts." },
-            { role: "system", content: "Artist workspace context (user-recorded, not independently verified):\\n" + advisorContext.slice(0, 9000) },
+            { role: "system", content: "Artist workspace context (user-recorded, not independently verified):\\n" + advisorContext.slice(0, 4000) },
             ...boundedHistory(data.history).slice(-4),
             { role: "user", content: data.message },
           ],
