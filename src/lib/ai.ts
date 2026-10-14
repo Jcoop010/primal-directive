@@ -265,7 +265,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     try {
       res = await complete({ request, apiKey, messages, search: searchRequested, provider });
-      if (res.status === 400 && provider === "xai" && searchRequested) {
+      if (res.status === 400 && searchRequested && (provider === "xai" || provider === "groq")) {
+        // Search tooling may be unsupported for the selected account/model.
+        // Retry without web tools before exhausting another provider.
         searchUsed = false;
         res = await complete({ request, apiKey, messages, search: false, provider });
       }
@@ -295,11 +297,12 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       }
     }
 
-    if (provider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
+    if (activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
     if (!res?.ok) {
       const local = fallback();
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
       const rateLimited = res?.status === 429;
+      const failedProvider = activeProvider;
       const providerError = res ? await readProviderBody(res) : {};
       const errorInfo = providerError.error && typeof providerError.error === "object"
         ? providerError.error as Record<string, unknown> : {};
@@ -328,7 +331,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const retrySeconds = retryHeader && /^\\d+$/.test(retryHeader) ? Math.min(86400, Number(retryHeader)) : null;
       console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account/rate limits; never log credentials.`);
       const diagnosis = rateLimited
-        ? `Gemini rejected this request with HTTP 429. ${quotaExhausted ? "Google reports a quota or resource limit; waiting one minute may not restore daily or project quota." : "This may be temporary throttling or an exhausted quota; the server cannot confirm which without Google quota details."} ${retrySeconds ? `Google requested a retry delay of approximately ${retrySeconds} seconds.` : retryDelay ? `Google requested a retry delay of ${retryDelay}.` : "No precise retry delay was provided."} The local workspace fallback is active; this turn was not answered by Gemini. Check Google AI Studio usage and limits before retrying or spending money. Live research was not verified.`
+        ? `${failedProvider.toUpperCase()} rejected this request with HTTP 429. ${quotaExhausted ? "The provider reports a quota or resource limit; waiting one minute may not restore daily or project quota." : "This may be temporary throttling or an exhausted quota; the server cannot confirm which without Google quota details."} ${retrySeconds ? `The provider requested a retry delay of approximately ${retrySeconds} seconds.` : retryDelay ? `The provider requested a retry delay of ${retryDelay}.` : "No precise retry delay was provided."} The local workspace fallback is active; this turn was not answered by the AI provider. Check the configured provider usage and limits before retrying or spending money. Live research was not verified.`
         : `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.`;
       return {
         ...local,
