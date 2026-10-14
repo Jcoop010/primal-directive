@@ -206,7 +206,7 @@ export const saveAppState = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const sql = await getSql();
     const serialized = JSON.stringify(data.state);
-    if (serialized.length > 2_000_000) {
+    if (new TextEncoder().encode(serialized).byteLength > 2_000_000) {
       throw new Error("App state exceeds the 2 MB safety limit");
     }
 
