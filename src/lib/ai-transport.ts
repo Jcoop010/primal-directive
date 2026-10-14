@@ -46,7 +46,15 @@ export function createAdvisorTransport(options: {
     if (response.status === 429) blocked.set(provider, now() + retryAfterMs(response.headers.get("retry-after"), now()));
     // Consume the body while the timeout still applies. A synthetic Response
     // keeps parsing predictable and avoids a hanging stream after fetch resolves.
-    const text = await response.text();
+    // Preserve a rate-limit diagnosis even when the provider response body
+    // stream fails after the HTTP 429 status has arrived.
+    let text: string;
+    try {
+      text = await response.text();
+    } catch (error) {
+      if (response.status !== 429) throw error;
+      text = "";
+    }
     return new Response(text || null, { status: response.status, headers: response.headers });
   };
 }
