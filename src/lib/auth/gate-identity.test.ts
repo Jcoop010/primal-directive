@@ -200,7 +200,7 @@ describe("verifyGateIdentityToken", () => {
     try {
       Date.now = () => actualNow() + 301_000;
       await assert.rejects(
-        resolver({ alg: "EdDSA", kid: key.kid }, {} as never),
+        async () => resolver({ alg: "EdDSA", kid: key.kid }, {} as never),
         /no gate identity key matches/,
       );
     } finally {
