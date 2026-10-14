@@ -215,9 +215,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const xaiKey = process.env.XAI_API_KEY?.trim();
-    const groqKey = process.env.GROQ_API_KEY?.trim();
-    const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : groqKey ? "groq" : null;
-    const apiKey = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
+    const groqKey = undefined; // Groq disabled by request; never use its credential.
+    const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : null;
+    const apiKey = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : undefined;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
@@ -281,7 +281,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // A provider/network exception should still allow the other configured provider.
     }
 
-    // If xAI is configured but unavailable, use Groq when its free-tier key exists.
+    if (provider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
+    // Groq has been disabled.
     // Keep the no-web-search limitation explicit so fallback answers never imply live research.
     if ((!res || !res.ok) && provider !== "groq" && groqKey) {
       activeProvider = "groq";
@@ -392,8 +393,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // Retry once with a compact, JSON-only request and no live search; if xAI's
     // format fails, use the already-configured Groq key before falling back.
     if (!safe?.success) {
-      const retryProvider: "gemini" | "xai" | "groq" =
-        activeProvider !== "groq" && groqKey ? "groq" : activeProvider;
+      const retryProvider: "gemini" | "xai" | "groq" = activeProvider;
       const retryKey = retryProvider === "groq" ? groqKey || apiKey : apiKey;
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
