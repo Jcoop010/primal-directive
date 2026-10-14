@@ -38,6 +38,10 @@ function AdvisorPage() {
   const ingestSuggestedGig = useMusician((s) => s.ingestSuggestedGig);
   const ingestSuggestedPerson = useMusician((s) => s.ingestSuggestedPerson);
   const clearChat = useMusician((s) => s.clearChat);
+  const resetSample = useMusician((s) => s.resetSample);
+  const profile = useMusician((s) => s.profile);
+  const gigs = useMusician((s) => s.gigs);
+  const people = useMusician((s) => s.people);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
@@ -101,6 +105,18 @@ function AdvisorPage() {
             <button
               type="button"
               onClick={() => {
+                if (!window.confirm("Load fictional demo artist River Fold? This replaces your current local workspace, including gigs, contacts, finances, merch, tasks, and chat. This cannot be undone.")) return;
+                resetSample();
+                toast.success("Fictional demo workspace loaded. Ask the Advisor to analyze River Fold.");
+              }}
+              disabled={busy}
+              className="rounded-md border border-live/40 bg-live/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-live hover:bg-live/20 disabled:opacity-50"
+            >
+              Load demo artist
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 clearChat();
                 toast("Thread cleared");
               }}
@@ -114,6 +130,9 @@ function AdvisorPage() {
           </div>
         </div>
 
+        <div className="border-b border-line px-4 py-2 text-xs text-muted">
+          {profile.artistName ? <span>Workspace: <strong className="text-fg">{profile.artistName}</strong> · {gigs.length} shows · {people.length} contacts {profile.artistName === "River Fold" ? "· FICTIONAL SAMPLE DATA" : ""}</span> : <span>No artist profile loaded. Use <strong>Load demo artist</strong> to explore the product with fictional data.</span>}
+        </div>
         <div ref={scroller} className="flex-1 space-y-3 overflow-y-auto px-3 py-4">
           {chat.map((m) => (
             <div
