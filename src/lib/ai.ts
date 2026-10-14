@@ -251,11 +251,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const advisorContext = advisorWorkspaceContext(data.context);
     const messages = [
       { role: "system", content: SYSTEM },
-      ...(provider === "groq" && !searchRequested ? [{
+      ...(false ? [{
         role: "system",
         content: "PROVIDER LIMITATION: No browser search was enabled for this turn. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
       }] : []),
-      ...(provider === "groq" && searchRequested ? [{
+      ...(false ? [{
         role: "system",
         content: "BROWSER SEARCH ENABLED: Use the built-in browser_search tool for current external claims. Include direct HTTPS URLs in the citations array only when they were actually returned by the search results. Never invent a source, contact, event, date, availability, guarantee, or statistic. If search results do not verify a detail, say so plainly."
       }] : []),
@@ -282,30 +282,6 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     }
 
     if (provider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
-    // Groq has been disabled.
-    // Keep the no-web-search limitation explicit so fallback answers never imply live research.
-    if ((!res || !res.ok) && provider !== "groq" && groqKey) {
-      activeProvider = "groq";
-      try {
-        res = await complete({ request,
-          apiKey: groqKey,
-          messages: [
-            ...messages,
-            {
-              role: "system",
-              content: searchRequested
-                ? "BROWSER SEARCH ENABLED: Use the built-in browser_search tool for current external claims. Include direct HTTPS URLs in the citations array only when they were actually returned by the search results. Never invent sources or unverified booking facts."
-                : "PROVIDER LIMITATION: No browser search was enabled for this turn. Do not claim to have searched the web or invent source URLs. Clearly label current external facts as unverified."
-            }
-          ],
-          search: searchRequested,
-          provider: "groq",
-        });
-      } catch {
-        res = null;
-      }
-    }
-
     // A live-search request can be rejected even when ordinary chat works.
     // Retry once without search so the user still gets model reasoning, while
     // explicitly disabling any claim of live verification.
