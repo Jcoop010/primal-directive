@@ -22,6 +22,12 @@ async function createAccount(index) {
     await page.getByPlaceholder("Password (8+ characters)").fill(password);
     await page.getByRole("button", { name: "Create account" }).last().click();
     await page.getByRole("heading", { name: "Command Center" }).waitFor({ timeout: 20_000 });
+    const browserCookies = (await context.cookies(base)).map(({ name, secure, sameSite }) => ({ name, secure, sameSite }));
+    assert.ok(browserCookies.some((cookie) => cookie.name.endsWith("session_token")),
+      `browser rejected session cookie after signup: ${JSON.stringify(browserCookies)}`);
+    const beforeReload = await context.request.get(`${base}/api/auth/get-session`);
+    const beforeSession = await beforeReload.json().catch(() => null);
+    assert.equal(beforeSession?.user?.email, email, "session must be authenticated immediately after sign-up");
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.getByRole("heading", { name: "Command Center" }).waitFor({ timeout: 20_000 });
     const gigsResponse = await page.goto(`${base}/gigs`, { waitUntil: "domcontentloaded" });
