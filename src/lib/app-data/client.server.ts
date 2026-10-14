@@ -215,6 +215,7 @@ function crossSiteBlockedResult(): CallToolResult | null {
 }
 
 const FAILURE_MEMO_TTL_MS = 5_000;
+const FAILURE_MEMO_MAX_ENTRIES = 1_000;
 const failureMemo = new Map<string, { at: number; result: CallToolResult }>();
 
 function tokenIdentityKey(token: string): string {
@@ -245,7 +246,15 @@ function memoizeFailure(
   for (const [staleKey, entry] of failureMemo) {
     if (now - entry.at > FAILURE_MEMO_TTL_MS) failureMemo.delete(staleKey);
   }
+  // Bound short-lived failures even when every request has a unique cache key.
+  // Map iteration preserves insertion order, so evict the oldest entry first.
+  failureMemo.delete(key);
   failureMemo.set(key, { at: now, result });
+  while (failureMemo.size > FAILURE_MEMO_MAX_ENTRIES) {
+    const oldest = failureMemo.keys().next().value;
+    if (oldest === undefined) break;
+    failureMemo.delete(oldest);
+  }
   return result;
 }
 
