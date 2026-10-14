@@ -190,7 +190,6 @@ async function complete(args: {
       Authorization: `Bearer ${args.apiKey}`,
     },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(45_000),
   });
   return res;
 }
@@ -201,7 +200,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
     // Prefer xAI if the user already configured it; otherwise use Groq's free
     // API tier. No paid provider is required to enable AI responses.
-    const request = createAdvisorTransport();
+    const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const xaiKey = process.env.XAI_API_KEY?.trim();
     const groqKey = process.env.GROQ_API_KEY?.trim();
     const provider: "xai" | "groq" | null = xaiKey ? "xai" : groqKey ? "groq" : null;
@@ -296,8 +295,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // A live-search request can be rejected even when ordinary chat works.
     // Retry once without search so the user still gets model reasoning, while
     // explicitly disabling any claim of live verification.
-    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && res?.status === 400) {
-      console.warn("[advisor] Groq rejected browser search (HTTP 400); retrying without live search.");
+    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && (!res || res.status === 400)) {
+      console.warn("[advisor] Groq live search failed or timed out; retrying without live search.");
       searchUsed = false;
       try {
         res = await complete({ request,
