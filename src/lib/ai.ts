@@ -142,7 +142,7 @@ async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
   search: boolean;
-  provider: "xai" | "gemini";
+  provider: "gemini";
   jsonOnly?: boolean;
   request: ReturnType<typeof createAdvisorTransport>;
 }) {
@@ -151,35 +151,7 @@ async function complete(args: {
     const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2048, ...(args.search ? {} : { responseMimeType: "application/json" }) }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
     return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
-  const body: Record<string, unknown> = {
-    model: "grok-4.7",
-    messages: args.messages,
-    temperature: 0.2,
-  };
-  body.max_tokens = args.jsonOnly ? 1400 : 2200;
-  // JSON mode is reserved for the repair attempt so the provider is constrained
-  // by the API as well as the prompt when its first answer was malformed.
-  if (args.jsonOnly) {
-    body.response_format = { type: "json_object" };
-  }
-  if (args.search && args.provider === "xai") {
-    body.search_parameters = {
-      mode: "on",
-      return_citations: true,
-      max_search_results: 8,
-      sources: [{ type: "web" }, { type: "news" }],
-    };
-  }
-  const endpoint = "https://api.x.ai/v1/chat/completions";
-  const res = await args.request(args.provider, endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${args.apiKey}`,
-    },
-    body: JSON.stringify(body),
-  });
-  return res;
+  throw new Error("Unsupported AI provider");
 }
 
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
@@ -188,9 +160,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
-    const xaiKey = process.env.XAI_API_KEY?.trim();
-    const provider: "gemini" | "xai" | null = xaiKey ? "xai" : geminiKey ? "gemini" : null;
-    const apiKey: string | undefined = provider === "xai" ? xaiKey : geminiKey;
+    const provider: "gemini" = "gemini";
+    const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
@@ -232,45 +203,15 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let activeProvider: "gemini" | "xai" = provider;
+    let activeProvider: "gemini" = provider;
     let searchUsed = searchRequested;
     let res: Response | null = null;
 
     try {
       res = await complete({ request, apiKey, messages, search: searchRequested, provider });
-      if (res.status === 400 && searchRequested && provider === "xai") {
-        // Search tooling may be unsupported for the selected account/model.
-        // Retry without web tools before exhausting another provider.
-        searchUsed = false;
-        res = await complete({ request, apiKey, messages, search: false, provider });
-      }
+
     } catch {
       // A provider/network exception should still allow the other configured provider.
-    }
-
-    if (!res?.ok) {
-      for (const next of (["xai", "gemini"] as const)) {
-        if (next === activeProvider) continue;
-        if (next === "gemini" && res?.status === 429) continue; // Do not repeatedly call a known quota-limited Gemini project.
-        const key = next === "xai" ? xaiKey : geminiKey;
-        if (!key) continue;
-        try {
-          const response = await complete({
-            request, apiKey: key, messages, provider: next,
-            search: searchRequested,
-          });
-          if (response.ok) {
-            res = response;
-            activeProvider = next;
-            searchUsed = searchRequested;
-            break;
-          }
-          console.warn(`[advisor] ${next} alternate provider failed: HTTP ${response.status}.`);
-        } catch {
-          console.warn(`[advisor] ${next} alternate provider network failure.`);
-          // Try the next configured provider.
-        }
-      }
     }
 
     if (activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
@@ -335,8 +276,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // Do not retry malformed Gemini answers: conserve quota and use local fallback.
     if (!safe?.success) {
-      const retryProvider: "gemini" | "xai" = activeProvider;
-      const retryKey = activeProvider === "xai" ? xaiKey : geminiKey;
+      const retryProvider: "gemini" = activeProvider;
+      const retryKey = geminiKey;
       if (!retryKey) return fallback();
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
