@@ -473,9 +473,12 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           detail: p.detail,
           reason: p.reason,
         }));
+      const verifiedAnswer = searchRequested && citations.length === 0
+        ? "LIVE RESEARCH NOT VERIFIED: The AI provider did not return usable source URLs. The following response is an unverified draft, not a verified venue or contact list. Do not rely on venue capacities, booking contacts, dates, or claims until checked against official sources.\n\n" + safe.data.answer.replace(/【[^】]+】/g, "[unverified citation removed]")
+        : safe.data.answer;
       return {
         ok: true,
-        answer: safe.data.answer,
+        answer: verifiedAnswer,
         source,
         citations,
         gigs,
