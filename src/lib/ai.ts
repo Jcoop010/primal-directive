@@ -147,7 +147,7 @@ async function complete(args: {
   };
   // Groq's current API uses max_completion_tokens for GPT-OSS requests;
   // xAI retains max_tokens in this compatibility wrapper.
-  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = 1800;
+  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = 3600;
   // JSON mode is reserved for the repair attempt so the provider is constrained
   // by the API as well as the prompt when its first answer was malformed.
   if (args.jsonOnly) {
@@ -360,12 +360,13 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       try {
         const retry = await complete({ request,
           apiKey: retryKey,
+          // Repair with a small, fresh prompt: repeating the entire long system
+          // contract can exhaust the provider's completion/reasoning budget.
           messages: [
-            ...messages,
-            {
-              role: "system",
-              content: "Your previous response could not be parsed as the required JSON schema. Retry now. Return exactly one valid JSON object matching the system OUTPUT CONTRACT, with keys answer, citations, gigs, people, moves. No markdown fences or extra text. Use empty arrays where evidence is unavailable. Do not claim live research; current external facts must be marked unverified."
-            }
+            { role: "system", content: "Answer the user's question clearly. Return ONLY a valid JSON object with keys answer (nonempty string), citations (empty array), gigs (empty array), people (empty array), moves (array of up to 3 short strings). Do not claim live web verification. Do not invent external facts." },
+            { role: "system", content: "Artist workspace context (user-recorded, not independently verified):\\n" + advisorContext.slice(0, 9000) },
+            ...boundedHistory(data.history).slice(-4),
+            { role: "user", content: data.message },
           ],
           search: false,
           provider: retryProvider,
