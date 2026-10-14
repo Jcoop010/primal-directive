@@ -26,7 +26,12 @@ async function createAccount(index) {
     await page.getByRole("heading", { name: "Command Center" }).waitFor({ timeout: 20_000 });
     const gigsResponse = await page.goto(`${base}/gigs`, { waitUntil: "domcontentloaded" });
     assert.equal(gigsResponse?.status(), 200);
-    await page.getByRole("heading", { name: "Gigs", exact: true }).waitFor({ timeout: 20_000 });
+    await page.getByRole("heading", { name: "Gigs", exact: true }).waitFor({ timeout: 8_000 }).catch(async () => {
+      const pageText = (await page.locator("body").innerText()).slice(0, 450);
+      const sessionResponse = await context.request.get(`${base}/api/auth/get-session`);
+      const session = await sessionResponse.json().catch(() => null);
+      throw new Error(`protected Gigs route did not render; url=${page.url()} sessionUser=${session?.user?.email ?? "none"} body=${JSON.stringify(pageText)}`);
+    });
     return { context, page, email };
   } catch (error) {
     await context.close();
