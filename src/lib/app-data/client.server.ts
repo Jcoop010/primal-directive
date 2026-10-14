@@ -127,6 +127,14 @@ async function gatePost(
     signal: AbortSignal.timeout(15_000),
   });
 
+  // Reject redirects from the response headers before reading any body.
+  // An HTML login redirect must never stall connector calls or masquerade as
+  // a completed tool operation.
+  if (res.status >= 300 && res.status < 400) {
+    void res.body?.cancel().catch(() => undefined);
+    return { status: res.status, json: {} };
+  }
+
   let json: GateJson = {};
   // The fetch signal remains active while consuming a streaming response body.
   const maxResponseBytes = 256 * 1024;

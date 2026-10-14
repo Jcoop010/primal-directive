@@ -298,6 +298,26 @@ describe("connector JSON shape validation", () => {
   });
 });
 
+describe("connector redirect without response body", () => {
+  it("rejects a stalled 302 body without waiting for its contents", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const saved = globalThis.fetch;
+    globalThis.fetch = (async () => new Response(new ReadableStream({ start() {} }), {
+      status: 302, headers: { location: "https://example.invalid/signin" },
+    })) as typeof fetch;
+    try {
+      const result = await callTool("google_drive_search", { q: "stalled-redirect-test" }, {
+        connectorType: ConnectorType.GoogleDrive, token: "stalled-redirect-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /redirect.*HTTP 302/);
+    } finally {
+      globalThis.fetch = saved;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
+  });
+});
+
 describe("callTool", () => {
   it("resolves ok:false for non-serializable args instead of rejecting", async () => {
     process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
