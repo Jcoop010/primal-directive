@@ -124,9 +124,11 @@ async function gatePost(
     headers,
     body: JSON.stringify(body),
     redirect: "manual",
+    signal: AbortSignal.timeout(15_000),
   });
 
   let json: GateJson = {};
+  // The fetch signal remains active while consuming a streaming response body.
   const text = await res.text();
   if (text) {
     try {
