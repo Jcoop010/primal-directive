@@ -251,14 +251,6 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const advisorContext = advisorWorkspaceContext(data.context);
     const messages = [
       { role: "system", content: SYSTEM },
-      ...(false ? [{
-        role: "system",
-        content: "PROVIDER LIMITATION: No browser search was enabled for this turn. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
-      }] : []),
-      ...(false ? [{
-        role: "system",
-        content: "BROWSER SEARCH ENABLED: Use the built-in browser_search tool for current external claims. Include direct HTTPS URLs in the citations array only when they were actually returned by the search results. Never invent a source, contact, event, date, availability, guarantee, or statistic. If search results do not verify a detail, say so plainly."
-      }] : []),
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${advisorContext}`,
