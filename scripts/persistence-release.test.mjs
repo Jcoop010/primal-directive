@@ -43,5 +43,19 @@ test("real workspace SQL preserves saves, isolates accounts and rejects stale ve
     assert.equal((await loadAppState({})).state.chat.length,2);
     await assert.rejects(saveAppState({state,expectedVersion:1}),/another session/);
     assert.equal((await loadAppState({})).version,2);
+    // UTF-8 multibyte input can exceed 2 MB even when JS .length is lower.
+    // Oversize rejects must not overwrite or increment an existing save.
+    const oversizedNotes = "🎵".repeat(550_000);
+    assert.ok(oversizedNotes.length < 2_000_000);
+    assert.ok(new TextEncoder().encode(oversizedNotes).byteLength > 2_000_000);
+    await assert.rejects(
+      saveAppState({
+        state: { ...state, profile: { ...state.profile, notes: oversizedNotes } },
+        expectedVersion: 2,
+      }),
+      /2 MB safety limit/,
+    );
+    assert.equal((await loadAppState({})).version, 2);
+    assert.equal((await loadAppState({})).state.profile.notes, "");
   } finally {delete globalThis[key];await db.close();}
 });
