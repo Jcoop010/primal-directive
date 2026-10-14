@@ -281,10 +281,15 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // A provider/network exception should still allow the other configured provider.
     }
 
+    if (provider === "gemini" && (!res || !res.ok)) {
+      console.error(`[advisor] Gemini primary request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}; search=${searchRequested}. No credentials logged.`);
+    }
+
     // If xAI is configured but unavailable, use Groq when its free-tier key exists.
     // Keep the no-web-search limitation explicit so fallback answers never imply live research.
     if ((!res || !res.ok) && provider !== "groq" && groqKey) {
       activeProvider = "groq";
+      searchUsed = false;
       try {
         res = await complete({ request,
           apiKey: groqKey,
