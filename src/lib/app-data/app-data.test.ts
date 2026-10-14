@@ -65,7 +65,7 @@ describe("callTool failure memo", () => {
     });
   });
 
-  it("keys by token identity so a reminted token shares the memo entry", async () => {
+  it("isolates failure cache by bearer token even for identical unverified user claims", async () => {
     await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async (calls) => {
       const first = await callTool(
         "google_drive_search",
@@ -85,7 +85,7 @@ describe("callTool failure memo", () => {
       );
       assert.equal(first.ok, false);
       assert.deepEqual(second, first);
-      assert.equal(calls(), 1);
+      assert.equal(calls(), 2);
 
       const other = await callTool(
         "google_drive_search",
@@ -96,7 +96,7 @@ describe("callTool failure memo", () => {
         },
       );
       assert.equal(other.ok, false);
-      assert.equal(calls(), 2);
+      assert.equal(calls(), 3);
     });
   });
 
