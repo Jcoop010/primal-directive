@@ -70,6 +70,10 @@ export function gateKeyResolver(
 
     let entry = jwksCache.get(url);
     if (!entry || Date.now() - entry.fetchedAt > JWKS_CACHE_TTL_MS) {
+      // Never accept an expired signing key when the identity provider's
+      // JWKS endpoint is unavailable. A revoked key must not live forever.
+      jwksCache.delete(url);
+      entry = undefined;
       const jwks = await jwksFetch(url);
       if (jwks) {
         entry = { jwks, fetchedAt: Date.now() };
