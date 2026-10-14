@@ -62,5 +62,22 @@ test("real workspace SQL preserves saves, isolates accounts and rejects stale ve
     await assert.rejects(loadAppState({}), /Stored workspace version is invalid/);
     await db.query("update app_state set version = 2 where user_id = $1", ["account-a"]);
     assert.equal((await loadAppState({})).version, 2);
+    // Two clients starting from the same revision cannot both commit.
+    // The losing save must not overwrite the winner or affect another account.
+    const changes = [
+      saveAppState({state:{...state,profile:{...state.profile,artistName:'Tab one'}},expectedVersion:2}),
+      saveAppState({state:{...state,profile:{...state.profile,artistName:'Tab two'}},expectedVersion:2}),
+    ];
+    const outcomes = await Promise.allSettled(changes);
+    assert.equal(outcomes.filter(x => x.status === 'fulfilled').length, 1);
+    assert.equal(outcomes.filter(x => x.status === 'rejected').length, 1);
+    assert.match(String(outcomes.find(x => x.status === 'rejected').reason), /another session/);
+    const afterRace = await loadAppState({});
+    assert.equal(afterRace.version, 3);
+    assert.ok(['Tab one','Tab two'].includes(afterRace.state.profile.artistName));
+    globalThis[key].userId='account-b';
+    const otherAccount = await loadAppState({});
+    assert.equal(otherAccount.version, 1);
+    assert.equal(otherAccount.state.profile.artistName, 'Account B');
   } finally {delete globalThis[key];await db.close();}
 });
