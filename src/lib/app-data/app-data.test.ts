@@ -172,6 +172,25 @@ describe("connector request deadline", () => {
   });
 });
 
+describe("connector response safety", () => {
+  it("rejects oversized upstream responses without parsing them", async () => {
+    process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
+    const saved = globalThis.fetch;
+    globalThis.fetch = (async () => new Response("x".repeat(257 * 1024), { status: 200 })) as typeof fetch;
+    try {
+      const result = await callTool("google_drive_search", { q: "oversize-response-test" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "oversize-response-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /Connector response exceeds safety limit/);
+    } finally {
+      globalThis.fetch = saved;
+      delete process.env.GROK_CONNECTORS_URL;
+    }
+  });
+});
+
 describe("callTool", () => {
   it("resolves ok:false for non-serializable args instead of rejecting", async () => {
     process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
