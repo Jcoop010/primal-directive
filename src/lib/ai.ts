@@ -142,9 +142,8 @@ async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
   search: boolean;
-  provider: "xai" | "groq" | "gemini";
+  provider: "xai" | "gemini";
   jsonOnly?: boolean;
-  compactModel?: boolean;
   request: ReturnType<typeof createAdvisorTransport>;
 }) {
   if (args.provider === "gemini") {
@@ -153,20 +152,16 @@ async function complete(args: {
     return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
   const body: Record<string, unknown> = {
-    model: args.provider === "groq" ? (args.compactModel ? "openai/gpt-oss-20b" : "openai/gpt-oss-120b") : "grok-4.7",
+    model: "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
   };
-  // Groq's current API uses max_completion_tokens for GPT-OSS requests;
-  // xAI retains max_tokens in this compatibility wrapper.
-  body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = args.jsonOnly ? 1400 : 2200;
+  body.max_tokens = args.jsonOnly ? 1400 : 2200;
   // JSON mode is reserved for the repair attempt so the provider is constrained
   // by the API as well as the prompt when its first answer was malformed.
   if (args.jsonOnly) {
     body.response_format = { type: "json_object" };
   }
-  // xAI supports its own live-search parameters. Groq's free API is used
-  // for reasoning only; never imply that it performed live web research.
   if (args.search && args.provider === "xai") {
     body.search_parameters = {
       mode: "on",
@@ -175,26 +170,7 @@ async function complete(args: {
       sources: [{ type: "web" }, { type: "news" }],
     };
   }
-  // GPT-OSS 120B supports Groq's built-in browser_search tool. Enable it only
-  // when current external evidence can materially improve the answer.
-  if (args.provider === "groq") {
-    // Keep search sessions economical while retaining deliberate reasoning on
-    // workspace-only questions. Groq documents low effort as a good balance
-    // for browser-search requests.
-    // Low effort leaves more of the completion budget for the actual answer;
-    // medium effort can consume too much of the token budget on this long schema prompt.
-    body.reasoning_effort = "low";
-    if (args.search) {
-      body.tools = [{ type: "browser_search" }];
-      // Let the model decide whether a search is useful for this turn. Requiring
-      // a tool on every search-intent match can produce HTTP 400 when the query
-      // lacks enough context to search meaningfully (for example, no home city).
-      body.tool_choice = "auto";
-    }
-  }
-  const endpoint = args.provider === "groq"
-    ? "https://api.groq.com/openai/v1/chat/completions"
-    : "https://api.x.ai/v1/chat/completions";
+  const endpoint = "https://api.x.ai/v1/chat/completions";
   const res = await args.request(args.provider, endpoint, {
     method: "POST",
     headers: {
@@ -210,14 +186,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
-    // Prefer xAI if the user already configured it; otherwise use Groq's free
-    // API tier. No paid provider is required to enable AI responses.
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const xaiKey = process.env.XAI_API_KEY?.trim();
-    const groqKey = process.env.GROQ_API_KEY?.trim();
-    const provider: "gemini" | "xai" | "groq" | null = groqKey ? "groq" : geminiKey ? "gemini" : xaiKey ? "xai" : null;
-    const apiKey: string | undefined = provider === "groq" ? groqKey : provider === "gemini" ? geminiKey : xaiKey;
+    const provider: "gemini" | "xai" | null = xaiKey ? "xai" : geminiKey ? "gemini" : null;
+    const apiKey: string | undefined = provider === "xai" ? xaiKey : geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
@@ -259,13 +232,13 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let activeProvider: "gemini" | "xai" | "groq" = provider;
+    let activeProvider: "gemini" | "xai" = provider;
     let searchUsed = searchRequested;
     let res: Response | null = null;
 
     try {
       res = await complete({ request, apiKey, messages, search: searchRequested, provider });
-      if (res.status === 400 && searchRequested && (provider === "xai" || provider === "groq")) {
+      if (res.status === 400 && searchRequested && provider === "xai") {
         // Search tooling may be unsupported for the selected account/model.
         // Retry without web tools before exhausting another provider.
         searchUsed = false;
@@ -275,36 +248,21 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // A provider/network exception should still allow the other configured provider.
     }
 
-    // On a Groq model quota/rate limit, try its smaller model before switching vendors.
-    if (activeProvider === "groq" && res?.status === 429 && groqKey) {
-      console.warn("[advisor] Groq primary model rate limited (429); trying compact model.");
-      try {
-        const compact = await complete({ request, apiKey: groqKey, messages, provider: "groq", search: false, compactModel: true });
-        if (compact.ok) {
-          res = compact;
-          searchUsed = false;
-        } else {
-          console.warn(`[advisor] Groq compact model failed: HTTP ${compact.status}.`);
-        }
-      } catch {
-        console.warn("[advisor] Groq compact model request failed.");
-      }
-    }
     if (!res?.ok) {
-      for (const next of (["groq", "gemini", "xai"] as const)) {
+      for (const next of (["xai", "gemini"] as const)) {
         if (next === activeProvider) continue;
         if (next === "gemini" && res?.status === 429) continue; // Do not repeatedly call a known quota-limited Gemini project.
-        const key = next === "groq" ? groqKey : next === "gemini" ? geminiKey : xaiKey;
+        const key = next === "xai" ? xaiKey : geminiKey;
         if (!key) continue;
         try {
           const response = await complete({
             request, apiKey: key, messages, provider: next,
-            search: searchRequested && next !== "groq",
+            search: searchRequested,
           });
           if (response.ok) {
             res = response;
             activeProvider = next;
-            searchUsed = searchRequested && next !== "groq";
+            searchUsed = searchRequested;
             break;
           }
           console.warn(`[advisor] ${next} alternate provider failed: HTTP ${response.status}.`);
@@ -377,8 +335,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // Do not retry malformed Gemini answers: conserve quota and use local fallback.
     if (!safe?.success) {
-      const retryProvider: "gemini" | "xai" | "groq" = activeProvider;
-      const retryKey = activeProvider === "groq" ? groqKey : activeProvider === "gemini" ? geminiKey : xaiKey;
+      const retryProvider: "gemini" | "xai" = activeProvider;
+      const retryKey = activeProvider === "xai" ? xaiKey : geminiKey;
       if (!retryKey) return fallback();
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
