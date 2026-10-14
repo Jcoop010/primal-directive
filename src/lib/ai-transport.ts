@@ -48,9 +48,31 @@ export function createAdvisorTransport(options: {
     // keeps parsing predictable and avoids a hanging stream after fetch resolves.
     // Preserve a rate-limit diagnosis even when the provider response body
     // stream fails after the HTTP 429 status has arrived.
-    let text: string;
+    // Bound upstream response data: a provider must not be able to force the
+    // server to buffer an arbitrarily large body before JSON validation.
+    const maxBodyBytes = 256 * 1024;
+    let text = "";
     try {
-      text = await response.text();
+      if (response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let received = 0;
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            received += value.byteLength;
+            if (received > maxBodyBytes) {
+              void reader.cancel().catch(() => undefined);
+              throw new Error("Advisor provider response exceeds safety limit");
+            }
+            text += decoder.decode(value, { stream: true });
+          }
+          text += decoder.decode();
+        } finally {
+          reader.releaseLock();
+        }
+      }
     } catch (error) {
       if (response.status !== 429) throw error;
       text = "";
