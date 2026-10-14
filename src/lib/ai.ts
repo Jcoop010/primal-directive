@@ -217,7 +217,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const xaiKey = process.env.XAI_API_KEY?.trim();
     const groqKey: string | undefined = undefined; // Groq disabled; credential is never read.
     const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : null;
-    const apiKey = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : undefined;
+    const apiKey: string | undefined = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : undefined;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
@@ -267,7 +267,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let activeProvider = provider;
+    let activeProvider: "gemini" | "xai" | "groq" = provider;
     let searchUsed = searchRequested;
     let res: Response | null = null;
 
