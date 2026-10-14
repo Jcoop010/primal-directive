@@ -127,3 +127,23 @@ test("Non-429 interrupted bodies remain errors rather than fake rate limits", as
   await assert.rejects(request("groq", "https://example.com", {}), /stream stopped/);
   assert.equal(cooldowns.size, 0);
 });
+
+
+test("Transport rejects oversized upstream bodies before accepting them", async () => {
+  const oversized = new Uint8Array(257 * 1024);
+  const request = createAdvisorTransport({
+    cooldowns: new Map(),
+    fetchImpl: async () => new Response(new ReadableStream({
+      start(controller) { controller.enqueue(oversized); controller.close(); },
+    }), { status: 200 }),
+  });
+  await assert.rejects(request("groq", "https://example.com", {}), /safety limit/);
+});
+
+test("Transport accepts normal responses within the upstream body limit", async () => {
+  const request = createAdvisorTransport({
+    cooldowns: new Map(),
+    fetchImpl: async () => new Response('{"choices":[]}', { status: 200 }),
+  });
+  assert.deepEqual(await (await request("groq", "https://example.com", {})).json(), { choices: [] });
+});
