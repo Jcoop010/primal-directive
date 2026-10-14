@@ -128,6 +128,12 @@ function citationsFrom(body: Record<string, unknown>): string[] {
   const choices = body.choices as Array<{ message?: { citations?: unknown } }> | undefined;
   const msgCites = Array.isArray(choices) ? choices[0]?.message?.citations : undefined;
   if (Array.isArray(msgCites)) bags.push(...msgCites);
+  const candidates = body.candidates as Array<{ groundingMetadata?: { groundingChunks?: Array<{ web?: { uri?: string } }> } }> | undefined;
+  for (const candidate of candidates ?? []) {
+    for (const chunk of candidate.groundingMetadata?.groundingChunks ?? []) {
+      if (chunk.web?.uri) bags.push(chunk.web.uri);
+    }
+  }
   return normalizeCitationUrls(bags);
 }
 
@@ -277,7 +283,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // If xAI is configured but unavailable, use Groq when its free-tier key exists.
     // Keep the no-web-search limitation explicit so fallback answers never imply live research.
-    if ((!res || !res.ok) && provider === "xai" && groqKey) {
+    if ((!res || !res.ok) && provider !== "groq" && groqKey) {
       activeProvider = "groq";
       try {
         res = await complete({ request,
