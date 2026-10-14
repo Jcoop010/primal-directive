@@ -3,6 +3,7 @@ import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { boundedHistory, createAdvisorTransport, readProviderBody, providerContent } from "@/lib/ai-transport";
 import { localGrowthAdvice } from "@/lib/local-advisor";
+import { advisorWorkspaceContext } from "@/lib/advisor-workspace-context";
 import { normalizeCitationUrls } from "@/lib/ai-citations";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
 import { GIG_STATUSES, PERSON_ROLES } from "@/lib/types";
@@ -240,9 +241,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // Bound total context instead of sending eight full-length model answers.
     // This reduces token-limit failures; it does not bypass provider quotas.
-    const advisorContext = data.context.length > 6000
-      ? data.context.slice(0, 5900) + "\n[Workspace excerpt truncated; do not assume omitted records are absent.]"
-      : data.context;
+    const advisorContext = advisorWorkspaceContext(data.context);
     const messages = [
       { role: "system", content: SYSTEM },
       ...(provider === "groq" && !searchRequested ? [{
