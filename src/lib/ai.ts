@@ -138,10 +138,11 @@ async function complete(args: {
   search: boolean;
   provider: "xai" | "groq";
   jsonOnly?: boolean;
+  compactModel?: boolean;
   request: ReturnType<typeof createAdvisorTransport>;
 }) {
   const body: Record<string, unknown> = {
-    model: args.provider === "groq" ? "openai/gpt-oss-120b" : "grok-4.7",
+    model: args.provider === "groq" ? (args.compactModel ? "openai/gpt-oss-20b" : "openai/gpt-oss-120b") : "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
   };
@@ -313,6 +314,33 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         });
       } catch {
         res = null;
+      }
+    }
+
+    // A smaller Groq model has a separate model-specific token budget.
+    // Try it once after a 429, with a compact no-search prompt; never imply
+    // that this fallback verified current venues or booking contacts.
+    if (res?.status === 429 && activeProvider === "groq") {
+      try {
+        const compact = await complete({
+          request,
+          apiKey: groqKey || apiKey,
+          provider: "groq",
+          compactModel: true,
+          search: false,
+          jsonOnly: true,
+          messages: [
+            { role: "system", content: "Return only JSON with answer (nonempty string), citations (empty array), gigs (empty array), people (empty array), moves (array). Answer the user with grounded reasoning from their supplied records. Do not claim live research or invent current venues, contacts, or dates." },
+            { role: "system", content: "Saved artist context: " + advisorContext.slice(0, 2400) },
+            { role: "user", content: data.message },
+          ],
+        });
+        if (compact.ok) {
+          res = compact;
+          searchUsed = false;
+        }
+      } catch {
+        // Preserve the rate-limit fallback when the smaller model is unavailable.
       }
     }
 
