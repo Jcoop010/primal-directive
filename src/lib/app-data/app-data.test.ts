@@ -126,6 +126,20 @@ describe("callTool failure memo", () => {
     });
   });
 
+  it("bounds the number of cached failures under distinct requests", async () => {
+    await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async () => {
+      const options = {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "bounded-failure-memo-token",
+      };
+      for (let i = 0; i < 1_010; i += 1) {
+        const result = await callTool("google_drive_search", { q: `bounded-${i}` }, options);
+        assert.equal(result.ok, false);
+      }
+      assert.ok(failureMemoSize() <= 1_000);
+    });
+  });
+
   it("never memoizes login-required 401s", async () => {
     await withStubbedGate(401, { errorMessage: "login required" }, async (calls) => {
       const options = {
