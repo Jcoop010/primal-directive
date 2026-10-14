@@ -282,57 +282,6 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     }
 
     if (provider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
-    // A live-search request can be rejected even when ordinary chat works.
-    // Retry once without search so the user still gets model reasoning, while
-    // explicitly disabling any claim of live verification.
-    if ((!res || !res.ok) && activeProvider === "groq" && searchRequested && (!res || res.status === 400)) {
-      console.warn("[advisor] Groq live search failed or timed out; retrying without live search.");
-      searchUsed = false;
-      try {
-        res = await complete({ request,
-          apiKey: groqKey || apiKey,
-          messages: [
-            ...messages,
-            {
-              role: "system",
-              content: "The live browser-search request failed. Answer using only supplied workspace context and general strategy. Do not claim to have searched the web, do not invent source URLs, and clearly label current venue/contact/event facts as unverified."
-            }
-          ],
-          search: false,
-          provider: "groq",
-        });
-      } catch {
-        res = null;
-      }
-    }
-
-    // A smaller Groq model has a separate model-specific token budget.
-    // Try it once after a 429, with a compact no-search prompt; never imply
-    // that this fallback verified current venues or booking contacts.
-    if (res?.status === 429 && activeProvider === "groq") {
-      try {
-        const compact = await complete({
-          request,
-          apiKey: groqKey || apiKey,
-          provider: "groq",
-          compactModel: true,
-          search: false,
-          jsonOnly: true,
-          messages: [
-            { role: "system", content: "Return only JSON with answer (nonempty string), citations (empty array), gigs (empty array), people (empty array), moves (array). Answer the user with grounded reasoning from their supplied records. Do not claim live research or invent current venues, contacts, or dates." },
-            { role: "system", content: "Saved artist context: " + advisorContext.slice(0, 2400) },
-            { role: "user", content: data.message },
-          ],
-        });
-        if (compact.ok) {
-          res = compact;
-          searchUsed = false;
-        }
-      } catch {
-        // Preserve the rate-limit fallback when the smaller model is unavailable.
-      }
-    }
-
     if (!res?.ok) {
       const local = fallback();
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
@@ -370,7 +319,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // format fails, use the already-configured Groq key before falling back.
     if (!safe?.success) {
       const retryProvider: "gemini" | "xai" | "groq" = activeProvider;
-      const retryKey = retryProvider === "groq" ? groqKey || apiKey : apiKey;
+      const retryKey = apiKey;
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
         const retry = await complete({ request,
@@ -415,17 +364,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // model's JSON "citations" field is ordinary generated text and is not
     // proof that a source was retrieved; never promote it into verified sources.
     const citations = normalizeCitationUrls(
-      searchUsed && (activeProvider === "xai" || activeProvider === "groq" || activeProvider === "gemini")
+      searchUsed
         ? citationsFrom(body)
         : [],
     );
-    const source = citations.length
-      ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
-      : activeProvider === "groq" && searchUsed
-        ? "GROQ AI — SEARCH REQUESTED; NO SOURCE URLS RETURNED"
-        : activeProvider === "groq"
-          ? "GROQ AI — NO LIVE WEB SEARCH; CURRENT FACTS NOT VERIFIED"
-          : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
+    const source = citations.length ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : "GEMINI AI — CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
