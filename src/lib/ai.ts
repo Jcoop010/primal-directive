@@ -139,6 +139,7 @@ async function complete(args: {
   messages: { role: string; content: string }[];
   search: boolean;
   provider: "xai" | "groq";
+  jsonOnly?: boolean;
 }) {
   const body: Record<string, unknown> = {
     model: args.provider === "groq" ? "openai/gpt-oss-120b" : "grok-4.7",
@@ -148,6 +149,11 @@ async function complete(args: {
   // Groq's current API uses max_completion_tokens for GPT-OSS requests;
   // xAI retains max_tokens in this compatibility wrapper.
   body[args.provider === "groq" ? "max_completion_tokens" : "max_tokens"] = 2400;
+  // JSON mode is reserved for the repair attempt so the provider is constrained
+  // by the API as well as the prompt when its first answer was malformed.
+  if (args.jsonOnly) {
+    body.response_format = { type: "json_object" };
+  }
   // xAI supports its own live-search parameters. Groq's free API is used
   // for reasoning only; never imply that it performed live web research.
   if (args.search && args.provider === "xai") {
@@ -164,7 +170,9 @@ async function complete(args: {
     // Keep search sessions economical while retaining deliberate reasoning on
     // workspace-only questions. Groq documents low effort as a good balance
     // for browser-search requests.
-    body.reasoning_effort = args.search ? "low" : "medium";
+    // Low effort leaves more of the completion budget for the actual answer;
+    // medium effort can consume too much of the token budget on this long schema prompt.
+    body.reasoning_effort = "low";
     if (args.search) {
       body.tools = [{ type: "browser_search" }];
       // Let the model decide whether a search is useful for this turn. Requiring
@@ -349,6 +357,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           ],
           search: false,
           provider: retryProvider,
+          jsonOnly: true,
         });
         if (retry.ok) {
           const retryBody = (await retry.json()) as Record<string, unknown>;
