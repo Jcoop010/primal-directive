@@ -24,7 +24,8 @@ async function createAccount(index) {
     await page.getByRole("heading", { name: "Command Center" }).waitFor({ timeout: 20_000 });
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.getByRole("heading", { name: "Command Center" }).waitFor({ timeout: 20_000 });
-    await page.getByRole("link", { name: "Gigs", exact: true }).first().click();
+    const gigsResponse = await page.goto(`${base}/gigs`, { waitUntil: "domcontentloaded" });
+    assert.equal(gigsResponse?.status(), 200);
     await page.getByRole("heading", { name: "Gigs", exact: true }).waitFor({ timeout: 20_000 });
     return { context, page, email };
   } catch (error) {
