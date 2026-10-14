@@ -129,7 +129,28 @@ async function gatePost(
 
   let json: GateJson = {};
   // The fetch signal remains active while consuming a streaming response body.
-  const text = await res.text();
+  const maxResponseBytes = 256 * 1024;
+  let text = "";
+  if (res.body) {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let received = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        received += value.byteLength;
+        if (received > maxResponseBytes) {
+          void reader.cancel().catch(() => undefined);
+          throw new Error("Connector response exceeds safety limit");
+        }
+        text += decoder.decode(value, { stream: true });
+      }
+      text += decoder.decode();
+    } finally {
+      reader.releaseLock();
+    }
+  }
   if (text) {
     try {
       json = JSON.parse(text) as GateJson;
