@@ -191,6 +191,20 @@ describe("connector response safety", () => {
   });
 });
 
+describe("connector redirect safety", () => {
+  it("treats a gateway redirect as failure rather than a successful tool result", async () => {
+    await withStubbedGate(302, {}, async (calls) => {
+      const result = await callTool("google_drive_search", { q: "redirect-case" }, {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "connector-redirect-test-token",
+      });
+      assert.equal(result.ok, false);
+      assert.match(result.errorMessage ?? "", /redirect.*HTTP 302/);
+      assert.equal(calls(), 1);
+    });
+  });
+});
+
 describe("callTool", () => {
   it("resolves ok:false for non-serializable args instead of rejecting", async () => {
     process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";

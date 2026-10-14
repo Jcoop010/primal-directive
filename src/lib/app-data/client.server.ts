@@ -329,6 +329,11 @@ export async function callTool(
       token,
     );
 
+    // Redirects are not connector tool results. With redirect: "manual",
+    // an authentication redirect must not become a false successful call.
+    if (status >= 300 && status < 400) {
+      return fail(`Connector gate returned redirect (HTTP ${status})`);
+    }
     if (status === 401) {
       const loginUrl =
         gateSigninUrl(ctx) ??
