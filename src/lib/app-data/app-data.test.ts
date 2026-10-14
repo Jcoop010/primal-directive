@@ -142,6 +142,36 @@ describe("callTool failure memo", () => {
   });
 });
 
+describe("connector request deadline", () => {
+  it("passes a 15-second abort signal to outbound gate calls", async () => {
+    const signalTimeout = mock.method(AbortSignal, "timeout", (ms: number) => {
+      assert.equal(ms, 15_000);
+      return AbortSignal.abort(new DOMException("deadline", "TimeoutError"));
+    });
+    try {
+      await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async () => {
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = (async (_url, init) => {
+          assert.ok(init?.signal instanceof AbortSignal);
+          assert.equal(init.signal.aborted, true);
+          throw init.signal.reason;
+        }) as typeof fetch;
+        try {
+          const result = await callTool("google_drive_search", { q: "deadline-case" }, {
+            connectorType: ConnectorType.GoogleDrive, token: "deadline-credential",
+          });
+          assert.equal(result.ok, false);
+          assert.match(result.errorMessage ?? "", /deadline/);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      });
+    } finally {
+      signalTimeout.mock.restore();
+    }
+  });
+});
+
 describe("callTool", () => {
   it("resolves ok:false for non-serializable args instead of rejecting", async () => {
     process.env.GROK_CONNECTORS_URL = "https://connectors.invalid.example";
