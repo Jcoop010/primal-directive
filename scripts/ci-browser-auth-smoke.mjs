@@ -20,11 +20,18 @@ async function createAccount(index) {
     await page.getByPlaceholder("Artist / band name").fill(`Browser Artist ${index}`);
     await page.getByPlaceholder("Email").fill(email);
     await page.getByPlaceholder("Password (8+ characters)").fill(password);
+    const signupResponsePromise = page.waitForResponse((response) =>
+      response.url().includes("/api/auth/sign-up/email"), { timeout: 20_000 });
     await page.getByRole("button", { name: "Create account" }).last().click();
+    const signupResponse = await signupResponsePromise;
+    const setCookie = await signupResponse.headerValue("set-cookie");
+    const safeCookieInfo = setCookie
+      ? setCookie.replace(/^[^=]+=[^;]*/, (part) => part.split("=")[0] + "=[REDACTED]")
+      : "no set-cookie header";
     await page.getByRole("heading", { name: "Command Center" }).waitFor({ timeout: 20_000 });
     const browserCookies = (await context.cookies(base)).map(({ name, secure, sameSite }) => ({ name, secure, sameSite }));
     assert.ok(browserCookies.some((cookie) => cookie.name.endsWith("session_token")),
-      `browser rejected session cookie after signup: ${JSON.stringify(browserCookies)}`);
+      `browser rejected session cookie after signup: ${JSON.stringify(browserCookies)}; HTTP ${signupResponse.status()}; ${safeCookieInfo}`);
     const beforeReload = await context.request.get(`${base}/api/auth/get-session`);
     const beforeSession = await beforeReload.json().catch(() => null);
     assert.equal(beforeSession?.user?.email, email, "session must be authenticated immediately after sign-up");
