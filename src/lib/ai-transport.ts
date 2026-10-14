@@ -36,6 +36,8 @@ export function createAdvisorTransport(options: {
   const deadline = now() + (options.timeoutMs ?? 30_000);
   let attempts = 0;
   return async (provider: Provider, endpoint: string, init: RequestInit): Promise<Response> => {
+    // Expired cooldowns should not accumulate indefinitely in a warm instance.
+    if ((blocked.get(provider) ?? 0) <= now()) blocked.delete(provider);
     if ((blocked.get(provider) ?? 0) > now()) {
       return new Response(null, { status: 429, headers: { "Retry-After": String(Math.ceil(((blocked.get(provider) ?? 0) - now()) / 1000)) } });
     }
