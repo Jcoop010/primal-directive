@@ -181,6 +181,33 @@ describe("verifyGateIdentityToken", () => {
     assert.equal(identity, null);
   });
 
+  it("does not trust expired signing keys after JWKS refresh fails", async () => {
+    const key = await makeKey("expired-gate-key");
+    const url = uniqueUrl();
+    let calls = 0;
+    let available = true;
+    const fetchImpl = async (): Promise<GateJwks | null> => {
+      calls += 1;
+      return available ? { keys: [key.jwk] } : null;
+    };
+    const resolver = gateKeyResolver(url, fetchImpl);
+    const token = await signToken(key, { sub: "user-1" });
+    assert.equal((await verifyGateIdentityToken(token, {
+      issuer: ISSUER, audience: AUDIENCE, getKey: resolver,
+    }))?.sub, "user-1");
+    const actualNow = Date.now;
+    available = false;
+    try {
+      Date.now = () => actualNow() + 301_000;
+      assert.equal(await verifyGateIdentityToken(token, {
+        issuer: ISSUER, audience: AUDIENCE, getKey: resolver,
+      }), null);
+    } finally {
+      Date.now = actualNow;
+    }
+    assert.ok(calls >= 2);
+  });
+
   it("refetches the JWKS when the kid rotates", async () => {
     const oldKey = await makeKey("k-old");
     const newKey = await makeKey("k-new");
