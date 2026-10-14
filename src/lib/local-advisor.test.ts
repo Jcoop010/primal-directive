@@ -99,7 +99,6 @@ test("merch questions stay in the inventory advice path", () => {
   assert.doesNotMatch(result.answer, /App-recorded financial summary/i);
 });
 
-
 test("offline advisor excludes unpaid fees and member distributions from gig cash comparison", () => {
   const context = [
     "ARTIST: Test Band",
