@@ -275,9 +275,25 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // A provider/network exception should still allow the other configured provider.
     }
 
+    // On a Groq model quota/rate limit, try its smaller model before switching vendors.
+    if (activeProvider === "groq" && res?.status === 429 && groqKey) {
+      console.warn("[advisor] Groq primary model rate limited (429); trying compact model.");
+      try {
+        const compact = await complete({ request, apiKey: groqKey, messages, provider: "groq", search: false, compactModel: true });
+        if (compact.ok) {
+          res = compact;
+          searchUsed = false;
+        } else {
+          console.warn(`[advisor] Groq compact model failed: HTTP ${compact.status}.`);
+        }
+      } catch {
+        console.warn("[advisor] Groq compact model request failed.");
+      }
+    }
     if (!res?.ok) {
       for (const next of (["groq", "gemini", "xai"] as const)) {
         if (next === activeProvider) continue;
+        if (next === "gemini" && res?.status === 429) continue; // Do not repeatedly call a known quota-limited Gemini project.
         const key = next === "groq" ? groqKey : next === "gemini" ? geminiKey : xaiKey;
         if (!key) continue;
         try {
@@ -291,7 +307,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
             searchUsed = searchRequested && next !== "groq";
             break;
           }
+          console.warn(`[advisor] ${next} alternate provider failed: HTTP ${response.status}.`);
         } catch {
+          console.warn(`[advisor] ${next} alternate provider network failure.`);
           // Try the next configured provider.
         }
       }
