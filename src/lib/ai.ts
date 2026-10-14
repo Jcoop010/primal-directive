@@ -260,7 +260,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     try {
       res = await complete({ apiKey, messages, search: searchRequested, provider });
-      if (!res.ok && provider === "xai") {
+      if (!res.ok && res.status === 400 && provider === "xai" && searchRequested) {
         res = await complete({ apiKey, messages, search: false, provider });
       }
     } catch {
@@ -339,7 +339,22 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-    let body = (await res.json()) as Record<string, unknown>;
+    let body: Record<string, unknown>;
+    try {
+      const decoded: unknown = await res.json();
+      if (!decoded || typeof decoded !== "object" || Array.isArray(decoded)) {
+        throw new Error("Invalid provider response envelope");
+      }
+      body = decoded as Record<string, unknown>;
+    } catch {
+      const local = fallback();
+      console.warn(`[advisor] ${activeProvider} returned a malformed response envelope.`);
+      return {
+        ...local,
+        source: "LOCAL WORKSPACE FALLBACK — INVALID PROVIDER RESPONSE",
+        answer: "The AI service returned an unreadable response. Your workspace has not been changed. I'm using local analysis instead; no live sources were verified.\n\n" + local.answer,
+      };
+    }
     const readSafeAnswer = (value: Record<string, unknown>) => {
       const choices = value.choices as
         | Array<{ message?: { content?: string } }>
