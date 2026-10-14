@@ -136,11 +136,16 @@ async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
   search: boolean;
-  provider: "xai" | "groq";
+  provider: "xai" | "groq" | "gemini";
   jsonOnly?: boolean;
   compactModel?: boolean;
   request: ReturnType<typeof createAdvisorTransport>;
 }) {
+  if (args.provider === "gemini") {
+    const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
+    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2400, responseMimeType: "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
+    return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
+  }
   const body: Record<string, unknown> = {
     model: args.provider === "groq" ? (args.compactModel ? "openai/gpt-oss-20b" : "openai/gpt-oss-120b") : "grok-4.7",
     messages: args.messages,
@@ -202,10 +207,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // Prefer xAI if the user already configured it; otherwise use Groq's free
     // API tier. No paid provider is required to enable AI responses.
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
+    const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const xaiKey = process.env.XAI_API_KEY?.trim();
     const groqKey = process.env.GROQ_API_KEY?.trim();
-    const provider: "xai" | "groq" | null = xaiKey ? "xai" : groqKey ? "groq" : null;
-    const apiKey = provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
+    const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : groqKey ? "groq" : null;
+    const apiKey = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
@@ -370,7 +376,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     let body = await readProviderBody(res);
     const readSafeAnswer = (value: Record<string, unknown>) => {
-      const raw = providerContent(value);
+      const raw = activeProvider === "gemini" ? (Array.isArray(value.candidates) ? (value.candidates[0]?.content?.parts || []).map((p: {text?: string}) => p.text || "").join("") : "") : providerContent(value);
       const parsed = extractJson(raw);
       return { raw, safe: parsed ? AiJson.safeParse(parsed) : null };
     };
@@ -380,8 +386,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // Retry once with a compact, JSON-only request and no live search; if xAI's
     // format fails, use the already-configured Groq key before falling back.
     if (!safe?.success) {
-      const retryProvider: "xai" | "groq" =
-        activeProvider === "xai" && groqKey ? "groq" : activeProvider;
+      const retryProvider: "gemini" | "xai" | "groq" =
+        activeProvider !== "groq" && groqKey ? "groq" : activeProvider;
       const retryKey = retryProvider === "groq" ? groqKey || apiKey : apiKey;
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
@@ -427,7 +433,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // model's JSON "citations" field is ordinary generated text and is not
     // proof that a source was retrieved; never promote it into verified sources.
     const citations = normalizeCitationUrls(
-      searchUsed && (activeProvider === "xai" || activeProvider === "groq")
+      searchUsed && (activeProvider === "xai" || activeProvider === "groq" || activeProvider === "gemini")
         ? citationsFrom(body)
         : [],
     );
