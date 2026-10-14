@@ -87,3 +87,43 @@ test("Transport aborts a stalled body as well as a stalled request", async () =>
   const keepAlive=setTimeout(()=>{},100);
   try {await assert.rejects(request("groq","https://example.com",{}),/timeout/i);} finally {clearTimeout(keepAlive);}
 });
+
+
+test("429 with interrupted response body retains rate-limit status and cooldown", async () => {
+  let calls = 0;
+  const cooldowns = new Map();
+  const request = createAdvisorTransport({
+    now: () => 0,
+    cooldowns,
+    fetchImpl: async () => {
+      calls++;
+      return new Response(new ReadableStream({
+        start(controller) { controller.error(new Error("connection interrupted")); },
+      }), { status: 429, headers: { "Retry-After": "90" } });
+    },
+  });
+  assert.equal((await request("groq", "https://example.com", {})).status, 429);
+  assert.equal((await request("groq", "https://example.com", {})).status, 429);
+  assert.equal(calls, 1);
+  assert.equal(cooldowns.get("groq"), 90000);
+});
+
+
+test("Retry-After parsing clamps malformed and oversized values", () => {
+  assert.equal(retryAfterMs("-10"), 60000);
+  assert.equal(retryAfterMs("invalid"), 60000);
+  assert.equal(retryAfterMs("999999999"), 86400000);
+  assert.equal(retryAfterMs("Wed, 21 Oct 2015 07:28:00 GMT", Date.parse("Wed, 21 Oct 2015 07:28:00 GMT") - 120000), 120000);
+});
+
+test("Non-429 interrupted bodies remain errors rather than fake rate limits", async () => {
+  const cooldowns = new Map();
+  const request = createAdvisorTransport({
+    cooldowns,
+    fetchImpl: async () => new Response(new ReadableStream({
+      start(controller) { controller.error(new Error("stream stopped")); },
+    }), { status: 502 }),
+  });
+  await assert.rejects(request("groq", "https://example.com", {}), /stream stopped/);
+  assert.equal(cooldowns.size, 0);
+});
