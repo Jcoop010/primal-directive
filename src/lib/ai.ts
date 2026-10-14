@@ -278,9 +278,17 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const local = fallback();
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
       const rateLimited = res?.status === 429;
+      const providerError = res ? await readProviderBody(res) : {};
+      const errorInfo = providerError.error && typeof providerError.error === "object"
+        ? providerError.error as Record<string, unknown> : {};
+      const errorStatus = typeof errorInfo.status === "string" ? errorInfo.status : "";
+      const errorMessage = typeof errorInfo.message === "string" ? errorInfo.message : "";
+      const quotaExhausted = rateLimited && /quota.*(exceed|exhaust)|free.tier|limit: 0|per.day|per day|billing|resource_exhausted/i.test(errorMessage + " " + errorStatus);
+      const retryHeader = res?.headers.get("retry-after");
+      const retrySeconds = retryHeader && /^\\d+$/.test(retryHeader) ? Math.min(86400, Number(retryHeader)) : null;
       console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account/rate limits; never log credentials.`);
       const diagnosis = rateLimited
-        ? `The ${activeProvider} AI provider rejected this request with HTTP 429 (rate limit or quota limit). The local workspace fallback is active, so your saved records remain available, but this turn was not answered by the AI model. This server pauses new calls to this provider for the reported retry window (at least one minute). Wait before retrying, or configure another provider key you already have access to. Check usage limits before considering any paid upgrade. Live research was not verified.`
+        ? `Gemini rejected this request with HTTP 429. ${quotaExhausted ? "Google reports a quota or resource limit; waiting one minute may not restore daily or project quota." : "This may be temporary throttling or an exhausted quota; the server cannot confirm which without Google quota details."} ${retrySeconds ? `Google requested a retry delay of approximately ${retrySeconds} seconds.` : "No precise retry delay was provided."} The local workspace fallback is active; this turn was not answered by Gemini. Check Google AI Studio usage and limits before retrying or spending money. Live research was not verified.`
         : `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.`;
       return {
         ...local,
