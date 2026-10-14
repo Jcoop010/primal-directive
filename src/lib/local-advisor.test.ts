@@ -98,3 +98,33 @@ test("merch questions stay in the inventory advice path", () => {
   assert.match(result.answer, /contribution margin and sell-through/i);
   assert.doesNotMatch(result.answer, /App-recorded financial summary/i);
 });
+
+
+test("offline advisor excludes unpaid fees and member distributions from gig cash comparison", () => {
+  const context = [
+    "ARTIST: Test Band",
+    "MONEY: collected 600, outstanding 900, costs 200, profit 400, member payouts 150",
+    "MONEY LEDGER (up to 18 records; may be incomplete; app-recorded, not bank-verified):",
+    "- date:2026-10-14 | type:collected | amount:600 | gigId:gig-one | gig:First Show | member:none | label:Guarantee",
+    "- date:2026-10-14 | type:cost | amount:200 | gigId:gig-one | gig:First Show | member:none | label:Travel",
+    "- date:2026-10-14 | type:outstanding | amount:900 | gigId:gig-one | gig:First Show | member:none | label:Unpaid fee",
+    "- date:2026-10-14 | type:payout | amount:150 | gigId:gig-one | gig:First Show | member:Alex | label:Distribution",
+  ].join("\n");
+  const result = localGrowthAdvice("Profit by gig?", context);
+  assert.match(result.answer, /First Show: collected \\$600\\.00; recorded costs \\$200\\.00; cash-based difference \\$400\\.00/);
+  assert.match(result.answer, /outstanding amounts are excluded from collected cash/i);
+  assert.doesNotMatch(result.answer, /\\$1,300\\.00/);
+});
+
+test("offline advisor labels partially linked gig records as incomplete", () => {
+  const context = [
+    "ARTIST: Test Band",
+    "MONEY LEDGER (up to 18 records; may be incomplete; app-recorded, not bank-verified):",
+    "- date:2026-10-14 | type:collected | amount:500 | gigId:gig-a | gig:Only Income | member:none | label:Fee",
+    "- date:2026-10-14 | type:cost | amount:100 | gigId:gig-b | gig:Only Costs | member:none | label:Travel",
+  ].join("\n");
+  const result = localGrowthAdvice("Which gigs were most profitable?", context);
+  assert.match(result.answer, /Only Income: collected \\$500\\.00; no costs linked; incomplete/i);
+  assert.match(result.answer, /Only Costs: no collected income linked; recorded costs \\$100\\.00; incomplete/i);
+  assert.match(result.answer, /not enough gigs with both collected income and linked costs/i);
+});
