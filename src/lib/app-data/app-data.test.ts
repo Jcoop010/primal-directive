@@ -140,6 +140,21 @@ describe("callTool failure memo", () => {
     });
   });
 
+  it("does not cache failures using oversized argument keys", async () => {
+    await withStubbedGate(500, { ok: false, errorMessage: "boom" }, async (calls) => {
+      const before = failureMemoSize();
+      const options = {
+        connectorType: ConnectorType.GoogleDrive,
+        token: "oversized-memo-key-token",
+      };
+      const args = { q: "x".repeat(20_000) };
+      assert.equal((await callTool("google_drive_search", args, options)).ok, false);
+      assert.equal((await callTool("google_drive_search", args, options)).ok, false);
+      assert.equal(calls(), 2, "large keys must not be memoized");
+      assert.equal(failureMemoSize(), before);
+    });
+  });
+
   it("never memoizes login-required 401s", async () => {
     await withStubbedGate(401, { errorMessage: "login required" }, async (calls) => {
       const options = {

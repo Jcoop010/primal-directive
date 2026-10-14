@@ -272,7 +272,10 @@ export function failureMemoSize(): number {
 
 function safeMemoKey(parts: unknown[]): string | null {
   try {
-    return JSON.stringify(parts);
+    const serialized = JSON.stringify(parts);
+    // Do not retain potentially multi-megabyte request arguments as cache keys.
+    // Large calls still execute; only memoization is skipped.
+    return serialized.length <= 16_384 ? serialized : null;
   } catch {
     return null;
   }
