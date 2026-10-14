@@ -194,9 +194,13 @@ export const loadAppState = createServerFn({ method: "GET" })
       [context.userId],
     );
     if (!rows.length) return { state: null, version: 0 };
+    const version = Number(rows[0].version);
+    if (!Number.isSafeInteger(version) || version < 1) {
+      throw new Error("Stored workspace version is invalid; refusing to load inconsistent data.");
+    }
     return {
       state: stateSchema.parse(rows[0].state),
-      version: Number(rows[0].version) || 1,
+      version,
     };
   });
 
