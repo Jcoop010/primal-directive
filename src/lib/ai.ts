@@ -149,7 +149,7 @@ async function complete(args: {
 }) {
   if (args.provider === "gemini") {
     const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2400, responseMimeType: "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
+    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2400, responseMimeType: args.search ? undefined : "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
     return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
   const body: Record<string, unknown> = {
