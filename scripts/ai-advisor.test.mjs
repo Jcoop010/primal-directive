@@ -87,3 +87,23 @@ test("Transport aborts a stalled body as well as a stalled request", async () =>
   const keepAlive=setTimeout(()=>{},100);
   try {await assert.rejects(request("groq","https://example.com",{}),/timeout/i);} finally {clearTimeout(keepAlive);}
 });
+
+
+test("429 with interrupted response body retains rate-limit status and cooldown", async () => {
+  let calls = 0;
+  const cooldowns = new Map();
+  const request = createAdvisorTransport({
+    now: () => 0,
+    cooldowns,
+    fetchImpl: async () => {
+      calls++;
+      return new Response(new ReadableStream({
+        start(controller) { controller.error(new Error("connection interrupted")); },
+      }), { status: 429, headers: { "Retry-After": "90" } });
+    },
+  });
+  assert.equal((await request("groq", "https://example.com", {})).status, 429);
+  assert.equal((await request("groq", "https://example.com", {})).status, 429);
+  assert.equal(calls, 1);
+  assert.equal(cooldowns.get("groq"), 90000);
+});
