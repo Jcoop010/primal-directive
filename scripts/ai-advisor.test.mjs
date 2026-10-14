@@ -170,3 +170,19 @@ test("429 returns before reading an indefinitely pending upstream body", async (
   assert.equal((await request("groq", "https://example.com", {})).status, 429);
   assert.equal(calls, 1);
 });
+
+
+test("Expired provider cooldowns are removed before a new request", async () => {
+  let now = 20_000;
+  let calls = 0;
+  const cooldowns = new Map([["groq", 10_000], ["xai", 50_000]]);
+  const request = createAdvisorTransport({
+    now: () => now,
+    cooldowns,
+    fetchImpl: async () => { calls++; return good(); },
+  });
+  assert.equal((await request("groq", "https://example.com", {})).status, 200);
+  assert.equal(cooldowns.has("groq"), false);
+  assert.equal((await request("xai", "https://example.com", {})).status, 429);
+  assert.equal(calls, 1);
+});
