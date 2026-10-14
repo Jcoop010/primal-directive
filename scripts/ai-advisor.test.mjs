@@ -147,3 +147,26 @@ test("Transport accepts normal responses within the upstream body limit", async 
   });
   assert.deepEqual(await (await request("groq", "https://example.com", {})).json(), { choices: [] });
 });
+
+
+test("429 returns before reading an indefinitely pending upstream body", async () => {
+  let calls = 0;
+  const cooldowns = new Map();
+  const request = createAdvisorTransport({
+    cooldowns,
+    now: () => 0,
+    fetchImpl: async () => {
+      calls++;
+      return new Response(new ReadableStream({ start() {} }), {
+        status: 429,
+        headers: { "Retry-After": "75" },
+      });
+    },
+  });
+  const response = await request("groq", "https://example.com", {});
+  assert.equal(response.status, 429);
+  assert.equal(await response.text(), "");
+  assert.equal(cooldowns.get("groq"), 75000);
+  assert.equal((await request("groq", "https://example.com", {})).status, 429);
+  assert.equal(calls, 1);
+});

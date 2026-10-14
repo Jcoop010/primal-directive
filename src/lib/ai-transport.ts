@@ -43,7 +43,13 @@ export function createAdvisorTransport(options: {
     attempts += 1;
     const signal = AbortSignal.timeout(Math.max(1, deadline - now()));
     const response = await request(endpoint, { ...init, signal });
-    if (response.status === 429) blocked.set(provider, now() + retryAfterMs(response.headers.get("retry-after"), now()));
+    if (response.status === 429) {
+      blocked.set(provider, now() + retryAfterMs(response.headers.get("retry-after"), now()));
+      // Rate-limit bodies contain no Advisor answer. Avoid consuming a slow,
+      // broken, or oversized upstream error stream.
+      void response.body?.cancel().catch(() => undefined);
+      return new Response(null, { status: 429, headers: response.headers });
+    }
     // Consume the body while the timeout still applies. A synthetic Response
     // keeps parsing predictable and avoids a hanging stream after fetch resolves.
     // Preserve a rate-limit diagnosis even when the provider response body
