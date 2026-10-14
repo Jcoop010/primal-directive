@@ -157,7 +157,7 @@ async function gatePost(
     } catch {
       json = {
         ok: false,
-        errorMessage: `gate non-JSON response (HTTP ${res.status}): ${text.slice(0, 200)}`,
+        errorMessage: `Connector gate returned invalid JSON (HTTP ${res.status})`,
       };
     }
   }
