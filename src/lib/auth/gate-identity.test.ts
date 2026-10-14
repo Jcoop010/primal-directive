@@ -199,9 +199,10 @@ describe("verifyGateIdentityToken", () => {
     available = false;
     try {
       Date.now = () => actualNow() + 301_000;
-      assert.equal(await verifyGateIdentityToken(token, {
-        issuer: ISSUER, audience: AUDIENCE, getKey: resolver,
-      }), null);
+      await assert.rejects(
+        resolver({ alg: "EdDSA", kid: key.kid }, {} as never),
+        /no gate identity key matches/,
+      );
     } finally {
       Date.now = actualNow;
     }
