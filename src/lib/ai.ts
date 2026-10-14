@@ -150,7 +150,7 @@ async function complete(args: {
   if (args.provider === "gemini") {
     const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
     const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 4096, responseMimeType: args.search ? undefined : "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
-    return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
+    return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
   const body: Record<string, unknown> = {
     model: args.provider === "groq" ? (args.compactModel ? "openai/gpt-oss-20b" : "openai/gpt-oss-120b") : "grok-4.7",
