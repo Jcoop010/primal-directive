@@ -149,7 +149,7 @@ async function complete(args: {
 }) {
   if (args.provider === "gemini") {
     const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2400, responseMimeType: args.search ? undefined : "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
+    const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 4096, responseMimeType: args.search ? undefined : "application/json" }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
     return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
   const body: Record<string, unknown> = {
@@ -215,7 +215,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const xaiKey = process.env.XAI_API_KEY?.trim();
-    const groqKey = undefined; // Groq disabled by request; never use its credential.
+    const groqKey: string | undefined = undefined; // Groq disabled; credential is never read.
     const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : null;
     const apiKey = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : undefined;
     const searchRequested = needsLiveResearch(data.message, data.history);
@@ -237,10 +237,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "OFFLINE MODE — FREE AI KEY NOT CONFIGURED",
-        answer: `AI responses are not connected yet because no provider API key is configured. You do not need to buy xAI credits: Groq offers a free API tier. Add a GROQ_API_KEY from https://console.groq.com/keys to the existing Vercel project's Production environment, then redeploy. Groq can generate AI strategy and planning, but this connection does not provide live web search or verify current venues, contacts, lineups, availability, or deal terms.\n\n${local.answer}`,
+        answer: `AI responses are not connected because GEMINI_API_KEY is not configured. Add a Gemini API key to the existing Vercel Production environment. Live research requires a functioning Google Search grounding connection.\n\n${local.answer}`,
         moves: [
-          "Create a free Groq API key at https://console.groq.com/keys; do not upgrade to a paid plan.",
-          "Add GROQ_API_KEY to the existing primal-directive Vercel project's Production environment.",
+          "Check that GEMINI_API_KEY is configured in Vercel Production.",
+          "Confirm the Gemini API key has access to the configured model.",
           "Redeploy the existing project and test a general strategy question; verify external booking facts separately.",
         ],
       };
@@ -248,7 +248,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // Bound total context instead of sending eight full-length model answers.
     // This reduces token-limit failures; it does not bypass provider quotas.
-    const advisorContext = advisorWorkspaceContext(data.context).slice(0, 4800);
+    const advisorContext = advisorWorkspaceContext(data.context);
     const messages = [
       { role: "system", content: SYSTEM },
       ...(provider === "groq" && !searchRequested ? [{
