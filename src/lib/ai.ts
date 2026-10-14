@@ -215,9 +215,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const xaiKey = process.env.XAI_API_KEY?.trim();
-    const groqKey: string | undefined = undefined; // Groq disabled; credential is never read.
-    const provider: "gemini" | "xai" | "groq" | null = geminiKey ? "gemini" : xaiKey ? "xai" : null;
-    const apiKey: string | undefined = provider === "gemini" ? geminiKey : provider === "xai" ? xaiKey : undefined;
+    const groqKey = process.env.GROQ_API_KEY?.trim();
+    const provider: "gemini" | "xai" | "groq" | null = groqKey ? "groq" : geminiKey ? "gemini" : xaiKey ? "xai" : null;
+    const apiKey: string | undefined = provider === "groq" ? groqKey : provider === "gemini" ? geminiKey : xaiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
@@ -271,6 +271,28 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       }
     } catch {
       // A provider/network exception should still allow the other configured provider.
+    }
+
+    if (!res?.ok) {
+      for (const next of (["groq", "gemini", "xai"] as const)) {
+        if (next === activeProvider) continue;
+        const key = next === "groq" ? groqKey : next === "gemini" ? geminiKey : xaiKey;
+        if (!key) continue;
+        try {
+          const response = await complete({
+            request, apiKey: key, messages, provider: next,
+            search: searchRequested && next !== "groq",
+          });
+          if (response.ok) {
+            res = response;
+            activeProvider = next;
+            searchUsed = searchRequested && next !== "groq";
+            break;
+          }
+        } catch {
+          // Try the next configured provider.
+        }
+      }
     }
 
     if (provider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
@@ -335,7 +357,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // Do not retry malformed Gemini answers: conserve quota and use local fallback.
     if (!safe?.success) {
       const retryProvider: "gemini" | "xai" | "groq" = activeProvider;
-      const retryKey = apiKey;
+      const retryKey = activeProvider === "groq" ? groqKey : activeProvider === "gemini" ? geminiKey : xaiKey;
+      if (!retryKey) return fallback();
       console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
       try {
         const retry = await complete({ request,
@@ -384,7 +407,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         ? citationsFrom(body)
         : [],
     );
-    const source = citations.length ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : "GEMINI AI — CURRENT FACTS NOT VERIFIED";
+    const source = citations.length ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : `${activeProvider.toUpperCase()} AI — CURRENT FACTS NOT VERIFIED`;
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
