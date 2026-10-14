@@ -1,4 +1,4 @@
-type Provider = "xai" | "groq";
+type Provider = "xai" | "groq" | "gemini";
 const cooldowns = new Map<Provider, number>();
 
 export function boundedHistory(history: { role: "user" | "ai"; text: string }[]) {
