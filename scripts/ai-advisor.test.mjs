@@ -69,10 +69,11 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
     assert.match(researchModel,/models\/gemini-2\.5-flash-lite:generateContent/);
     const urls=[];
-    globalThis.fetch=async (url)=>{ urls.push(String(url)); return urls.length===1 ? new Response(null,{status:404}) : geminiGood(); };
+    globalThis.fetch=async (url)=>{ urls.push(String(url)); return urls.length===1 ? new Response(null,{status:404}) : urls.length===2 ? new Response(JSON.stringify({models:[{name:"models/gemini-3.8-flash",supportedGenerationMethods:["generateContent"]}]})) : geminiGood(); };
     await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
-    assert.equal(urls.length,2);
-    assert.ok(urls[1].includes("gemini-2.5-flash:generateContent"));
+    assert.equal(urls.length,3);
+    assert.ok(urls[1].includes("/models?pageSize="));
+    assert.ok(urls[2].includes("gemini-3.8-flash:generateContent"));
     delete process.env.GEMINI_SEARCH_GROUNDING_ENABLED;
     assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
     assert.deepEqual(research.citations,[]);
