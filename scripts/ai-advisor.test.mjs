@@ -40,8 +40,13 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     process.env.GROQ_API_KEY = "test-only";
     process.env.GEMINI_API_KEY = "test-only";
     const geminiGood = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ answer: "Valid strategy", gigs: [], people: [], moves: [] }) }] } }] }));
-    globalThis.fetch = async (url, init) => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); assert.equal(JSON.parse(init.body).tools, undefined); return geminiGood(); };
-    assert.equal((await askGrowthAdvisor(input)).answer, "Valid strategy");
+    let outgoing;
+    globalThis.fetch = async (url, init) => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); outgoing = JSON.parse(init.body); assert.equal(outgoing.tools, undefined); return geminiGood(); };
+    const workspace = {gigs:[],money:[{id:'collected',type:'collected',amount:12.34}],merchProducts:[],tasks:[]};
+    assert.equal((await askGrowthAdvisor({...input,workspace})).answer, "Valid strategy");
+    assert.equal(calls,1);
+    assert.match(JSON.stringify(outgoing),/APP-CALCULATED WORKSPACE BRIEF/);
+    assert.ok(outgoing.contents[0].parts[0].text.includes('"collected":1234'));
     const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
     assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
     assert.deepEqual(research.citations,[]);

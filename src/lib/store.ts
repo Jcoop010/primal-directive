@@ -5,6 +5,7 @@ import { uid } from "@/lib/utils";
 import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, isSourceManagedMoneyEntry, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
 import { changesPayoutIdentity, hasGigLinkedFinancialHistory, hasRecordedPayouts } from "@/lib/contact-integrity";
+import { prepareAdvisorTask, type AdvisorTaskDraft } from "@/lib/advisor-tasks";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -65,6 +66,7 @@ type Actions = {
   recordMerchOrder: (order: Omit<MerchOrder, "id" | "status" | "createdAt" | "subtotal" | "total" | "refundedAmount">) => string;
   refundMerchOrder: (id: string, restock: boolean, note: string) => void;
   generateShowTasks: () => number;
+  addAdvisorTask: (draft: AdvisorTaskDraft) => { id: string; created: boolean };
   updateOperationalTask: (id: string, patch: Partial<Pick<OperationalTask, "status" | "dueDate">>) => void;
   updateProfile: (patch: Partial<ArtistProfile>) => void;
   addUserMessage: (text: string) => void;
@@ -329,6 +331,15 @@ export const useMusician = create<State & Actions>()(
             ? { ...task, ...patch, ...(patch.dueDate !== undefined ? { dueDateOverridden: true } : {}) }
             : task),
         })),
+      addAdvisorTask: (draft) => {
+        let result = { id: "", created: false };
+        set(state => {
+          const prepared = prepareAdvisorTask(draft, state.tasks, state.gigs, uid());
+          result = { id: prepared.task.id, created: prepared.created };
+          return prepared.created ? { tasks: [prepared.task, ...state.tasks] } : state;
+        });
+        return result;
+      },
       updateProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
       addUserMessage: (text) =>

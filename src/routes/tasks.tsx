@@ -27,7 +27,7 @@ function TasksPage() {
   const [filter, setFilter] = useState<"open" | "all" | "done">("open");
   const today = toIsoDay(new Date());
   const openTasks = tasks.filter((task) => task.status === "open");
-  const overdue = openTasks.filter((task) => task.dueDate < today);
+  const overdue = openTasks.filter((task) => task.dueDate && task.dueDate < today);
   const visible = useMemo(() => tasks
     .filter((task) => filter === "all" || task.status === filter)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.title.localeCompare(b.title)), [tasks, filter]);
@@ -89,7 +89,7 @@ function TasksPage() {
           </div>
         ) : visible.map((task, index) => {
           const gig = gigs.find((item) => item.id === task.gigId);
-          const isOverdue = task.status === "open" && task.dueDate < today;
+          const isOverdue = task.status === "open" && Boolean(task.dueDate) && task.dueDate < today;
           return (
             <div key={task.id} className={cn("flex items-start gap-3 px-4 py-4", index < visible.length - 1 && "border-b border-line")}>
               <button type="button" onClick={() => updateTask(task.id, { status: task.status === "done" ? "open" : "done" })} className="mt-0.5 shrink-0" aria-label={task.status === "done" ? "Mark task open" : "Mark task complete"}>
@@ -100,7 +100,7 @@ function TasksPage() {
                 <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-muted">{CATEGORY[task.category]}</div>
                 <p className="mt-2 text-xs leading-relaxed text-muted">{task.description}</p>
                 <div className={cn("mt-2 text-xs font-semibold", isOverdue ? "text-danger" : "text-muted")}>
-                  {isOverdue ? "OVERDUE · " : "Due · "}{longDate(task.dueDate)}
+                  {task.dueDate ? <>{isOverdue ? "OVERDUE · " : "Due · "}{longDate(task.dueDate)}</> : "Unscheduled"}
                 </div>
                 {gig && <Link to="/gigs" className="mt-1 inline-block text-xs font-semibold text-accent">{gig.venue || gig.name} · {gig.city}</Link>}
               </div>
