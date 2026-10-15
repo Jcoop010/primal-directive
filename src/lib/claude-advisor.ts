@@ -13,7 +13,7 @@ export async function claudeComplete(args:{apiKey:string;messages:Msg[];search:b
   return fetch("https://api.anthropic.com/v1/messages",{
     method:"POST",
     headers:{"content-type":"application/json","x-api-key":args.apiKey,"anthropic-version":"2023-06-01"},
-    body:JSON.stringify({model:process.env.ANTHROPIC_MODEL || "claude-haiku-5-5",max_tokens:1024,temperature:0.2,system,messages:history, ...(tools?{tools}: {})}),
+    body:JSON.stringify({model:process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001",max_tokens:1024,temperature:0.2,system,messages:history, ...(tools?{tools}: {})}),
     signal:AbortSignal.timeout(45000)
   });
 }
