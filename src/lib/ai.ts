@@ -305,6 +305,19 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-    // Never show malformed or schema-invalid model output as if it were a vetted answer.
+    // Never discard an otherwise useful sourced response merely because
+    // its optional JSON envelope was malformed or truncated.
+    // Keep structured leads disabled; expose the answer only as unverified prose.
+    if (raw.trim()) {
+      return {
+        ok: true,
+        answer: raw.trim().slice(0, 8000),
+        source: "AI RESPONSE — STRUCTURED FORMAT INVALID; FACTS NOT VERIFIED",
+        citations: [],
+        gigs: [],
+        people: [],
+        moves: [],
+      };
+    }
     return fallback();
   });
