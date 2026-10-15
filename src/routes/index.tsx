@@ -187,6 +187,8 @@ function AdvisorPage() {
                         </div>
                       </div>
                       <p className="mt-1.5 text-xs text-soft">{g.reason}</p>
+                      {g.sourceUrl ? <a href={g.sourceUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs text-accent underline">View supporting source</a> : null}
+                      <p className="mt-1 text-[11px] text-muted">Research lead only · Not a confirmed booking · Capacity, availability and contacts require separate verification</p>
                       <div className="mt-2 flex items-center justify-between">
                         <span className="text-[11px] text-muted">
                           {longDate(g.date)} · {Math.round(g.conf * 100)}%
@@ -217,6 +219,7 @@ function AdvisorPage() {
                         <div className="text-xs text-muted">
                           {p.role} · {p.city}
                         </div>
+                        {p.sourceUrl ? <a href={p.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-accent underline">View supporting source</a> : null}
                       </div>
                       <Button
                         size="sm"

@@ -101,6 +101,7 @@ export type OperationalTask = {
 export type ChatRole = "user" | "ai";
 
 export type SuggestedGig = {
+  sourceUrl?: string;
   name: string;
   venue: string;
   city: string;
@@ -112,6 +113,7 @@ export type SuggestedGig = {
 };
 
 export type SuggestedPerson = {
+  sourceUrl?: string;
   name: string;
   role: PersonRole;
   city: string;
