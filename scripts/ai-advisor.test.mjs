@@ -74,6 +74,12 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.deepEqual(research.moves,[]);
     assert.doesNotMatch(research.answer,/Valid strategy/);
     calls=0;
+    globalThis.fetch=async()=>{calls++;throw Error("Disabled grounding must not call Gemini");};
+    const disabledResearch=await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
+    assert.match(disabledResearch.answer,/LIVE RESEARCH UNAVAILABLE/);
+    assert.deepEqual(disabledResearch.citations,[]);
+    assert.equal(calls,0);
+    calls=0;
     globalThis.fetch=async()=>{calls++;return new Response(null,{status:503});};
     const planningFailure=await askGrowthAdvisor({...input,message:'Explain my saved weekly plan',workspace,planning});
     assert.match(planningFailure.source,/HTTP 503/);
