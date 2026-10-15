@@ -241,29 +241,21 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // A provider/network exception should still allow the other configured provider.
     }
 
-    // If xAI is configured but unavailable, use Groq when its free-tier key exists.
-    // Keep the no-web-search limitation explicit so fallback answers never imply live research.
-    if ((!res || !res.ok) && (provider === "xai" || provider === "anthropic") && groqKey) {
-      activeProvider = "groq";
-      try {
-        res = await complete({
-          apiKey: groqKey,
-          messages: [
-            ...messages,
-            {
-              role: "system",
-              content: "PROVIDER LIMITATION: This request uses Groq without a web-search tool. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
-            }
-          ],
-          search: false,
-          provider: "groq",
-        });
-      } catch {
-        res = null;
-      }
+    // Do not silently substitute an ungrounded provider for live research.
+    // Report only the upstream HTTP status; never log tokens or response bodies.
+    if (!res?.ok) {
+      console.error("[advisor] primary provider unavailable", {
+        provider,
+        status: res?.status ?? "network-error",
+      });
+      const local = fallback();
+      return {
+        ...local,
+        source: "AI PROVIDER UNAVAILABLE — LIVE FACTS NOT VERIFIED",
+        answer: `Live research is temporarily unavailable (provider: ${provider}, status: ${res?.status ?? "connection failure"}). No current venue, contact, or booking details have been verified.\\n\\n${local.answer}`,
+      };
     }
 
-    if (!res?.ok) return fallback();
 
     const body = (await res.json()) as Record<string, unknown>;
     const choices = body.choices as
