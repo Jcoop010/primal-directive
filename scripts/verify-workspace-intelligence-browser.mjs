@@ -85,8 +85,9 @@ try{
  pass('Explicit approval creates one unscheduled task with editable fields; mobile review fits');
  await page.reload({waitUntil:'networkidle'});
  await page.getByText('QA reviewed finance task',{exact:true}).waitFor({timeout:30000});
+ const completedSaved=saveAck('QA reviewed finance task');
  await page.getByRole('button',{name:'Mark task complete',exact:true}).click();
- await saveAck('"status":"done"');
+ await completedSaved;
  await nav('Advisor');await review.click();
  await dialog().getByLabel(/^Task title/).fill('  QA   REVIEWED finance TASK  ');
  await dialog().getByRole('button',{name:'Add task',exact:true}).click();
