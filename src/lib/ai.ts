@@ -301,9 +301,23 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const parsed = extractJson(raw);
       return { raw, safe: parsed ? AiJson.safeParse(parsed) : null };
     };
-    const { safe } = readSafeAnswer(body);
+    const { raw, safe } = readSafeAnswer(body);
 
-    // A malformed answer never triggers another paid/quota-consuming request.
+    // Gemini can return useful plain text or a nonconforming JSON object.
+    // Preserve it for general advice, but never present ungrounded live claims.
+    if (!safe?.success && raw.trim()) {
+      const plain = raw.trim().slice(0, 20000);
+      if (!searchRequested) {
+        return { ok: true, answer: plain, source: "GEMINI AI — CURRENT FACTS NOT VERIFIED", citations: [], gigs: [], people: [], moves: [] };
+      }
+      const citations = normalizeCitationUrls(searchUsed ? citationsFrom(body) : []);
+      if (citations.length) {
+        return { ok: true, answer: plain, source: "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE", citations, gigs: [], people: [], moves: [] };
+      }
+      return { ok: true, answer: "LIVE RESEARCH NOT VERIFIED: Gemini responded but supplied no usable source citations. Current external facts, booking contacts, availability and dates were not verified.", source: "GEMINI AI — CURRENT FACTS NOT VERIFIED", citations: [], gigs: [], people: [], moves: [] };
+    }
+
+    // An empty answer never triggers another quota-consuming request.
     if (!safe?.success) {
       const local = fallback();
       return {
