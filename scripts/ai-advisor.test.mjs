@@ -182,7 +182,7 @@ test("Transient Gemini 503 recovers on one retry without changing models", async
       if (urls.length===1) return new Response(null,{status:503});
       return new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify({answer:"Recovered after temporary outage",gigs:[],people:[],moves:[]})}]}}]}));
     };
-    const result=await askGrowthAdvisor({...input,message:"Help my band with promotion"});
+    const result=await askGrowthAdvisor({...input,message:"How can I improve my band promotion strategy?"});
     assert.equal(result.answer,"Recovered after temporary outage");
     assert.equal(urls.length,2);
     assert.equal(urls[0],urls[1]);
