@@ -173,7 +173,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     if (/^(?:what(?:'s| is) the time|what time is it|current time|time now)[?.!\s]*$/i.test(data.message.trim())) {
       return { ok: true, answer: `The current UTC time is ${new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date())} (UTC). Your local timezone was not supplied.`, source: 'SERVER CLOCK — UTC', citations: [], gigs: [], people: [], moves: [] };
     }
-    const request = createAdvisorTransport({ timeoutMs: 55_000, deduplicationScope: context.userId });
+    const request = createAdvisorTransport({ timeoutMs: 55_000, deduplicationScope: context.userId, allowSecondOn404: true });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const provider = "gemini" as const;
     const apiKey = geminiKey;
