@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "advisor-intelligence-production": false,
-      "fix/advisor-release-reliability": false
+      "fix/advisor-release-reliability": false,
+      "fix/gemini-executive-recovery-20261014": false
     }
   }
 }

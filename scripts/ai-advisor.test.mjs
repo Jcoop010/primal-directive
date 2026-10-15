@@ -10,7 +10,7 @@ import { boundedHistory, createAdvisorTransport, retryAfterMs } from "../src/lib
 // The production middleware remains required; no provider credentials are used.
 const framework = `export function createServerFn() { let schema; return {
  middleware(m) { if (!m.length) throw Error('Missing auth'); return this; },
- validator(v) { schema=v; return this; }, handler(fn) { return data => fn({data:schema(data)}); }
+ validator(v) { schema=v; return this; }, handler(fn) { return data => fn({data:schema(data),context:{userId:"test-user"}}); }
 }; }`;
 const require = createRequire(import.meta.url);
 let source = ts.transpileModule(readFileSync(new URL("../src/lib/ai.ts", import.meta.url), "utf8"), {
@@ -66,13 +66,12 @@ test("Transport respects Retry-After, recovers after cooldown and caps attempts"
   let time=0, calls=0;
   const blocked=new Map();
   const options={now:()=>time,cooldowns:blocked,fetchImpl:async()=>{calls++;return calls===1?new Response(null,{status:429}):good();}};
-  assert.equal((await createAdvisorTransport(options)("groq","https://example.com",{})).status,429);
-  assert.equal((await createAdvisorTransport(options)("groq","https://example.com",{})).status,429);
+  assert.equal((await createAdvisorTransport(options)("gemini","https://example.com",{})).status,429);
+  assert.equal((await createAdvisorTransport(options)("gemini","https://example.com",{})).status,429);
   assert.equal(calls,1); time=60001;
   const request=createAdvisorTransport(options);
-  assert.equal((await request("groq","https://example.com",{})).status,200);
-  await request("groq","https://example.com",{});
-  await assert.rejects(request("groq","https://example.com",{}),/budget/);
+  assert.equal((await request("gemini","https://example.com",{})).status,200);
+  await assert.rejects(request("gemini","https://example.com",{}),/budget/);
 });
 
 test("Transport aborts a stalled body as well as a stalled request", async () => {
@@ -80,5 +79,19 @@ test("Transport aborts a stalled body as well as a stalled request", async () =>
     return new Response(new ReadableStream({start(controller){init.signal.addEventListener('abort',()=>controller.error(init.signal.reason));}}));
   }});
   const keepAlive=setTimeout(()=>{},100);
-  try {await assert.rejects(request("groq","https://example.com",{}),/timeout/i);} finally {clearTimeout(keepAlive);}
+  try {await assert.rejects(request("gemini","https://example.com",{}),/timeout/i);} finally {clearTimeout(keepAlive);}
+});
+
+test("Concurrent identical requests deduplicate only within the same authenticated account", async () => {
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  let calls = 0;
+  const options = {deduplicationScope:"account-a", cooldowns:new Map(), fetchImpl:async () => {calls++; await gate; return good();}};
+  const a = createAdvisorTransport(options)("gemini","https://example.com",{body:"same"});
+  const b = createAdvisorTransport(options)("gemini","https://example.com",{body:"same"});
+  const c = createAdvisorTransport({...options,deduplicationScope:"account-b"})("gemini","https://example.com",{body:"same"});
+  await new Promise(resolve => setTimeout(resolve, 25));
+  release();
+  await Promise.all([a,b,c]);
+  assert.equal(calls,2);
 });

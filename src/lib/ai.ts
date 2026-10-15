@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { boundedHistory, createAdvisorTransport, readProviderBody, providerContent } from "@/lib/ai-transport";
+import { boundedHistory, createAdvisorTransport, readProviderBody } from "@/lib/ai-transport";
+import { geminiFailure } from "@/lib/gemini-failure";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import { advisorWorkspaceContext } from "@/lib/advisor-workspace-context";
 import { needsLiveResearch } from "@/lib/advisor-search-intent";
@@ -157,8 +158,8 @@ async function complete(args: {
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
-  .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
-    const request = createAdvisorTransport({ timeoutMs: 55_000 });
+  .handler(async ({ data, context }): Promise<ChatOk | ChatErr> => {
+    const request = createAdvisorTransport({ timeoutMs: 55_000, deduplicationScope: context.userId });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const provider: "gemini" = "gemini";
     const apiKey = geminiKey;
@@ -203,15 +204,15 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let activeProvider: "gemini" = provider;
-    let searchUsed = searchRequested;
+    const activeProvider: "gemini" = provider;
+    const searchUsed = searchRequested;
     let res: Response | null = null;
 
     try {
       res = await complete({ request, apiKey, messages, search: searchRequested, provider });
 
     } catch {
-      // A provider/network exception should still allow the other configured provider.
+      // Network failures use an explicitly labelled local fallback.
     }
 
     if (activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
@@ -219,97 +220,37 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const local = fallback();
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
       const rateLimited = res?.status === 429;
-      const failedProvider = activeProvider;
       const providerError = res ? await readProviderBody(res) : {};
-      const errorInfo = providerError.error && typeof providerError.error === "object"
-        ? providerError.error as Record<string, unknown> : {};
-      const errorStatus = typeof errorInfo.status === "string" ? errorInfo.status : "";
-      const errorMessage = typeof errorInfo.message === "string" ? errorInfo.message : "";
-      const quotaExhausted = rateLimited && /quota.*(exceed|exhaust)|free.tier|limit: 0|per.day|per day|billing|resource_exhausted/i.test(errorMessage + " " + errorStatus);
-      // Only retain Google-defined quota identifiers and numeric limits, never
-      // the full provider message (which may contain user/account details).
-      const details = Array.isArray(errorInfo.details) ? errorInfo.details : [];
-      const violations = details.flatMap((detail: unknown) => {
-        if (!detail || typeof detail !== "object") return [];
-        const d = detail as Record<string, unknown>;
-        return Array.isArray(d.violations) ? d.violations : [];
-      }).filter((v: unknown) => v && typeof v === "object").slice(0, 6)
-        .map((v: unknown) => {
-          const q = v as Record<string, unknown>;
-          const dims = q.quotaDimensions && typeof q.quotaDimensions === "object" ? q.quotaDimensions as Record<string, unknown> : {};
-          const safe = (x: unknown) => typeof x === "string" && /^[a-zA-Z0-9_.:/-]{1,180}$/.test(x) ? x : undefined;
-          return { metric: safe(q.quotaMetric), id: safe(q.quotaId), model: safe(dims.model), limit: safe(q.quotaValue) };
-        });
-      const retryDetail = details.find((d: unknown) => !!d && typeof d === "object" && "retryDelay" in d) as Record<string, unknown> | undefined;
-      const retryDelay = typeof retryDetail?.retryDelay === "string" && /^\\d+(?:\\.\\d+)?s$/.test(retryDetail.retryDelay)
-        ? retryDetail.retryDelay : undefined;
-      if (rateLimited) console.warn("[advisor] Gemini quota diagnostics (safe identifiers only):", JSON.stringify({ status: errorStatus, violations, retryDelay }));
-      const retryHeader = res?.headers.get("retry-after");
-      const retrySeconds = retryHeader && /^\\d+$/.test(retryHeader) ? Math.min(86400, Number(retryHeader)) : null;
-      console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account/rate limits; never log credentials.`);
-      const diagnosis = rateLimited
-        ? `${failedProvider.toUpperCase()} rejected this request with HTTP 429. ${quotaExhausted ? "The provider reports a quota or resource limit; waiting one minute may not restore daily or project quota." : "This may be temporary throttling or an exhausted quota; the server cannot confirm which without Google quota details."} ${retrySeconds ? `The provider requested a retry delay of approximately ${retrySeconds} seconds.` : retryDelay ? `The provider requested a retry delay of ${retryDelay}.` : "No precise retry delay was provided."} The local workspace fallback is active; this turn was not answered by the AI provider. Check the configured provider usage and limits before retrying or spending money. Live research was not verified.`
-        : `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.`;
+      const diagnosis = res ? geminiFailure(res.status, providerError) : null;
+      console.warn("[advisor] Gemini failure:", JSON.stringify(diagnosis
+        ? {status: res?.status, kind: diagnosis.kind, violations: diagnosis.violations, retrySeconds: diagnosis.retrySeconds}
+        : {kind: "network_or_timeout"}));
+      const explanation = diagnosis?.message ?? "The Gemini connection failed or timed out. Check network connectivity before retrying.";
       return {
         ...local,
         source: rateLimited
           ? "LOCAL WORKSPACE FALLBACK — PROVIDER RATE LIMITED (HTTP 429)"
           : `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
-        answer: diagnosis + `\n\n${local.answer}`,
+        answer: explanation + " This turn uses local workspace rules; it is not a Gemini answer and live research was not verified." + `\n\n${local.answer}`,
         moves: rateLimited
           ? [
               "Check the configured provider's current rate limits and usage dashboard before retrying.",
               "Wait for the limit window to reset; avoid repeatedly resubmitting the same prompt.",
-              "If another provider key is already available, configure it as a fallback; no paid upgrade is assumed."
+              "Verify the Gemini project and model quotas; no other AI provider is used."
             ]
           : local.moves,
       };
     }
 
-    let body = await readProviderBody(res);
+    const body = await readProviderBody(res);
     const readSafeAnswer = (value: Record<string, unknown>) => {
-      const raw = activeProvider === "gemini" ? (Array.isArray(value.candidates) ? (value.candidates[0]?.content?.parts || []).map((p: {text?: string}) => p.text || "").join("") : "") : providerContent(value);
+      const raw = Array.isArray(value.candidates) ? (value.candidates[0]?.content?.parts || []).map((p: {text?: string}) => p.text || "").join("") : "";
       const parsed = extractJson(raw);
       return { raw, safe: parsed ? AiJson.safeParse(parsed) : null };
     };
-    let { safe } = readSafeAnswer(body);
+    const { safe } = readSafeAnswer(body);
 
-    // Do not retry malformed Gemini answers: conserve quota and use local fallback.
-    if (!safe?.success) {
-      const retryProvider: "gemini" = activeProvider;
-      const retryKey = geminiKey;
-      if (!retryKey) return fallback();
-      console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
-      try {
-        const retry = await complete({ request,
-          apiKey: retryKey,
-          // Repair with a small, fresh prompt: repeating the entire long system
-          // contract can exhaust the provider's completion/reasoning budget.
-          messages: [
-            { role: "system", content: "Answer the user's question clearly. Return ONLY a valid JSON object with keys answer (nonempty string), citations (empty array), gigs (empty array), people (empty array), moves (array of up to 3 short strings). Do not claim live web verification. Do not invent external facts." },
-            { role: "system", content: "Artist workspace context (user-recorded, not independently verified):\\n" + advisorContext.slice(0, 4000) },
-            ...boundedHistory(data.history).slice(-4),
-            { role: "user", content: data.message },
-          ],
-          search: false,
-          provider: retryProvider,
-          jsonOnly: true,
-        });
-        if (retry.ok) {
-          const retryBody = await readProviderBody(retry);
-          const retryParsed = readSafeAnswer(retryBody);
-          if (retryParsed.safe?.success) {
-            body = retryBody;
-            safe = retryParsed.safe;
-            activeProvider = retryProvider;
-            searchUsed = false;
-          }
-        }
-      } catch {
-        // The local workspace fallback below remains available if retry fails.
-      }
-    }
-
+    // A malformed answer never triggers another paid/quota-consuming request.
     if (!safe?.success) {
       const local = fallback();
       return {
