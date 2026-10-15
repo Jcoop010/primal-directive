@@ -94,7 +94,7 @@ try {
  await page.route(advisorEndpoint,route=>route.fulfill({status:503,body:"Temporarily unavailable"}));
  await page.getByPlaceholder("Ask about growth, rooms, bills, routing…").fill("Network recovery check");
  await page.getByRole("button",{name:"Send",exact:true}).click();
- await page.getByText("The live connector dropped. Check the board and pipeline, then try the advisor again.",{exact:true}).waitFor({timeout:70000});
+ await page.waitForFunction(()=>Array.from(document.querySelectorAll("div.whitespace-pre-wrap")).at(-1)?.textContent?.includes("The live connector dropped. Check the board and pipeline, then try the advisor again."),null,{timeout:70000});
  await page.unroute(advisorEndpoint);
  await ask("Recovery after simulated network failure","Give one short measurable next step.");
  await page.setViewportSize({width:1440,height:1000});
