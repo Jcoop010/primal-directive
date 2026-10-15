@@ -158,6 +158,20 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
+    // Answer deterministic time queries without a provider round-trip. Server
+    // timezone is UTC; never guess the user's local timezone from band data.
+    if (/^(?:what(?:'s| is) the time|what time is it|current time|time now)[?.!\\s]*$/i.test(data.message.trim())) {
+      const now = new Date();
+      return {
+        ok: true,
+        answer: `The current UTC time is ${new Intl.DateTimeFormat("en-US", { timeZone: "UTC", hour: "numeric", minute: "2-digit", hour12: true }).format(now)} (UTC). I don't have your device's timezone in this request, so I won't guess your local time.`,
+        source: "SERVER CLOCK — UTC",
+        citations: [],
+        gigs: [],
+        people: [],
+        moves: [],
+      };
+    }
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const provider = "gemini" as const;
