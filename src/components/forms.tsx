@@ -489,21 +489,15 @@ function MoneyForm({
 }
 
 export function ProfileDrawer() {
-  const { composer, profile, setComposer, updateProfile, resetSample, clearAll } =
-    useMusician();
-  const [draft, setDraft] = useState(profile);
-  const open = composer.profileOpen;
+  const composer = useMusician(state => state.composer);
+  const setComposer = useMusician(state => state.setComposer);
+  return <Drawer open={composer.profileOpen} onOpenChange={open => setComposer({ profileOpen: open })} title="Artist profile">{composer.profileOpen ? <ProfileForm /> : null}</Drawer>;
+}
 
+function ProfileForm() {
+  const { profile, setComposer, updateProfile, resetSample, clearAll } = useMusician();
+  const [draft, setDraft] = useState(() => profile);
   return (
-    <Drawer
-      open={open}
-      onOpenChange={(v) => {
-        if (v) setDraft(useMusician.getState().profile);
-        setComposer({ profileOpen: v });
-      }}
-      title="Artist profile"
-    >
-      {open ? (
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -566,6 +560,7 @@ export function ProfileDrawer() {
               variant="ghost"
               className="flex-1"
               onClick={() => {
+                if (!window.confirm('Replace workspace records, goals, saved notes, plans and chat with fictional sample data?')) return;
                 resetSample();
                 toast("Sample scene loaded");
                 setComposer({ profileOpen: false });
@@ -578,6 +573,7 @@ export function ProfileDrawer() {
               variant="ghost"
               className="flex-1"
               onClick={() => {
+                if (!window.confirm('Clear workspace records, goals, saved notes, plans and chat? Your artist profile stays.')) return;
                 clearAll();
                 toast("Cleared local data");
                 setComposer({ profileOpen: false });
@@ -587,8 +583,6 @@ export function ProfileDrawer() {
             </Button>
           </div>
         </form>
-      ) : null}
-    </Drawer>
   );
 }
 

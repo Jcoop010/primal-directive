@@ -1,7 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { boundedHistory, createAdvisorTransport, readProviderBody, providerContent } from "@/lib/ai-transport";
+import { boundedHistory, createAdvisorTransport, readProviderBody } from "@/lib/ai-transport";
+import { geminiFailure } from "@/lib/gemini-failure";
+import { intelligenceContext } from "@/lib/workspace-intelligence";
+import { intelligenceWorkspaceSchema } from "@/lib/workspace-intelligence-schema";
+import { planningContext, localPlanningSummary } from "@/lib/artist-planning";
+import { planningSchema } from "@/lib/artist-planning-schema";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import { advisorWorkspaceContext } from "@/lib/advisor-workspace-context";
 import { needsLiveResearch } from "@/lib/advisor-search-intent";
@@ -19,6 +24,8 @@ const Input = z.object({
   message: z.string().trim().min(1).max(2000),
   history: z.array(HistoryItem).max(10),
   context: z.string().max(16000),
+  workspace: intelligenceWorkspaceSchema.optional(),
+  planning: planningSchema.optional(),
 });
 
 const GigOut = z.object({
@@ -149,7 +156,7 @@ async function complete(args: {
   if (args.provider === "gemini") {
     const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
     const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2048, ...(args.search ? {} : { responseMimeType: "application/json" }) }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
-    return args.request("gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
+    return args.request("gemini", `https://generativelanguage.googleapis.com/v1beta/models/${args.search ? "gemini-2.5-flash-lite" : "gemini-3.1-flash-lite"}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
   }
   throw new Error("Unsupported AI provider");
 }
@@ -157,39 +164,21 @@ async function complete(args: {
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
-  .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
-    // Answer deterministic time queries without a provider round-trip. Server
-    // timezone is UTC; never guess the user's local timezone from band data.
-    if (/^(?:what(?:'s| is) the time|what time is it|current time|time now)[?.!\\s]*$/i.test(data.message.trim())) {
-      const now = new Date();
-      return {
-        ok: true,
-        answer: `The current UTC time is ${new Intl.DateTimeFormat("en-US", { timeZone: "UTC", hour: "numeric", minute: "2-digit", hour12: true }).format(now)} (UTC). I don't have your device's timezone in this request, so I won't guess your local time.`,
-        source: "SERVER CLOCK — UTC",
-        citations: [],
-        gigs: [],
-        people: [],
-        moves: [],
-      };
+  .handler(async ({ data, context }): Promise<ChatOk | ChatErr> => {
+    if (/^(?:what(?:'s| is) the time|what time is it|current time|time now)[?.!\s]*$/i.test(data.message.trim())) {
+      return { ok: true, answer: `The current UTC time is ${new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date())} (UTC). Your local timezone was not supplied.`, source: 'SERVER CLOCK — UTC', citations: [], gigs: [], people: [], moves: [] };
     }
-    const request = createAdvisorTransport({ timeoutMs: 55_000 });
+    const request = createAdvisorTransport({ timeoutMs: 55_000, deduplicationScope: context.userId });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const provider = "gemini" as const;
     const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
-    // When the AI service is down, avoid turning unrelated questions into
-    // artist strategy. The local rules engine is intentionally domain-specific.
-    const generalQuestion = !/(\\b(gig|gigs|booking|booker|venue|venues|tour|routing|show|shows|artist|band|bands|merch|fans|audience|music|song|playlist|press|promotion|promoter|ticket|fee|guarantee|pipeline|revenue|payout|profit|finance|money|settlement|inventory)\\b)/i.test(data.message);
-    const generalFallback = () => ({
-      ok: true as const,
-      answer: "I can't answer this question reliably right now because the Gemini service is unavailable. I won't substitute unrelated band advice or pretend I checked live information. Please try again when the provider is available.",
-      source: "GENERAL ASSISTANT — AI SERVICE UNAVAILABLE",
-      citations: [] as string[],
-      gigs: [] as SuggestedGig[],
-      people: [] as SuggestedPerson[],
-      moves: [] as string[],
-    });
     const fallback = () => {
+      if (data.workspace && data.planning && /\b(goals?|weekly|saved|workspace|my memory|our memory|planning code)\b/i.test(data.message)) {
+        const local = localPlanningSummary(data.planning, data.workspace);
+        return { ok: true as const, ...local, source: 'LOCAL PLANNING SUMMARY — NO AI ANSWER', citations: [] as string[], gigs: [] as SuggestedGig[], people: [] as SuggestedPerson[] };
+      }
+      if (!/\b(gigs?|booking|booker|venues?|tour|routing|shows?|artist|bands?|merch|fans|audience|music|song|playlist|press|promotion|promoter|ticket|fee|guarantee|pipeline|revenue|payout|profit|finance|money|settlement|inventory|margin|costs?|income|budget|draw|career|growth|workspace|goals?|weekly|plan|tasks?)\b/i.test(data.message)) return { ok: true as const, answer: 'The Gemini service is unavailable for this question. I cannot provide a reliable answer right now and have not checked live information. Please try again later.', source: 'GENERAL ASSISTANT — AI SERVICE UNAVAILABLE', citations: [] as string[], gigs: [] as SuggestedGig[], people: [] as SuggestedPerson[], moves: [] as string[] };
       const local = localGrowthAdvice(data.message, data.context);
       return {
         ok: true as const,
@@ -204,6 +193,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     if (!apiKey || !provider) {
       const local = fallback();
+      if (local.source.startsWith('GENERAL ASSISTANT')) return local;
       return {
         ...local,
         source: "OFFLINE MODE — FREE AI KEY NOT CONFIGURED",
@@ -221,6 +211,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const advisorContext = advisorWorkspaceContext(data.context);
     const messages = [
       { role: "system", content: SYSTEM },
+      ...(data.workspace ? [{ role: "system", content: intelligenceContext(data.workspace) }] : []),
+      ...(data.workspace && data.planning ? [{ role: 'system', content: planningContext(data.planning, data.workspace) }] : []),
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${advisorContext}`,
@@ -229,119 +221,60 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let activeProvider: "gemini" = provider;
-    let searchUsed = searchRequested;
+    const activeProvider: "gemini" = provider;
+    const searchUsed = searchRequested && process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true";
     let res: Response | null = null;
 
     try {
-      res = await complete({ request, apiKey, messages, search: searchRequested, provider });
+      res = await complete({ request, apiKey, messages, search: searchUsed, provider });
 
     } catch {
-      // A provider/network exception should still allow the other configured provider.
+      // Network failures use an explicitly labelled local fallback.
     }
 
     if (activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
     if (!res?.ok) {
-      const local = generalQuestion ? generalFallback() : fallback();
+      const local = fallback();
+      const general = local.source.startsWith('GENERAL ASSISTANT');
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
       const rateLimited = res?.status === 429;
-      const failedProvider = activeProvider;
       const providerError = res ? await readProviderBody(res) : {};
-      const errorInfo = providerError.error && typeof providerError.error === "object"
-        ? providerError.error as Record<string, unknown> : {};
-      const errorStatus = typeof errorInfo.status === "string" ? errorInfo.status : "";
-      const errorMessage = typeof errorInfo.message === "string" ? errorInfo.message : "";
-      const quotaExhausted = rateLimited && /quota.*(exceed|exhaust)|free.tier|limit: 0|per.day|per day|billing|resource_exhausted/i.test(errorMessage + " " + errorStatus);
-      // Only retain Google-defined quota identifiers and numeric limits, never
-      // the full provider message (which may contain user/account details).
-      const details = Array.isArray(errorInfo.details) ? errorInfo.details : [];
-      const violations = details.flatMap((detail: unknown) => {
-        if (!detail || typeof detail !== "object") return [];
-        const d = detail as Record<string, unknown>;
-        return Array.isArray(d.violations) ? d.violations : [];
-      }).filter((v: unknown) => v && typeof v === "object").slice(0, 6)
-        .map((v: unknown) => {
-          const q = v as Record<string, unknown>;
-          const dims = q.quotaDimensions && typeof q.quotaDimensions === "object" ? q.quotaDimensions as Record<string, unknown> : {};
-          const safe = (x: unknown) => typeof x === "string" && /^[a-zA-Z0-9_.:/-]{1,180}$/.test(x) ? x : undefined;
-          return { metric: safe(q.quotaMetric), id: safe(q.quotaId), model: safe(dims.model), limit: safe(q.quotaValue) };
-        });
-      const retryDetail = details.find((d: unknown) => !!d && typeof d === "object" && "retryDelay" in d) as Record<string, unknown> | undefined;
-      const retryDelay = typeof retryDetail?.retryDelay === "string" && /^\\d+(?:\\.\\d+)?s$/.test(retryDetail.retryDelay)
-        ? retryDetail.retryDelay : undefined;
-      if (rateLimited) console.warn("[advisor] Gemini quota diagnostics (safe identifiers only):", JSON.stringify({ status: errorStatus, violations, retryDelay }));
-      const retryHeader = res?.headers.get("retry-after");
-      const retrySeconds = retryHeader && /^\\d+$/.test(retryHeader) ? Math.min(86400, Number(retryHeader)) : null;
-      console.error(`[advisor] ${activeProvider} provider request failed: ${failure}. Check provider configuration and account/rate limits; never log credentials.`);
-      const diagnosis = rateLimited
-        ? `${failedProvider.toUpperCase()} rejected this request with HTTP 429. ${quotaExhausted ? "The provider reports a quota or resource limit; waiting one minute may not restore daily or project quota." : "This may be temporary throttling or an exhausted quota; the server cannot confirm which without Google quota details."} ${retrySeconds ? `The provider requested a retry delay of approximately ${retrySeconds} seconds.` : retryDelay ? `The provider requested a retry delay of ${retryDelay}.` : "No precise retry delay was provided."} The local workspace fallback is active; this turn was not answered by the AI provider. Check the configured provider usage and limits before retrying or spending money. Live research was not verified.`
-        : `The ${activeProvider} AI request failed (${failure}), so I’m using conservative workspace rules for this turn. This is a provider-connection failure, not evidence that your pipeline is empty. Check the provider key, account/rate limits, and Production environment configuration. Live research was not verified.`;
+      const diagnosis = res ? geminiFailure(res.status, providerError) : null;
+      console.warn("[advisor] Gemini failure:", JSON.stringify(diagnosis
+        ? {status: res?.status, kind: diagnosis.kind, violations: diagnosis.violations, retrySeconds: diagnosis.retrySeconds}
+        : {kind: "network_or_timeout"}));
+      const explanation = diagnosis?.message ?? "The Gemini connection failed or timed out. Check network connectivity before retrying.";
       return {
         ...local,
-        source: rateLimited
+        source: general ? local.source : rateLimited
           ? "LOCAL WORKSPACE FALLBACK — PROVIDER RATE LIMITED (HTTP 429)"
           : `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
-        answer: diagnosis + `\n\n${local.answer}`,
-        moves: generalQuestion ? [] : rateLimited
+        answer: explanation + (general ? ' This turn could not be answered by Gemini and no live information was checked.' : " This turn uses local workspace rules; it is not a Gemini answer and live research was not verified.") + `\n\n${local.answer}`,
+        moves: general ? [] : rateLimited
           ? [
               "Check the configured provider's current rate limits and usage dashboard before retrying.",
               "Wait for the limit window to reset; avoid repeatedly resubmitting the same prompt.",
-              "If another provider key is already available, configure it as a fallback; no paid upgrade is assumed."
+              "Verify the Gemini project and model quotas; no other AI provider is used."
             ]
           : local.moves,
       };
     }
 
-    let body = await readProviderBody(res);
+    const body = await readProviderBody(res);
     const readSafeAnswer = (value: Record<string, unknown>) => {
-      const raw = activeProvider === "gemini" ? (Array.isArray(value.candidates) ? (value.candidates[0]?.content?.parts || []).map((p: {text?: string}) => p.text || "").join("") : "") : providerContent(value);
+      const raw = Array.isArray(value.candidates) ? (value.candidates[0]?.content?.parts || []).map((p: {text?: string}) => p.text || "").join("") : "";
       const parsed = extractJson(raw);
       return { raw, safe: parsed ? AiJson.safeParse(parsed) : null };
     };
-    let { safe } = readSafeAnswer(body);
+    const { safe } = readSafeAnswer(body);
 
-    // Do not retry malformed Gemini answers: conserve quota and use local fallback.
+    // A malformed answer never triggers another paid/quota-consuming request.
     if (!safe?.success) {
-      const retryProvider: "gemini" = activeProvider;
-      const retryKey = geminiKey;
-      if (!retryKey) return fallback();
-      console.warn(`[advisor] ${activeProvider} returned an unusable answer; retrying once with strict JSON output and no live search.`);
-      try {
-        const retry = await complete({ request,
-          apiKey: retryKey,
-          // Repair with a small, fresh prompt: repeating the entire long system
-          // contract can exhaust the provider's completion/reasoning budget.
-          messages: [
-            { role: "system", content: "Answer the user's question clearly. Return ONLY a valid JSON object with keys answer (nonempty string), citations (empty array), gigs (empty array), people (empty array), moves (array of up to 3 short strings). Do not claim live web verification. Do not invent external facts." },
-            { role: "system", content: "Artist workspace context (user-recorded, not independently verified):\\n" + advisorContext.slice(0, 4000) },
-            ...boundedHistory(data.history).slice(-4),
-            { role: "user", content: data.message },
-          ],
-          search: false,
-          provider: retryProvider,
-          jsonOnly: true,
-        });
-        if (retry.ok) {
-          const retryBody = await readProviderBody(retry);
-          const retryParsed = readSafeAnswer(retryBody);
-          if (retryParsed.safe?.success) {
-            body = retryBody;
-            safe = retryParsed.safe;
-            activeProvider = retryProvider;
-            searchUsed = false;
-          }
-        }
-      } catch {
-        // The local workspace fallback below remains available if retry fails.
-      }
-    }
-
-    if (!safe?.success) {
-      const local = generalQuestion ? generalFallback() : fallback();
+      const local = fallback();
       return {
         ...local,
-        source: "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
-        answer: "The AI provider responded, but its answer was not usable. I did not send another AI request, to conserve quota. I’m using conservative workspace rules instead. Live research was not verified.\n\n" + local.answer,
+        source: local.source.startsWith('GENERAL ASSISTANT') ? local.source : "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
+        answer: "Gemini returned an unusable answer. No second request was sent. Live information was not verified.\n\n" + local.answer,
       };
     }
 
@@ -377,11 +310,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           detail: p.detail,
           reason: p.reason,
         }));
-      // A warning is insufficient: unsupported claims and outreach tasks must not
-      // be surfaced as usable research when provider grounding is absent.
-      const researchUnverified = searchRequested && citations.length === 0;
-      const verifiedAnswer = researchUnverified
-        ? "LIVE RESEARCH UNAVAILABLE: Gemini returned no usable grounding sources. Venue capacities, contacts, band identities, availability and proposed dates were not verified. No research-based tasks were generated. Check official sources or retry when live grounding is available."
+      const verifiedAnswer = searchRequested && citations.length === 0
+        ? 'LIVE RESEARCH NOT VERIFIED: No usable live grounding sources were returned. Current external facts, contacts, capacities, availability and dates have not been verified. No research-based tasks were generated. Check official sources; workspace analysis and goal planning remain available.'
         : safe.data.answer;
       return {
         ok: true,
@@ -390,7 +320,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         citations,
         gigs,
         people,
-        moves: researchUnverified ? [] : (safe.data.moves ?? []).slice(0, 3),
+        moves: searchRequested && citations.length === 0 ? [] : (safe.data.moves ?? []).slice(0, 3),
       };
     }
 

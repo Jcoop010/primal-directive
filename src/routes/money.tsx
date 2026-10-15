@@ -65,8 +65,8 @@ function MoneyPage() {
           Track fee, travel, and merch — not vanity gross
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          The board turns this ledger into actual profit. Log remainders the
-          night of the show so outstanding does not go quiet.
+          Compare recorded collected income with operating costs, and track unpaid amounts separately.
+          Unrecorded costs are excluded; these records do not verify a bank balance or accounting profit.
         </p>
       </Card>
 

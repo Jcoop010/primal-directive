@@ -3,10 +3,13 @@ import { toast } from "sonner";
 import { loadAppState, saveAppState } from "@/lib/persistence";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { useMusician } from "@/lib/store";
+import { emptyPlanning } from "@/lib/artist-planning";
+const PERSISTED_KEYS = ['gigs', 'people', 'money', 'merchProducts', 'merchSales', 'merchOrders', 'merchInventoryAdjustments', 'merchRefunds', 'tasks', 'planning', 'chat', 'profile'] as const;
 
 /** Bridges the existing Zustand UX to the authenticated server source of truth. */
 export function DurableSync() {
   const { user, isPending } = useCurrentUserState();
+  const userId = user?.id ?? null;
   const readyFor = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loading = useRef(false);
@@ -14,21 +17,33 @@ export function DurableSync() {
   const activeUserId = useRef<string | null>(null);
   const version = useRef(0);
   const saveQueue = useRef<Promise<void>>(Promise.resolve());
-  const [syncStatus, setSyncStatus] = useState<"loading" | "ready" | "error">("loading");
+  const retrySave = useRef<(() => void) | null>(null);
+  const dirty = useRef(false);
+  const changeVersion = useRef(0);
+  const [syncStatus, setSyncStatus] = useState<"loading" | "ready" | "error" | "unsaved">("loading");
 
   // Keep queued work from a previous account from starting after an account switch.
-  activeUserId.current = !isPending && user ? user.id : null;
+  activeUserId.current = !isPending ? userId : null;
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!dirty.current || !activeUserId.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, []);
 
   useEffect(() => {
-    if (isPending || !user) {
+    if (isPending || !userId) {
       readyFor.current = null;
       version.current = 0;
+      dirty.current = false;
       setSyncStatus("loading");
       return;
     }
-    if (readyFor.current === user.id || loading.current) return;
+    if (readyFor.current === userId || loading.current) return;
 
-    const userId = user.id;
     const requestId = ++loadRequest.current;
     loading.current = true;
     setSyncStatus("loading");
@@ -49,6 +64,8 @@ export function DurableSync() {
             merchInventoryAdjustments: state.merchInventoryAdjustments ?? [],
             merchRefunds: state.merchRefunds ?? [],
             tasks: state.tasks ?? [],
+            planning: state.planning ?? emptyPlanning(),
+            composer: { gigOpen: false, personOpen: false, moneyOpen: false, profileOpen: false, commandOpen: false },
             chat: state.chat,
             profile: state.profile,
           }));
@@ -65,6 +82,8 @@ export function DurableSync() {
             merchInventoryAdjustments: [],
             merchRefunds: [],
             tasks: [],
+            planning: emptyPlanning(),
+            composer: { gigOpen: false, personOpen: false, moneyOpen: false, profileOpen: false, commandOpen: false },
             chat: [],
             profile: {
               artistName: "",
@@ -77,6 +96,8 @@ export function DurableSync() {
           }));
         }
         readyFor.current = userId;
+        dirty.current = false;
+        changeVersion.current = 0;
         setSyncStatus("ready");
       })
       .catch((error) => {
@@ -95,13 +116,14 @@ export function DurableSync() {
         loading.current = false;
       }
     };
-  }, [user, isPending]);
+  }, [userId, isPending]);
 
   useEffect(() => {
-    if (!user || isPending) return;
-    const userId = user.id;
-    const unsubscribe = useMusician.subscribe(() => {
+    if (!userId || isPending) return;
+    const scheduleSave = () => {
       if (readyFor.current !== userId || activeUserId.current !== userId || loading.current) return;
+      dirty.current = true;
+      const snapshotVersion = ++changeVersion.current;
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         timer.current = null;
@@ -118,6 +140,7 @@ export function DurableSync() {
           merchInventoryAdjustments: current.merchInventoryAdjustments,
           merchRefunds: current.merchRefunds,
           tasks: current.tasks,
+          planning: current.planning,
           chat: current.chat,
           profile: current.profile,
         };
@@ -130,7 +153,13 @@ export function DurableSync() {
             const result = await saveAppState({
               data: { state, expectedVersion: version.current },
             });
-            version.current = result.version;
+            if (activeUserId.current === userId && readyFor.current === userId) {
+              version.current = result.version;
+              if (snapshotVersion === changeVersion.current) {
+                dirty.current = false;
+                setSyncStatus('ready');
+              }
+            }
           })
           .catch((error) => {
             console.error("[primal-directive] durable save failed", error);
@@ -139,7 +168,7 @@ export function DurableSync() {
               if (conflict) {
                 readyFor.current = null;
                 setSyncStatus("error");
-              }
+              } else setSyncStatus('unsaved');
               toast.error(
                 conflict
                   ? "This workspace changed in another session. Reload before making more edits."
@@ -148,16 +177,22 @@ export function DurableSync() {
             }
           });
       }, 650);
+    };
+    const unsubscribe = useMusician.subscribe((state, previous) => {
+      if (PERSISTED_KEYS.some(key => state[key] !== previous[key])) scheduleSave();
     });
+    retrySave.current = scheduleSave;
 
     return () => {
       unsubscribe();
       if (timer.current) clearTimeout(timer.current);
       timer.current = null;
+      retrySave.current = null;
     };
-  }, [user, isPending]);
+  }, [userId, isPending]);
 
   if (syncStatus === "ready") return null;
+  if (syncStatus === 'unsaved') return <div role="alert" className="fixed inset-x-4 bottom-24 z-40 mx-auto flex max-w-lg flex-wrap items-center justify-between gap-3 rounded-lg border border-danger bg-surface p-4 text-sm text-fg"><p>Changes are not saved yet. Keep this tab open.</p><button type="button" className="min-h-11 rounded-md border border-line px-3 font-semibold text-accent" onClick={() => retrySave.current?.()}>Retry save</button></div>;
 
   return (
     <div
