@@ -5,7 +5,7 @@ import { boundedHistory, createAdvisorTransport, readProviderBody } from "@/lib/
 import { geminiFailure } from "@/lib/gemini-failure";
 import { intelligenceContext } from "@/lib/workspace-intelligence";
 import { intelligenceWorkspaceSchema } from "@/lib/workspace-intelligence-schema";
-import { planningContext } from "@/lib/artist-planning";
+import { planningContext, localPlanningSummary } from "@/lib/artist-planning";
 import { planningSchema } from "@/lib/artist-planning-schema";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import { advisorWorkspaceContext } from "@/lib/advisor-workspace-context";
@@ -174,6 +174,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
+      if (data.workspace && data.planning && /\b(goals?|weekly|saved|workspace|my memory|our memory|planning code)\b/i.test(data.message)) {
+        const local = localPlanningSummary(data.planning, data.workspace);
+        return { ok: true as const, ...local, source: 'LOCAL PLANNING SUMMARY — NO AI ANSWER', citations: [] as string[], gigs: [] as SuggestedGig[], people: [] as SuggestedPerson[] };
+      }
       if (!/\b(gigs?|booking|booker|venues?|tour|routing|shows?|artist|bands?|merch|fans|audience|music|song|playlist|press|promotion|promoter|ticket|fee|guarantee|pipeline|revenue|payout|profit|finance|money|settlement|inventory|margin|costs?|income|budget|draw|career|growth|workspace|goals?|weekly|plan|tasks?)\b/i.test(data.message)) return { ok: true as const, answer: 'The Gemini service is unavailable for this question. I cannot provide a reliable answer right now and have not checked live information. Please try again later.', source: 'GENERAL ASSISTANT — AI SERVICE UNAVAILABLE', citations: [] as string[], gigs: [] as SuggestedGig[], people: [] as SuggestedPerson[], moves: [] as string[] };
       const local = localGrowthAdvice(data.message, data.context);
       return {

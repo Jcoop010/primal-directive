@@ -7,6 +7,7 @@ const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
 const page=await context.newPage();const results=[];const errors=[];let saveEndpoint;
 const answers=[];
+const accounts=[];
 page.on('pageerror',()=>errors.push('uncaught_browser_error'));
 page.on('request',request=>{if(request.method()==='POST' && request.url().includes('/_serverFn/') && request.postData()?.includes('expectedVersion')) saveEndpoint=request.url();});
 const pass=test=>{results.push({test,passed:true});console.log(JSON.stringify({test,passed:true}));};
@@ -16,15 +17,19 @@ const saved=(marker='Cedar')=>page.waitForResponse(response=>response.status()==
 const date=days=>{const d=new Date();d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);};
 async function signup(){
  const email='primal-continuity-qa-'+randomUUID()+'@example.invalid';const password=randomUUID()+'aA1!';console.log('::add-mask::'+email);console.log('::add-mask::'+password);
+ accounts.push({email,password});
  await page.getByRole('button',{name:'Create account',exact:true}).click();await page.getByPlaceholder('Artist / band name').fill('Cedar release QA');await page.getByPlaceholder('Email',{exact:true}).fill(email);await page.getByPlaceholder('Password (8+ characters)').fill(password);await page.locator('form').getByRole('button',{name:'Create account',exact:true}).click();
  await page.getByPlaceholder('Ask about growth, rooms, bills, routing…').waitFor({timeout:30000});await page.getByText('Loading your workspace',{exact:true}).waitFor({state:'hidden',timeout:30000});
  const session=await (await context.request.get(base+'/api/auth/get-session')).json();assert.ok(session.user?.id);return session.user.id;
 }
 async function expand(){const details=page.locator('details').filter({has:page.locator('summary',{hasText:'Goals & weekly plan'})});if(!await details.getAttribute('open').then(value=>value!==null))await details.locator('summary').click();return details;}
 async function ask(message){
+ for(let attempt=0;attempt<2;attempt++){
  const before=await page.locator('div.whitespace-pre-wrap').count();await page.getByPlaceholder('Ask about growth, rooms, bills, routing…').fill(message);await page.getByRole('button',{name:'Send',exact:true}).click();
  await page.waitForFunction(n=>document.querySelectorAll('div.whitespace-pre-wrap').length>=n,before+2,{timeout:70000});const answer=await page.locator('div.whitespace-pre-wrap').last().innerText();
+ if(attempt===0 && /HTTP (502|503|504)|network error or timeout|connection failed or timed out/i.test(answer) && !/HTTP 429/.test(answer)){await saved();pass('Temporary Gemini failure explicitly labelled; one delayed verification retry');await page.waitForTimeout(10000);continue;}
  assert.match(answer,/GEMINI AI — CURRENT FACTS NOT VERIFIED/);assert.doesNotMatch(answer,/LOCAL WORKSPACE FALLBACK|OFFLINE MODE|AI SERVICE UNAVAILABLE|LIVE RESEARCH NOT VERIFIED/);await saved();answers.push({question:message,answer});await writeFile('qa-evidence/continuity-gemini-answers.json',JSON.stringify(answers,null,2));console.log('QA_GEMINI_ANSWER '+JSON.stringify({question:message,answer}));return answer;
+ }
 }
 await mkdir('qa-evidence',{recursive:true});
 try{
@@ -59,5 +64,6 @@ try{
  const planDeleted=saved();await panel.getByRole('button',{name:'Delete plan only',exact:true}).click();await planDeleted;await nav('Tasks');await page.getByRole('button',{name:'All tasks',exact:true}).click();assert.equal(await page.getByText('Prepare Cedar signup invitation reviewed',{exact:true}).count(),1);pass('Goals and plans can be deleted without deleting accepted tasks');
  await page.getByRole('button',{name:'Sign out',exact:true}).click();await page.getByRole('heading',{name:'Your command center.',exact:true}).waitFor({timeout:30000});const ownerB=await signup();assert.notEqual(ownerA,ownerB);await expand();assert.equal(await panel.getByText('Cedar recovery note',{exact:true}).count(),0);assert.equal(await panel.getByRole('button',{name:'Delete goal',exact:true}).count(),0);assert.equal(await panel.getByRole('button',{name:'Delete plan only',exact:true}).count(),0);assert.equal(await page.locator('div.whitespace-pre-wrap').count(),0);await nav('Tasks');await page.getByText('Your workflow starts here',{exact:true}).waitFor();await nav('Money');await page.getByText('No money logged',{exact:true}).waitFor();pass('Second account has no prior goals, memory, plans, tasks, ledger or chat');
  await page.getByRole('button',{name:'Sign out',exact:true}).click();await page.getByRole('heading',{name:'Your command center.',exact:true}).waitFor({timeout:30000});assert.equal(await (await context.request.get(base+'/api/auth/get-session')).json(),null);assert.deepEqual(errors,[]);pass('Logout invalidates session with no uncaught browser errors');
+ await page.getByPlaceholder('Email',{exact:true}).fill(accounts[0].email);await page.getByPlaceholder('Password (8+ characters)').fill(accounts[0].password);await page.locator('form').getByRole('button',{name:'Sign in',exact:true}).click();await page.getByPlaceholder('Ask about growth, rooms, bills, routing…').waitFor({timeout:30000});await expand();await page.getByText('Cedar recovery note',{exact:true}).waitFor({timeout:30000});assert.equal((await (await context.request.get(base+'/api/auth/get-session')).json()).user?.id,ownerA);await nav('Tasks');await page.getByRole('button',{name:'All tasks',exact:true}).click();await page.getByText('Prepare Cedar signup invitation reviewed',{exact:true}).waitFor();pass('Returning with existing credentials restores the original account and its saved note and task');await page.getByRole('button',{name:'Sign out',exact:true}).click();await page.getByRole('heading',{name:'Your command center.',exact:true}).waitFor({timeout:30000});assert.equal(await (await context.request.get(base+'/api/auth/get-session')).json(),null);assert.deepEqual(errors,[]);
  await writeFile('qa-evidence/continuity-results.json',JSON.stringify({base,tests:results},null,2));
 }catch(error){await writeFile('qa-evidence/continuity-results.json',JSON.stringify({base,tests:results,failed:true,error:String(error?.message??error)},null,2));await page.screenshot({path:'qa-evidence/continuity-failure.png'}).catch(()=>{});throw error;}finally{await browser.close();}

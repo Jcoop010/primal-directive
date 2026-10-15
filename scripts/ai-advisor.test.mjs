@@ -69,6 +69,14 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.deepEqual(research.citations,[]);
     assert.deepEqual(research.moves,[]);
     assert.doesNotMatch(research.answer,/Valid strategy/);
+    calls=0;
+    globalThis.fetch=async()=>{calls++;return new Response(null,{status:503});};
+    const planningFailure=await askGrowthAdvisor({...input,message:'Explain my saved weekly plan',workspace,planning});
+    assert.match(planningFailure.source,/HTTP 503/);
+    assert.match(planningFailure.answer,/No weekday travel/);
+    assert.match(planningFailure.answer,/Capture 12 email signups/);
+    assert.match(planningFailure.answer,/without an AI answer/);
+    assert.equal(calls,1);
     delete process.env.GEMINI_API_KEY;
     calls = 0;
     assert.match((await askGrowthAdvisor(input)).source, /OFFLINE/);

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {emptyPlanning,saveGoal,saveMemory,metricValue,goalProgress,weekRange,draftWeeklyPlan,acceptPlanAction,planProgress,planningContext} from '../src/lib/artist-planning.ts';
+import {emptyPlanning,saveGoal,saveMemory,metricValue,goalProgress,weekRange,draftWeeklyPlan,acceptPlanAction,planProgress,planningContext,localPlanningSummary} from '../src/lib/artist-planning.ts';
 const workspace=()=>({gigs:[],money:[],tasks:[],merchProducts:[]});
 const goal=(extra={})=>({title:'Grow our audience',metric:'manual',target:12,reported:0,deadline:'2026-10-25',nextAction:'Prepare approved signup invitation',...extra});
 test('recorded goals capture a baseline and handle cents, refunds and corrected records',()=>{
@@ -78,4 +78,10 @@ test('show and task measurements respond to status transitions without inflating
  const p=saveGoal(emptyPlanning(),goal({metric:'tasks',target:1}),w,'g');
  w.tasks[1].status='done';assert.equal(goalProgress(p.goals[0],w).current,1);
  w.tasks[1].status='open';assert.equal(goalProgress(p.goals[0],w).current,0);
+});
+test('planning fallback recalls explicit saved facts and avoids completed actions without an AI call',()=>{
+ const w=workspace();let p=saveMemory(saveGoal(emptyPlanning(),goal({reported:3}),w,'g'),'Planning code CEDAR-48','note');
+ p=draftWeeklyPlan(p,w,'2026-10-15','week');const action=p.plans[0].actions[0];const accepted=acceptPlanAction(p,[],[],'week',action.id,action,'t');
+ const summary=localPlanningSummary(accepted.planning,{...w,tasks:[{...accepted.tasks[0],status:'done'}]});
+ assert.match(summary.answer,/CEDAR-48/);assert.match(summary.answer,/3 \/ 12/);assert.match(summary.answer,/1 \/ 1 actions complete/);assert.match(summary.answer,/without an AI answer/);assert.deepEqual(summary.moves,[]);
 });
