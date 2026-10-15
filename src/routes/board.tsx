@@ -31,9 +31,9 @@ function BoardPage() {
   const profit = collected - costs;
   const open = pipelineGigs(gigs);
   const bookingLeads = gigs.filter((gig) => gig.status === "lead" || gig.status === "outreach" || gig.status === "negotiating" || gig.status === "hold").map((gig) => {
-    const hasSource = /Research source:\\s*https:\\/\\//i.test(gig.notes);
-    const researchOnly = /Unconfirmed research lead/i.test(gig.notes);
-    const hasDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(gig.date);
+    const hasSource = gig.notes.includes("Research source: https://");
+    const researchOnly = gig.notes.includes("Unconfirmed research lead");
+    const hasDate = gig.date.length === 10 && gig.date[4] === "-" && gig.date[7] === "-";
     const score = Math.min(100, Math.round((gig.conf || 0) * 35 + (hasSource ? 25 : 0) + (gig.fee > 0 && !researchOnly ? 20 : 0) + (hasDate && !researchOnly ? 10 : 0) + (gig.status !== "lead" ? 10 : 0)));
     return { gig, score, hasSource, researchOnly };
   }).sort((a, b) => b.score - a.score).slice(0, 6);
