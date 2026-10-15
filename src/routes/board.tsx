@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { longDate, money, toIsoDay } from "@/lib/format";
 import { deriveSignals } from "@/lib/signals";
 import { buildDailyBriefing } from "@/lib/daily-briefing";
+import { makeBriefingActionPrompt } from "@/lib/briefing-actions";
 import { Sparkles, ArrowUpRight } from "lucide-react";
 import {
   pipelineGigs,
@@ -76,6 +77,7 @@ function BoardPage() {
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
           {briefing.map((item) => <Link key={item.id} to={item.href} className="group flex items-start justify-between gap-3 rounded-xl border border-line bg-bg/80 p-4 transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"><div className="min-w-0"><div className="mb-2 flex items-center gap-2"><span className={cn("size-2 rounded-full", item.priority === "urgent" ? "bg-warn" : item.priority === "important" ? "bg-accent" : "bg-live")} /><span className="text-[10px] font-bold uppercase tracking-widest text-muted">{item.priority}</span></div><h3 className="text-sm font-bold">{item.title}</h3><p className="mt-1 text-xs leading-relaxed text-muted">{item.detail}</p></div><ArrowUpRight className="size-4 shrink-0 text-muted group-hover:text-accent" /></Link>)}
         </div>
+        <div className="mt-4 flex flex-wrap gap-2">{briefing.slice(0, 3).map((item) => <button key={item.id} type="button" onClick={() => { useMusician.getState().addUserMessage(makeBriefingActionPrompt(item)); window.location.assign("/"); }} className="min-h-10 rounded-lg border border-accent/40 bg-accent/10 px-3 text-xs font-bold text-accent hover:bg-accent/20">Plan: {item.title}</button>)}</div>
         <p className="mt-4 text-[11px] text-muted">Workspace intelligence · Rule-based, not externally verified AI research · No messages are sent automatically.</p>
       </section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><Eyebrow>Overview / Booking board</Eyebrow><Link to="/gigs" className="rounded-xl border border-line bg-surface px-4 py-2 text-xs font-bold text-soft hover:border-accent hover:text-accent">View pipeline →</Link></div>
