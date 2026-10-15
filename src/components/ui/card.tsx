@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-line bg-surface p-4 shadow-card",
+        "command-panel p-4 transition-colors duration-200 hover:border-line-strong",
         className,
       )}
     >
