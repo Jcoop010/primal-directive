@@ -3,6 +3,8 @@ import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { boundedHistory, createAdvisorTransport, readProviderBody } from "@/lib/ai-transport";
 import { geminiFailure } from "@/lib/gemini-failure";
+import { intelligenceContext } from "@/lib/workspace-intelligence";
+import { intelligenceWorkspaceSchema } from "@/lib/workspace-intelligence-schema";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import { advisorWorkspaceContext } from "@/lib/advisor-workspace-context";
 import { needsLiveResearch } from "@/lib/advisor-search-intent";
@@ -20,6 +22,7 @@ const Input = z.object({
   message: z.string().trim().min(1).max(2000),
   history: z.array(HistoryItem).max(10),
   context: z.string().max(16000),
+  workspace: intelligenceWorkspaceSchema.optional(),
 });
 
 const GigOut = z.object({
@@ -196,6 +199,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const advisorContext = advisorWorkspaceContext(data.context);
     const messages = [
       { role: "system", content: SYSTEM },
+      ...(data.workspace ? [{ role: "system", content: intelligenceContext(data.workspace) }] : []),
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${advisorContext}`,

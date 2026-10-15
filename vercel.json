@@ -2,6 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
+      "feat/workspace-intelligence-20261015": false,
+      "verify/workspace-intelligence-20261015": false,
       "advisor-intelligence-production": false,
       "fix/advisor-release-reliability": false,
       "fix/gemini-executive-recovery-20261014": false,

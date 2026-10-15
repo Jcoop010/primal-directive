@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { PGlite } from "@electric-sql/pglite";
+import { prepareAdvisorTask } from "../src/lib/advisor-tasks.ts";
 
 test("real workspace SQL preserves saves, isolates accounts and rejects stale versions", async () => {
   const db = new PGlite();
@@ -29,6 +30,7 @@ test("real workspace SQL preserves saves, isolates accounts and rejects stale ve
   try {
     const {saveAppState,loadAppState}=await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
     const state={gigs:[],people:[],money:[],chat:[{id:'q1',role:'user',text:'Preserve this during AI failure'}],profile:{artistName:'Account A',city:'',genre:'',draw:'',feeTarget:0,notes:''}};
+    state.tasks = [prepareAdvisorTask({title:'Reviewed task',description:'Approved by account A',category:'finance',gigId:'',dueDate:''},[],[],'reviewed-task').task];
     assert.deepEqual(await loadAppState({}),{state:null,version:0});
     assert.equal((await saveAppState({state,expectedVersion:0})).version,1);
     assert.equal((await loadAppState({})).state.chat[0].text,state.chat[0].text);
@@ -39,6 +41,7 @@ test("real workspace SQL preserves saves, isolates accounts and rejects stale ve
     await saveAppState({state:{...state,profile:{...state.profile,artistName:'Account B'}},expectedVersion:0});
     globalThis[key].userId='account-a';
     assert.equal((await loadAppState({})).state.profile.artistName,'Account A');
+    assert.equal((await loadAppState({})).state.tasks[0].title,'Reviewed task');
     await saveAppState({state:{...state,chat:[...state.chat,{id:'a1',role:'ai',text:'Local fallback',source:'LOCAL WORKSPACE FALLBACK'}]},expectedVersion:1});
     assert.equal((await loadAppState({})).state.chat.length,2);
     await assert.rejects(saveAppState({state,expectedVersion:1}),/another session/);
