@@ -54,7 +54,7 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     process.env.GEMINI_API_KEY = "test-only";
     const geminiGood = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ answer: "Valid strategy", gigs: [], people: [], moves: [] }) }] } }] }));
     let outgoing;
-    globalThis.fetch = async (url, init) => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); outgoing = JSON.parse(init.body); assert.equal(outgoing.tools, undefined); return geminiGood(); };
+    globalThis.fetch = async (url, init) => { calls++; assert.match(String(url), /models\/gemini-3\.1-flash-lite:generateContent/); outgoing = JSON.parse(init.body); assert.equal(outgoing.tools, undefined); return geminiGood(); };
     const workspace = {gigs:[],money:[{id:'collected',type:'collected',amount:12.34}],merchProducts:[],tasks:[]};
     const planning=saveMemory(saveGoal(emptyPlanning(),{title:'Capture 12 email signups',metric:'manual',target:12,reported:3,deadline:'2026-12-01',nextAction:'Review signup invitation'},workspace,'goal'),'No weekday travel','note');
     assert.equal((await askGrowthAdvisor({...input,workspace,planning})).answer, "Valid strategy");
@@ -64,7 +64,7 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.match(outgoing.contents[0].parts[0].text,/Capture 12 email signups/);
     assert.match(outgoing.contents[0].parts[0].text,/No weekday travel/);
     assert.match(outgoing.contents[0].parts[0].text,/User-reported/);
-    const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
+    let researchModel = ""; globalThis.fetch = async (url, init) => { researchModel=String(url); const body=JSON.parse(init.body); assert.deepEqual(body.tools,[{google_search:{}}]); return geminiGood(); };\n    const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});\n    assert.match(researchModel,/models\/gemini-2\.5-flash-lite:generateContent/);
     assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
     assert.deepEqual(research.citations,[]);
     assert.deepEqual(research.moves,[]);
