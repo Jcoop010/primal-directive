@@ -212,3 +212,25 @@ test("Claude takes priority when configured and limits paid tokens",async()=>{
   for(const [k,v] of [["ANTHROPIC_API_KEY",saved.anthropic],["GEMINI_API_KEY",saved.gemini]]) if(v===undefined)delete process.env[k];else process.env[k]=v;
  }
 });
+
+test("Claude grounded research preserves provider citations and rejects model-invented citations",async()=>{
+ const saved={fetch:globalThis.fetch,anthropic:process.env.ANTHROPIC_API_KEY,search:process.env.ANTHROPIC_WEB_SEARCH_ENABLED};
+ try{
+  process.env.ANTHROPIC_API_KEY="test-claude";
+  process.env.ANTHROPIC_WEB_SEARCH_ENABLED="true";
+  globalThis.fetch=async(_url,init)=>{
+   const payload=JSON.parse(init.body);
+   assert.equal(payload.tools?.[0]?.name,"web_search");
+   return new Response(JSON.stringify({content:[
+    {type:"text",text:JSON.stringify({answer:"Official site lists shows; saved booker identity unverified.",citations:["https://invented.example/contact"],gigs:[],people:[],moves:[]}),citations:[{type:"web_search_result_location",url:"https://venue.example/events",cited_text:"Shows"}]}
+   ]}),{headers:{"content-type":"application/json"}});
+  };
+  const result=await askGrowthAdvisor({...input,message:"Research current Pittsburgh music venues with official source links"});
+  assert.match(result.source,/LIVE WEB RESEARCH/);
+  assert.deepEqual(result.citations,["https://venue.example/events"]);
+  assert.doesNotMatch(result.answer,/LIVE RESEARCH NOT VERIFIED/);
+ }finally{
+  globalThis.fetch=saved.fetch;
+  for(const [k,v] of [["ANTHROPIC_API_KEY",saved.anthropic],["ANTHROPIC_WEB_SEARCH_ENABLED",saved.search]]) if(v===undefined)delete process.env[k];else process.env[k]=v;
+ }
+});
