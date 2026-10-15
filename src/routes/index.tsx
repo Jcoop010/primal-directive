@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowUp, LoaderCircle } from "lucide-react";
+import { ArrowUp, ChevronDown, ChevronUp, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, Eyebrow } from "@/components/ui/card";
@@ -37,6 +37,24 @@ const SUGGESTIONS = [
   },
 ];
 
+function AdvisorMessage({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const long = text.length > 720;
+  const visible = long && !expanded ? text.slice(0, 720).replace(/\\s+\\S*$/, "") + "…" : text;
+  return (
+    <div>
+      <div className="whitespace-pre-wrap break-words">{visible}</div>
+      {long && (
+        <button type="button" onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-md border border-line px-2.5 py-1 text-xs font-semibold text-accent hover:bg-bg">
+          {expanded ? <><ChevronUp className="size-3.5" /> Show less</> : <><ChevronDown className="size-3.5" /> Read full answer</>}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function AdvisorPage() {
   const { user } = useCurrentUserState();
   const owner = user?.id ?? null;
@@ -57,6 +75,7 @@ function AdvisorPage() {
   const people = useMusician((s) => s.people);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [answerMode, setAnswerMode] = useState<"quick" | "detailed" | "research">("quick");
   const [taskSuggestion, setTaskSuggestion] = useState<{ owner: string; text: string } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
@@ -79,7 +98,7 @@ function AdvisorPage() {
     try {
       const res = await askGrowthAdvisor({
         data: {
-          message: q,
+          message: `${answerMode === "quick" ? "Respond concisely: lead with the answer, aim for 100–150 words, at most 3 key points. Do not repeat the question or include raw JSON. Keep citations and uncertainty clear." : answerMode === "detailed" ? "Provide a detailed but well-organized answer; avoid repetition and raw JSON." : "Provide thorough research with sources, clearly distinguishing verified external facts from saved workspace data. No raw JSON."}\n\nUser request: ${q}`,
           history,
           context: buildAdvisorContext(),
           workspace: intelligenceWorkspace(useMusician.getState()),
@@ -122,7 +141,7 @@ function AdvisorPage() {
 
       <Card className="flex min-h-[28rem] flex-1 flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <strong className="text-sm">Primal Directive AI</strong>
+          <div><strong className="text-sm">Primal Directive AI</strong><p className="mt-0.5 text-[11px] text-muted">Clear answers. Your next move, without the noise.</p></div>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -152,6 +171,15 @@ function AdvisorPage() {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-line px-4 py-2" role="group" aria-label="Advisor response length">
+          {(["quick", "detailed", "research"] as const).map(mode => (
+            <button key={mode} type="button" onClick={() => setAnswerMode(mode)} aria-pressed={answerMode === mode}
+              disabled={busy}
+              className={cn("min-h-9 rounded-md px-3 text-xs font-semibold transition-colors", answerMode === mode ? "bg-accent text-accent-fg" : "text-muted hover:bg-surface-2 hover:text-fg")}>
+              {mode === "quick" ? "Quick" : mode === "detailed" ? "Detailed" : "Deep research"}
+            </button>
+          ))}
+        </div>
         <div className="border-b border-line px-4 py-2 text-xs text-muted">
           {profile.artistName ? <span>Workspace: <strong className="text-fg">{profile.artistName}</strong> · {gigs.length} shows · {people.length} contacts {profile.artistName === "River Fold" ? "· FICTIONAL SAMPLE DATA" : ""}</span> : <span>No artist profile loaded. Use <strong>Load demo artist</strong> to explore the product with fictional data.</span>}
         </div>
@@ -166,7 +194,7 @@ function AdvisorPage() {
                   : "border border-line bg-surface-2 text-fg",
               )}
             >
-              {m.text}
+              {m.role === "ai" ? <AdvisorMessage text={m.text} /> : m.text}
               {m.role === "ai" && m.source ? (
                 <div className="mt-2 text-[9px] font-bold tracking-[0.14em] text-muted uppercase">
                   {m.source}
