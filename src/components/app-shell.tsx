@@ -88,9 +88,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <SignInGate fallback={<SignInScreen />}>
       <div className="min-h-dvh md:flex">
         <DurableSync />
-        <aside className="hidden w-56 shrink-0 flex-col border-r border-line bg-bg/80 md:flex">
+        <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-[#0d141d]/95 md:flex">
           <div className="px-5 pt-6 pb-4">
-            <div className="text-[11px] font-bold tracking-[0.22em]">PRIMAL DIRECTIVE</div>
+            <div className="flex items-center gap-2 text-[11px] font-bold tracking-[0.22em]"><span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-live via-info to-accent text-bg"><Music2 className="size-5" /></span><span>PRIMAL DIRECTIVE</span></div>
             <div className="mt-1 text-xs text-muted">Artist Command Center</div>
           </div>
           <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -101,8 +101,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold transition-colors",
-                    active ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface hover:text-fg",
+                    "flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-all duration-150",
+                    active ? "command-nav-active text-fg" : "text-muted hover:bg-surface hover:text-fg",
                   )}
                 >
                   <item.icon className="size-4" strokeWidth={1.75} />
@@ -135,7 +135,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
           <header className="px-4 pt-5 pb-2 md:px-8 md:pt-7">
-            <div className="mx-auto flex max-w-3xl items-end justify-between gap-4">
+            <div className="mx-auto flex max-w-6xl items-end justify-between gap-4">
               <div>
                 <div className="text-[11px] font-bold tracking-[0.22em] md:hidden">PRIMAL DIRECTIVE</div>
                 <div className="mt-1 text-xs text-muted md:hidden">Artist Command Center</div>
@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-2">
                 <div className="hidden items-center gap-2 rounded-full border border-line bg-bg px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-muted sm:flex">
                   <span className="size-1.5 rounded-full bg-live shadow-[0_0_10px_var(--color-live)]" />
-                  SCENE INTEL
+                  ARTIST OPERATIONS
                 </div>
                 <button
                   type="button"
@@ -163,7 +163,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <main
             className={cn(
-              "mx-auto w-full max-w-3xl flex-1 px-3.5 pb-28 md:px-8 md:pb-10",
+              "mx-auto w-full max-w-6xl flex-1 px-3.5 pb-28 md:px-8 md:pb-10",
               pathname === "/" && "flex flex-col pb-24 md:pb-28",
             )}
           >
@@ -171,8 +171,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </main>
         </div>
 
-        <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-20 overflow-x-auto border-t border-line bg-bg/90 backdrop-blur-md md:hidden">
-          <div className="mx-auto flex w-max min-w-full max-w-3xl overflow-x-auto px-1 pb-[env(safe-area-inset-bottom)]">
+        <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-20 overflow-x-auto border-t border-line bg-[#0c141d]/95 backdrop-blur-xl md:hidden">
+          <div className="mx-auto flex w-max min-w-full max-w-6xl overflow-x-auto px-1 pb-[env(safe-area-inset-bottom)]">
             {NAV.map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
               return (
@@ -196,7 +196,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           type="button"
           onClick={onFab}
           className={cn(
-            "fixed right-4 bottom-[4.75rem] z-30 size-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-[0_10px_30px_#0009] md:right-8 md:bottom-8",
+            "fixed right-4 bottom-[4.75rem] z-30 size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-[#ffae52] text-accent-fg shadow-[0_10px_30px_#0009] md:right-8 md:bottom-8",
             pathname === "/" ? "hidden md:flex" : "flex",
           )}
           aria-label="Add"
