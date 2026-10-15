@@ -156,7 +156,12 @@ async function complete(args: {
   if (args.provider === "gemini") {
     const prompt = args.messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
     const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 2048, ...(args.search ? {} : { responseMimeType: "application/json" }) }, ...(args.search ? { tools: [{ google_search: {} }] } : {}) };
-    return args.request("gemini", `https://generativelanguage.googleapis.com/v1beta/models/${args.search ? "gemini-2.5-flash-lite" : "gemini-3.1-flash-lite"}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
+    const callModel = (model: string) => args.request("gemini", `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey }, body: JSON.stringify(body) });
+    const primary = await callModel(args.search ? "gemini-2.5-flash-lite" : "gemini-3.1-flash-lite");
+    // A 404 means this key cannot use the selected model. Try one alternative
+    // in the same Gemini family; never retry 429/503 or bypass search grounding.
+    if (primary.status === 404) return callModel(args.search ? "gemini-2.5-flash" : "gemini-2.5-flash-lite");
+    return primary;
   }
   throw new Error("Unsupported AI provider");
 }
