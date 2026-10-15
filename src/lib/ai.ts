@@ -281,8 +281,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         name: g.name,
         venue: g.venue,
         city: g.city,
-        date: g.date,
-        fee: g.fee,
+        // An AI research suggestion is never proof of a scheduled show or an agreed fee.
+        date: "",
+        fee: 0,
         conf: g.conf,
         reason: g.reason,
         sourceUrl: g.sourceUrl,
@@ -310,7 +311,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     }
 
-    // Never discard an otherwise useful sourced response merely because
+    // Never discard an otherwise useful response merely because
     // its optional JSON envelope was malformed or truncated.
     // Keep structured leads disabled; expose the answer only as unverified prose.
     if (raw.trim() && !raw.trim().startsWith("{") && !raw.trim().startsWith("```")) {
