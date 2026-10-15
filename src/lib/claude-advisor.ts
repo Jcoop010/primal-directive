@@ -1,5 +1,5 @@
 /** Claude primary provider. Provider keys never reach the browser. */
-import { normalizeCitationUrls } from "@/lib/ai-citations";
+import { normalizeCitationUrls } from "./ai-citations.ts";
 
 type Msg = {role:string;content:string};
 export async function claudeComplete(args:{apiKey:string;messages:Msg[];search:boolean}):Promise<Response>{
