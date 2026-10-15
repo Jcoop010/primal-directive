@@ -94,3 +94,18 @@
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* Primal Directive: premium unified interaction language */
+@layer base {
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  ::selection { background: #ff7a1850; color: #fff; }
+  * { scrollbar-color: #38434d transparent; }
+}
+@layer components {
+  .glass-panel { background: linear-gradient(145deg, #171e26e8, #101419ed); border: 1px solid #34404c; box-shadow: 0 14px 48px #0005; backdrop-filter: blur(18px); }
+  .metric-value { font-variant-numeric: tabular-nums; letter-spacing: -0.045em; }
+}
+@media (hover: hover) {
+  button:not(:disabled), a { transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease; }
+  button:not(:disabled):active { transform: scale(.98); }
+}
