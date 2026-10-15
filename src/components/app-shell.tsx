@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Banknote,
@@ -6,6 +7,8 @@ import {
   ListChecks,
   Music2,
   Plus,
+  Menu,
+  X,
   Route as RouteIcon,
   ShoppingBag,
   Sparkles,
@@ -63,6 +66,7 @@ function SignInScreen() {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const profile = useMusician((s) => s.profile);
   const setComposer = useMusician((s) => s.setComposer);
@@ -86,9 +90,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <SignInGate fallback={<SignInScreen />}>
       <div className="min-h-dvh md:flex">
         <DurableSync />
-        <aside className="hidden w-56 shrink-0 flex-col border-r border-line bg-bg/80 md:flex">
+        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-bg/90 md:flex">
           <div className="px-5 pt-6 pb-4">
-            <div className="text-[11px] font-bold tracking-[0.22em]">PRIMAL DIRECTIVE</div>
+            <div className="text-[12px] font-extrabold tracking-[0.19em] text-accent">PRIMAL DIRECTIVE</div>
             <div className="mt-1 text-xs text-muted">Artist Command Center</div>
           </div>
           <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -100,7 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   to={item.to}
                   className={cn(
                     "flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold transition-colors",
-                    active ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface hover:text-fg",
+                    active ? "bg-accent/10 text-accent ring-1 ring-accent/20" : "text-muted hover:bg-surface hover:text-fg",
                   )}
                 >
                   <item.icon className="size-4" strokeWidth={1.75} />
@@ -132,8 +136,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-          <header className="px-4 pt-5 pb-2 md:px-8 md:pt-7">
-            <div className="mx-auto flex max-w-3xl items-end justify-between gap-4">
+          <header className="border-b border-line/60 bg-bg/70 px-4 pt-5 pb-5 backdrop-blur-xl md:px-8 md:pt-7 md:pb-6">
+            <div className="mx-auto flex max-w-7xl items-end justify-between gap-4">
               <div>
                 <div className="text-[11px] font-bold tracking-[0.22em] md:hidden">PRIMAL DIRECTIVE</div>
                 <div className="mt-1 text-xs text-muted md:hidden">Artist Command Center</div>
@@ -143,6 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <div className="mt-1 text-xs text-muted">{todayLabel()}</div>
               </div>
               <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation" aria-expanded={mobileMenuOpen} className="flex size-11 items-center justify-center rounded-xl border border-line bg-surface md:hidden"><Menu className="size-5" /></button>
                 <div className="hidden items-center gap-2 rounded-full border border-line bg-bg px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-muted sm:flex">
                   <span className="size-1.5 rounded-full bg-live shadow-[0_0_10px_var(--color-live)]" />
                   SCENE INTEL
@@ -161,7 +166,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <main
             className={cn(
-              "mx-auto w-full max-w-3xl flex-1 px-3.5 pb-28 md:px-8 md:pb-10",
+              "mx-auto w-full max-w-7xl flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-10",
               pathname === "/" && "flex flex-col pb-24 md:pb-8",
             )}
           >
@@ -169,23 +174,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </main>
         </div>
 
-        <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-20 overflow-x-auto border-t border-line bg-bg/90 backdrop-blur-md md:hidden">
-          <div className="mx-auto flex w-max min-w-full max-w-3xl overflow-x-auto px-1 pb-[env(safe-area-inset-bottom)]">
-            {NAV.map((item) => {
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm md:hidden" onClick={() => setMobileMenuOpen(false)}>
+            <nav aria-label="Mobile navigation" className="h-full w-[min(85vw,340px)] overflow-y-auto border-r border-line bg-bg p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+              <div className="mb-8 flex items-center justify-between">
+                <div><div className="text-xs font-extrabold tracking-[0.2em] text-accent">PRIMAL DIRECTIVE</div><div className="mt-1 text-xs text-muted">Artist Command Center</div></div>
+                <button type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-line p-2"><X className="size-5" /></button>
+              </div>
+              <div className="flex flex-col gap-1">
+                {NAV.map((item) => {
+                  const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+                  return <Link key={item.to} to={item.to} onClick={() => setMobileMenuOpen(false)} aria-current={active ? "page" : undefined} className={cn("flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm font-semibold", active ? "bg-accent/10 text-accent" : "text-muted hover:bg-surface hover:text-fg")}><item.icon className="size-5" />{item.label}</Link>;
+                })}
+              </div>
+              <div className="mt-8 border-t border-line pt-5"><UserButton /></div>
+            </nav>
+          </div>
+        )}
+
+        <nav aria-label="Quick navigation" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur-xl md:hidden">
+          <div className="mx-auto grid max-w-md grid-cols-5 pb-[env(safe-area-inset-bottom)]">
+            {NAV.filter((item) => ["/", "/board", "/gigs", "/calendar", "/tasks"].includes(item.to)).map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    "flex min-h-14 w-[68px] shrink-0 flex-col items-center justify-center gap-1 text-[10px] font-semibold",
-                    active ? "text-fg" : "text-muted",
-                  )}
-                >
-                  <item.icon className="size-4" strokeWidth={1.75} />
-                  {item.label}
-                </Link>
-              );
+              return <Link key={item.to} to={item.to} aria-current={active ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold", active ? "text-accent" : "text-muted")}><item.icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />{item.label}</Link>;
             })}
           </div>
         </nav>
