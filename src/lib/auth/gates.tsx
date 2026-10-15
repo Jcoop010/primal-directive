@@ -34,7 +34,7 @@ export function SignInGate({
 }) {
   const { user, isPending } = useCurrentUserState();
   const state = resolveSignInGateState({ isPending, hasUser: user !== null });
-  if (state === "pending") return null;
+  if (state === "pending") return <div role="status" aria-live="polite" className="grid min-h-dvh place-items-center px-6"><div className="flex flex-col items-center gap-4 text-center"><div className="size-10 animate-spin rounded-full border-[3px] border-line-strong border-t-accent" aria-hidden="true" /><p className="text-sm font-medium text-muted">Preparing your artist workspace…</p></div></div>;
   if (state === "signed_in") return <>{children}</>;
   return <>{fallback ?? <SignInButtons />}</>;
 }

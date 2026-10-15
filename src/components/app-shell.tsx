@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Banknote,
@@ -73,6 +73,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const openGig = useMusician((s) => s.openGig);
   const openPerson = useMusician((s) => s.openPerson);
   const openMoney = useMusician((s) => s.openMoney);
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileMenuOpen]);
   const pageTitle =
     NAV.find((n) => (n.to === "/" ? pathname === "/" : pathname.startsWith(n.to)))?.label ??
     "Command";
