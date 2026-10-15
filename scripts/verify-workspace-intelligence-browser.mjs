@@ -67,8 +67,8 @@ try{
  pass('Cancel leaves Tasks unchanged');
  await nav('Advisor');
  await review.click();
- await dialog().getByLabel('Task title',{exact:true}).fill('QA reviewed finance task');
- await dialog().getByLabel('Task details',{exact:true}).fill('Confirm unpaid terms before counting income.');
+ await dialog().getByLabel(/^Task title/).fill('QA reviewed finance task');
+ await dialog().getByLabel(/^Task details/).fill('Confirm unpaid terms before counting income.');
  await dialog().getByLabel(/^Category/).selectOption('finance');
  await page.setViewportSize({width:390,height:844});
  await dialog().getByRole('button',{name:'Add task',exact:true}).scrollIntoViewIfNeeded();
@@ -88,7 +88,7 @@ try{
  await page.getByRole('button',{name:'Mark task complete',exact:true}).click();
  await saveAck('"status":"done"');
  await nav('Advisor');await review.click();
- await dialog().getByLabel('Task title',{exact:true}).fill('  QA   REVIEWED finance TASK  ');
+ await dialog().getByLabel(/^Task title/).fill('  QA   REVIEWED finance TASK  ');
  await dialog().getByRole('button',{name:'Add task',exact:true}).click();
  await page.getByText('This task already exists. Check Tasks, including completed tasks.',{exact:true}).waitFor();
  await nav('Tasks');
