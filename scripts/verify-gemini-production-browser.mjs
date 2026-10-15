@@ -66,7 +66,7 @@ try {
   }
  }
  await ask("General career advice","Give a practical two-week career plan for this independent act.");
- await ask("Booking strategy","Suggest a concert booking strategy using our saved profile without claiming any live facts.",{research:true});
+ await ask("Booking strategy","Suggest a booking strategy using only our saved profile and workspace records.");
  await ask("Venue research limitation","Find current venue availability and booking contacts in Albany. Be clear about what you can verify.",{research:true});
  await ask("Marketing and fan growth","Recommend a measurable fan-growth and marketing experiment using our saved weekly goal.",{contextAware:true});
  await ask("Workspace context awareness","What are our saved act name, home city, typical draw, and weekly signup goal?",{contextAware:true});

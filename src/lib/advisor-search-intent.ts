@@ -1,5 +1,6 @@
 export function needsLiveResearch(message: string, history: { role: "user" | "ai"; text: string }[]): boolean {
   if (/\b(saved|recorded|workspace|weekly plan|goal progress|completed tasks?)\b/i.test(message) && !/\b(search|research|find|look up|verify|latest|news|weather|forecast|stock price|live|availability)\b/i.test(message)) return false;
+  if (/\b(strategy|plan|advice|improve|grow|prepare|build|write|draft|checklist|how)\b/i.test(message) && !/\b(search|research|find|look up|verify|current|currently|latest|upcoming|today|tomorrow|news|weather|forecast|stock price|live|availability|who|where)\b/i.test(message)) return false;
   const previous = message.trim().length < 32
     ? history.filter(item => item.role === "user").slice(-2).map(item => item.text).join(" ")
     : "";
