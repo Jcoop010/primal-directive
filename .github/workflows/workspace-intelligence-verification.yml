@@ -31,3 +31,7 @@ jobs:
           name: workspace-intelligence-evidence
           path: qa-evidence/
           retention-days: 7
+      - name: Export synthetic review images
+        if: always()
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; for (const name of ["intelligence-desktop.png","intelligence-mobile-review.png","intelligence-failure.png"]) { const path="qa-evidence/"+name; if(fs.existsSync(path)) console.log("QA_IMAGE "+name+" "+fs.readFileSync(path).toString("base64")); }'

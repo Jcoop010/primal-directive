@@ -33,8 +33,8 @@ try{
  await nav('Money');
  for(const [type,amount,label] of [['collected','432.10','QA collected'],['cost','123.45','QA costs'],['outstanding','900','QA unpaid']]){
   await page.getByRole('button',{name:'Add',exact:true}).click();
-  await dialog().getByLabel('Type',{exact:true}).selectOption(type);
-  await dialog().getByLabel('Amount',{exact:true}).fill(amount);
+  await dialog().getByLabel(/^Type/).selectOption(type);
+  await dialog().getByLabel(/^Amount/).fill(amount);
   await dialog().getByLabel('Label',{exact:true}).fill(label);
   const saved=saveAck(label);
   await dialog().getByRole('button',{name:'Save',exact:true}).click();
@@ -69,7 +69,7 @@ try{
  await review.click();
  await dialog().getByLabel('Task title',{exact:true}).fill('QA reviewed finance task');
  await dialog().getByLabel('Task details',{exact:true}).fill('Confirm unpaid terms before counting income.');
- await dialog().getByLabel('Category',{exact:true}).selectOption('finance');
+ await dialog().getByLabel(/^Category/).selectOption('finance');
  await page.setViewportSize({width:390,height:844});
  await dialog().getByRole('button',{name:'Add task',exact:true}).scrollIntoViewIfNeeded();
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
