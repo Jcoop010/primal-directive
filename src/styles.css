@@ -2,24 +2,24 @@
 @import "tw-animate-css";
 
 @theme {
-  --color-bg: #07090c;
-  --color-surface: #101419;
-  --color-surface-2: #151a20;
+  --color-bg: #080b12;
+  --color-surface: #111923;
+  --color-surface-2: #192432;
   --color-fg: #f5f7f9;
   --color-muted: #9aa5af;
   --color-soft: #cbd2d8;
-  --color-line: #28313a;
-  --color-line-strong: #3a4652;
+  --color-line: #2a3947;
+  --color-line-strong: #435365;
   --color-accent: #ff7a18;
   --color-accent-fg: #101214;
-  --color-live: #55d49a;
+  --color-live: #5fe2a4;
   --color-danger: #ff6b6b;
   --color-warn: #ffc36e;
-  --color-info: #72a7ff;
-  --color-background: #07090c;
+  --color-info: #67b9ff;
+  --color-background: #080b12;
   --color-foreground: #f5f7f9;
-  --color-border: #28313a;
-  --color-card: #101419;
+  --color-border: #2a3947;
+  --color-card: #111923;
   --color-primary: #ff7a18;
   --color-primary-foreground: #101214;
   --color-muted-foreground: #9aa5af;
@@ -94,3 +94,32 @@
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* Command center visual system: depth without sacrificing readability. */
+@layer components {
+  .command-panel {
+    border: 1px solid var(--color-line);
+    border-radius: 20px;
+    background: linear-gradient(145deg, #172330 0%, #101720 65%, #111b23 100%);
+    box-shadow: 0 14px 42px #0005, inset 0 1px #ffffff0c;
+  }
+  .command-glow {
+    background-image: radial-gradient(ellipse at 0% 0%, #5fe2a419, transparent 55%),
+      radial-gradient(ellipse at 100% 100%, #ff7a1815, transparent 52%);
+  }
+  .command-stat {
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: linear-gradient(160deg, #1b2935, #101821);
+  }
+  .command-stat:nth-child(3n + 1) { border-top: 2px solid var(--color-live); }
+  .command-stat:nth-child(3n + 2) { border-top: 2px solid var(--color-accent); }
+  .command-stat:nth-child(3n + 3) { border-top: 2px solid var(--color-info); }
+  .command-nav-active {
+    background: linear-gradient(100deg, #244338, #172932);
+    box-shadow: inset 3px 0 var(--color-live);
+  }
+}
+
+:focus-visible { outline: 2px solid var(--color-live); outline-offset: 3px; }
+::selection { background: #5fe2a455; color: var(--color-fg); }
