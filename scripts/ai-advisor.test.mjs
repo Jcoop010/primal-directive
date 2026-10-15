@@ -46,7 +46,7 @@ test('clock queries do not call Gemini; unavailable general questions do not bec
 });
 
 test("Gemini-only Advisor handles valid output, offline mode and rate limits", async () => {
-  const saved = { fetch: globalThis.fetch, gemini: process.env.GEMINI_API_KEY, xai: process.env.XAI_API_KEY, groq: process.env.GROQ_API_KEY };
+  const saved = { grounding: process.env.GEMINI_SEARCH_GROUNDING_ENABLED, fetch: globalThis.fetch, gemini: process.env.GEMINI_API_KEY, xai: process.env.XAI_API_KEY, groq: process.env.GROQ_API_KEY };
   let calls = 0;
   try {
     delete process.env.XAI_API_KEY;
@@ -64,9 +64,11 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.match(outgoing.contents[0].parts[0].text,/Capture 12 email signups/);
     assert.match(outgoing.contents[0].parts[0].text,/No weekday travel/);
     assert.match(outgoing.contents[0].parts[0].text,/User-reported/);
+    process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
     let researchModel = ""; globalThis.fetch = async (url, init) => { researchModel=String(url); assert.deepEqual(JSON.parse(init.body).tools,[{google_search:{}}]); return geminiGood(); };
     const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
     assert.match(researchModel,/models\/gemini-2\.5-flash-lite:generateContent/);
+    delete process.env.GEMINI_SEARCH_GROUNDING_ENABLED;
     assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
     assert.deepEqual(research.citations,[]);
     assert.deepEqual(research.moves,[]);
@@ -90,6 +92,7 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.equal(calls, 1);
   } finally {
     globalThis.fetch = saved.fetch;
+    if(saved.grounding === undefined) delete process.env.GEMINI_SEARCH_GROUNDING_ENABLED; else process.env.GEMINI_SEARCH_GROUNDING_ENABLED = saved.grounding;
     for (const [key,value] of [["GEMINI_API_KEY",saved.gemini],["XAI_API_KEY",saved.xai],["GROQ_API_KEY",saved.groq]]) {
       if (value === undefined) delete process.env[key]; else process.env[key] = value;
     }
