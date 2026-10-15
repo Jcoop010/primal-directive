@@ -10,7 +10,7 @@ try {
  const response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent",{
   method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
   signal:AbortSignal.timeout(20000),
-  body:JSON.stringify({contents:[{parts:[{text:"Respond with the word READY."}]}],generationConfig:{temperature:0,maxOutputTokens:32}})
+  body:JSON.stringify({contents:[{parts:[{text:"Respond with the word READY."}]}],generationConfig:{temperature:0,maxOutputTokens:128}})
  });
  const body=await response.json().catch(()=>({}));
  if (!response.ok) {
@@ -18,8 +18,8 @@ try {
   console.log("[gemini-probe]",JSON.stringify({status:response.status,...failure}));
  } else {
   const ready=(body.candidates??[]).flatMap(c=>c.content?.parts??[]).map(p=>p.text??"").join("").trim();
-  console.log("[gemini-probe]",JSON.stringify({status:response.status,ready:ready==="READY",finishReason:body.candidates?.[0]?.finishReason}));
-  if (ready==="READY") {
+  console.log("[gemini-probe]",JSON.stringify({status:response.status,ready:/^READY[.!]?$/i.test(ready),sample:ready.slice(0,160),responseKeys:Object.keys(body),finishReason:body.candidates?.[0]?.finishReason}));
+  if (/^READY[.!]?$/i.test(ready)) {
    const jsonResponse=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent",{
     method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
     signal:AbortSignal.timeout(20000),
