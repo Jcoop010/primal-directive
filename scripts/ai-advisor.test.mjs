@@ -5,12 +5,13 @@ import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { boundedHistory, createAdvisorTransport, retryAfterMs } from "../src/lib/ai-transport.ts";
+import { emptyPlanning, saveGoal, saveMemory } from '../src/lib/artist-planning.ts';
 
 // Isolate the actual handler from TanStack's HTTP compiler and auth database.
 // The production middleware remains required; no provider credentials are used.
 const framework = `export function createServerFn() { let schema; return {
  middleware(m) { if (!m.length) throw Error('Missing auth'); return this; },
- validator(v) { schema=v; return this; }, handler(fn) { return data => fn({data:schema(data)}); }
+ validator(v) { schema=v; return this; }, handler(fn) { return data => fn({data:schema(data),context:{userId:"test-user"}}); }
 }; }`;
 const require = createRequire(import.meta.url);
 let source = ts.transpileModule(readFileSync(new URL("../src/lib/ai.ts", import.meta.url), "utf8"), {
@@ -31,6 +32,18 @@ test("long conversation history has a fixed budget and retains recent turns", ()
   assert.ok(messages.reduce((sum,item)=>sum+item.content.length,0)<=3000);
   assert.match(messages.at(-1).content,/Turn 7/);
 });
+test('clock queries do not call Gemini; unavailable general questions do not become artist advice',async()=>{
+ const original=globalThis.fetch;const key=process.env.GEMINI_API_KEY;let calls=0;
+ try {
+  delete process.env.GEMINI_API_KEY;
+  globalThis.fetch=async()=>{calls++;throw Error('Unexpected request');};
+  const clock=await askGrowthAdvisor({...input,message:'What time is it?'});
+  assert.equal(clock.source,'SERVER CLOCK — UTC');assert.match(clock.answer,/UTC/);
+  const general=await askGrowthAdvisor({...input,message:'Explain how a compiler works'});
+  assert.match(general.source,/GENERAL ASSISTANT/);assert.deepEqual(general.moves,[]);assert.doesNotMatch(general.answer,/venue|booking|pipeline/);
+  assert.equal(calls,0);
+ } finally {globalThis.fetch=original;if(key===undefined)delete process.env.GEMINI_API_KEY;else process.env.GEMINI_API_KEY=key;}
+});
 
 test("Gemini-only Advisor handles valid output, offline mode and rate limits", async () => {
   const saved = { fetch: globalThis.fetch, gemini: process.env.GEMINI_API_KEY, xai: process.env.XAI_API_KEY, groq: process.env.GROQ_API_KEY };
@@ -40,8 +53,30 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     process.env.GROQ_API_KEY = "test-only";
     process.env.GEMINI_API_KEY = "test-only";
     const geminiGood = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ answer: "Valid strategy", gigs: [], people: [], moves: [] }) }] } }] }));
-    globalThis.fetch = async url => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); return geminiGood(); };
-    assert.equal((await askGrowthAdvisor(input)).answer, "Valid strategy");
+    let outgoing;
+    globalThis.fetch = async (url, init) => { calls++; assert.match(String(url), /models\/gemini-3\.1-flash-lite:generateContent/); outgoing = JSON.parse(init.body); assert.equal(outgoing.tools, undefined); return geminiGood(); };
+    const workspace = {gigs:[],money:[{id:'collected',type:'collected',amount:12.34}],merchProducts:[],tasks:[]};
+    const planning=saveMemory(saveGoal(emptyPlanning(),{title:'Capture 12 email signups',metric:'manual',target:12,reported:3,deadline:'2026-12-01',nextAction:'Review signup invitation'},workspace,'goal'),'No weekday travel','note');
+    assert.equal((await askGrowthAdvisor({...input,workspace,planning})).answer, "Valid strategy");
+    assert.equal(calls,1);
+    assert.match(JSON.stringify(outgoing),/APP-CALCULATED WORKSPACE BRIEF/);
+    assert.ok(outgoing.contents[0].parts[0].text.includes('"collected":1234'));
+    assert.match(outgoing.contents[0].parts[0].text,/Capture 12 email signups/);
+    assert.match(outgoing.contents[0].parts[0].text,/No weekday travel/);
+    assert.match(outgoing.contents[0].parts[0].text,/User-reported/);
+    let researchModel = ""; globalThis.fetch = async (url, init) => { researchModel=String(url); const body=JSON.parse(init.body); assert.deepEqual(body.tools,[{google_search:{}}]); return geminiGood(); };\n    const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});\n    assert.match(researchModel,/models\/gemini-2\.5-flash-lite:generateContent/);
+    assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
+    assert.deepEqual(research.citations,[]);
+    assert.deepEqual(research.moves,[]);
+    assert.doesNotMatch(research.answer,/Valid strategy/);
+    calls=0;
+    globalThis.fetch=async()=>{calls++;return new Response(null,{status:503});};
+    const planningFailure=await askGrowthAdvisor({...input,message:'Explain my saved weekly plan',workspace,planning});
+    assert.match(planningFailure.source,/HTTP 503/);
+    assert.match(planningFailure.answer,/No weekday travel/);
+    assert.match(planningFailure.answer,/Capture 12 email signups/);
+    assert.match(planningFailure.answer,/without an AI answer/);
+    assert.equal(calls,1);
     delete process.env.GEMINI_API_KEY;
     calls = 0;
     assert.match((await askGrowthAdvisor(input)).source, /OFFLINE/);
@@ -66,13 +101,12 @@ test("Transport respects Retry-After, recovers after cooldown and caps attempts"
   let time=0, calls=0;
   const blocked=new Map();
   const options={now:()=>time,cooldowns:blocked,fetchImpl:async()=>{calls++;return calls===1?new Response(null,{status:429}):good();}};
-  assert.equal((await createAdvisorTransport(options)("groq","https://example.com",{})).status,429);
-  assert.equal((await createAdvisorTransport(options)("groq","https://example.com",{})).status,429);
+  assert.equal((await createAdvisorTransport(options)("gemini","https://example.com",{})).status,429);
+  assert.equal((await createAdvisorTransport(options)("gemini","https://example.com",{})).status,429);
   assert.equal(calls,1); time=60001;
   const request=createAdvisorTransport(options);
-  assert.equal((await request("groq","https://example.com",{})).status,200);
-  await request("groq","https://example.com",{});
-  await assert.rejects(request("groq","https://example.com",{}),/budget/);
+  assert.equal((await request("gemini","https://example.com",{})).status,200);
+  await assert.rejects(request("gemini","https://example.com",{}),/budget/);
 });
 
 test("Transport aborts a stalled body as well as a stalled request", async () => {
@@ -80,5 +114,19 @@ test("Transport aborts a stalled body as well as a stalled request", async () =>
     return new Response(new ReadableStream({start(controller){init.signal.addEventListener('abort',()=>controller.error(init.signal.reason));}}));
   }});
   const keepAlive=setTimeout(()=>{},100);
-  try {await assert.rejects(request("groq","https://example.com",{}),/timeout/i);} finally {clearTimeout(keepAlive);}
+  try {await assert.rejects(request("gemini","https://example.com",{}),/timeout/i);} finally {clearTimeout(keepAlive);}
+});
+
+test("Concurrent identical requests deduplicate only within the same authenticated account", async () => {
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  let calls = 0;
+  const options = {deduplicationScope:"account-a", cooldowns:new Map(), fetchImpl:async () => {calls++; await gate; return good();}};
+  const a = createAdvisorTransport(options)("gemini","https://example.com",{body:"same"});
+  const b = createAdvisorTransport(options)("gemini","https://example.com",{body:"same"});
+  const c = createAdvisorTransport({...options,deduplicationScope:"account-b"})("gemini","https://example.com",{body:"same"});
+  await new Promise(resolve => setTimeout(resolve, 25));
+  release();
+  await Promise.all([a,b,c]);
+  assert.equal(calls,2);
 });

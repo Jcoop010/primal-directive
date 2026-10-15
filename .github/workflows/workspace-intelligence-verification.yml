@@ -1,0 +1,37 @@
+name: Workspace intelligence production verification
+on:
+  push:
+    branches: [verify/workspace-intelligence-20261015]
+permissions:
+  contents: read
+jobs:
+  production-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install test dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify calculations, real Gemini analysis, task review, persistence and account isolation
+        run: node scripts/verify-workspace-intelligence-browser.mjs
+      - name: Verify existing authenticated Advisor behavior
+        run: node scripts/verify-gemini-production-browser.mjs
+      - name: Preserve synthetic QA evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: workspace-intelligence-evidence
+          path: qa-evidence/
+          retention-days: 7
+      - name: Export synthetic review images
+        if: always()
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; for (const name of ["intelligence-desktop.png","intelligence-mobile-review.png","intelligence-failure.png"]) { const path="qa-evidence/"+name; if(fs.existsSync(path)) console.log("QA_IMAGE "+name+" "+fs.readFileSync(path).toString("base64")); }'

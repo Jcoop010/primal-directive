@@ -1,4 +1,5 @@
-type Provider = "xai" | "groq" | "gemini";
+type Provider = "gemini";
+const inFlight = new Map<string, Promise<{text: string; status: number; headers: Headers}>>();
 const cooldowns = new Map<Provider, number>();
 
 export function boundedHistory(history: { role: "user" | "ai"; text: string }[]) {
@@ -22,13 +23,14 @@ export function retryAfterMs(value: string | null, now = Date.now()): number {
   return Math.min(86_400_000, Math.max(60_000, Number.isFinite(delay) ? delay : 60_000));
 }
 
-// At most two requests per turn, sharing one deadline including body reads.
+// At most one request per turn, sharing one deadline including body reads.
 // Cooldowns are best-effort per warm server instance, never a distributed guarantee.
 export function createAdvisorTransport(options: {
   fetchImpl?: typeof fetch;
   now?: () => number;
   timeoutMs?: number;
   cooldowns?: Map<Provider, number>;
+  deduplicationScope?: string;
 } = {}) {
   const request = options.fetchImpl ?? fetch;
   const now = options.now ?? Date.now;
@@ -39,15 +41,31 @@ export function createAdvisorTransport(options: {
     if ((blocked.get(provider) ?? 0) > now()) {
       return new Response(null, { status: 429, headers: { "Retry-After": String(Math.ceil(((blocked.get(provider) ?? 0) - now()) / 1000)) } });
     }
-    if (attempts >= 2 || now() >= deadline) throw new Error("Advisor request budget exhausted");
+    if (attempts >= 1 || now() >= deadline) throw new Error("Advisor request budget exhausted");
     attempts += 1;
     const signal = AbortSignal.timeout(Math.max(1, deadline - now()));
-    const response = await request(endpoint, { ...init, signal });
-    if (response.status === 429) blocked.set(provider, now() + retryAfterMs(response.headers.get("retry-after"), now()));
-    // Consume the body while the timeout still applies. A synthetic Response
-    // keeps parsing predictable and avoids a hanging stream after fetch resolves.
-    const text = await response.text();
-    return new Response(text || null, { status: response.status, headers: response.headers });
+    const scope = options.deduplicationScope;
+    const fingerprint = scope ? Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",
+      new TextEncoder().encode(JSON.stringify([scope, endpoint, new Headers(init.headers).get("x-goog-api-key"), init.body])))))
+      .map(n => n.toString(16).padStart(2, "0")).join("") : undefined;
+    let pending = fingerprint ? inFlight.get(fingerprint) : undefined;
+    if (!pending) {
+      pending = (async () => {
+        const response = await request(endpoint, { ...init, signal });
+        if (response.status === 429) blocked.set(provider, now() + retryAfterMs(response.headers.get("retry-after"), now()));
+        const text = await response.text();
+        return {text, status: response.status, headers: response.headers};
+      })();
+      if (fingerprint && inFlight.size < 100) {
+        inFlight.set(fingerprint, pending);
+        const current = pending;
+        void pending.finally(() => {
+          if (inFlight.get(fingerprint) === current) inFlight.delete(fingerprint);
+        }).catch(() => {});
+      }
+    }
+    const response = await pending;
+    return new Response(response.text || null, {status: response.status, headers: response.headers});
   };
 }
 
@@ -59,12 +77,4 @@ export async function readProviderBody(response: Response): Promise<Record<strin
   } catch {
     return {};
   }
-}
-
-export function providerContent(body: Record<string, unknown>): string {
-  if (!Array.isArray(body.choices)) return "";
-  const first = body.choices[0];
-  if (!first || typeof first !== "object") return "";
-  const content = first.message?.content;
-  return typeof content === "string" ? content : "";
 }

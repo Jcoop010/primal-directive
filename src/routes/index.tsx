@@ -9,10 +9,16 @@ import { askGrowthAdvisor } from "@/lib/ai";
 import { hostFromUrl, longDate, money } from "@/lib/format";
 import { buildAdvisorContext, useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { intelligenceWorkspace } from "@/lib/workspace-intelligence";
+import { WorkspaceBrief } from "@/components/workspace-brief";
+import { AdvisorTaskReview } from "@/components/advisor-task-review";
+import { ArtistPlanning } from "@/components/artist-planning";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 export const Route = createFileRoute("/")({ component: AdvisorPage });
 
 const SUGGESTIONS = [
+  { label: "Analyze workspace", q: "Analyze my full recorded workspace. Explain the financial position, rank the most useful next priorities with reasons, and give three short actions. Distinguish recorded results from estimates and unknown costs; avoid repeating completed tasks." },
   {
     label: "Grow local draw",
     q: "How do we grow our local draw in the next 90 days given our current pipeline and home city?",
@@ -32,6 +38,13 @@ const SUGGESTIONS = [
 ];
 
 function AdvisorPage() {
+  const { user } = useCurrentUserState();
+  const owner = user?.id ?? null;
+  const ownerRef = useRef<string | null>(owner);
+  useEffect(() => {
+    ownerRef.current = owner;
+    return () => { ownerRef.current = null; };
+  }, [owner]);
   const chat = useMusician((s) => s.chat);
   const addUserMessage = useMusician((s) => s.addUserMessage);
   const addAiMessage = useMusician((s) => s.addAiMessage);
@@ -44,6 +57,7 @@ function AdvisorPage() {
   const people = useMusician((s) => s.people);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [taskSuggestion, setTaskSuggestion] = useState<{ owner: string; text: string } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,7 +67,8 @@ function AdvisorPage() {
 
   async function send(text: string) {
     const q = text.trim();
-    if (!q || busy) return;
+    const requestOwner = ownerRef.current;
+    if (!q || busy || !requestOwner) return;
     const history = useMusician.getState().chat.slice(-8).map((m) => ({
       role: m.role,
       text: m.text,
@@ -67,8 +82,11 @@ function AdvisorPage() {
           message: q,
           history,
           context: buildAdvisorContext(),
+          workspace: intelligenceWorkspace(useMusician.getState()),
+          planning: useMusician.getState().planning,
         },
       });
+      if (ownerRef.current !== requestOwner) return;
       if (!res.ok) {
         addAiMessage({
           text: res.error,
@@ -85,18 +103,22 @@ function AdvisorPage() {
         });
       }
     } catch {
+      if (ownerRef.current !== requestOwner) return;
       addAiMessage({
         text: "The live connector dropped. Check the board and pipeline, then try the advisor again.",
         source: "CONNECTOR",
       });
     } finally {
-      setBusy(false);
+      if (ownerRef.current === requestOwner) setBusy(false);
     }
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Eyebrow>Growth advisor</Eyebrow>
+      <div className="my-3"><WorkspaceBrief /></div>
+      <ArtistPlanning busy={busy} onExplain={() => void send('Explain my saved weekly plan and goal progress. Use the provided records, available capacity and completed work. Give the best next internal steps.')} />
+      {taskSuggestion !== null && taskSuggestion.owner === owner && <AdvisorTaskReview key={taskSuggestion.text} suggestion={taskSuggestion.text} onClose={() => setTaskSuggestion(null)} />}
 
       <Card className="flex min-h-[28rem] flex-1 flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
@@ -167,10 +189,10 @@ function AdvisorPage() {
               ) : null}
               {m.moves && m.moves.length > 0 ? (
                 <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
-                  {m.moves.map((move) => (
-                    <li key={move} className="text-xs text-soft">
-                      <span className="mr-2 text-accent">→</span>
-                      {move}
+                  {m.moves.map((move, index) => (
+                    <li key={`${index}-${move}`} className="space-y-1 text-xs text-soft">
+                      <div><span className="mr-2 text-accent">→</span>{move}</div>
+                      <button type="button" disabled={busy || !owner} onClick={() => { if (owner) setTaskSuggestion({ owner, text: move }); }} className="min-h-11 rounded-md border border-line px-3 text-xs font-semibold text-accent disabled:opacity-50">Review task</button>
                     </li>
                   ))}
                 </ul>

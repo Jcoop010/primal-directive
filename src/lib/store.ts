@@ -5,6 +5,8 @@ import { uid } from "@/lib/utils";
 import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, isSourceManagedMoneyEntry, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
 import { changesPayoutIdentity, hasGigLinkedFinancialHistory, hasRecordedPayouts } from "@/lib/contact-integrity";
+import { prepareAdvisorTask, type AdvisorTaskDraft } from "@/lib/advisor-tasks";
+import { emptyPlanning, saveGoal, saveMemory, draftWeeklyPlan, acceptPlanAction, type PlanningState, type GoalDraft, type PlanAction } from "@/lib/artist-planning";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -42,6 +44,7 @@ type State = {
   merchInventoryAdjustments: MerchInventoryAdjustment[];
   merchRefunds: MerchRefund[];
   tasks: OperationalTask[];
+  planning: PlanningState;
   chat: ChatMessage[];
   profile: ArtistProfile;
   composer: Composer;
@@ -65,6 +68,16 @@ type Actions = {
   recordMerchOrder: (order: Omit<MerchOrder, "id" | "status" | "createdAt" | "subtotal" | "total" | "refundedAmount">) => string;
   refundMerchOrder: (id: string, restock: boolean, note: string) => void;
   generateShowTasks: () => number;
+  addAdvisorTask: (draft: AdvisorTaskDraft) => { id: string; created: boolean };
+  saveGoal: (draft: GoalDraft, id?: string) => void;
+  deleteGoal: (id: string) => void;
+  saveMemory: (text: string, id?: string) => void;
+  deleteMemory: (id: string) => void;
+  setWeeklyCapacity: (minutes: number) => void;
+  draftWeeklyPlan: (day: string) => void;
+  deleteWeeklyPlan: (id: string) => void;
+  acceptPlanAction: (planId: string, actionId: string, draft: PlanAction) => void;
+  editTask: (id: string, draft: AdvisorTaskDraft) => void;
   updateOperationalTask: (id: string, patch: Partial<Pick<OperationalTask, "status" | "dueDate">>) => void;
   updateProfile: (patch: Partial<ArtistProfile>) => void;
   addUserMessage: (text: string) => void;
@@ -109,6 +122,7 @@ function fresh(): Omit<State, "composer"> & { composer: Composer } {
     merchInventoryAdjustments: [],
     merchRefunds: [],
     tasks: [],
+    planning: emptyPlanning(),
     chat: welcomeChat(),
     composer: { ...emptyComposer },
   };
@@ -329,6 +343,36 @@ export const useMusician = create<State & Actions>()(
             ? { ...task, ...patch, ...(patch.dueDate !== undefined ? { dueDateOverridden: true } : {}) }
             : task),
         })),
+      addAdvisorTask: (draft) => {
+        let result = { id: "", created: false };
+        set(state => {
+          const prepared = prepareAdvisorTask(draft, state.tasks, state.gigs, uid());
+          result = { id: prepared.task.id, created: prepared.created };
+          return prepared.created ? { tasks: [prepared.task, ...state.tasks] } : state;
+        });
+        return result;
+      },
+      saveGoal: (draft, id) => set(state => ({ planning: saveGoal(state.planning, draft, state, id ?? uid()) })),
+      deleteGoal: id => set(state => ({ planning: { ...state.planning, goals: state.planning.goals.filter(goal => goal.id !== id), plans: state.planning.plans.map(plan => ({ ...plan, actions: plan.actions.map(action => action.goalId === id ? { ...action, goalId: '' } : action) })) } })),
+      saveMemory: (text, id) => set(state => ({ planning: saveMemory(state.planning, text, id ?? uid()) })),
+      deleteMemory: id => set(state => ({ planning: { ...state.planning, memories: state.planning.memories.filter(memory => memory.id !== id) } })),
+      setWeeklyCapacity: minutes => {
+        if (!Number.isInteger(minutes) || minutes < 15 || minutes > 2400) throw Error('Weekly capacity must be 15–2,400 minutes.');
+        set(state => ({ planning: { ...state.planning, capacityMinutes: minutes } }));
+      },
+      draftWeeklyPlan: day => set(state => ({ planning: draftWeeklyPlan(state.planning, state, day, uid()) })),
+      deleteWeeklyPlan: id => set(state => ({ planning: { ...state.planning, plans: state.planning.plans.filter(plan => plan.id !== id) } })),
+      acceptPlanAction: (planId, actionId, draft) => set(state => {
+        const result = acceptPlanAction(state.planning, state.tasks, state.gigs, planId, actionId, draft, uid());
+        return { planning: result.planning, tasks: result.tasks };
+      }),
+      editTask: (id, draft) => set(state => {
+        const existing = state.tasks.find(task => task.id === id);
+        if (!existing) throw Error('This task no longer exists.');
+        const result = prepareAdvisorTask(draft, state.tasks.filter(task => task.id !== id), state.gigs, id, existing.createdAt);
+        if (!result.created) throw Error('Another task already has this title and show link, including completed tasks.');
+        return { tasks: state.tasks.map(task => task.id === id ? { ...result.task, sourceKey: existing.sourceKey, status: existing.status, dueDateOverridden: true } : task) };
+      }),
       updateProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
       addUserMessage: (text) =>
@@ -431,6 +475,7 @@ export const useMusician = create<State & Actions>()(
           merchInventoryAdjustments: [],
           merchRefunds: [],
           tasks: [],
+          planning: emptyPlanning(),
           chat: welcomeChat(),
           composer: { ...emptyComposer },
         }),
@@ -447,6 +492,7 @@ export const useMusician = create<State & Actions>()(
         merchInventoryAdjustments: s.merchInventoryAdjustments,
         merchRefunds: s.merchRefunds,
         tasks: s.tasks,
+        planning: s.planning,
         chat: s.chat,
         profile: s.profile,
       }),
