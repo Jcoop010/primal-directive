@@ -134,7 +134,7 @@ async function complete(args: {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": args.apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 1800, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 2 }] } : {}), }),
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1800, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 2 }] } : {}), }),
       signal: AbortSignal.timeout(45_000),
     });
     if (!response.ok) return response;
