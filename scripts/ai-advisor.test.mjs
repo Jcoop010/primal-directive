@@ -40,8 +40,11 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     process.env.GROQ_API_KEY = "test-only";
     process.env.GEMINI_API_KEY = "test-only";
     const geminiGood = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ answer: "Valid strategy", gigs: [], people: [], moves: [] }) }] } }] }));
-    globalThis.fetch = async url => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); return geminiGood(); };
+    globalThis.fetch = async (url, init) => { calls++; assert.match(String(url), /generativelanguage.googleapis.com/); assert.equal(JSON.parse(init.body).tools, undefined); return geminiGood(); };
     assert.equal((await askGrowthAdvisor(input)).answer, "Valid strategy");
+    const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
+    assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
+    assert.deepEqual(research.citations,[]);
     delete process.env.GEMINI_API_KEY;
     calls = 0;
     assert.match((await askGrowthAdvisor(input)).source, /OFFLINE/);

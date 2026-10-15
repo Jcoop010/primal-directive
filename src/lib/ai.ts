@@ -205,11 +205,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     ];
 
     const activeProvider: "gemini" = provider;
-    const searchUsed = searchRequested;
+    const searchUsed = searchRequested && process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true";
     let res: Response | null = null;
 
     try {
-      res = await complete({ request, apiKey, messages, search: searchRequested, provider });
+      res = await complete({ request, apiKey, messages, search: searchUsed, provider });
 
     } catch {
       // Network failures use an explicitly labelled local fallback.

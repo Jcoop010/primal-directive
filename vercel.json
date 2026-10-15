@@ -4,7 +4,8 @@
     "deploymentEnabled": {
       "advisor-intelligence-production": false,
       "fix/advisor-release-reliability": false,
-      "fix/gemini-executive-recovery-20261014": false
+      "fix/gemini-executive-recovery-20261014": false,
+      "verify/gemini-production-20261015": false
     }
   }
 }
