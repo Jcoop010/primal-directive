@@ -5,6 +5,8 @@ import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { longDate, money, toIsoDay } from "@/lib/format";
 import { deriveSignals } from "@/lib/signals";
+import { buildDailyBriefing } from "@/lib/daily-briefing";
+import { Sparkles, ArrowUpRight } from "lucide-react";
 import {
   pipelineGigs,
   pipelineValue,
@@ -21,6 +23,7 @@ function BoardPage() {
   const moneyEntries = useMusician((s) => s.money);
   const people = useMusician((s) => s.people);
   const tasks = useMusician((s) => s.tasks);
+  const merchProducts = useMusician((s) => s.merchProducts);
   const collected = sumMoney(moneyEntries, "collected");
   const outstanding = sumMoney(moneyEntries, "outstanding");
   const costs = sumMoney(moneyEntries, "cost");
@@ -28,6 +31,7 @@ function BoardPage() {
   const open = pipelineGigs(gigs);
   const signals = deriveSignals(gigs, moneyEntries, people);
   const today = toIsoDay(new Date());
+  const briefing = buildDailyBriefing({ gigs, tasks, money: moneyEntries, merchProducts }, today);
   const openTasks = tasks.filter((task) => task.status === "open");
   const overdueTasks = openTasks
     .filter((task) => task.dueDate < today)
@@ -64,6 +68,16 @@ function BoardPage() {
 
   return (
     <div>
+      <section aria-label="Mission Control daily briefing" className="mb-6 overflow-hidden rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/10 via-surface to-surface p-5 shadow-card sm:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div><div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-accent"><Sparkles className="size-4" /> Mission Control 2.0</div><h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Your daily briefing</h2><p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Prioritized from your saved bookings, tasks, finances, and inventory. Updated whenever your workspace changes.</p></div>
+          <Link to="/" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold text-accent-fg">Ask AI Advisor <ArrowUpRight className="size-4" /></Link>
+        </div>
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          {briefing.map((item) => <Link key={item.id} to={item.href} className="group flex items-start justify-between gap-3 rounded-xl border border-line bg-bg/80 p-4 transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"><div className="min-w-0"><div className="mb-2 flex items-center gap-2"><span className={cn("size-2 rounded-full", item.priority === "urgent" ? "bg-warn" : item.priority === "important" ? "bg-accent" : "bg-live")} /><span className="text-[10px] font-bold uppercase tracking-widest text-muted">{item.priority}</span></div><h3 className="text-sm font-bold">{item.title}</h3><p className="mt-1 text-xs leading-relaxed text-muted">{item.detail}</p></div><ArrowUpRight className="size-4 shrink-0 text-muted group-hover:text-accent" /></Link>)}
+        </div>
+        <p className="mt-4 text-[11px] text-muted">Workspace intelligence · Rule-based, not externally verified AI research · No messages are sent automatically.</p>
+      </section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><Eyebrow>Overview / Booking board</Eyebrow><Link to="/gigs" className="rounded-xl border border-line bg-surface px-4 py-2 text-xs font-bold text-soft hover:border-accent hover:text-accent">View pipeline →</Link></div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <MetricCard label="Collected" value={money(collected)} hint="cash logged" />
