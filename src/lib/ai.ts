@@ -128,8 +128,22 @@ async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
   search: boolean;
-  provider: "xai" | "groq";
+  provider: "xai" | "groq" | "anthropic";
 }) {
+  if (args.provider === "anthropic") {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": args.apiKey, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 1800, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 2 }] } : {}), }),
+      signal: AbortSignal.timeout(45_000),
+    });
+    if (!response.ok) return response;
+    const payload = await response.json() as { content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }> }> };
+    const content = payload.content ?? [];
+    const text = content.filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n");
+    const citations = content.flatMap((b) => b.citations ?? []).map((cite) => cite.url).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    return new Response(JSON.stringify({ choices: [{ message: { content: text } }], citations }), { status: 200, headers: { "Content-Type": "application/json" } });
+  }
   const body: Record<string, unknown> = {
     model: args.provider === "groq" ? "openai/gpt-oss-120b" : "grok-4.7",
     messages: args.messages,
@@ -168,8 +182,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // API tier. No paid provider is required to enable AI responses.
     const xaiKey = process.env.XAI_API_KEY;
     const groqKey = process.env.GROQ_API_KEY;
-    const provider: "xai" | "groq" | null = xaiKey ? "xai" : groqKey ? "groq" : null;
-    const apiKey = provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    const provider: "anthropic" | "xai" | "groq" | null = anthropicKey ? "anthropic" : xaiKey ? "xai" : groqKey ? "groq" : null;
+    const apiKey = provider === "anthropic" ? anthropicKey : provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
@@ -218,8 +233,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let res: Response | null = null;
 
     try {
-      res = await complete({ apiKey, messages, search: provider === "xai", provider });
-      if (!res.ok && provider === "xai") {
+      res = await complete({ apiKey, messages, search: provider === "xai" || provider === "anthropic", provider });
+      if (!res.ok && (provider === "xai" || provider === "anthropic")) {
         res = await complete({ apiKey, messages, search: false, provider });
       }
     } catch {
@@ -228,7 +243,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     // If xAI is configured but unavailable, use Groq when its free-tier key exists.
     // Keep the no-web-search limitation explicit so fallback answers never imply live research.
-    if ((!res || !res.ok) && provider === "xai" && groqKey) {
+    if ((!res || !res.ok) && (provider === "xai" || provider === "anthropic") && groqKey) {
       activeProvider = "groq";
       try {
         res = await complete({
@@ -258,7 +273,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const parsed = extractJson(raw);
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
-    const citations = activeProvider === "xai" ? citationsFrom(body) : [];
+    const citations = activeProvider === "xai" || activeProvider === "anthropic" ? citationsFrom(body) : [];
     const source = citations.length
       ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
       : activeProvider === "groq"
