@@ -201,7 +201,7 @@ test("Claude takes priority when configured and limits paid tokens",async()=>{
   globalThis.fetch=async(url,init)=>{
    calls++;assert.match(String(url),/api.anthropic.com\/v1\/messages/);
    const payload=JSON.parse(init.body);
-   assert.equal(payload.model,"claude-haiku-5-5");assert.equal(payload.max_tokens,1024);
+   assert.equal(payload.model,"claude-haiku-4-5-20251001");assert.equal(payload.max_tokens,1024);
    assert.equal(payload.tools,undefined);
    return new Response(JSON.stringify({content:[{type:"text",text:JSON.stringify({answer:"Claude working",gigs:[],people:[],moves:[]})}]}));
   };
