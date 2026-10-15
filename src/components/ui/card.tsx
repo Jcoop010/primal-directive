@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-line bg-surface p-4 shadow-card",
+        "rounded-2xl border border-line/85 bg-surface/95 p-5 shadow-card transition-colors hover:border-line-strong/80",
         className,
       )}
     >
@@ -21,7 +21,7 @@ export function Card({
 
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+    <div className="mb-3 mt-7 px-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted first:mt-0">
       {children}
     </div>
   );
