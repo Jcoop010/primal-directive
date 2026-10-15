@@ -345,7 +345,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // proof that a source was retrieved; never promote it into verified sources.
     const citations = normalizeCitationUrls(
       searchUsed
-        ? citationsFrom(body)
+        ? (useClaude ? claudeCitations(body) : citationsFrom(body))
         : [],
     );
     const source = citations.length ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : `${useClaude ? "CLAUDE" : activeProvider.toUpperCase()} AI — CURRENT FACTS NOT VERIFIED`;
