@@ -160,7 +160,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
-    const provider: "gemini" = "gemini";
+    const provider = "gemini" as const;
     const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
