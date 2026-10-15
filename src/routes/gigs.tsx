@@ -50,7 +50,7 @@ function GigsPage() {
       <p className="mb-3 px-1 text-xs text-muted">
         {money(pipelineValue(gigs))} open · {gigs.length} total
       </p>
-      <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
+      <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
         <FilterChip
           active={filter === "all"}
           onClick={() => setFilter("all")}
@@ -80,7 +80,7 @@ function GigsPage() {
               type="button"
               onClick={() => openGig(g.id)}
               className={cn(
-                "flex w-full items-start justify-between gap-3 px-4 py-3.5 text-left hover:bg-surface-2",
+                "flex w-full items-start justify-between gap-3 px-5 py-5 text-left transition-colors hover:bg-surface-2",
                 i < shown.length - 1 && "border-b border-line",
               )}
             >
@@ -127,8 +127,8 @@ function FilterChip({
       className={cn(
         "shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em]",
         active
-          ? "border-line-strong bg-surface-2 text-fg"
-          : "border-line bg-bg text-muted",
+          ? "border-accent/40 bg-accent/10 text-accent"
+          : "border-line bg-surface text-muted hover:border-line-strong hover:text-fg",
       )}
     >
       {label}

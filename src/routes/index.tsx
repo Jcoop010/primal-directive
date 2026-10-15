@@ -91,10 +91,10 @@ function AdvisorPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <Eyebrow>Growth advisor</Eyebrow>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2"><Eyebrow>Intelligence / Growth advisor</Eyebrow><span className="rounded-full border border-live/25 bg-live/10 px-3 py-1 text-[10px] font-bold tracking-widest text-live">ADVISOR WORKSPACE</span></div>
 
-      <Card className="flex min-h-[28rem] flex-1 flex-col overflow-hidden p-0">
+      <Card className="flex min-h-[min(65dvh,40rem)] flex-1 flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
           <strong className="text-sm">Primal Directive AI</strong>
           <div className="flex items-center gap-3">
@@ -114,12 +114,12 @@ function AdvisorPage() {
           </div>
         </div>
 
-        <div ref={scroller} className="flex-1 space-y-3 overflow-y-auto px-3 py-4">
+        <div ref={scroller} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
           {chat.map((m) => (
             <div
               key={m.id}
               className={cn(
-                "max-w-[88%] rounded-lg px-3.5 py-3 text-sm leading-relaxed whitespace-pre-wrap",
+                "max-w-[95%] rounded-xl sm:max-w-[82%] px-3.5 py-3 text-sm leading-relaxed whitespace-pre-wrap",
                 m.role === "user"
                   ? "ml-auto bg-accent font-medium text-accent-fg"
                   : "border border-line bg-surface-2 text-fg",
@@ -258,7 +258,7 @@ function AdvisorPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about growth, rooms, bills, routing…"
-            className="h-11 flex-1 rounded-md border border-line-strong bg-bg px-3 text-sm outline-none placeholder:text-muted focus:border-muted"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-bg px-3 text-sm outline-none placeholder:text-muted focus:border-muted"
             autoComplete="off"
           />
           <Button
