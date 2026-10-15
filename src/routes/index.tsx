@@ -47,6 +47,15 @@ function AdvisorPage() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [chat, busy]);
 
+  useEffect(() => {
+    const queued = window.sessionStorage.getItem("primal-briefing-prompt");
+    if (!queued) return;
+    window.sessionStorage.removeItem("primal-briefing-prompt");
+    void send(queued);
+    // A queued briefing is consumed only on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function send(text: string) {
     const q = text.trim();
     if (!q || busy) return;
