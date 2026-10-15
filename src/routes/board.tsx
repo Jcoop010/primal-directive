@@ -30,6 +30,13 @@ function BoardPage() {
   const costs = sumMoney(moneyEntries, "cost");
   const profit = collected - costs;
   const open = pipelineGigs(gigs);
+  const bookingLeads = gigs.filter((gig) => gig.status === "lead" || gig.status === "outreach" || gig.status === "negotiating" || gig.status === "hold").map((gig) => {
+    const hasSource = gig.notes.includes("Research source: https://");
+    const researchOnly = gig.notes.includes("Unconfirmed research lead");
+    const hasDate = gig.date.length === 10 && gig.date[4] === "-" && gig.date[7] === "-";
+    const score = Math.min(100, Math.round((gig.conf || 0) * 35 + (hasSource ? 25 : 0) + (gig.fee > 0 && !researchOnly ? 20 : 0) + (hasDate && !researchOnly ? 10 : 0) + (gig.status !== "lead" ? 10 : 0)));
+    return { gig, score, hasSource, researchOnly };
+  }).sort((a, b) => b.score - a.score).slice(0, 6);
   const signals = deriveSignals(gigs, moneyEntries, people);
   const today = toIsoDay(new Date());
   const briefing = buildDailyBriefing({ gigs, tasks, money: moneyEntries, merchProducts }, today);
@@ -94,6 +101,24 @@ function BoardPage() {
         hint={profit < 0 ? "loss after tracked costs" : "after tracked costs"}
       />
 
+      <section aria-label="Booking intelligence" className="mt-6 mb-6 rounded-2xl border border-line bg-surface p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div><Eyebrow>Booking Intelligence</Eyebrow><h2 className="mt-2 font-display text-xl font-bold">Opportunity priorities</h2><p className="mt-1 max-w-xl text-xs leading-relaxed text-muted">Transparent readiness ranking from your saved pipeline. Scores are heuristic, not predicted booking probability. Revenue and dates count only when entered as actual terms.</p></div>
+          <Link to="/gigs" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-soft hover:text-accent">Manage opportunities →</Link>
+        </div>
+        {bookingLeads.length === 0 ? <p className="mt-4 rounded-xl border border-dashed border-line p-4 text-sm text-muted">No active booking opportunities yet. Research venues with the AI Advisor, verify the sources, and save qualified leads to begin prioritizing.</p> : (
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {bookingLeads.map(({ gig, score, hasSource, researchOnly }) => (
+              <div key={gig.id} className="rounded-xl border border-line bg-bg p-4">
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location unrecorded"} · {gig.status}</div></div><div className="shrink-0 text-right"><div className="text-lg font-bold tabular text-accent">{score}<span className="text-xs text-muted">/100</span></div><div className="text-[10px] text-muted">Readiness score</div></div></div>
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-accent" style={{ width: `${score}%` }} /></div>
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px]"><span className={hasSource ? "text-live" : "text-warn"}>{hasSource ? "Source recorded" : "Source missing"}</span><span className="text-muted">·</span><span className="text-muted">{researchOnly ? "Unconfirmed research" : gig.fee > 0 ? "Fee entered" : "Fee unknown"}</span><span className="text-muted">·</span><span className="text-muted">{gig.date && !researchOnly ? "Date entered" : "Date unconfirmed"}</span></div>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="mt-3 text-[11px] text-muted">Score: confidence 35 pts, recorded research source 25, entered fee 20, entered date 10, progressed pipeline status 10. Does not validate sources, venue capacity, travel cost, or booking availability.</p>
+      </section>
       <Eyebrow>Band Pulse</Eyebrow>
       <Card>
         <div className="flex items-start justify-between gap-3">
