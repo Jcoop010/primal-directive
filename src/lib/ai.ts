@@ -223,6 +223,17 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     const activeProvider: "gemini" = provider;
     const searchUsed = searchRequested && process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true";
+    if (searchRequested && !searchUsed) {
+      return {
+        ok: true as const,
+        answer: "LIVE RESEARCH UNAVAILABLE: Search grounding is disabled for this deployment. No current external facts or booking contacts were checked. Enable verified research before relying on current opportunities.",
+        source: "LIVE RESEARCH DISABLED — NO SOURCES VERIFIED",
+        citations: [],
+        gigs: [],
+        people: [],
+        moves: [],
+      };
+    }
     let res: Response | null = null;
 
     try {
