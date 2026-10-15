@@ -48,6 +48,13 @@ try {
    await page.getByRole("button",{name:"Send",exact:true}).click();
    await page.waitForFunction(n=>document.querySelectorAll("div.whitespace-pre-wrap").length>=n,before+2,{timeout:70000});
    const answer=await page.locator("div.whitespace-pre-wrap").last().innerText();
+   if(research){
+    assert.match(answer,/LIVE RESEARCH NOT VERIFIED/);
+    assert.match(answer,/LIVE RESEARCH UNAVAILABLE — GROUNDING OFF/);
+    assert.equal(await page.locator('div.whitespace-pre-wrap').last().getByRole('button',{name:'Review task',exact:true}).count(),0);
+    results.push({test,passed:true,source:'LIVE RESEARCH UNAVAILABLE — GROUNDING OFF',providerRequest:false});
+    console.log(JSON.stringify({test,passed:true,providerRequest:false}));return;
+   }
    if(attempt===0 && /HTTP (502|503|504)|network error or timeout|connection failed or timed out/i.test(answer) && !/HTTP 429/.test(answer)){
     results.push({test:"Transient provider/network failure explicitly labelled; one delayed verification retry",passed:true});
     console.log(JSON.stringify({test,transientNetworkFailure:true}));
@@ -81,7 +88,7 @@ try {
  },{timeout:20000});
  await page.reload({waitUntil:"networkidle"});
  await page.getByText(source,{exact:true}).first().waitFor({timeout:30000});
- assert.equal(await page.getByText(source,{exact:true}).count(),8);
+ assert.equal(await page.getByText(source,{exact:true}).count(),7);
  results.push({test:"Profile and conversation persist after refresh",passed:true});
  await page.locator("div.whitespace-pre-wrap").last().scrollIntoViewIfNeeded();
  await page.screenshot({path:"qa-evidence/production-desktop.png"});

@@ -173,6 +173,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const provider = "gemini" as const;
     const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
+    if (searchRequested && process.env.GEMINI_SEARCH_GROUNDING_ENABLED !== 'true') {
+      return { ok: true, answer: 'LIVE RESEARCH NOT VERIFIED: Live web search is currently off. I did not make an AI request for live research. Current external facts were not verified, and no research-based leads or tasks were generated. Check official sources for current information. Saved-workspace analysis, weekly planning and general strategy remain available.', source: 'LIVE RESEARCH UNAVAILABLE — GROUNDING OFF', citations: [], gigs: [], people: [], moves: [] };
+    }
     const fallback = () => {
       if (data.workspace && data.planning && /\b(goals?|weekly|saved|workspace|my memory|our memory|planning code)\b/i.test(data.message)) {
         const local = localPlanningSummary(data.planning, data.workspace);
