@@ -8,6 +8,7 @@ import { downloadCsv, longDate, toIsoDay } from "@/lib/format";
 import { useMusician } from "@/lib/store";
 import type { OperationalTask } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { AdvisorTaskReview } from '@/components/advisor-task-review';
 
 export const Route = createFileRoute("/tasks")({ component: TasksPage });
 
@@ -20,6 +21,7 @@ const CATEGORY: Record<OperationalTask["category"], string> = {
 };
 
 function TasksPage() {
+  const [editing, setEditing] = useState<string | null>(null);
   const tasks = useMusician((s) => s.tasks);
   const gigs = useMusician((s) => s.gigs);
   const generateShowTasks = useMusician((s) => s.generateShowTasks);
@@ -38,6 +40,7 @@ function TasksPage() {
 
   return (
     <div className="space-y-5">
+      {editing && <AdvisorTaskReview key={editing} taskId={editing} suggestion="" onClose={() => setEditing(null)} />}
       <div className="flex items-start justify-between gap-3">
         <div>
           <Eyebrow>Operational control room</Eyebrow>
@@ -92,11 +95,12 @@ function TasksPage() {
           const isOverdue = task.status === "open" && Boolean(task.dueDate) && task.dueDate < today;
           return (
             <div key={task.id} className={cn("flex items-start gap-3 px-4 py-4", index < visible.length - 1 && "border-b border-line")}>
-              <button type="button" onClick={() => updateTask(task.id, { status: task.status === "done" ? "open" : "done" })} className="mt-0.5 shrink-0" aria-label={task.status === "done" ? "Mark task open" : "Mark task complete"}>
+              <button type="button" onClick={() => updateTask(task.id, { status: task.status === "done" ? "open" : "done" })} className="grid min-h-11 min-w-11 shrink-0 place-items-center" aria-label={task.status === "done" ? "Mark task open" : "Mark task complete"}>
                 {task.status === "done" ? <CheckCircle2 className="size-5 text-live" /> : <Circle className="size-5 text-muted" />}
               </button>
               <div className="min-w-0 flex-1">
                 <div className={cn("text-sm font-semibold", task.status === "done" && "text-muted line-through")}>{task.title}</div>
+                <button type="button" className="mt-2 min-h-11 rounded-md border border-line px-3 text-xs font-semibold text-accent" onClick={() => setEditing(task.id)}>Edit task</button>
                 <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-muted">{CATEGORY[task.category]}</div>
                 <p className="mt-2 text-xs leading-relaxed text-muted">{task.description}</p>
                 <div className={cn("mt-2 text-xs font-semibold", isOverdue ? "text-danger" : "text-muted")}>

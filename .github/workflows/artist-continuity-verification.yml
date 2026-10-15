@@ -1,0 +1,39 @@
+name: Artist continuity production verification
+on:
+  push:
+    branches: [verify/artist-continuity-20261015]
+permissions:
+  contents: read
+jobs:
+  production-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies and Chromium
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Verify real goals, memory, planning, task lifecycle, data workflows and save recovery
+        run: node scripts/verify-artist-continuity-browser.mjs
+      - name: Verify existing workspace intelligence
+        run: node scripts/verify-workspace-intelligence-browser.mjs
+      - name: Verify existing Gemini and authentication behavior
+        run: node scripts/verify-gemini-production-browser.mjs
+      - name: Preserve synthetic QA evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: artist-continuity-evidence
+          path: qa-evidence/
+          retention-days: 7
+      - name: Export synthetic review images
+        if: always()
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; for (const name of ["continuity-desktop.png","continuity-mobile-review.png","continuity-failure.png"]) { const path="qa-evidence/"+name; if(fs.existsSync(path)) console.log("QA_IMAGE "+name+" "+fs.readFileSync(path).toString("base64")); }'

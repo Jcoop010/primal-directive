@@ -468,7 +468,7 @@ function MerchPage() {
           <TrendingUp className="mt-0.5 size-4 shrink-0 text-accent" />
           <div>
             <div className="text-sm font-semibold">Built for the road</div>
-            <p className="mt-1 text-xs leading-relaxed text-muted">Products can be tracked by size and color, and each order can contain multiple items with discount, tax, processor fee, show, and member attribution. Online checkout, refunds/voids, provider webhooks, and cross-device stock locking are not connected yet.</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">Track products by size and color, and record orders with discount, tax, processor fee, show and member attribution. Manual refunds update these internal records; they do not return money through a payment provider. Online checkout and provider webhooks are not connected. Conflicting workspace saves require a reload before continuing.</p>
             <Link to="/money" className="mt-3 inline-flex text-xs font-semibold text-accent">Open money ledger →</Link>
           </div>
         </div>

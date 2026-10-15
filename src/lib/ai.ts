@@ -5,6 +5,8 @@ import { boundedHistory, createAdvisorTransport, readProviderBody } from "@/lib/
 import { geminiFailure } from "@/lib/gemini-failure";
 import { intelligenceContext } from "@/lib/workspace-intelligence";
 import { intelligenceWorkspaceSchema } from "@/lib/workspace-intelligence-schema";
+import { planningContext, localPlanningSummary } from "@/lib/artist-planning";
+import { planningSchema } from "@/lib/artist-planning-schema";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import { advisorWorkspaceContext } from "@/lib/advisor-workspace-context";
 import { needsLiveResearch } from "@/lib/advisor-search-intent";
@@ -23,6 +25,7 @@ const Input = z.object({
   history: z.array(HistoryItem).max(10),
   context: z.string().max(16000),
   workspace: intelligenceWorkspaceSchema.optional(),
+  planning: planningSchema.optional(),
 });
 
 const GigOut = z.object({
@@ -162,12 +165,23 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }): Promise<ChatOk | ChatErr> => {
+    if (/^(?:what(?:'s| is) the time|what time is it|current time|time now)[?.!\s]*$/i.test(data.message.trim())) {
+      return { ok: true, answer: `The current UTC time is ${new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date())} (UTC). Your local timezone was not supplied.`, source: 'SERVER CLOCK — UTC', citations: [], gigs: [], people: [], moves: [] };
+    }
     const request = createAdvisorTransport({ timeoutMs: 55_000, deduplicationScope: context.userId });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const provider = "gemini" as const;
     const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
+    if (searchRequested && process.env.GEMINI_SEARCH_GROUNDING_ENABLED !== 'true') {
+      return { ok: true, answer: 'LIVE RESEARCH NOT VERIFIED: Live web search is currently off. I did not make an AI request for live research. Current external facts were not verified, and no research-based leads or tasks were generated. Check official sources for current information. Saved-workspace analysis, weekly planning and general strategy remain available.', source: 'LIVE RESEARCH UNAVAILABLE — GROUNDING OFF', citations: [], gigs: [], people: [], moves: [] };
+    }
     const fallback = () => {
+      if (data.workspace && data.planning && /\b(goals?|weekly|saved|workspace|my memory|our memory|planning code)\b/i.test(data.message)) {
+        const local = localPlanningSummary(data.planning, data.workspace);
+        return { ok: true as const, ...local, source: 'LOCAL PLANNING SUMMARY — NO AI ANSWER', citations: [] as string[], gigs: [] as SuggestedGig[], people: [] as SuggestedPerson[] };
+      }
+      if (!/\b(gigs?|booking|booker|venues?|tour|routing|shows?|artist|bands?|merch|fans|audience|music|song|playlist|press|promotion|promoter|ticket|fee|guarantee|pipeline|revenue|payout|profit|finance|money|settlement|inventory|margin|costs?|income|budget|draw|career|growth|workspace|goals?|weekly|plan|tasks?)\b/i.test(data.message)) return { ok: true as const, answer: 'The Gemini service is unavailable for this question. I cannot provide a reliable answer right now and have not checked live information. Please try again later.', source: 'GENERAL ASSISTANT — AI SERVICE UNAVAILABLE', citations: [] as string[], gigs: [] as SuggestedGig[], people: [] as SuggestedPerson[], moves: [] as string[] };
       const local = localGrowthAdvice(data.message, data.context);
       return {
         ok: true as const,
@@ -182,6 +196,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     if (!apiKey || !provider) {
       const local = fallback();
+      if (local.source.startsWith('GENERAL ASSISTANT')) return local;
       return {
         ...local,
         source: "OFFLINE MODE — FREE AI KEY NOT CONFIGURED",
@@ -200,6 +215,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const messages = [
       { role: "system", content: SYSTEM },
       ...(data.workspace ? [{ role: "system", content: intelligenceContext(data.workspace) }] : []),
+      ...(data.workspace && data.planning ? [{ role: 'system', content: planningContext(data.planning, data.workspace) }] : []),
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${advisorContext}`,
@@ -222,6 +238,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     if (activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
     if (!res?.ok) {
       const local = fallback();
+      const general = local.source.startsWith('GENERAL ASSISTANT');
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
       const rateLimited = res?.status === 429;
       const providerError = res ? await readProviderBody(res) : {};
@@ -232,11 +249,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const explanation = diagnosis?.message ?? "The Gemini connection failed or timed out. Check network connectivity before retrying.";
       return {
         ...local,
-        source: rateLimited
+        source: general ? local.source : rateLimited
           ? "LOCAL WORKSPACE FALLBACK — PROVIDER RATE LIMITED (HTTP 429)"
           : `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
-        answer: explanation + " This turn uses local workspace rules; it is not a Gemini answer and live research was not verified." + `\n\n${local.answer}`,
-        moves: rateLimited
+        answer: explanation + (general ? ' This turn could not be answered by Gemini and no live information was checked.' : " This turn uses local workspace rules; it is not a Gemini answer and live research was not verified.") + `\n\n${local.answer}`,
+        moves: general ? [] : rateLimited
           ? [
               "Check the configured provider's current rate limits and usage dashboard before retrying.",
               "Wait for the limit window to reset; avoid repeatedly resubmitting the same prompt.",
@@ -259,8 +276,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const local = fallback();
       return {
         ...local,
-        source: "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
-        answer: "The AI provider responded, but its answer was not usable. I did not send another AI request, to conserve quota. I’m using conservative workspace rules instead. Live research was not verified.\n\n" + local.answer,
+        source: local.source.startsWith('GENERAL ASSISTANT') ? local.source : "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
+        answer: "Gemini returned an unusable answer. No second request was sent. Live information was not verified.\n\n" + local.answer,
       };
     }
 
@@ -297,7 +314,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           reason: p.reason,
         }));
       const verifiedAnswer = searchRequested && citations.length === 0
-        ? "LIVE RESEARCH NOT VERIFIED: The AI provider did not return usable source URLs. The following response is an unverified draft, not a verified venue or contact list. Do not rely on venue capacities, booking contacts, dates, or claims until checked against official sources.\n\n" + safe.data.answer.replace(/【[^】]+】/g, "[unverified citation removed]")
+        ? 'LIVE RESEARCH NOT VERIFIED: No usable live grounding sources were returned. Current external facts, contacts, capacities, availability and dates have not been verified. No research-based tasks were generated. Check official sources; workspace analysis and goal planning remain available.'
         : safe.data.answer;
       return {
         ok: true,
@@ -306,7 +323,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         citations,
         gigs,
         people,
-        moves: (safe.data.moves ?? []).slice(0, 3),
+        moves: searchRequested && citations.length === 0 ? [] : (safe.data.moves ?? []).slice(0, 3),
       };
     }
 

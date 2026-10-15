@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { PGlite } from "@electric-sql/pglite";
 import { prepareAdvisorTask } from "../src/lib/advisor-tasks.ts";
+import { emptyPlanning, saveGoal, saveMemory } from '../src/lib/artist-planning.ts';
 
 test("real workspace SQL preserves saves, isolates accounts and rejects stale versions", async () => {
   const db = new PGlite();
@@ -46,5 +47,18 @@ test("real workspace SQL preserves saves, isolates accounts and rejects stale ve
     assert.equal((await loadAppState({})).state.chat.length,2);
     await assert.rejects(saveAppState({state,expectedVersion:1}),/another session/);
     assert.equal((await loadAppState({})).version,2);
+    const workspace={gigs:[],money:[],tasks:[],merchProducts:[]};
+    const planning=saveMemory(saveGoal(emptyPlanning(),{title:'Keep this saved goal',metric:'manual',target:10,reported:2,deadline:'2026-12-01',nextAction:'Review the saved weekly goal'},workspace,'goal-a'),'Keep this approved memory','memory-a');
+    await saveAppState({state:{...state,planning},expectedVersion:2});
+    assert.equal((await loadAppState({})).state.planning.goals[0].reported,2);
+    await saveAppState({state,expectedVersion:3});
+    assert.equal((await loadAppState({})).state.planning.memories[0].text,'Keep this approved memory');
+    globalThis[key].userId='account-b';
+    assert.equal((await loadAppState({})).state.planning,undefined);
+    globalThis[key].userId='account-a';
+    await assert.rejects(saveAppState({state:{...state,chat:[{id:'large',role:'user',text:'💥'.repeat(510000)}]},expectedVersion:4}),/2 MB/);
+    await saveAppState({state:{...state,planning:emptyPlanning()},expectedVersion:4});
+    assert.deepEqual((await loadAppState({})).state.planning.memories,[]);
+    assert.deepEqual((await loadAppState({})).state.planning.goals,[]);
   } finally {delete globalThis[key];await db.close();}
 });
