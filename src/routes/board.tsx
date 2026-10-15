@@ -13,6 +13,7 @@ import {
   weightedValue,
 } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { validDay } from '@/lib/workspace-intelligence';
 
 export const Route = createFileRoute("/board")({ component: BoardPage });
 
@@ -30,7 +31,7 @@ function BoardPage() {
   const today = toIsoDay(new Date());
   const openTasks = tasks.filter((task) => task.status === "open");
   const overdueTasks = openTasks
-    .filter((task) => task.dueDate < today)
+    .filter((task) => validDay(task.dueDate) && task.dueDate < today)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   const nextShow = gigs
     .filter(
@@ -73,9 +74,9 @@ function BoardPage() {
       </div>
       <MetricCard
         className="mt-2.5"
-        label="Real gig profit"
+        label="Recorded operating difference"
         value={money(profit)}
-        hint={profit < 0 ? "loss after tracked costs" : "after tracked costs"}
+        hint="collected minus recorded costs; before payouts"
       />
 
       <Eyebrow>Band Pulse</Eyebrow>

@@ -269,8 +269,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const local = fallback();
       return {
         ...local,
-        source: "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
-        answer: "The AI provider responded, but its answer was not usable. I did not send another AI request, to conserve quota. I’m using conservative workspace rules instead. Live research was not verified.\n\n" + local.answer,
+        source: local.source.startsWith('GENERAL ASSISTANT') ? local.source : "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
+        answer: "Gemini returned an unusable answer. No second request was sent. Live information was not verified.\n\n" + local.answer,
       };
     }
 
