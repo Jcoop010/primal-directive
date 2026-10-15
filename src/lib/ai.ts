@@ -256,7 +256,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     const activeProvider: "gemini" = provider;
     const useClaude = Boolean(claudeKey);
-    const searchUsed = searchRequested && (useClaude || process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true");
+    const searchUsed = searchRequested && (useClaude ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED === "true" : process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true");
     if (searchRequested && !searchUsed) {
       return {
         ok: true as const,
@@ -287,10 +287,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const rateLimited = res?.status === 429;
       const providerError = res ? await readProviderBody(res) : {};
       const diagnosis = res ? geminiFailure(res.status, providerError) : null;
-      console.warn("[advisor] Gemini failure:", JSON.stringify(diagnosis
+      console.warn("[advisor] Provider failure:", JSON.stringify(diagnosis
         ? {status: res?.status, kind: diagnosis.kind, violations: diagnosis.violations, retrySeconds: diagnosis.retrySeconds}
         : {kind: "network_or_timeout"}));
-      const explanation = diagnosis?.message ?? "The Gemini connection failed or timed out. Check network connectivity before retrying.";
+      const explanation = useClaude ? (res?.status === 429 ? "Claude is rate limited. Local workspace intelligence is available; no second paid request was sent." : "Claude is temporarily unavailable. No second paid request was sent.") : (diagnosis?.message ?? "The Gemini connection failed or timed out. Check network connectivity before retrying.");
       return {
         ...local,
         source: general ? local.source : rateLimited
