@@ -160,7 +160,26 @@ async function complete(args: {
     const primary = await callModel(args.search ? "gemini-2.5-flash-lite" : "gemini-3.1-flash-lite");
     // A 404 means this key cannot use the selected model. Try one alternative
     // in the same Gemini family; never retry 429/503 or bypass search grounding.
-    if (primary.status === 404) return callModel(args.search ? "gemini-2.5-flash" : "gemini-2.5-flash-lite");
+    if (primary.status === 404) {
+      // Discover model IDs from the same production key rather than guessing.
+      // Listing models is metadata-only and does not generate tokens.
+      try {
+        const listed = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", {
+          headers: { "x-goog-api-key": args.apiKey }, signal: AbortSignal.timeout(8000),
+        });
+        if (listed.ok) {
+          const payload = await listed.json() as { models?: { name?: string; supportedGenerationMethods?: string[] }[] };
+          const supported = (payload.models ?? []).filter(m => m.name?.startsWith("models/gemini-") && m.supportedGenerationMethods?.includes("generateContent"));
+          const preferred = args.search
+            ? ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]
+            : ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash-lite"];
+          const candidates = supported.map(m => m.name!.slice("models/".length));
+          const alternate = preferred.find(id => candidates.includes(id) && id !== (args.search ? "gemini-2.5-flash-lite" : "gemini-3.1-flash-lite"));
+          if (alternate) return callModel(alternate);
+        }
+      } catch { /* Fail closed when model discovery is unavailable. */ }
+      return primary;
+    }
     return primary;
   }
   throw new Error("Unsupported AI provider");
