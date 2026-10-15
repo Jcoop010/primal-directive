@@ -32,6 +32,7 @@ export function createAdvisorTransport(options: {
   cooldowns?: Map<Provider, number>;
   deduplicationScope?: string;
   allowSecondOn404?: boolean;
+  allowSecondOn503?: boolean;
 } = {}) {
   const request = options.fetchImpl ?? fetch;
   const now = options.now ?? Date.now;
@@ -43,7 +44,7 @@ export function createAdvisorTransport(options: {
     if ((blocked.get(provider) ?? 0) > now()) {
       return new Response(null, { status: 429, headers: { "Retry-After": String(Math.ceil(((blocked.get(provider) ?? 0) - now()) / 1000)) } });
     }
-    if ((attempts >= 1 && !(options.allowSecondOn404 && attempts === 1 && lastStatus === 404)) || now() >= deadline) throw new Error("Advisor request budget exhausted");
+    if ((attempts >= 1 && !((options.allowSecondOn404 && attempts === 1 && lastStatus === 404) || (options.allowSecondOn503 && attempts === 1 && lastStatus === 503))) || now() >= deadline) throw new Error("Advisor request budget exhausted");
     attempts += 1;
     const signal = AbortSignal.timeout(Math.max(1, deadline - now()));
     const scope = options.deduplicationScope;
