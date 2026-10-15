@@ -160,7 +160,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
     const request = createAdvisorTransport({ timeoutMs: 55_000 });
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
-    const provider: "gemini" = "gemini";
+    const provider = "gemini" as const;
     const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
@@ -351,8 +351,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           detail: p.detail,
           reason: p.reason,
         }));
-      const verifiedAnswer = searchRequested && citations.length === 0
-        ? "LIVE RESEARCH NOT VERIFIED: The AI provider did not return usable source URLs. The following response is an unverified draft, not a verified venue or contact list. Do not rely on venue capacities, booking contacts, dates, or claims until checked against official sources.\n\n" + safe.data.answer.replace(/【[^】]+】/g, "[unverified citation removed]")
+      // A warning is insufficient: unsupported claims and outreach tasks must not
+      // be surfaced as usable research when provider grounding is absent.
+      const researchUnverified = searchRequested && citations.length === 0;
+      const verifiedAnswer = researchUnverified
+        ? "LIVE RESEARCH UNAVAILABLE: Gemini returned no usable grounding sources. Venue capacities, contacts, band identities, availability and proposed dates were not verified. No research-based tasks were generated. Check official sources or retry when live grounding is available."
         : safe.data.answer;
       return {
         ok: true,
@@ -361,7 +364,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         citations,
         gigs,
         people,
-        moves: (safe.data.moves ?? []).slice(0, 3),
+        moves: researchUnverified ? [] : (safe.data.moves ?? []).slice(0, 3),
       };
     }
 
