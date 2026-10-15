@@ -308,7 +308,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     // Never discard an otherwise useful sourced response merely because
     // its optional JSON envelope was malformed or truncated.
     // Keep structured leads disabled; expose the answer only as unverified prose.
-    if (raw.trim()) {
+    if (raw.trim() && !raw.trim().startsWith("{") && !raw.trim().startsWith("```")) {
       return {
         ok: true,
         answer: raw.trim().slice(0, 8000),
