@@ -46,7 +46,7 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.equal((await askGrowthAdvisor({...input,workspace})).answer, "Valid strategy");
     assert.equal(calls,1);
     assert.match(JSON.stringify(outgoing),/APP-CALCULATED WORKSPACE BRIEF/);
-    assert.ok(JSON.stringify(outgoing).includes('collected\\\":1234'));
+    assert.ok(outgoing.contents[0].parts[0].text.includes('"collected":1234'));
     const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
     assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
     assert.deepEqual(research.citations,[]);
