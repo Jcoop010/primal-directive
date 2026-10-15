@@ -1,3 +1,4 @@
+import { claudeComplete, claudeCitations } from "@/lib/claude-advisor";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
@@ -200,9 +201,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return { ok: true, answer: `The current UTC time is ${new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date())} (UTC). Your local timezone was not supplied.`, source: 'SERVER CLOCK — UTC', citations: [], gigs: [], people: [], moves: [] };
     }
     const request = createAdvisorTransport({ timeoutMs: 55_000, deduplicationScope: context.userId, allowSecondOn404: true, allowSecondOn503: true });
+    const claudeKey = process.env.ANTHROPIC_API_KEY?.trim();
     const geminiKey = process.env.GEMINI_API_KEY?.trim();
     const provider = "gemini" as const;
-    const apiKey = geminiKey;
+    const apiKey = claudeKey || geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
     const fallback = () => {
       if (data.workspace && data.planning && /\b(goals?|weekly|saved|workspace|my memory|our memory|planning code)\b/i.test(data.message)) {
@@ -253,7 +255,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     ];
 
     const activeProvider: "gemini" = provider;
-    const searchUsed = searchRequested && process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true";
+    const useClaude = Boolean(claudeKey);
+    const searchUsed = searchRequested && (useClaude ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED === "true" : process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true");
     if (searchRequested && !searchUsed) {
       return {
         ok: true as const,
@@ -268,13 +271,15 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let res: Response | null = null;
 
     try {
-      res = await complete({ request, apiKey, messages, search: searchUsed, provider });
+      res = useClaude
+        ? await claudeComplete({ apiKey: claudeKey!, messages, search: searchUsed })
+        : await complete({ request, apiKey, messages, search: searchUsed, provider });
 
     } catch {
       // Network failures use an explicitly labelled local fallback.
     }
 
-    if (activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
+    if (!useClaude && activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
     if (!res?.ok) {
       const local = fallback();
       const general = local.source.startsWith('GENERAL ASSISTANT');
@@ -282,10 +287,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const rateLimited = res?.status === 429;
       const providerError = res ? await readProviderBody(res) : {};
       const diagnosis = res ? geminiFailure(res.status, providerError) : null;
-      console.warn("[advisor] Gemini failure:", JSON.stringify(diagnosis
+      console.warn("[advisor] Provider failure:", JSON.stringify(diagnosis
         ? {status: res?.status, kind: diagnosis.kind, violations: diagnosis.violations, retrySeconds: diagnosis.retrySeconds}
         : {kind: "network_or_timeout"}));
-      const explanation = diagnosis?.message ?? "The Gemini connection failed or timed out. Check network connectivity before retrying.";
+      const explanation = useClaude ? (res?.status === 429 ? "Claude is rate limited. Local workspace intelligence is available; no second paid request was sent." : "Claude is temporarily unavailable. No second paid request was sent.") : (diagnosis?.message ?? "The Gemini connection failed or timed out. Check network connectivity before retrying.");
       return {
         ...local,
         source: general ? local.source : rateLimited
@@ -308,16 +313,17 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const parsed = extractJson(raw);
       return { raw, safe: parsed ? AiJson.safeParse(parsed) : null };
     };
-    const { raw, safe } = readSafeAnswer(body);
+    const claudeRaw = useClaude && Array.isArray(body.content) ? (body.content as Array<{type?:string;text?:string}>).filter(p=>p.type==="text").map(p=>p.text ?? "").join("\n") : "";
+    const { raw, safe } = useClaude ? (()=>{ const parsed=extractJson(claudeRaw); return {raw:claudeRaw,safe:parsed?AiJson.safeParse(parsed):null}; })() : readSafeAnswer(body);
 
     // Gemini can return useful plain text or a nonconforming JSON object.
     // Preserve it for general advice, but never present ungrounded live claims.
     if (!safe?.success && raw.trim()) {
       const plain = raw.trim().slice(0, 20000);
       if (!searchRequested) {
-        return { ok: true, answer: plain, source: "GEMINI AI — CURRENT FACTS NOT VERIFIED", citations: [], gigs: [], people: [], moves: [] };
+        return { ok: true, answer: plain, source: `${useClaude ? "CLAUDE" : "GEMINI"} AI — CURRENT FACTS NOT VERIFIED`, citations: [], gigs: [], people: [], moves: [] };
       }
-      const citations = normalizeCitationUrls(searchUsed ? citationsFrom(body) : []);
+      const citations = normalizeCitationUrls(searchUsed ? (useClaude ? claudeCitations(body) : citationsFrom(body)) : []);
       if (citations.length) {
         return { ok: true, answer: plain, source: "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE", citations, gigs: [], people: [], moves: [] };
       }
@@ -342,7 +348,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         ? citationsFrom(body)
         : [],
     );
-    const source = citations.length ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : `${activeProvider.toUpperCase()} AI — CURRENT FACTS NOT VERIFIED`;
+    const source = citations.length ? "LIVE WEB RESEARCH — SOURCES ATTACHED; CHECK EACH SOURCE" : `${useClaude ? "CLAUDE" : activeProvider.toUpperCase()} AI — CURRENT FACTS NOT VERIFIED`;
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,

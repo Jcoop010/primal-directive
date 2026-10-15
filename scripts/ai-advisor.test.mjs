@@ -192,3 +192,23 @@ test("Concurrent identical requests deduplicate only within the same authenticat
   assert.equal(calls,2);
 });
 
+
+test("Claude takes priority when configured and limits paid tokens",async()=>{
+ const saved={fetch:globalThis.fetch,anthropic:process.env.ANTHROPIC_API_KEY,gemini:process.env.GEMINI_API_KEY};
+ try{
+  process.env.ANTHROPIC_API_KEY="test-claude";process.env.GEMINI_API_KEY="test-gemini";
+  let calls=0;
+  globalThis.fetch=async(url,init)=>{
+   calls++;assert.match(String(url),/api.anthropic.com\/v1\/messages/);
+   const payload=JSON.parse(init.body);
+   assert.equal(payload.model,"claude-haiku-5-5");assert.equal(payload.max_tokens,1024);
+   assert.equal(payload.tools,undefined);
+   return new Response(JSON.stringify({content:[{type:"text",text:JSON.stringify({answer:"Claude working",gigs:[],people:[],moves:[]})}]}));
+  };
+  const result=await askGrowthAdvisor({...input,message:"Explain music promotion strategy"});
+  assert.equal(result.answer,"Claude working");assert.equal(calls,1);
+ }finally{
+  globalThis.fetch=saved.fetch;
+  for(const [k,v] of [["ANTHROPIC_API_KEY",saved.anthropic],["GEMINI_API_KEY",saved.gemini]]) if(v===undefined)delete process.env[k];else process.env[k]=v;
+ }
+});
