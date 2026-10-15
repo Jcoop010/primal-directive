@@ -229,7 +229,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    let activeProvider = provider;
+    const activeProvider = provider;
     let res: Response | null = null;
 
     try {
