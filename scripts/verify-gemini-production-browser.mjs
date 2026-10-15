@@ -62,6 +62,12 @@ try {
  await ask("Structured suggested actions","Give exactly three actionable priorities with a first step and completion signal.",{moves:true});
  await ask("Consecutive follow-up","Which of those three should we do first, and why?");
  await ask("Consecutive clarification","Turn that first action into a short checklist.");
+ // The app intentionally debounces writes; verify persistence after the final server acknowledgement.
+ await page.waitForResponse(response=>{
+  const request=response.request();
+  const body=request.postData()??"";
+  return request.method()==="POST" && request.url().includes("/_serverFn/") && !body.includes('"history"') && body.includes("Turn that first action into a short checklist.") && response.status()===200;
+ },{timeout:20000});
  await page.reload({waitUntil:"networkidle"});
  await page.getByText(source,{exact:true}).first().waitFor({timeout:30000});
  assert.equal(await page.getByText(source,{exact:true}).count(),8);
