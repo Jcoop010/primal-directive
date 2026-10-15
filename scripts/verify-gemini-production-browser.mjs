@@ -48,10 +48,10 @@ try {
    await page.getByRole("button",{name:"Send",exact:true}).click();
    await page.waitForFunction(n=>document.querySelectorAll("div.whitespace-pre-wrap").length>=n,before+2,{timeout:70000});
    const answer=await page.locator("div.whitespace-pre-wrap").last().innerText();
-   if(attempt===0 && /network error or timeout|connection failed or timed out/i.test(answer) && !/HTTP 429/.test(answer)){
-    results.push({test:"Transient network failure explicitly labelled; one delayed verification retry",passed:true});
+   if(attempt===0 && /HTTP (502|503|504)|network error or timeout|connection failed or timed out/i.test(answer) && !/HTTP 429/.test(answer)){
+    results.push({test:"Transient provider/network failure explicitly labelled; one delayed verification retry",passed:true});
     console.log(JSON.stringify({test,transientNetworkFailure:true}));
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(10000);
     continue;
    }
    assert.ok(answer.length>80);
