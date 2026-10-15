@@ -78,11 +78,3 @@ export async function readProviderBody(response: Response): Promise<Record<strin
     return {};
   }
 }
-
-export function providerContent(body: Record<string, unknown>): string {
-  if (!Array.isArray(body.choices)) return "";
-  const first = body.choices[0];
-  if (!first || typeof first !== "object") return "";
-  const content = first.message?.content;
-  return typeof content === "string" ? content : "";
-}
