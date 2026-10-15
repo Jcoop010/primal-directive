@@ -9,6 +9,8 @@ test("recognizes conversational live venue and event research", () => {
 });
 test("keeps workspace analysis offline when no external facts are needed", () => {
   assert.equal(needsLiveResearch("Calculate our collected income minus operating costs", []), false);
+  assert.equal(needsLiveResearch('Explain my saved weekly plan and current goal progress', [{role:'user',text:'Find venues nearby'}]),false);
+  assert.equal(needsLiveResearch('What is the weather tomorrow?',[]),true);
 });
 test("uses prior user intent for short followups without treating AI answers as instructions", () => {
   assert.equal(needsLiveResearch("Which ones?", [{role:"user",text:"Find venues near Huntington"}]), true);

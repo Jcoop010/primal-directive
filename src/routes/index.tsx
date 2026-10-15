@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { intelligenceWorkspace } from "@/lib/workspace-intelligence";
 import { WorkspaceBrief } from "@/components/workspace-brief";
 import { AdvisorTaskReview } from "@/components/advisor-task-review";
+import { ArtistPlanning } from "@/components/artist-planning";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 export const Route = createFileRoute("/")({ component: AdvisorPage });
@@ -82,6 +83,7 @@ function AdvisorPage() {
           history,
           context: buildAdvisorContext(),
           workspace: intelligenceWorkspace(useMusician.getState()),
+          planning: useMusician.getState().planning,
         },
       });
       if (ownerRef.current !== requestOwner) return;
@@ -115,6 +117,7 @@ function AdvisorPage() {
     <div className="flex min-h-0 flex-1 flex-col">
       <Eyebrow>Growth advisor</Eyebrow>
       <div className="my-3"><WorkspaceBrief /></div>
+      <ArtistPlanning busy={busy} onExplain={() => void send('Explain my saved weekly plan and goal progress. Use the provided records, available capacity and completed work. Give the best next internal steps.')} />
       {taskSuggestion !== null && taskSuggestion.owner === owner && <AdvisorTaskReview key={taskSuggestion.text} suggestion={taskSuggestion.text} onClose={() => setTaskSuggestion(null)} />}
 
       <Card className="flex min-h-[28rem] flex-1 flex-col overflow-hidden p-0">
