@@ -27,7 +27,7 @@ try {
    });
    const jsonBody=await jsonResponse.json().catch(()=>({}));
    const text=(jsonBody.candidates??[]).flatMap(c=>c.content?.parts??[]).map(p=>p.text??"").join("");
-   let structured=false; try { structured=JSON.parse(text).answer==="READY"; } catch {}
+   let structured=false; try { structured=JSON.parse(text).answer==="READY"; } catch { /* Invalid structured output is reported as false. */ }
    console.log("[gemini-probe]",JSON.stringify({test:"structured_output",status:jsonResponse.status,structured,...(!jsonResponse.ok ? geminiFailure(jsonResponse.status,jsonBody) : {})}));
   }
  }
