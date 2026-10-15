@@ -9,6 +9,10 @@ const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
 const page=await context.newPage();
 const errors=[];
+let advisorEndpoint;
+page.on("request",request=>{
+ if(request.method()==="POST" && request.url().includes("/_serverFn/") && request.postData()?.includes('"history"')) advisorEndpoint=request.url();
+});
 page.on("pageerror",()=>errors.push("uncaught_browser_error"));
 const email="primal-qa-"+randomUUID()+"@example.invalid";
 const password=randomUUID()+"aA1!";
@@ -69,11 +73,12 @@ try {
  await page.locator("input[placeholder^='Ask about growth']").scrollIntoViewIfNeeded();
  await page.screenshot({path:"qa-evidence/production-mobile.png"});
  results.push({test:"Mobile layout without horizontal overflow",passed:true});
- await page.route("**/_serverFn/**",route=>route.request().method()==="POST"?route.fulfill({status:503,body:"Temporarily unavailable"}):route.continue());
+ assert.ok(advisorEndpoint,"Advisor request endpoint was observed");
+ await page.route(advisorEndpoint,route=>route.fulfill({status:503,body:"Temporarily unavailable"}));
  await page.getByPlaceholder("Ask about growth, rooms, bills, routing…").fill("Network recovery check");
  await page.getByRole("button",{name:"Send",exact:true}).click();
  await page.getByText("The live connector dropped. Check the board and pipeline, then try the advisor again.",{exact:true}).waitFor({timeout:70000});
- await page.unroute("**/_serverFn/**");
+ await page.unroute(advisorEndpoint);
  await ask("Recovery after simulated network failure","Give one short measurable next step.");
  await page.setViewportSize({width:1440,height:1000});
  await page.getByRole("button",{name:"Sign out",exact:true}).click();
