@@ -64,7 +64,9 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.match(outgoing.contents[0].parts[0].text,/Capture 12 email signups/);
     assert.match(outgoing.contents[0].parts[0].text,/No weekday travel/);
     assert.match(outgoing.contents[0].parts[0].text,/User-reported/);
-    let researchModel = ""; globalThis.fetch = async (url, init) => { researchModel=String(url); assert.deepEqual(JSON.parse(init.body).tools,[{google_search:{}}]); return geminiGood(); };\n    const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});\n    assert.match(researchModel,/models\/gemini-2\.5-flash-lite:generateContent/);
+    let researchModel = ""; globalThis.fetch = async (url, init) => { researchModel=String(url); assert.deepEqual(JSON.parse(init.body).tools,[{google_search:{}}]); return geminiGood(); };
+    const research = await askGrowthAdvisor({...input,message:"Find current venue booking contacts"});
+    assert.match(researchModel,/models\/gemini-2\.5-flash-lite:generateContent/);
     assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
     assert.deepEqual(research.citations,[]);
     assert.deepEqual(research.moves,[]);
