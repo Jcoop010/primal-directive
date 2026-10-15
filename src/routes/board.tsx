@@ -64,15 +64,15 @@ function BoardPage() {
 
   return (
     <div>
-      <Eyebrow>Booking board</Eyebrow>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><Eyebrow>Overview / Booking board</Eyebrow><Link to="/gigs" className="rounded-xl border border-line bg-surface px-4 py-2 text-xs font-bold text-soft hover:border-accent hover:text-accent">View pipeline →</Link></div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <MetricCard label="Collected" value={money(collected)} hint="cash logged" />
         <MetricCard label="Outstanding" value={money(outstanding)} hint="money to collect" />
         <MetricCard label="Open pipeline" value={money(pipelineValue(gigs))} hint={`${open.length} opportunities`} />
         <MetricCard label="Weighted" value={money(Math.round(weightedValue(gigs)))} hint="fee × confidence" />
       </div>
       <MetricCard
-        className="mt-2.5"
+        className="mt-3"
         label="Real gig profit"
         value={money(profit)}
         hint={profit < 0 ? "loss after tracked costs" : "after tracked costs"}
