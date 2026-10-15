@@ -111,6 +111,29 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
   }
 });
 
+test("Gemini plain-text responses remain useful without extra quota requests", async () => {
+  const saved = { fetch: globalThis.fetch, key: process.env.GEMINI_API_KEY, grounding: process.env.GEMINI_SEARCH_GROUNDING_ENABLED };
+  let calls = 0;
+  try {
+    process.env.GEMINI_API_KEY = "test-only";
+    process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+    globalThis.fetch = async () => { calls++; return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "Focus on collecting email signups at your next show." }] } }] })); };
+    const general = await askGrowthAdvisor({...input, message: "How can my band grow?"});
+    assert.equal(general.answer, "Focus on collecting email signups at your next show.");
+    assert.match(general.source, /GEMINI AI/);
+    assert.deepEqual(general.citations, []);
+    assert.equal(calls, 1);
+    const research = await askGrowthAdvisor({...input, message: "Find current venue booking contacts"});
+    assert.match(research.answer, /LIVE RESEARCH NOT VERIFIED/);
+    assert.deepEqual(research.citations, []);
+    assert.equal(calls, 2);
+  } finally {
+    globalThis.fetch = saved.fetch;
+    if (saved.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = saved.key;
+    if (saved.grounding === undefined) delete process.env.GEMINI_SEARCH_GROUNDING_ENABLED; else process.env.GEMINI_SEARCH_GROUNDING_ENABLED = saved.grounding;
+  }
+});
+
 test("Transport respects Retry-After, recovers after cooldown and caps attempts", async () => {
   assert.equal(retryAfterMs("120"),120000);
   assert.equal(retryAfterMs(null),60000);
