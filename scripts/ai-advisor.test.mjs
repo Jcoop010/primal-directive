@@ -68,6 +68,27 @@ test("Gemini plain-text responses remain useful without extra quota requests", a
   }
 });
 
+
+test("Transient Gemini 503 recovers on one retry without changing models", async () => {
+  const saved = {fetch:globalThis.fetch,key:process.env.GEMINI_API_KEY};
+  const urls=[];
+  try {
+    process.env.GEMINI_API_KEY="test-only";
+    globalThis.fetch=async url => {
+      urls.push(String(url));
+      if (urls.length===1) return new Response(null,{status:503});
+      return new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify({answer:"Recovered after temporary outage",gigs:[],people:[],moves:[]})}]}}]}));
+    };
+    const result=await askGrowthAdvisor({...input,message:"How can I improve my band promotion strategy?"});
+    assert.equal(result.answer,"Recovered after temporary outage");
+    assert.equal(urls.length,2);
+    assert.equal(urls[0],urls[1]);
+  } finally {
+    globalThis.fetch=saved.fetch;
+    if(saved.key===undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY=saved.key;
+  }
+});
+
 test("Gemini-only Advisor handles valid output, offline mode and rate limits", async () => {
   const saved = { grounding: process.env.GEMINI_SEARCH_GROUNDING_ENABLED, fetch: globalThis.fetch, gemini: process.env.GEMINI_API_KEY, xai: process.env.XAI_API_KEY, groq: process.env.GROQ_API_KEY };
   let calls = 0;
@@ -115,7 +136,7 @@ test("Gemini-only Advisor handles valid output, offline mode and rate limits", a
     assert.match(planningFailure.answer,/No weekday travel/);
     assert.match(planningFailure.answer,/Capture 12 email signups/);
     assert.match(planningFailure.answer,/without an AI answer/);
-    assert.equal(calls,1);
+    assert.equal(calls,2);
     delete process.env.GEMINI_API_KEY;
     calls = 0;
     assert.match((await askGrowthAdvisor(input)).source, /OFFLINE/);
@@ -170,3 +191,4 @@ test("Concurrent identical requests deduplicate only within the same authenticat
   await Promise.all([a,b,c]);
   assert.equal(calls,2);
 });
+
