@@ -177,6 +177,18 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const provider = "gemini" as const;
     const apiKey = geminiKey;
     const searchRequested = needsLiveResearch(data.message, data.history);
+    // When the AI service is down, avoid turning unrelated questions into
+    // artist strategy. The local rules engine is intentionally domain-specific.
+    const generalQuestion = !/(\\b(gig|gigs|booking|booker|venue|venues|tour|routing|show|shows|artist|band|bands|merch|fans|audience|music|song|playlist|press|promotion|promoter|ticket|fee|guarantee|pipeline|revenue|payout|profit|finance|money|settlement|inventory)\\b)/i.test(data.message);
+    const generalFallback = () => ({
+      ok: true as const,
+      answer: "I can't answer this question reliably right now because the Gemini service is unavailable. I won't substitute unrelated band advice or pretend I checked live information. Please try again when the provider is available.",
+      source: "GENERAL ASSISTANT — AI SERVICE UNAVAILABLE",
+      citations: [] as string[],
+      gigs: [] as SuggestedGig[],
+      people: [] as SuggestedPerson[],
+      moves: [] as string[],
+    });
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
@@ -230,7 +242,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
 
     if (activeProvider === "gemini" && (!res || !res.ok)) console.error(`[advisor] Gemini request failed: ${res ? `HTTP ${res.status}` : "network error or timeout"}. No secrets logged.`);
     if (!res?.ok) {
-      const local = fallback();
+      const local = generalQuestion ? generalFallback() : fallback();
       const failure = res ? `HTTP ${res.status}` : "network error or timeout";
       const rateLimited = res?.status === 429;
       const failedProvider = activeProvider;
@@ -270,7 +282,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           ? "LOCAL WORKSPACE FALLBACK — PROVIDER RATE LIMITED (HTTP 429)"
           : `LOCAL WORKSPACE FALLBACK — AI PROVIDER FAILED (${failure})`,
         answer: diagnosis + `\n\n${local.answer}`,
-        moves: rateLimited
+        moves: generalQuestion ? [] : rateLimited
           ? [
               "Check the configured provider's current rate limits and usage dashboard before retrying.",
               "Wait for the limit window to reset; avoid repeatedly resubmitting the same prompt.",
@@ -325,7 +337,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     }
 
     if (!safe?.success) {
-      const local = fallback();
+      const local = generalQuestion ? generalFallback() : fallback();
       return {
         ...local,
         source: "LOCAL WORKSPACE FALLBACK — INVALID AI RESPONSE",
