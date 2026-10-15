@@ -52,6 +52,7 @@ export function DurableSync() {
             merchRefunds: state.merchRefunds ?? [],
             tasks: state.tasks ?? [],
             planning: state.planning ?? emptyPlanning(),
+            composer: { gigOpen: false, personOpen: false, moneyOpen: false, profileOpen: false, commandOpen: false },
             chat: state.chat,
             profile: state.profile,
           }));
@@ -69,6 +70,7 @@ export function DurableSync() {
             merchRefunds: [],
             tasks: [],
             planning: emptyPlanning(),
+            composer: { gigOpen: false, personOpen: false, moneyOpen: false, profileOpen: false, commandOpen: false },
             chat: [],
             profile: {
               artistName: "",
