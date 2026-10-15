@@ -4,6 +4,7 @@ import { loadAppState, saveAppState } from "@/lib/persistence";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { useMusician } from "@/lib/store";
 import { emptyPlanning } from "@/lib/artist-planning";
+const PERSISTED_KEYS = ['gigs', 'people', 'money', 'merchProducts', 'merchSales', 'merchOrders', 'merchInventoryAdjustments', 'merchRefunds', 'tasks', 'planning', 'chat', 'profile'] as const;
 
 /** Bridges the existing Zustand UX to the authenticated server source of truth. */
 export function DurableSync() {
@@ -17,15 +18,27 @@ export function DurableSync() {
   const version = useRef(0);
   const saveQueue = useRef<Promise<void>>(Promise.resolve());
   const retrySave = useRef<(() => void) | null>(null);
+  const dirty = useRef(false);
+  const changeVersion = useRef(0);
   const [syncStatus, setSyncStatus] = useState<"loading" | "ready" | "error" | "unsaved">("loading");
 
   // Keep queued work from a previous account from starting after an account switch.
   activeUserId.current = !isPending ? userId : null;
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!dirty.current || !activeUserId.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, []);
 
   useEffect(() => {
     if (isPending || !userId) {
       readyFor.current = null;
       version.current = 0;
+      dirty.current = false;
       setSyncStatus("loading");
       return;
     }
@@ -83,6 +96,8 @@ export function DurableSync() {
           }));
         }
         readyFor.current = userId;
+        dirty.current = false;
+        changeVersion.current = 0;
         setSyncStatus("ready");
       })
       .catch((error) => {
@@ -107,6 +122,8 @@ export function DurableSync() {
     if (!userId || isPending) return;
     const scheduleSave = () => {
       if (readyFor.current !== userId || activeUserId.current !== userId || loading.current) return;
+      dirty.current = true;
+      const snapshotVersion = ++changeVersion.current;
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         timer.current = null;
@@ -138,7 +155,10 @@ export function DurableSync() {
             });
             if (activeUserId.current === userId && readyFor.current === userId) {
               version.current = result.version;
-              setSyncStatus('ready');
+              if (snapshotVersion === changeVersion.current) {
+                dirty.current = false;
+                setSyncStatus('ready');
+              }
             }
           })
           .catch((error) => {
@@ -158,7 +178,9 @@ export function DurableSync() {
           });
       }, 650);
     };
-    const unsubscribe = useMusician.subscribe(scheduleSave);
+    const unsubscribe = useMusician.subscribe((state, previous) => {
+      if (PERSISTED_KEYS.some(key => state[key] !== previous[key])) scheduleSave();
+    });
     retrySave.current = scheduleSave;
 
     return () => {
