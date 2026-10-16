@@ -70,6 +70,10 @@ try {
   await submitDialog();
   await recover("/people");
   assert.equal((await state()).people[0].name, "Fictional QA Booker");
+  await page.getByRole("searchbox", { name: "Search people", exact: true }).fill("no-such-fictional-contact");
+  await page.getByText("No matching contacts", { exact: true }).waitFor();
+  await page.getByRole("searchbox", { name: "Search people", exact: true }).fill("Fictional QA Booker");
+  await page.getByText("Fictional QA Booker", { exact: true }).waitFor();
 
   await ready("/gigs");
   await page.getByRole("button", { name: "Add", exact: true }).click();
@@ -95,6 +99,13 @@ try {
   await recover("/money");
   assert.equal((await state()).money.find((entry) => entry.label === "Fictional QA show income").amount, 125.5);
   await page.screenshot({ path: "/workspace/screenshots/authenticated-money.png" });
+  const downloadPending = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export CSV", exact: true }).click();
+  const download = await downloadPending;
+  const stream = await download.createReadStream();
+  let csv = "";
+  for await (const chunk of stream) csv += chunk.toString();
+  assert.ok(csv.includes("Fictional QA show income") && csv.includes("125.5"), "Money export lost saved records or cents");
 
   await ready("/merch");
   await page.getByRole("button", { name: "Add first item", exact: true }).click();
@@ -113,6 +124,13 @@ try {
   assert.equal(merch.merchProducts[0].stockOnHand, 8);
   assert.equal(merch.merchOrders[0].status, "paid");
   assert.equal(merch.merchOrders[0].total, 60);
+
+  if (origin === "http://127.0.0.1:8080") {
+    await ready("/");
+    await page.getByPlaceholder("Ask about growth, rooms, bills, routing…", { exact: true }).fill("Help fictional River Fold prioritize the next week using saved data.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await page.getByText("OFFLINE MODE — AI PROVIDER NOT CONFIGURED", { exact: true }).waitFor();
+  }
 
   for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
