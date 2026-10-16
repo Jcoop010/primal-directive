@@ -136,7 +136,9 @@ try {
   await auth("sign-in/email", { email: emailA, password });
   await ready("/people");
   assert.equal((await state()).people[0].name, "Fictional QA Booker");
-  await auth("sign-out", {});
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await page.getByText("Sign in to access your private pipeline", { exact: false }).waitFor();
   await page.goto(origin + "/money");
   await page.getByText("Sign in to access your private pipeline", { exact: false }).waitFor();
   assert.equal(await page.locator("main").count(), 0);
