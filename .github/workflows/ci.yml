@@ -105,13 +105,13 @@ jobs:
           BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/ /workspace/screenshots/production.png
           BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/demo /workspace/screenshots/production-demo.png
           node scripts/browser-smoke.mjs http://127.0.0.1:8080/ /workspace/screenshots/dev.png
+          npm run preview:restart
+          node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/built.png --baseline /workspace/screenshots/dev.json || { cat .grok/preview.log; exit 1; }
           node scripts/ci-browser-acceptance.mjs
           if [ "$GITHUB_REF" = "refs/heads/main" ]; then
             AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-auth-smoke.mjs
             AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-browser-acceptance.mjs
           fi
-          npm run preview:restart
-          node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/built.png --baseline /workspace/screenshots/dev.json || { cat .grok/preview.log; exit 1; }
 
       - name: Expose public and fictional QA screenshots for connector review
         if: always()
