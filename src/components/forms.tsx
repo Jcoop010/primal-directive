@@ -435,21 +435,25 @@ function MoneyForm({
 }
 
 export function ProfileDrawer() {
-  const { composer, profile, setComposer, updateProfile, resetSample, clearAll } =
-    useMusician();
-  const [draft, setDraft] = useState(profile);
-  const open = composer.profileOpen;
-
+  const { composer, setComposer } = useMusician();
   return (
     <Drawer
-      open={open}
-      onOpenChange={(v) => {
-        if (v) setDraft(useMusician.getState().profile);
-        setComposer({ profileOpen: v });
-      }}
+      open={composer.profileOpen}
+      onOpenChange={(open) => setComposer({ profileOpen: open })}
       title="Artist profile"
     >
-      {open ? (
+      {composer.profileOpen ? <ProfileForm /> : null}
+    </Drawer>
+  );
+}
+
+// Mount a new draft for each opening, after DurableSync has loaded this account.
+// A draft created with the shell can contain the demo seed or another account's
+// old values and must never replace the current artist profile.
+function ProfileForm() {
+  const { profile, setComposer, updateProfile, resetSample, clearAll } = useMusician();
+  const [draft, setDraft] = useState(profile);
+  return (
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -533,8 +537,6 @@ export function ProfileDrawer() {
             </Button>
           </div>
         </form>
-      ) : null}
-    </Drawer>
   );
 }
 
