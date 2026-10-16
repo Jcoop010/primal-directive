@@ -215,10 +215,14 @@ async function complete(args: {
       signal: args.signal,
     });
     if (!response.ok) return response;
-    const payload = await response.json() as { content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }> }> };
+    const payload = await response.json() as { content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }>; content?: Array<{ type?: string; url?: string }> | { error_code?: string } }> };
     const content = payload.content ?? [];
     const text = content.filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n");
-    const citations = content.flatMap((b) => b.citations ?? []).map((cite) => cite.url).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    // JSON answers may omit inline citation annotations. The server's search
+    // result blocks still carry actual source URLs; never scrape model prose.
+    const results = content.filter((block) => block.type === "web_search_tool_result").flatMap((block) => Array.isArray(block.content) ? block.content.filter((item) => item.type === "web_search_result") : []);
+    const citations = [...content.flatMap((b) => b.citations ?? []), ...results].map((cite) => cite.url).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    if (args.search) console.info("[advisor] search evidence", { provider: "anthropic", results: results.length, citations: citations.length });
     return new Response(JSON.stringify({ choices: [{ message: { content: text } }], citations }), { status: 200, headers: { "Content-Type": "application/json" } });
   }
   const body: Record<string, unknown> = {
@@ -396,7 +400,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     }
 
     // If all providers lack grounded research, preserve a useful AI answer but label it unverified.
-    if (!res?.ok && ungroundedResponse) res = ungroundedResponse;
+    if (!needsResearch && !res?.ok && ungroundedResponse) res = ungroundedResponse;
 
     // Do not silently substitute an ungrounded provider for live research.
     // Report only the upstream HTTP status; never log tokens or response bodies.

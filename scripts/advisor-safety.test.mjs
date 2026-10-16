@@ -53,6 +53,36 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal(result.gigs[0].fee, 0);
     });
     process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+    await t.test("Anthropic search-result sources survive JSON without inline citations", async (st) => {
+      process.env.ANTHROPIC_API_KEY = "fictional-anthropic";
+      st.mock.method(globalThis, "fetch", async (url) => {
+        assert.match(String(url), /api.anthropic.com/);
+        return Response.json({ content: [
+          { type: "web_search_tool_result", content: [{ type: "web_search_result", url: answer.gigs[0].sourceUrl }] },
+          { type: "text", text: JSON.stringify(answer) },
+        ] });
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.equal(result.gigs.length, 1);
+      assert.deepEqual(result.citations, [answer.gigs[0].sourceUrl]);
+      assert.match(result.source, /LIVE WEB SEARCH/);
+      delete process.env.ANTHROPIC_API_KEY;
+    });
+    await t.test("research without returned evidence cannot claim live verification", async (st) => {
+      process.env.ANTHROPIC_API_KEY = "fictional-anthropic";
+      st.mock.method(globalThis, "fetch", async (url) => {
+        if (String(url).includes("anthropic")) return Response.json({ content: [
+          { type: "web_search_tool_result", content: { type: "web_search_tool_result_error", error_code: "unavailable" } },
+          { type: "text", text: JSON.stringify({ ...answer, answer: "Live search confirmed!" }) },
+        ] });
+        return new Response("", { status: 503 });
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.match(result.source, /UNAVAILABLE/);
+      assert.doesNotMatch(result.answer, /Live search confirmed/);
+      assert.deepEqual(result.gigs, []);
+      delete process.env.ANTHROPIC_API_KEY;
+    });
     await t.test("an unknown fee cannot discard an otherwise grounded booking lead", async (st) => {
       st.mock.method(globalThis, "fetch", async () => {
         const response = await gemini().json();
