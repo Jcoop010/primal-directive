@@ -58,6 +58,19 @@ describe("show financial summary", () => {
     });
   });
 
+  it("QA: a collected $1,000 payment less a $250 recorded expense nets $750, excluding outstanding income", () => {
+    const summary = summarizeShowFinances([
+      { label: "QA Test Venue payment", amount: 1000, kind: "income", status: "actual" },
+      { label: "QA Test Venue travel expense", amount: 250, kind: "expense", status: "actual" },
+      { label: "Unpaid future fee", amount: 400, kind: "income", status: "expected" },
+    ]);
+    assert.equal(summary.actualIncome, 1000);
+    assert.equal(summary.actualExpenses, 250);
+    assert.equal(summary.actualNet, 750);
+    assert.equal(summary.expectedIncome, 400);
+    assert.equal(summary.expectedNet, 400);
+  });
+
   it("rejects negative, infinite, and NaN amounts", () => {
     for (const amount of [-1, Infinity, NaN]) {
       assert.throws(
