@@ -59,12 +59,20 @@ function MerchPage() {
   const [fee, setFee] = useState("0");
   const [member, setMember] = useState("");
   const [orderQuery, setOrderQuery] = useState("");
+  const [inventoryView, setInventoryView] = useState<"all" | "reorder" | "out">("all");
+  const [inventoryQuery, setInventoryQuery] = useState("");
 
   const summary = useMemo(() => summarizeMerch(products, sales, orders, refunds), [products, sales, orders, refunds]);
   const activeProducts = products.filter((product) => product.active);
   const selectedProduct = products.find((product) => product.id === saleProductId);
   const lowStock = activeProducts.filter((product) => product.stockOnHand <= product.reorderAt);
-  const sortedProducts = [...products].sort((a, b) => {
+  const outOfStock = activeProducts.filter((product) => product.stockOnHand === 0);
+  const reorderCost = lowStock.reduce((total, product) => total + Math.max(0, product.reorderAt + 1 - product.stockOnHand) * product.unitCost, 0);
+  const sortedProducts = [...products].filter((product) => {
+    const matchesView = inventoryView === "all" || (product.active && (inventoryView === "out" ? product.stockOnHand === 0 : product.stockOnHand <= product.reorderAt));
+    const query = inventoryQuery.trim().toLowerCase();
+    return matchesView && (!query || [product.name, product.sku, product.size, product.color, categoryLabel[product.category]].some((value) => value?.toLowerCase().includes(query)));
+  }).sort((a, b) => {
     const lowA = a.active && a.stockOnHand <= a.reorderAt ? 1 : 0;
     const lowB = b.active && b.stockOnHand <= b.reorderAt ? 1 : 0;
     return lowB - lowA || a.name.localeCompare(b.name);
@@ -192,6 +200,14 @@ function MerchPage() {
           </div>
         </Card>
       )}
+
+      <section aria-label="Inventory intelligence" className="rounded-2xl border border-line bg-surface p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-display text-base font-bold">Inventory intelligence</h3><p className="mt-1 text-xs text-muted">Prioritize stock before your next show. Estimates use recorded unit costs, not supplier quotes.</p></div><div className="text-right"><div className="text-lg font-extrabold text-fg">{money(reorderCost)}</div><div className="text-[11px] text-muted">Estimated cost to exceed reorder levels</div></div></div>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {([{key:"all",label:"All items",count:products.length},{key:"reorder",label:"Reorder",count:lowStock.length},{key:"out",label:"Sold out",count:outOfStock.length}] as const).map((item) => <button type="button" key={item.key} aria-pressed={inventoryView === item.key} onClick={() => setInventoryView(item.key)} className={cn("rounded-xl border p-3 text-left transition-colors",inventoryView === item.key ? "border-accent bg-accent/10" : "border-line bg-bg/60 hover:border-accent/50")}><div className="font-display text-xl font-bold">{item.count}</div><div className="mt-1 text-xs font-semibold text-muted">{item.label}</div></button>)}
+        </div>
+        <label className="mt-3 block text-xs font-semibold text-muted">Search inventory<input type="search" value={inventoryQuery} onChange={(event) => setInventoryQuery(event.target.value)} placeholder="Product, SKU, size, color..." className="mt-1 min-h-10 w-full rounded-lg border border-line bg-bg px-3 text-sm text-fg" /></label>
+      </section>
 
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-bold">Inventory</h3>
