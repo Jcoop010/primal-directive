@@ -20,6 +20,8 @@ const commands = [
   ["find", "label", "Artist / band", "fill", "River Fold (fictional QA)"],
   ["find", "label", "Home city", "fill", "Test City (fictional)"],
   ["find", "label", "Genre", "fill", "Indie folk"],
+  ["press", "Tab"],
+  ["eval", `JSON.stringify([...document.querySelectorAll("[role=dialog] input")].map(input => ({value:input.value, controlled: input[Object.keys(input).find(key => key.startsWith("__reactProps"))]?.value})))`],
   ["find", "text", "Save profile", "click"],
   ["eval", "if (!document.body.innerText.includes('River Fold (fictional QA)')) throw new Error('Profile was not applied by the form'); true"],
   ["wait", "2000"],
