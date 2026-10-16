@@ -52,14 +52,14 @@ async function state() {
 try {
   await auth("sign-up/email", { name: "River Fold A (fictional QA)", email: emailA, password });
   await ready("/");
-  await page.locator("aside button").click();
+  await page.locator("aside button").first().click();
   await page.getByLabel("Artist / band", { exact: true }).fill("River Fold (fictional QA)");
   await page.getByLabel("Home city", { exact: true }).fill("Test City (fictional)");
   await page.getByLabel("Genre", { exact: true }).fill("Indie folk");
   await submitDialog();
   await recover("/");
   assert.equal((await state()).profile.artistName, "River Fold (fictional QA)");
-  await page.locator("aside button").click();
+  await page.locator("aside button").first().click();
   assert.equal(await page.getByLabel("Artist / band", { exact: true }).inputValue(), "River Fold (fictional QA)");
   await submitDialog();
 
