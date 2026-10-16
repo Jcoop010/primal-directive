@@ -2,9 +2,18 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { GIG_STATUSES, MERCH_CATEGORIES, MERCH_PAYMENT_METHODS, MONEY_TYPES, PERSON_ROLES } from "@/lib/types";
+import { venueEvidenceShape } from "@/lib/venue-evidence";
+import {
+  GIG_STATUSES,
+  MERCH_CATEGORIES,
+  MERCH_PAYMENT_METHODS,
+  MONEY_TYPES,
+  PERSON_ROLES,
+} from "@/lib/types";
 
 const suggestedGigSchema = z.object({
+  ...venueEvidenceShape,
+  sourceUrl: z.string().url().optional(),
   name: z.string(),
   venue: z.string(),
   city: z.string(),
@@ -16,6 +25,7 @@ const suggestedGigSchema = z.object({
 });
 
 const suggestedPersonSchema = z.object({
+  sourceUrl: z.string().url().optional(),
   name: z.string(),
   role: z.enum(PERSON_ROLES),
   city: z.string(),
@@ -24,6 +34,7 @@ const suggestedPersonSchema = z.object({
 });
 
 const gigSchema = z.object({
+  ...venueEvidenceShape,
   id: z.string(),
   name: z.string(),
   venue: z.string(),
@@ -100,7 +111,14 @@ const merchOrderSchema = z.object({
   channel: z.enum(["table", "show", "online"]),
   date: z.string(),
   createdAt: z.string(),
-  lines: z.array(z.object({ productId: z.string(), quantity: z.number().int().positive(), unitPrice: z.number().nonnegative(), unitCost: z.number().nonnegative() })),
+  lines: z.array(
+    z.object({
+      productId: z.string(),
+      quantity: z.number().int().positive(),
+      unitPrice: z.number().nonnegative(),
+      unitCost: z.number().nonnegative(),
+    }),
+  ),
   subtotal: z.number().nonnegative(),
   discountAmount: z.number().nonnegative(),
   taxAmount: z.number().nonnegative(),
@@ -215,26 +233,29 @@ export const saveAppState = createServerFn({ method: "POST" })
     }
 
     // Compare-and-swap prevents one browser tab from silently replacing a newer workspace.
-    const rows = data.expectedVersion === 0
-      ? await sql.query<{ version: number }>(
-          `insert into app_state (user_id, state, version, updated_at)
+    const rows =
+      data.expectedVersion === 0
+        ? await sql.query<{ version: number }>(
+            `insert into app_state (user_id, state, version, updated_at)
            values ($1, $2::jsonb, 1, current_timestamp)
            on conflict (user_id) do nothing
            returning version`,
-          [context.userId, serialized],
-        )
-      : await sql.query<{ version: number }>(
-          `update app_state
+            [context.userId, serialized],
+          )
+        : await sql.query<{ version: number }>(
+            `update app_state
            set state = $2::jsonb,
                version = version + 1,
                updated_at = current_timestamp
            where user_id = $1 and version = $3
            returning version`,
-          [context.userId, serialized, data.expectedVersion],
-        );
+            [context.userId, serialized, data.expectedVersion],
+          );
 
     if (!rows.length) {
-      throw new Error("Workspace changed in another session. Reload before saving to avoid overwriting newer data.");
+      throw new Error(
+        "Workspace changed in another session. Reload before saving to avoid overwriting newer data.",
+      );
     }
     return { ok: true, version: Number(rows[0].version) };
   });

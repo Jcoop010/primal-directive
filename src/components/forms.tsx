@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
+import { bookingDraft } from "@/lib/booking-workflow";
 import { useMusician } from "@/lib/store";
 import {
   GIG_STATUS_LABEL,
@@ -25,8 +26,7 @@ function todayIso() {
 }
 
 export function GigDrawer() {
-  const { composer, gigs, setComposer, addGig, updateGig, removeGig } =
-    useMusician();
+  const { composer, gigs, setComposer, addGig, updateGig, removeGig } = useMusician();
   const editing = gigs.find((g) => g.id === composer.editingGigId);
   const open = composer.gigOpen;
   return (
@@ -83,6 +83,15 @@ function GigForm({
   const [conf, setConf] = useState(String(Math.round((initial?.conf ?? 0.5) * 100)));
   const [status, setStatus] = useState<GigStatus>(initial?.status ?? "lead");
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [researchSourceUrl, setResearchSourceUrl] = useState(initial?.researchSourceUrl ?? "");
+  const [outreachContact, setOutreachContact] = useState(initial?.outreachContact ?? "");
+  const [outreachNextFollowUp, setOutreachNextFollowUp] = useState(
+    initial?.outreachNextFollowUp ?? "",
+  );
+  const [outreachLastContactedAt, setOutreachLastContactedAt] = useState(
+    initial?.outreachLastContactedAt ?? "",
+  );
+  const [outreachNotes, setOutreachNotes] = useState(initial?.outreachNotes ?? "");
 
   return (
     <form
@@ -90,16 +99,27 @@ function GigForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!name.trim()) return;
-        onSave({
-          name: name.trim(),
-          venue: venue.trim(),
-          city: city.trim(),
-          date,
-          fee: Number(fee) || 0,
-          conf: Math.min(1, Math.max(0, (Number(conf) || 0) / 100)),
-          status,
-          notes: notes.trim(),
-        });
+        try {
+          onSave({
+            name: name.trim(),
+            venue: venue.trim(),
+            city: city.trim(),
+            date,
+            fee: Number(fee) || 0,
+            conf: Math.min(1, Math.max(0, (Number(conf) || 0) / 100)),
+            status,
+            notes: notes.trim(),
+            researchSourceUrl,
+            outreachContact,
+            outreachNextFollowUp,
+            outreachLastContactedAt,
+            outreachNotes,
+            researchVerifiedAt:
+              researchSourceUrl === initial?.researchSourceUrl ? initial?.researchVerifiedAt : "",
+          });
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Unable to save booking");
+        }
       }}
     >
       <Field label="Opportunity">
@@ -120,7 +140,12 @@ function GigForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Date">
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <Input
+            type="date"
+            required={status === "booked"}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
         </Field>
         <Field label="Fee">
           <Input
@@ -134,10 +159,7 @@ function GigForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Status">
-          <NativeSelect
-            value={status}
-            onChange={(e) => setStatus(e.target.value as GigStatus)}
-          >
+          <NativeSelect value={status} onChange={(e) => setStatus(e.target.value as GigStatus)}>
             {GIG_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {GIG_STATUS_LABEL[s]}
@@ -162,6 +184,111 @@ function GigForm({
           placeholder="Load-in, bill, follow-up…"
         />
       </Field>
+      <section
+        aria-label="Booking research and outreach"
+        className="space-y-3 rounded-lg border border-line p-3"
+      >
+        <h3 className="text-sm font-semibold">Research → pitch → follow-up</h3>
+        {initial?.venueCapacity && initial.capacitySourceUrl && (
+          <p className="text-xs text-soft">
+            Source-cited capacity: {initial.venueCapacity} ·{" "}
+            <a
+              className="text-accent underline"
+              href={initial.capacitySourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Review capacity evidence
+            </a>
+          </p>
+        )}
+        {initial?.bookingContactName && initial.bookingContactSourceUrl && (
+          <p className="text-xs text-soft">
+            Source-cited contact: {initial.bookingContactName} ·{" "}
+            <a
+              className="text-accent underline"
+              href={initial.bookingContactSourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Review contact evidence
+            </a>
+          </p>
+        )}
+        <p className="text-xs text-muted">
+          A recorded source is not booking confirmation. Review the recipient and claims before
+          sending anything yourself.
+        </p>
+        <Field label="Official research source">
+          <Input
+            type="url"
+            value={researchSourceUrl}
+            onChange={(e) => setResearchSourceUrl(e.target.value)}
+            placeholder="https://"
+          />
+        </Field>
+        <Field label="Booking contact or submission route">
+          <Input
+            value={outreachContact}
+            onChange={(e) => setOutreachContact(e.target.value)}
+            placeholder="Official booking URL or a source-supported contact"
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Last contacted (manual)">
+            <Input
+              type="date"
+              value={outreachLastContactedAt}
+              onChange={(e) => setOutreachLastContactedAt(e.target.value)}
+            />
+          </Field>
+          <Field label="Next booking follow-up">
+            <Input
+              type="date"
+              value={outreachNextFollowUp}
+              onChange={(e) => setOutreachNextFollowUp(e.target.value)}
+            />
+          </Field>
+        </div>
+        <p className="text-xs text-muted">
+          Saving a follow-up date synchronizes one internal task. No email or message is sent.
+        </p>
+        <Field label="Conversation and deal notes">
+          <Textarea
+            value={outreachNotes}
+            maxLength={12000}
+            onChange={(e) => setOutreachNotes(e.target.value)}
+            placeholder="Responses, discussed terms, conditions and next action…"
+          />
+        </Field>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            const draft = bookingDraft(
+              {
+                ...initial,
+                id: initial?.id ?? "draft",
+                name,
+                venue,
+                city,
+                date,
+                fee: Number(fee) || 0,
+                conf: Number(conf) / 100,
+                status,
+                notes,
+              },
+              useMusician.getState().profile,
+            );
+            setOutreachNotes((previous) =>
+              [previous, "DRAFT — NOT SENT\n" + draft].filter(Boolean).join("\n\n"),
+            );
+            toast("Draft added to notes. Review and save before sending.");
+          }}
+        >
+          Prepare personalized pitch
+        </Button>
+      </section>
       <div className="flex gap-2 pt-2">
         <Button type="submit" className="flex-1">
           Save gig
@@ -177,8 +304,7 @@ function GigForm({
 }
 
 export function PersonDrawer() {
-  const { composer, people, setComposer, addPerson, updatePerson, removePerson } =
-    useMusician();
+  const { composer, people, setComposer, addPerson, updatePerson, removePerson } = useMusician();
   const editing = people.find((p) => p.id === composer.editingPersonId);
   const open = composer.personOpen;
   return (
@@ -252,14 +378,16 @@ function PersonForm({
       }}
     >
       <Field label="Name">
-        <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Band or person" />
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          placeholder="Band or person"
+        />
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Role">
-          <NativeSelect
-            value={role}
-            onChange={(e) => setRole(e.target.value as PersonRole)}
-          >
+          <NativeSelect value={role} onChange={(e) => setRole(e.target.value as PersonRole)}>
             {PERSON_ROLES.map((r) => (
               <option key={r} value={r}>
                 {PERSON_ROLE_LABEL[r]}
@@ -296,8 +424,7 @@ function PersonForm({
 }
 
 export function MoneyDrawer() {
-  const { composer, money, gigs, setComposer, addMoney, updateMoney, removeMoney } =
-    useMusician();
+  const { composer, money, gigs, setComposer, addMoney, updateMoney, removeMoney } = useMusician();
   const editing = money.find((m) => m.id === composer.editingMoneyId);
   const open = composer.moneyOpen;
   return (
@@ -375,10 +502,7 @@ function MoneyForm({
     >
       <div className="grid grid-cols-2 gap-3">
         <Field label="Type">
-          <NativeSelect
-            value={type}
-            onChange={(e) => setType(e.target.value as MoneyType)}
-          >
+          <NativeSelect value={type} onChange={(e) => setType(e.target.value as MoneyType)}>
             {MONEY_TYPES.map((t) => (
               <option key={t} value={t}>
                 {MONEY_TYPE_LABEL[t]}
@@ -454,89 +578,87 @@ function ProfileForm() {
   const { profile, setComposer, updateProfile, resetSample, clearAll } = useMusician();
   const [draft, setDraft] = useState(profile);
   return (
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            updateProfile(draft);
-            toast("Profile saved");
+    <form
+      className="space-y-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        updateProfile(draft);
+        toast("Profile saved");
+        setComposer({ profileOpen: false });
+      }}
+    >
+      <Field label="Artist / band">
+        <Input
+          value={draft.artistName}
+          onChange={(e) => setDraft({ ...draft, artistName: e.target.value })}
+        />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Home city">
+          <Input
+            value={draft.city}
+            onChange={(e) => setDraft({ ...draft, city: e.target.value })}
+          />
+        </Field>
+        <Field label="Genre">
+          <Input
+            value={draft.genre}
+            onChange={(e) => setDraft({ ...draft, genre: e.target.value })}
+          />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Typical draw">
+          <Input
+            value={draft.draw}
+            onChange={(e) => setDraft({ ...draft, draw: e.target.value })}
+          />
+        </Field>
+        <Field label="Fee target">
+          <Input
+            type="number"
+            min={0}
+            value={draft.feeTarget}
+            onChange={(e) => setDraft({ ...draft, feeTarget: Number(e.target.value) || 0 })}
+          />
+        </Field>
+      </div>
+      <Field label="Growth notes">
+        <Textarea
+          value={draft.notes}
+          onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
+        />
+      </Field>
+      <Button type="submit" className="w-full">
+        Save profile
+      </Button>
+      <div className="flex gap-2 pt-2">
+        <Button
+          type="button"
+          variant="ghost"
+          className="flex-1"
+          onClick={() => {
+            resetSample();
+            toast("Sample scene loaded");
             setComposer({ profileOpen: false });
           }}
         >
-          <Field label="Artist / band">
-            <Input
-              value={draft.artistName}
-              onChange={(e) => setDraft({ ...draft, artistName: e.target.value })}
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Home city">
-              <Input
-                value={draft.city}
-                onChange={(e) => setDraft({ ...draft, city: e.target.value })}
-              />
-            </Field>
-            <Field label="Genre">
-              <Input
-                value={draft.genre}
-                onChange={(e) => setDraft({ ...draft, genre: e.target.value })}
-              />
-            </Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Typical draw">
-              <Input
-                value={draft.draw}
-                onChange={(e) => setDraft({ ...draft, draw: e.target.value })}
-              />
-            </Field>
-            <Field label="Fee target">
-              <Input
-                type="number"
-                min={0}
-                value={draft.feeTarget}
-                onChange={(e) =>
-                  setDraft({ ...draft, feeTarget: Number(e.target.value) || 0 })
-                }
-              />
-            </Field>
-          </div>
-          <Field label="Growth notes">
-            <Textarea
-              value={draft.notes}
-              onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-            />
-          </Field>
-          <Button type="submit" className="w-full">
-            Save profile
-          </Button>
-          <div className="flex gap-2 pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              className="flex-1"
-              onClick={() => {
-                resetSample();
-                toast("Sample scene loaded");
-                setComposer({ profileOpen: false });
-              }}
-            >
-              Load sample
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="flex-1"
-              onClick={() => {
-                clearAll();
-                toast("Cleared local data");
-                setComposer({ profileOpen: false });
-              }}
-            >
-              Clear data
-            </Button>
-          </div>
-        </form>
+          Load sample
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="flex-1"
+          onClick={() => {
+            clearAll();
+            toast("Cleared local data");
+            setComposer({ profileOpen: false });
+          }}
+        >
+          Clear data
+        </Button>
+      </div>
+    </form>
   );
 }
 
@@ -549,25 +671,13 @@ export function CommandDrawer() {
       title="Quick add"
     >
       <div className="grid gap-2">
-        <Button
-          variant="ghost"
-          className="h-12 justify-start"
-          onClick={() => openGig()}
-        >
+        <Button variant="ghost" className="h-12 justify-start" onClick={() => openGig()}>
           Add gig
         </Button>
-        <Button
-          variant="ghost"
-          className="h-12 justify-start"
-          onClick={() => openPerson()}
-        >
+        <Button variant="ghost" className="h-12 justify-start" onClick={() => openPerson()}>
           Add contact
         </Button>
-        <Button
-          variant="ghost"
-          className="h-12 justify-start"
-          onClick={() => openMoney()}
-        >
+        <Button variant="ghost" className="h-12 justify-start" onClick={() => openMoney()}>
           Log money
         </Button>
       </div>
