@@ -171,10 +171,10 @@ function GigsPage() {
                   const artist = useMusician.getState().profile.artistName || "our band";
                   const venue = g.venue || g.name;
                   const subject = "Booking inquiry — " + artist + " / " + venue;
-                  const body = "Hello,\\n\\nI'm reaching out on behalf of " + artist + " to ask about potential booking opportunities at " + venue + (g.city ? " in " + g.city : "") + ". We'd love to learn about your submission process and any appropriate upcoming dates.\\n\\nHappy to share our EPK, live footage, and recent draw information if useful.\\n\\nThanks for your consideration,\\n" + artist;
-                  const draft = "Subject: " + subject + "\\n\\n" + body;
+                  const body = "Hello,\n\nI'm reaching out on behalf of " + artist + " to ask about potential booking opportunities at " + venue + (g.city ? " in " + g.city : "") + ". We'd love to learn about your submission process and any appropriate upcoming dates.\n\nHappy to share our EPK, live footage, and recent draw information if useful.\n\nThanks for your consideration,\n" + artist;
+                  const draft = "Subject: " + subject + "\n\n" + body;
                   void navigator.clipboard?.writeText(draft);
-                  updateGig(g.id, {outreachNotes: [g.outreachNotes, "DRAFT (not sent) — " + new Date().toISOString().slice(0,10) + "\\n" + draft].filter(Boolean).join("\\n\\n")});
+                  updateGig(g.id, {outreachNotes: [g.outreachNotes, "DRAFT (not sent) — " + new Date().toISOString().slice(0,10) + "\n" + draft].filter(Boolean).join("\n\n")});
                 }}>Prepare draft and copy</button>
                 <p className="mt-2 text-muted">Draft saved to outreach notes. Clipboard access depends on browser permission.</p>
               </div>
