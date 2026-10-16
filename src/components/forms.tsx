@@ -390,7 +390,7 @@ function MoneyForm({
           <Input
             type="number"
             min={0}
-            step="1"
+            step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required
