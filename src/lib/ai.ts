@@ -390,13 +390,13 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // Venue cards render below the answer, not "above". A provider may
       // also omit structured leads or supply URLs that fail source matching.
       // Never expose a dangling "see above" placeholder as the full answer.
-      const refersToMissingShortlist = /\\b(?:see|refer to|shown|listed)\\b.{0,45}\\b(?:above|shortlist)\\b/i.test(safe.data.answer)
-        && /\\b(?:structured|shortlist|venues?)\\b/i.test(safe.data.answer);
+      const refersToMissingShortlist = /\b(?:see|refer to|shown|listed)\b.{0,45}\b(?:above|shortlist)\b/i.test(safe.data.answer)
+        && /\b(?:structured|shortlist|venues?)\b/i.test(safe.data.answer);
       const leadSummary = gigs.length
-        ? gigs.map((g, i) => `${i + 1}. ${g.venue || g.name} — ${g.city || "City not verified"}\\n   ${g.reason || "Booking fit requires review"}\\n   Source: ${g.sourceUrl}`).join("\\n\\n")
+        ? gigs.map((g, i) => `${i + 1}. ${g.venue || g.name} — ${g.city || "City not verified"}\n   ${g.reason || "Booking fit requires review"}\n   Source: ${g.sourceUrl}`).join("\n\n")
         : "No venue leads passed the citation-matching check. Source links below are research references, not verified booking contacts.";
       const answer = refersToMissingShortlist
-        ? `Venue research results (${gigs.length} citation-matched leads):\\n\\n${leadSummary}\\n\\nResearch is incomplete. Verify capacity and booking contacts directly before outreach.`
+        ? `Venue research results (${gigs.length} citation-matched leads):\n\n${leadSummary}\n\nResearch is incomplete. Verify capacity and booking contacts directly before outreach.`
         : safe.data.answer;
       return {
         ok: true,
@@ -405,7 +405,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         citations,
         gigs,
         people,
-        moves: (safe.data.moves ?? []).filter((move) => !/\\b(?:say ['"]?continue|next turn|search pass)\\b/i.test(move)).slice(0, 3),
+        moves: (safe.data.moves ?? []).filter((move) => !/\b(?:say ['"]?continue|next turn|search pass)\b/i.test(move)).slice(0, 3),
       };
     }
 
