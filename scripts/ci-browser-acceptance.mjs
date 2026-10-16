@@ -1,133 +1,152 @@
-import { spawnSync } from "node:child_process";
+import assert from "node:assert/strict";
+import { randomBytes, randomUUID } from "node:crypto";
 import { chromium } from "playwright";
-import { randomUUID } from "node:crypto";
 
 const origin = process.env.AUTH_SMOKE_ORIGIN ?? "http://127.0.0.1:8080";
-if (!["http://127.0.0.1:8080", "https://primal-directive-loose-ends-co.vercel.app"].includes(origin)) throw new Error("Unexpected acceptance target");
+assert.ok(["http://127.0.0.1:8080", "https://primal-directive-loose-ends-co.vercel.app"].includes(origin));
 const suffix = randomUUID();
-const commands = [
-  ["open", origin],
-  ["wait", "--fn", "!document.body.innerText.includes('Preparing your artist workspace')"],
-  ["eval", `(async () => {
-    sessionStorage.setItem("__qa_password", crypto.randomUUID() + crypto.randomUUID());
-    const response = await fetch("/api/auth/sign-up/email", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "River Fold A (fictional QA)", email: "river-fold-a-${suffix}@example.invalid", password: sessionStorage.getItem("__qa_password") }) });
-    if (!response.ok) throw new Error("Disposable account registration failed: " + response.status);
-    return true;
-  })()`],
-  ["open", origin],
-  ["wait", "--fn", "document.body.innerText.includes('Command Center') && !document.body.innerText.includes('Loading your workspace')"],
-  ["click", "aside button"],
-  ["wait", "500"],
-  ["find", "label", "Artist / band", "fill", "River Fold (fictional QA)"],
-  ["find", "label", "Home city", "fill", "Test City (fictional)"],
-  ["find", "label", "Genre", "fill", "Indie folk"],
-  ["press", "Tab"],
-  ["scrollintoview", "[role=dialog] button[type=submit]"],
-  ["click", "[role=dialog] button[type=submit]"],
-  ["wait", "--fn", "document.body.innerText.includes('River Fold (fictional QA)') && !document.querySelector('[role=dialog] form')"],
-  ["wait", "2000"],
-  ["eval", "localStorage.removeItem('musician-os-v1'); true"],
-  ["open", origin],
-  ["wait", "--fn", "document.body.innerText.includes('River Fold (fictional QA)') && !document.body.innerText.includes('Loading your workspace')"],
-  ["click", "aside button"],
-  ["wait", "500"],
-  ["wait", "--fn", "document.querySelector('[role=dialog] input')?.value === 'River Fold (fictional QA)'"],
-  ["scrollintoview", "[role=dialog] button[type=submit]"],
-  ["click", "[role=dialog] button[type=submit]"],
-  ["open", origin + "/people"],
-  ["wait", "--fn", "!document.body.innerText.includes('Loading your workspace') && document.body.innerText.includes('Relationship command center')"],
-  ["find", "role", "button", "click", "--name", "Add contact", "--exact"],
-  ["wait", "500"],
-  ["find", "label", "Name", "fill", "Fictional QA Booker"],
-  ["find", "label", "Contact", "fill", "fictional-booker@example.invalid"],
-  ["scrollintoview", "[role=dialog] button[type=submit]"],
-  ["click", "[role=dialog] button[type=submit]"],
-  ["wait", "2000"],
-  ["open", origin + "/gigs"],
-  ["wait", "--fn", "document.querySelector('main') && !document.body.innerText.includes('Loading your workspace')"],
-  ["click", "button[aria-label=Add]"],
-  ["wait", "500"],
-  ["find", "label", "Opportunity", "fill", "Fictional QA booking"],
-  ["find", "label", "Venue", "fill", "Fictional QA Hall"],
-  ["find", "label", "City", "fill", "Test City (fictional)"],
-  ["find", "label", "Date", "fill", "2027-06-12"],
-  ["find", "label", "Fee", "fill", "500"],
-  ["find", "label", "Status", "select", "booked"],
-  ["scrollintoview", "[role=dialog] button[type=submit]"],
-  ["click", "[role=dialog] button[type=submit]"],
-  ["wait", "2000"],
-  ["open", origin + "/tasks"],
-  ["wait", "--fn", `document.querySelector("button[aria-label='Mark task complete']") && !document.body.innerText.includes("Loading your workspace")`],
-  ["find", "first", "button[aria-label='Mark task complete']", "click"],
-  ["wait", "2000"],
-  ["open", origin + "/money"],
-  ["wait", "--fn", "document.body.innerText.includes('Financial activity') && !document.body.innerText.includes('Loading your workspace')"],
-  ["find", "text", "Add entry", "click"],
-  ["wait", "500"],
-  ["find", "label", "Amount", "fill", "125.50"],
-  ["find", "label", "Label", "fill", "Fictional QA show income"],
-  ["scrollintoview", "[role=dialog] button[type=submit]"],
-  ["click", "[role=dialog] button[type=submit]"],
-  ["wait", "2000"],
-  ["eval", "localStorage.removeItem('musician-os-v1'); true"],
-  ["open", origin + "/money"],
-  ["wait", "--fn", "document.body.innerText.includes('Fictional QA show income') && !document.body.innerText.includes('Loading your workspace')"],
-  ["screenshot", "/workspace/screenshots/authenticated-money.png"],
-  ["open", origin + "/merch"],
-  ["wait", "--fn", "document.querySelector('main') && !document.body.innerText.includes('Loading your workspace')"],
-  ["find", "text", "Add first item", "click"],
-  ["find", "label", "Product name", "fill", "Fictional River Fold QA tee"],
-  ["find", "label", "Opening stock", "fill", "10"],
-  ["scrollintoview", "main form:has(input[placeholder='Settlement logo tee']) button[type=submit]"],
-  ["click", "main form:has(input[placeholder='Settlement logo tee']) button[type=submit]"],
-  ["wait", "2000"],
-  ["eval", "localStorage.removeItem('musician-os-v1'); true"],
-  ["open", origin + "/merch"],
-  ["wait", "--fn", "document.body.innerText.includes('Fictional River Fold QA tee') && !document.body.innerText.includes('Loading your workspace')"],
-  ...["board", "gigs", "calendar", "tour", "merch", "tasks"].flatMap((route) => [
-    ["open", origin + "/" + route],
-    ["wait", "--fn", "document.querySelector('main')?.innerText.trim().length > 20 && !document.body.innerText.includes('Loading your workspace')"],
-    ["eval", "if (document.documentElement.scrollWidth > document.documentElement.clientWidth + 1) throw new Error('Horizontal overflow'); true"],
-  ]),
-  ["set", "viewport", "390", "844"],
-  ...["board", "gigs", "people", "money", "calendar", "tour", "merch", "tasks"].flatMap((route) => [
-    ["open", origin + "/" + route],
-    ["wait", "--fn", "document.querySelector('main')?.innerText.trim().length > 20 && !document.body.innerText.includes('Loading your workspace')"],
-    ["eval", "if (document.documentElement.scrollWidth > document.documentElement.clientWidth + 1) throw new Error('Mobile horizontal overflow'); true"],
-  ]),
-  ["screenshot", "/workspace/screenshots/authenticated-mobile.png"],
-  ["eval", `(async () => {
-    const response = await fetch("/api/auth/sign-up/email", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "River Fold B (fictional QA)", email: "river-fold-b-${suffix}@example.invalid", password: sessionStorage.getItem("__qa_password") }) });
-    if (!response.ok) throw new Error("Second disposable account registration failed: " + response.status);
-    return true;
-  })()`],
-  ["open", origin + "/people"],
-  ["wait", "--fn", "document.body.innerText.includes('No people yet') && !document.body.innerText.includes('Loading your workspace')"],
-  ["eval", "if (document.body.innerText.includes('Fictional QA Booker') || document.body.innerText.includes('River Fold (fictional QA)')) throw new Error('Account data leaked'); true"],
-  ["eval", `(async () => {
-    const response = await fetch("/api/auth/sign-out", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
-    if (!response.ok) throw new Error("Logout failed");
-    return true;
-  })()`],
-  ["open", origin + "/money"],
-  ["wait", "--fn", "document.body.innerText.includes('Sign in to access your private pipeline')"],
-  ["close"],
-];
-const result = spawnSync("npx", [
-  "--yes", "agent-browser", "--executable-path", chromium.executablePath(),
-  "batch", "--bail",
-], { input: JSON.stringify(commands.map((command) => command[0] === "wait" && command[1] === "--fn"
-  ? ["wait", "--fn", "document.readyState === 'complete' && !document.body.innerText.includes('Preparing your artist workspace') && !document.body.innerText.includes('Loading your workspace') && (" + command[2] + ")"]
-  : command)), encoding: "utf8", timeout: 240_000 });
-process.stdout.write(result.stdout ?? "");
-process.stderr.write(result.stderr ?? "");
-if (result.error) throw new Error("Interactive browser runner failed: " + result.error.message);
-if (result.status !== 0) {
-  const diagnostic = spawnSync("npx", ["--yes", "agent-browser", "batch", "--bail"], {
-    input: JSON.stringify([["eval", "document.body.innerText"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
-    encoding: "utf8", timeout: 30_000,
+const password = randomBytes(32).toString("base64url");
+const emailA = "river-fold-a-" + suffix + "@example.invalid";
+const emailB = "river-fold-b-" + suffix + "@example.invalid";
+const browser = await chromium.launch({ headless: true, args: ["--no-sandbox"] });
+const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+const page = await context.newPage();
+page.setDefaultTimeout(25_000);
+const errors = [];
+page.on("pageerror", (error) => errors.push(error.message));
+page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+
+async function auth(path, payload) {
+  const response = await context.request.post(origin + "/api/auth/" + path, {
+    headers: { origin }, data: payload,
   });
-  process.stdout.write(diagnostic.stdout ?? "");
-  process.stderr.write(diagnostic.stderr ?? "");
+  assert.equal(response.status(), 200, "Authentication endpoint failed: " + path);
 }
-process.exitCode = result.status ?? 1;
+async function ready(path) {
+  await page.goto(origin + path, { waitUntil: "domcontentloaded" });
+  await page.locator("main").waitFor();
+  await page.waitForFunction(() =>
+    !document.body.innerText.includes("Preparing your artist workspace") &&
+    !document.body.innerText.includes("Loading your workspace"));
+}
+async function saved() {
+  // The application debounces persistence for 650 ms. Verify recovery after
+  // clearing its cache rather than treating the local success toast as a save.
+  await page.waitForTimeout(1800);
+}
+async function recover(path) {
+  await saved();
+  await page.evaluate(() => localStorage.removeItem("musician-os-v1"));
+  await ready(path);
+}
+async function submitDialog() {
+  const button = page.locator("[role=dialog] button[type=submit]");
+  await button.scrollIntoViewIfNeeded();
+  await button.click();
+  await page.locator("[role=dialog] form").waitFor({ state: "hidden" });
+}
+async function state() {
+  return page.evaluate(() => JSON.parse(localStorage.getItem("musician-os-v1") ?? "null")?.state);
+}
+
+try {
+  await auth("sign-up/email", { name: "River Fold A (fictional QA)", email: emailA, password });
+  await ready("/");
+  await page.locator("aside button").click();
+  await page.getByLabel("Artist / band", { exact: true }).fill("River Fold (fictional QA)");
+  await page.getByLabel("Home city", { exact: true }).fill("Test City (fictional)");
+  await page.getByLabel("Genre", { exact: true }).fill("Indie folk");
+  await submitDialog();
+  await recover("/");
+  assert.equal((await state()).profile.artistName, "River Fold (fictional QA)");
+  await page.locator("aside button").click();
+  assert.equal(await page.getByLabel("Artist / band", { exact: true }).inputValue(), "River Fold (fictional QA)");
+  await submitDialog();
+
+  await ready("/people");
+  await page.getByRole("button", { name: "Add contact", exact: true }).click();
+  await page.getByLabel("Name", { exact: true }).fill("Fictional QA Booker");
+  await page.getByLabel("Contact", { exact: true }).fill("fictional-booker@example.invalid");
+  await submitDialog();
+  await recover("/people");
+  assert.equal((await state()).people[0].name, "Fictional QA Booker");
+
+  await ready("/gigs");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByLabel("Opportunity", { exact: true }).fill("Fictional QA booking");
+  await page.getByLabel("Venue", { exact: true }).fill("Fictional QA Hall");
+  await page.getByLabel("City", { exact: true }).fill("Test City (fictional)");
+  await page.getByLabel("Date", { exact: true }).fill("2027-06-12");
+  await page.getByLabel("Fee", { exact: true }).fill("500");
+  await page.getByLabel("Status", { exact: true }).selectOption("booked");
+  await submitDialog();
+  await recover("/tasks");
+  const beforeTasks = await state();
+  assert.ok(beforeTasks.tasks.length > 0, "Booking did not generate operational tasks");
+  await page.getByRole("button", { name: "Mark task complete", exact: true }).first().click();
+  await recover("/tasks");
+  assert.ok((await state()).tasks.some((task) => task.status === "done"));
+
+  await ready("/money");
+  await page.getByRole("button", { name: "Add entry", exact: true }).click();
+  await page.getByLabel("Amount", { exact: true }).fill("125.50");
+  await page.getByLabel("Label", { exact: true }).fill("Fictional QA show income");
+  await submitDialog();
+  await recover("/money");
+  assert.equal((await state()).money.find((entry) => entry.label === "Fictional QA show income").amount, 125.5);
+  await page.screenshot({ path: "/workspace/screenshots/authenticated-money.png" });
+
+  await ready("/merch");
+  await page.getByRole("button", { name: "Add first item", exact: true }).click();
+  await page.getByLabel("Product name", { exact: true }).fill("Fictional River Fold QA tee");
+  await page.getByLabel("Opening stock", { exact: true }).fill("10");
+  await page.getByRole("button", { name: "Save product", exact: true }).click();
+  await recover("/merch");
+  assert.equal((await state()).merchProducts[0].stockOnHand, 10);
+  const productSelect = page.getByLabel("Product", { exact: true }).first();
+  await productSelect.selectOption((await state()).merchProducts[0].id);
+  await page.getByLabel("Quantity", { exact: true }).fill("2");
+  await page.getByRole("button", { name: "Add item to order", exact: true }).click();
+  await page.getByRole("button", { name: "Record paid order", exact: true }).click();
+  await recover("/merch");
+  const merch = await state();
+  assert.equal(merch.merchProducts[0].stockOnHand, 8);
+  assert.equal(merch.merchOrders[0].status, "paid");
+  assert.equal(merch.merchOrders[0].total, 60);
+
+  for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    for (const route of ["/", "/board", "/gigs", "/people", "/money", "/calendar", "/tour", "/merch", "/tasks"]) {
+      await ready(route);
+      assert.ok((await page.locator("main").innerText()).trim().length > 20, "Empty route: " + route);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1), false, "Horizontal overflow: " + route);
+    }
+  }
+  await page.screenshot({ path: "/workspace/screenshots/authenticated-mobile.png" });
+  await auth("sign-out", {});
+  await auth("sign-up/email", { name: "River Fold B (fictional QA)", email: emailB, password });
+  await ready("/people");
+  const bob = await state();
+  assert.equal(bob.people.length, 0);
+  assert.equal(bob.gigs.length, 0);
+  assert.equal(bob.money.length, 0);
+  assert.equal(bob.merchProducts.length, 0);
+  assert.equal(bob.profile.artistName, "");
+  await auth("sign-out", {});
+  await auth("sign-in/email", { email: emailA, password });
+  await ready("/people");
+  assert.equal((await state()).people[0].name, "Fictional QA Booker");
+  await auth("sign-out", {});
+  await page.goto(origin + "/money");
+  await page.getByText("Sign in to access your private pipeline", { exact: false }).waitFor();
+  assert.equal(await page.locator("main").count(), 0);
+  assert.deepEqual(errors, [], "Browser errors during authenticated workflows");
+  console.log("Browser acceptance passed: profile recovery, contacts, booked shows, generated tasks, decimal money, merch stock/order, all desktop/mobile routes, two-account isolation, logout and sign-in recovery.");
+} catch (error) {
+  console.error("Browser acceptance failed:", error.message);
+  console.error((await page.locator("body").innerText()).slice(0, 5000));
+  await page.screenshot({ path: "/workspace/screenshots/acceptance-failure.png" }).catch(() => {});
+  throw error;
+} finally {
+  await browser.close();
+}
