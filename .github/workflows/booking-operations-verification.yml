@@ -36,6 +36,7 @@ jobs:
           trap 'kill "$DEV_PID" "$PROXY_PID" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 60); do
             if curl --silent --fail http://127.0.0.1:8080/__app-env > /dev/null; then
+              node --input-type=module -e 'import {chromium} from "playwright";const browser=await chromium.launch();const page=await browser.newPage({ignoreHTTPSErrors:true});await page.goto(process.env.QA_BASE_URL,{waitUntil:"networkidle"});await page.waitForTimeout(4000);await browser.close();'
               node scripts/verify-booking-operations-browser.mjs || { cat /tmp/primal-dev.log; cat /tmp/primal-proxy.log; exit 1; }
               exit $?
             fi

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
@@ -12,6 +13,7 @@ import { useMusician } from "@/lib/store";
 import {
   GIG_STATUS_LABEL,
   GIG_STATUSES,
+  GIG_STATUS_LABEL,
   MONEY_TYPE_LABEL,
   MONEY_TYPES,
   PERSON_ROLE_LABEL,
@@ -255,6 +257,7 @@ function PersonForm({
   const [sharePercent, setSharePercent] = useState(
     initial?.settlementSharePercent === undefined ? "" : String(initial.settlementSharePercent),
   );
+  const linked = useMusician(s => s.gigs).filter(g => initial && g.booking?.contactId === initial.id);
 
   return (
     <form
@@ -312,6 +315,7 @@ function PersonForm({
       <Field label="Notes">
         <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Field>
+      {initial && <section aria-label="Linked booking relationships" className="rounded-md border border-line p-3"><h3 className="text-sm font-semibold">Linked opportunities</h3>{linked.length ? linked.map(g => <article key={g.id} className="mt-3 border-t border-line pt-3"><p className="text-sm font-semibold">{g.venue || g.name}</p><p className="mt-1 text-xs text-muted">{GIG_STATUS_LABEL[g.status]} · {g.city || 'Location unrecorded'}{g.booking?.followUpDate ? ' · Follow up '+g.booking.followUpDate : ''}</p>{g.booking?.log.slice(0,2).map(entry => <p key={entry.id} className="mt-2 break-words text-xs text-soft">{entry.date} · {entry.kind}: {entry.text}</p>)}</article>):<p className="mt-2 text-xs text-muted">Link this contact from an opportunity’s qualification editor to see conversations and follow-ups here.</p>}<Link to="/gigs" onClick={() => useMusician.getState().setComposer({personOpen:false})} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-accent">Open booking workspace →</Link></section>}
       <div className="flex gap-2 pt-2">
         <Button type="submit" className="flex-1">
           Save contact
