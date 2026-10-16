@@ -164,6 +164,20 @@ function GigsPage() {
                 <label className="sm:col-span-2">Outreach notes<textarea aria-label="Outreach notes" rows={2} className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNotes || ""} onChange={(e) => updateGig(g.id, {outreachNotes:e.target.value})}/></label>
                 <button type="button" disabled={!g.researchSourceUrl} className="rounded border border-line px-3 py-2 disabled:opacity-40" onClick={() => updateGig(g.id, {researchVerifiedAt:new Date().toISOString().slice(0,10)})}>Mark source reviewed</button>
               </div>
+              <div className="mt-4 rounded-xl border border-line bg-surface-2 p-3">
+                <div className="font-semibold text-fg">Booking outreach assistant</div>
+                <p className="mt-1 text-muted">Create a reviewable first-contact draft from your saved lead. Confirm venue details and the recipient before sending. No message is sent by Primal Directive.</p>
+                <button type="button" className="mt-3 min-h-10 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 font-semibold text-accent hover:bg-accent/20" onClick={() => {
+                  const artist = useMusician.getState().profile.artistName || "our band";
+                  const venue = g.venue || g.name;
+                  const subject = "Booking inquiry — " + artist + " / " + venue;
+                  const body = "Hello,\n\nI'm reaching out on behalf of " + artist + " to ask about potential booking opportunities at " + venue + (g.city ? " in " + g.city : "") + ". We'd love to learn about your submission process and any appropriate upcoming dates.\n\nHappy to share our EPK, live footage, and recent draw information if useful.\n\nThanks for your consideration,\n" + artist;
+                  const draft = "Subject: " + subject + "\n\n" + body;
+                  void navigator.clipboard?.writeText(draft);
+                  updateGig(g.id, {outreachNotes: [g.outreachNotes, "DRAFT (not sent) — " + new Date().toISOString().slice(0,10) + "\n" + draft].filter(Boolean).join("\n\n")});
+                }}>Prepare draft and copy</button>
+                <p className="mt-2 text-muted">Draft saved to outreach notes. Clipboard access depends on browser permission.</p>
+              </div>
               <p className="mt-2 text-muted">Manual record only; no messages are sent automatically.</p>
             </details>
             </div>
