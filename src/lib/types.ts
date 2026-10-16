@@ -68,6 +68,8 @@ export type Gig = import("./venue-evidence").VenueEvidence & {
   outreachLastContactedAt?: string;
   outreachNextFollowUp?: string;
   outreachNotes?: string;
+  outreachReplyStatus?: "awaiting" | "interested" | "declined";
+  outreachReplyReceivedAt?: string;
 };
 
 export type Person = {
