@@ -163,6 +163,9 @@ async function createSql(): Promise<Sql> {
       "@/lib/db is server-only — call getSql() from a createServerFn handler or a server route loader, never from client code.",
     );
   }
+  if (dbSource === "pglite" && process.env.VERCEL_ENV === "production") {
+    throw new Error("Production requires a persistent PostgreSQL connection.");
+  }
   return dbSource === "postgres" ? createPostgresSql() : createPgliteSql();
 }
 
