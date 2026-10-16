@@ -8,6 +8,7 @@ import {
   Music2,
   Plus,
   Menu,
+  Search,
   X,
   Route as RouteIcon,
   ShoppingBag,
@@ -67,6 +68,8 @@ function SignInScreen() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [commandSearchOpen, setCommandSearchOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const profile = useMusician((s) => s.profile);
   const setComposer = useMusician((s) => s.setComposer);
@@ -81,6 +84,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobileMenuOpen]);
+  useEffect(() => {
+    const onShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandSearchOpen((open) => !open);
+      } else if (event.key === "Escape") {
+        setCommandSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onShortcut);
+    return () => window.removeEventListener("keydown", onShortcut);
+  }, []);
+  const commandMatches = NAV.filter((item) => item.label.toLowerCase().includes(commandQuery.trim().toLowerCase()));
   const pageTitle =
     NAV.find((n) => (n.to === "/" ? pathname === "/" : pathname.startsWith(n.to)))?.label ??
     "Command";
@@ -156,6 +172,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <div className="mt-1 text-xs text-muted">{todayLabel()}</div>
               </div>
               <div className="flex items-center gap-2">
+                <button type="button" onClick={() => {setCommandQuery("");setCommandSearchOpen(true);}} aria-label="Search workspace navigation" className="flex min-h-11 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-xs font-semibold text-muted transition-colors hover:border-accent/40 hover:text-fg"><Search className="size-4" /><span className="hidden lg:inline">Jump to page</span><kbd className="hidden rounded border border-line px-1.5 py-0.5 text-[10px] lg:inline">⌘ K</kbd></button>
                 <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation" aria-expanded={mobileMenuOpen} className="flex size-11 items-center justify-center rounded-xl border border-line bg-surface md:hidden"><Menu className="size-5" /></button>
                 <div className="hidden items-center gap-2 rounded-full border border-line bg-bg px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-muted sm:flex">
                   <span className="size-1.5 rounded-full bg-live shadow-[0_0_10px_var(--color-live)]" />
@@ -183,6 +200,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </main>
         </div>
 
+        {commandSearchOpen && (
+          <div className="fixed inset-0 z-[70] flex items-start justify-center bg-black/75 px-4 pt-[min(15vh,120px)] backdrop-blur-sm" onMouseDown={(event) => {if (event.target === event.currentTarget) setCommandSearchOpen(false);}}>
+            <section role="dialog" aria-modal="true" aria-label="Jump to workspace page" className="w-full max-w-lg overflow-hidden rounded-2xl border border-line-strong bg-surface shadow-2xl">
+              <div className="flex items-center gap-3 border-b border-line px-4 py-3"><Search className="size-5 text-accent"/><input autoFocus aria-label="Search pages" placeholder="Search pages…" value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} className="min-h-10 min-w-0 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-muted"/><button type="button" aria-label="Close page search" onClick={() => setCommandSearchOpen(false)} className="rounded-lg p-2 text-muted hover:bg-bg hover:text-fg"><X className="size-4"/></button></div>
+              <nav aria-label="Workspace search results" className="max-h-[min(60vh,480px)] overflow-y-auto p-2">
+                {commandMatches.map((item) => <Link key={item.to} to={item.to} onClick={() => {setCommandSearchOpen(false);setCommandQuery("");setMobileMenuOpen(false);}} className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-fg transition-colors hover:bg-accent/10 hover:text-accent"><item.icon className="size-4 text-accent"/>{item.label}</Link>)}
+                {commandMatches.length === 0 && <p className="px-3 py-6 text-center text-sm text-muted">No matching pages</p>}
+              </nav>
+              <p className="border-t border-line px-4 py-3 text-[11px] text-muted">Navigate across Advisor, bookings, tours, finance, people, merch, and tasks. Press Esc to close.</p>
+            </section>
+          </div>
+        )}
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm md:hidden" onClick={() => setMobileMenuOpen(false)}>
             <nav aria-label="Mobile navigation" className="h-full w-[min(85vw,340px)] overflow-y-auto border-r border-line bg-bg p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
