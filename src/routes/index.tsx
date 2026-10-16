@@ -366,19 +366,24 @@ function AdvisorPage() {
                 </div>
               ) : null}
               {m.citations && m.citations.length > 0 ? (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {m.citations.map((url, index) => (
-                    <a
-                      key={url}
-                      href={url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-full border border-line bg-bg px-2 py-0.5 text-[10px] font-medium text-soft hover:border-muted"
-                    >
-                      {`Source ${index + 1}: ${hostFromUrl(url)}`}
-                    </a>
-                  ))}
-                </div>
+                <details className="mt-2 rounded-lg border border-line bg-bg/50 p-2">
+                  <summary className="cursor-pointer select-none text-xs font-medium text-accent">
+                    View sources ({m.citations.length})
+                  </summary>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {m.citations.map((url, index) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full border border-line bg-bg px-2 py-1 text-[11px] font-medium text-soft underline hover:border-muted"
+                      >
+                        {`Source ${index + 1}: ${hostFromUrl(url)}`}
+                      </a>
+                    ))}
+                  </div>
+                </details>
               ) : null}
               {m.moves && m.moves.length > 0 ? (
                 <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
