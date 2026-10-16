@@ -73,6 +73,7 @@ function AdvisorPage() {
   const ingestSuggestedPerson = useMusician((s) => s.ingestSuggestedPerson);
   const clearChat = useMusician((s) => s.clearChat);
   const [input, setInput] = useState("");
+  const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [answerMode, setAnswerMode] = useState<"quick" | "detailed" | "research">("quick");
   const [showMissions, setShowMissions] = useState(true);
@@ -139,6 +140,42 @@ function AdvisorPage() {
     } finally {
       if (ownerRef.current === requestOwner) setBusy(false);
     }
+  }
+
+  const researchLeads = chat.flatMap((message) => message.gigs ?? []);
+  const uniqueLeads = researchLeads.filter((lead, index, leads) =>
+    leads.findIndex((other) => other.name === lead.name && other.venue === lead.venue && other.city === lead.city) === index
+  );
+  const leadKey = (lead: { name: string; venue: string; city: string }) =>
+    JSON.stringify([lead.name, lead.venue, lead.city]);
+  const selectedLeads = uniqueLeads.filter((lead) => selectedVenues.includes(leadKey(lead)));
+
+  async function copyCampaign() {
+    if (!selectedLeads.length) return;
+    const profile = useMusician.getState().profile;
+    const messages = selectedLeads.map((lead, index) =>
+      `PITCH ${index + 1} — ${lead.venue || lead.name}, ${lead.city}\n\n${buildBookingPitch(lead.venue || lead.name, lead.city, profile)}`
+    );
+    try {
+      await navigator.clipboard.writeText(messages.join("\n\n--------------------\n\n"));
+      toast(`${messages.length} draft pitches copied — review before sending`);
+    } catch {
+      toast("Clipboard unavailable; use each card's Copy pitch button");
+    }
+  }
+
+  function saveCampaignLeads() {
+    const store = useMusician.getState();
+    const existing = new Set(store.gigs.map((gig) => `${gig.venue.toLowerCase().trim()}|${gig.city.toLowerCase().trim()}`));
+    let added = 0;
+    selectedLeads.forEach((lead) => {
+      const key = `${lead.venue.toLowerCase().trim()}|${lead.city.toLowerCase().trim()}`;
+      if (existing.has(key)) return;
+      store.ingestSuggestedGig(lead);
+      existing.add(key);
+      added++;
+    });
+    toast(`${added} new venue lead${added === 1 ? "" : "s"} added; existing pipeline venues skipped`);
   }
 
   return (
@@ -220,6 +257,18 @@ function AdvisorPage() {
         </div>
       </section>
 
+      {uniqueLeads.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface-2 p-3" aria-label="Booking campaign preparation">
+          <span className="mr-auto text-xs font-semibold">
+            Campaign prep · {selectedLeads.length} of {uniqueLeads.length} venues selected
+          </span>
+          <Button size="sm" variant="ghost" onClick={() => setSelectedVenues(uniqueLeads.map(leadKey))}>Select all</Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelectedVenues([])}>Clear</Button>
+          <Button size="sm" disabled={!selectedLeads.length} onClick={saveCampaignLeads}>Save leads</Button>
+          <Button size="sm" disabled={!selectedLeads.length} onClick={() => void copyCampaign()}>Copy campaign pitches</Button>
+          <span className="w-full text-[11px] text-muted">Drafts only. No messages are sent. Verify contacts and EPK links before outreach.</span>
+        </div>
+      ) : null}
       <Card className="command-surface flex min-h-[min(62dvh,38rem)] flex-1 flex-col overflow-hidden rounded-2xl p-0">
         <div className="flex items-center justify-between border-b border-line bg-surface/80 px-4 py-3">
           <strong className="flex items-center gap-2 text-sm">
@@ -301,6 +350,18 @@ function AdvisorPage() {
                           {g.status ? <StatusBadge status={g.status} /> : null}
                         </div>
                       </div>
+                      <label className="mt-2 flex items-center gap-2 text-xs font-medium text-soft">
+                        <input
+                          type="checkbox"
+                          checked={selectedVenues.includes(leadKey(g))}
+                          onChange={(event) => setSelectedVenues((current) =>
+                            event.target.checked
+                              ? [...new Set([...current, leadKey(g)])]
+                              : current.filter((key) => key !== leadKey(g))
+                          )}
+                        />
+                        Include in booking campaign
+                      </label>
                       <p className="mt-1.5 text-xs text-soft">{g.reason}</p>
                       {g.venueCapacity && g.capacitySourceUrl ? (
                         <p className="mt-2 text-xs text-soft">
