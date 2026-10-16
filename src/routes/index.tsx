@@ -67,6 +67,7 @@ function AdvisorPage() {
     };
   }, [owner]);
   const chat = useMusician((s) => s.chat);
+  const pipelineGigs = useMusician((s) => s.gigs);
   const addUserMessage = useMusician((s) => s.addUserMessage);
   const addAiMessage = useMusician((s) => s.addAiMessage);
   const ingestSuggestedGig = useMusician((s) => s.ingestSuggestedGig);
@@ -139,6 +140,45 @@ function AdvisorPage() {
       });
     } finally {
       if (ownerRef.current === requestOwner) setBusy(false);
+    }
+  }
+
+  const followUps = pipelineGigs
+    .filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status))
+    .filter((gig) => gig.outreachNextFollowUp || gig.outreachLastContactedAt)
+    .sort((a, b) => (a.outreachNextFollowUp || "9999").localeCompare(b.outreachNextFollowUp || "9999"))
+    .slice(0, 5);
+
+  function recordContact(gigId: string) {
+    const gig = useMusician.getState().gigs.find((item) => item.id === gigId);
+    if (!gig) return;
+    const today = new Date().toISOString().slice(0, 10);
+    useMusician.getState().updateGig(gigId, {
+      outreachLastContactedAt: today,
+      ...(gig.status === "lead" ? { status: "outreach" as const } : {}),
+    });
+    toast("Contact date recorded. No email was sent.");
+  }
+
+  async function copyFollowUp(gigId: string) {
+    const gig = useMusician.getState().gigs.find((item) => item.id === gigId);
+    if (!gig) return;
+    const profile = useMusician.getState().profile;
+    const draft = `Subject: Following up — ${profile.artistName || "[Artist]"} / ${gig.venue || gig.name}
+
+Hello ${gig.bookingContactName || (gig.venue || gig.name) + " booking team"},
+
+I'm following up on our booking inquiry for ${profile.artistName || "[Artist]"} (${profile.genre || "live music"}). Are there any suitable support slots or dates we could discuss?
+
+Music: [add link]
+EPK: [add link]
+Thanks,
+[Your name]`;
+    try {
+      await navigator.clipboard.writeText(draft);
+      toast("Follow-up copied. Review before sending.");
+    } catch {
+      toast("Clipboard unavailable. Please use your browser copy controls.");
     }
   }
 
@@ -268,6 +308,35 @@ function AdvisorPage() {
           <Button size="sm" disabled={!selectedLeads.length} onClick={() => void copyCampaign()}>Copy campaign pitches</Button>
           <span className="w-full text-[11px] text-muted">Drafts only. No messages are sent. Verify contacts and EPK links before outreach.</span>
         </div>
+      ) : null}
+      {followUps.length > 0 ? (
+        <details className="rounded-xl border border-line bg-surface-2 p-3">
+          <summary className="cursor-pointer text-sm font-semibold">
+            Booking follow-ups · {followUps.length} tracked
+          </summary>
+          <div className="mt-3 space-y-2">
+            {followUps.map((gig) => (
+              <div key={gig.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-line bg-bg p-2">
+                <span className="mr-auto min-w-36 text-xs font-medium">
+                  {gig.venue || gig.name} · {gig.city}
+                  <span className="block text-[11px] text-muted">
+                    {gig.outreachNextFollowUp ? `Next: ${gig.outreachNextFollowUp}` : "Follow-up not scheduled"}
+                  </span>
+                </span>
+                <input
+                  type="date"
+                  aria-label={`Next follow-up date for ${gig.venue || gig.name}`}
+                  className="min-h-9 rounded-md border border-line bg-bg px-2 text-xs"
+                  value={gig.outreachNextFollowUp || ""}
+                  onChange={(event) => useMusician.getState().updateGig(gig.id, { outreachNextFollowUp: event.target.value })}
+                />
+                <Button size="sm" variant="ghost" onClick={() => void copyFollowUp(gig.id)}>Copy follow-up</Button>
+                <Button size="sm" variant="ghost" onClick={() => recordContact(gig.id)}>Mark contacted</Button>
+              </div>
+            ))}
+            <p className="text-[11px] text-muted">Dates and contact activity are manually recorded. No messages are sent automatically.</p>
+          </div>
+        </details>
       ) : null}
       <Card className="command-surface flex min-h-[min(62dvh,38rem)] flex-1 flex-col overflow-hidden rounded-2xl p-0">
         <div className="flex items-center justify-between border-b border-line bg-surface/80 px-4 py-3">
