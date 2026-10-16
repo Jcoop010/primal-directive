@@ -19,7 +19,7 @@ const SUGGESTIONS = [
   },
   {
     label: "Find matching venues",
-    q: "Act as my booking agent: identify realistic venue prospects for my genre, draw, and home market. Include official venue URLs when supported, mark capacity and booking contacts unverified unless confirmed by sources, and do not invent availability or guarantees.",
+    q: "Act as my booking agent and research exactly three realistic venue prospects for my genre, verified draw and home market. For EACH venue, show name and city, official website, official booking submission URL or clearly NOT VERIFIED, room capacity with verification status, genre fit, and a source URL. Return each cited venue as a gig lead card for review. Finish this research now; do not instruct me to say continue or search separately. Never invent contacts, availability or guarantees.",
   },
   {
     label: "Draft booking pitch",
