@@ -156,6 +156,25 @@ function sourceMatches(url: string | undefined, citations: string[]): boolean {
   return claimed !== null && citations.some((candidate) => normalize(candidate) === claimed);
 }
 
+async function groundingUrls(urls: string[], signal: AbortSignal): Promise<string[]> {
+  // Gemini may cite Google's opaque redirect URLs while its answer names the
+  // destination page. Resolve only Google's known redirect endpoint, never a
+  // model-supplied host, and do not follow the redirect to the external site.
+  const resolved = await Promise.all(urls.slice(0, 8).map(async (value) => {
+    try {
+      const url = new URL(value);
+      if (url.origin !== "https://vertexaisearch.cloud.google.com" || !url.pathname.startsWith("/grounding-api-redirect/")) return value;
+      const response = await fetch(url, { redirect: "manual", signal: AbortSignal.any([signal, AbortSignal.timeout(3000)]) });
+      const location = response.headers.get("location");
+      await response.body?.cancel();
+      if (![301, 302, 303, 307, 308].includes(response.status) || !location) return value;
+      const destination = new URL(location, url);
+      return destination.protocol === "https:" && !destination.username && !destination.password ? destination.href : value;
+    } catch { return value; }
+  }));
+  return [...new Set([...resolved, ...urls])];
+}
+
 async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
@@ -171,7 +190,7 @@ async function complete(args: {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: args.messages.filter((message) => message.role === "system").map((message) => message.content).join("\n\n") }] },
         contents: args.messages.filter((message) => message.role !== "system").map((message) => ({ role: message.role === "assistant" ? "model" : "user", parts: [{ text: message.content }] })),
-        generationConfig: { maxOutputTokens: 1600 },
+        generationConfig: { maxOutputTokens: 3200 },
         ...(args.search ? { tools: [{ google_search: {} }] } : {}),
       }),
       signal: args.signal,
@@ -185,7 +204,8 @@ async function complete(args: {
     };
     const candidate = payload.candidates?.[0];
     const text = (candidate?.content?.parts ?? []).filter((part) => !part.thought && typeof part.text === "string").map((part) => part.text).join("\n");
-    const citations = (candidate?.groundingMetadata?.groundingChunks ?? []).map((chunk) => chunk.web?.uri).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    const urls = (candidate?.groundingMetadata?.groundingChunks ?? []).map((chunk) => chunk.web?.uri).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    const citations = await groundingUrls(urls, args.signal);
     return Response.json({ choices: [{ message: { content: text } }], citations });
   }
   if (args.provider === "anthropic") {

@@ -52,6 +52,24 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal(result.gigs[0].fee, 0);
     });
     process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+    await t.test("Google grounding redirects match the destination without fetching it", async (st) => {
+      const urls = [];
+      st.mock.method(globalThis, "fetch", async (url, options) => {
+        urls.push(String(url));
+        if (String(url).startsWith("https://vertexaisearch.cloud.google.com/")) {
+          assert.equal(options.redirect, "manual");
+          assert.equal(options.headers, undefined);
+          return new Response(null, { status: 302, headers: { location: "https://example.invalid/room?id=1" } });
+        }
+        const response = await gemini().json();
+        response.candidates[0].groundingMetadata.groundingChunks[0].web.uri = "https://vertexaisearch.cloud.google.com/grounding-api-redirect/test";
+        return Response.json(response);
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.equal(result.gigs.length, 1);
+      assert.ok(result.citations.includes("https://example.invalid/room?id=1"));
+      assert.equal(urls.length, 2);
+    });
     await t.test("short confirmation preserves venue research", async (st) => {
       st.mock.method(globalThis, "fetch", async (_url, options) => {
         assert.deepEqual(JSON.parse(options.body).tools, [{ google_search: {} }]);
@@ -74,7 +92,7 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal(urls.length, 3);
       delete process.env.ANTHROPIC_API_KEY;
     });
-    await t.test("different query records and path case are not the same evidence", async (st) => {
+    await t.test("different query records are not the same evidence", async (st) => {
       st.mock.method(globalThis, "fetch", async () => {
         const response = await gemini().json();
         response.candidates[0].groundingMetadata.groundingChunks[0].web.uri = "https://example.invalid/room?id=2";
