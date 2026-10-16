@@ -18,7 +18,15 @@ const commands = [
   ["wait", "--fn", "document.body.innerText.includes('Command Center') && !document.body.innerText.includes('Loading your workspace')"],
   ["eval", `(() => {
     window.__qaSubmits = [];
+    window.__qaProfiles = [];
     document.addEventListener("submit", (event) => { window.__qaSubmits.push({ text: event.target.innerText.slice(0,300), prevented: event.defaultPrevented }); }, true);
+    return true;
+  })()`],
+  ["eval", `(async () => {
+    if (location.hostname === "127.0.0.1") {
+      const { useMusician } = await import("/src/lib/store.ts");
+      useMusician.subscribe((state) => window.__qaProfiles.push({ name: state.profile.artistName, open: state.composer.profileOpen }));
+    }
     return true;
   })()`],
   ["click", "aside button"],
@@ -117,7 +125,7 @@ process.stderr.write(result.stderr ?? "");
 if (result.error) throw new Error("Interactive browser runner failed: " + result.error.message);
 if (result.status !== 0) {
   const diagnostic = spawnSync("npx", ["--yes", "agent-browser", "batch", "--bail"], {
-    input: JSON.stringify([["eval", "JSON.stringify({ body: document.body.innerText, submits: window.__qaSubmits, profile: JSON.parse(localStorage.getItem('musician-os-v1') || 'null')?.state?.profile })"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
+    input: JSON.stringify([["eval", "JSON.stringify({ body: document.body.innerText, submits: window.__qaSubmits, changes: window.__qaProfiles, profile: JSON.parse(localStorage.getItem('musician-os-v1') || 'null')?.state?.profile })"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
     encoding: "utf8", timeout: 30_000,
   });
   process.stdout.write(diagnostic.stdout ?? "");
