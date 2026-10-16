@@ -38,4 +38,15 @@ test("booking leads remain unconfirmed and saved outreach reaches the advisor", 
   useMusician.getState().updateProfile({ notes: "long profile ".repeat(1000) });
   assert.ok(buildAdvisorContext().length <= 4500);
   assert.ok(buildAdvisorContext().includes("2030-02-01"));
+  const reminder=useMusician.getState().tasks.find(t=>t.sourceKey==="booking:"+gig.id+":followup");
+  assert.ok(reminder);
+  useMusician.getState().updateOperationalTask(reminder.id,{dueDate:"2030-02-02"});
+  assert.equal(useMusician.getState().gigs[0].outreachNextFollowUp,"2030-02-02");
+  useMusician.getState().updateOperationalTask(reminder.id,{status:"done"});
+  assert.equal(useMusician.getState().gigs[0].outreachNextFollowUp,"");
+  useMusician.getState().updateGig(gig.id,{notes:"Unrelated edit must not revive a completed follow-up."});
+  assert.equal(useMusician.getState().tasks.filter(t=>t.sourceKey===reminder.sourceKey && t.status==="open").length,0);
+  useMusician.getState().updateOperationalTask(reminder.id,{status:"open"});
+  assert.equal(useMusician.getState().gigs[0].outreachNextFollowUp,"2030-02-02");
+  assert.equal(useMusician.getState().tasks.filter(t=>t.sourceKey===reminder.sourceKey && t.status==="open").length,1);
 });
