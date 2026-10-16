@@ -226,7 +226,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         res = await complete({ apiKey, messages, search: false, provider });
       }
     } catch {
-      // A provider/network exception should still allow the other configured provider.
+      // A provider/network exception should use the clearly labeled offline fallback.
     }
 
     // Do not silently substitute an ungrounded provider for live research.
@@ -240,6 +240,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "AI PROVIDER UNAVAILABLE — LIVE FACTS NOT VERIFIED",
+        gigs: [],
+        people: [],
+        moves: [],
         answer: `Live research is temporarily unavailable (provider: ${provider}, status: ${res?.status ?? "connection failure"}). No current venue, contact, or booking details have been verified.\\n\\n${local.answer}`,
       };
     }
@@ -309,5 +312,12 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         moves: [],
       };
     }
-    return fallback();
+    const local = fallback();
+    return {
+      ...local,
+      source: "AI RESPONSE INVALID — OFFLINE GUIDANCE; EXTERNAL FACTS NOT VERIFIED",
+      gigs: [],
+      people: [],
+      moves: [],
+    };
   });
