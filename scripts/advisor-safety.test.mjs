@@ -93,6 +93,7 @@ test("advisor handles provider failures without fabricating verified leads", asy
       delete process.env.GEMINI_API_KEY;
     });
     await t.test("Gemini HTTP failure returns offline guidance without retrying paid calls", async (subtest) => {
+      delete process.env.XAI_API_KEY;
       process.env.GEMINI_API_KEY = "fictional-gemini-key";
       const mocked = subtest.mock.method(globalThis, "fetch", async () => new Response("", { status: 503 }));
       const result = await askGrowthAdvisor({ data });
@@ -103,6 +104,7 @@ test("advisor handles provider failures without fabricating verified leads", asy
     });
     await t.test("missing keys never call a provider", async (subtest) => {
       delete process.env.XAI_API_KEY;
+      delete process.env.GEMINI_API_KEY;
       delete process.env.GEMINI_API_KEY;
       delete process.env.ANTHROPIC_API_KEY;
       const mocked = subtest.mock.method(globalThis, "fetch", () => { throw new Error("must not call"); });
