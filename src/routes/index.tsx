@@ -155,7 +155,7 @@ function AdvisorPage() {
       if (cancelled) return;
       const connected = data?.some((account) =>
         account.providerId === "google" &&
-        (account.scopes || []).some((scope) => scope === "https://www.googleapis.com/auth/gmail.send")
+        (account.scope || "").split(" ").includes("https://www.googleapis.com/auth/gmail.send")
       );
       setGmailConnection(connected ? "connected" : "not-connected");
     }).catch(() => {
