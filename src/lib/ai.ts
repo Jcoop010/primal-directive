@@ -272,13 +272,17 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           res = await complete({ apiKey, messages, search: false, provider });
         }
         if (res.ok) break;
+        // A failed Claude request must remain visible even when Gemini also fails.
+        // Do not log API keys, response bodies, or artist context.
+        console.warn("[advisor] provider attempt failed", { provider, status: res.status });
         // Credentials are specific to each provider. Try the next configured
         // provider if one rejects its key; never retry the rejected provider.
         if (res.status === 401 || res.status === 403) {
           console.warn("[advisor] provider credentials rejected; trying next provider", { provider, status: res.status });
           continue;
         }
-      } catch {
+      } catch (error) {
+        console.warn("[advisor] provider attempt threw", { provider, reason: error instanceof Error ? error.name : "unknown" });
         res = null;
       }
     }
