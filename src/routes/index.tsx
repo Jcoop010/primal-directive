@@ -171,7 +171,7 @@ function AdvisorPage() {
               ) : null}
               {m.citations && m.citations.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {m.citations.map((url) => (
+                  {m.citations.map((url, index) => (
                     <a
                       key={url}
                       href={url}
@@ -179,7 +179,7 @@ function AdvisorPage() {
                       rel="noreferrer"
                       className="rounded-full border border-line bg-bg px-2 py-0.5 text-[10px] font-medium text-soft hover:border-muted"
                     >
-                      {hostFromUrl(url)}
+                      {`Source ${index + 1}: ${hostFromUrl(url)}`}
                     </a>
                   ))}
                 </div>
