@@ -46,7 +46,7 @@ function MoneyPage() {
           Export CSV
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <MetricCard label="Collected" value={money(collected)} hint="tracked income" />
         <MetricCard label="Costs" value={money(costs)} hint="tracked expenses" />
         <MetricCard
@@ -62,8 +62,8 @@ function MoneyPage() {
       </div>
 
       <Eyebrow>Real gig economics</Eyebrow>
-      <Card>
-        <h2 className="font-display text-lg font-semibold">
+      <Card className="command-surface">
+        <h2 className="font-display text-xl font-bold">
           Track fee, travel, and merch — not vanity gross
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -73,7 +73,7 @@ function MoneyPage() {
       </Card>
 
       <Eyebrow>Ledger</Eyebrow>
-      <Card className="p-0">
+      <Card className="command-surface overflow-hidden p-0">
         {entries.length === 0 ? (
           <EmptyState
             title="No money logged"
