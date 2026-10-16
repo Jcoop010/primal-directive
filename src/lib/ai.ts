@@ -605,18 +605,14 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const refersToMissingShortlist =
         /\b(?:see|refer to|shown|listed)\b.{0,45}\b(?:above|shortlist)\b/i.test(safe.data.answer) &&
         /\b(?:structured|shortlist|venues?)\b/i.test(safe.data.answer);
-      const leadSummary = gigs.length
-        ? gigs
-            .map(
-              (g, i) =>
-                `${i + 1}. ${g.venue || g.name} — ${g.city || "City not verified"}\n   ${g.reason || "Booking fit requires review"}\n   Source: ${g.sourceUrl}`,
-            )
-            .join("\n\n")
-        : "No venue cards met the source requirements. The cited pages are research references, not verified booking contacts.";
-      const answer = refersToMissingShortlist
-        ? `Venue research results (${gigs.length} citation-matched leads):\n\n${leadSummary}\n\nResearch is incomplete. Verify capacity and booking contacts directly before outreach.`
-        : readableAdvisorAnswer(safe.data.answer).answer ||
-          "The provider returned unreadable content. Please try a shorter question.";
+      // Cards already contain detailed venue evidence. Keep the chat header
+      // brief instead of repeating every venue, contact, and capacity.
+      const researchAnswer = readableAdvisorAnswer(safe.data.answer).answer;
+      const answer = gigs.length
+        ? `${gigs.length} source-cited venue lead${gigs.length === 1 ? "" : "s"} shown below. ${gigs.some((g) => !g.bookingRoute) ? "Some booking routes remain unverified. " : ""}Review the cards for source links and details.`
+        : refersToMissingShortlist
+          ? "No venue cards passed source verification. Review the research sources below; booking contacts remain unverified."
+          : researchAnswer || "No verified venue leads returned.";
       return {
         ok: true,
         answer,
