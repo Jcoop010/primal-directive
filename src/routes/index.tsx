@@ -247,13 +247,13 @@ function AdvisorPage() {
             </button>
           ))}
         </div>
-        <div ref={scroller} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
+        <div ref={scroller} className="min-h-0 min-w-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto px-3 py-4 sm:px-6">
           {chat.map((m) => (
             <div
               key={m.id}
               data-advisor-message={m.role}
               className={cn(
-                "max-w-[95%] rounded-xl sm:max-w-[82%] px-3.5 py-3 text-sm leading-relaxed whitespace-pre-wrap",
+                "min-w-0 max-w-full overflow-hidden break-words rounded-xl px-3 py-3 text-sm leading-relaxed whitespace-pre-wrap sm:max-w-[82%] sm:px-3.5",
                 m.role === "user"
                   ? "ml-auto bg-accent font-medium text-accent-fg"
                   : "border border-line bg-surface-2 text-fg",
@@ -291,13 +291,13 @@ function AdvisorPage() {
                 </ul>
               ) : null}
               {m.gigs && m.gigs.length > 0 ? (
-                <div className="mt-3 space-y-2 border-t border-line pt-3">
+                <div className="mt-3 min-w-0 space-y-2 border-t border-line pt-3">
                   {m.gigs.map((g, i) => (
                     <div
                       key={`${g.name}-${i}`}
-                      className="rounded-md border border-line bg-bg p-2.5"
+                      className="min-w-0 max-w-full break-words rounded-md border border-line bg-bg p-2.5"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
                         <div>
                           <div className="text-sm font-semibold">{g.name}</div>
                           <div className="text-xs text-muted">
@@ -368,7 +368,7 @@ function AdvisorPage() {
                         Research lead only · Not a confirmed booking · Capacity, availability and
                         contacts require separate verification
                       </p>
-                      <div className="mt-2 flex items-center justify-between">
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
                         <span className="text-[11px] text-muted">
                           {longDate(g.date)} · Research prospect
                         </span>
@@ -437,7 +437,7 @@ function AdvisorPage() {
           ) : null}
         </div>
 
-        <div className="flex gap-2 overflow-x-auto px-3 pb-2">
+        <div className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain px-3 pb-2">
           {SUGGESTIONS.map((s) => (
             <button
               key={s.label}
