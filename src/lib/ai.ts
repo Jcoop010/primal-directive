@@ -420,7 +420,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let attemptedProvider = "none";
     const researchRequested =
       data.mode === "research" || researchNeeded(data.message, data.history);
-    const policy = createProviderPolicy();
+    const policy = createProviderPolicy({ timeoutMs: researchRequested ? 180_000 : 55_000, attemptMs: researchRequested ? 75_000 : 20_000 });
     const failures: string[] = [];
     for (const { provider, apiKey } of providers) {
       const blocked = policy.blocked(provider);

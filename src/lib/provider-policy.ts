@@ -74,10 +74,10 @@ export function createProviderPolicy(
         } catch {
           body = undefined;
         }
-        blocks.set(provider, {
-          status: 429,
-          until: now() + retryDelay(response.headers, body, now()),
-        });
+        const delay = retryDelay(response.headers, body, now());
+        const details = (body as {error?:{details?:{violations?:{quotaValue?:string}[]}[]}})?.error?.details;
+        console.warn("[advisor] provider cooldown", { provider, status:429, seconds:Math.ceil(delay/1000), zeroQuota: Array.isArray(details) && details.some(d=>d.violations?.some(v=>v.quotaValue === "0")) });
+        blocks.set(provider, { status:429, until:now()+delay });
       } else if ([401, 403, 404].includes(response.status))
         blocks.set(provider, { status: response.status, until: now() + 300_000 });
       else if (response.status >= 500)
