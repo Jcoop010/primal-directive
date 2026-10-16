@@ -16,6 +16,11 @@ const commands = [
   })()`],
   ["open", origin],
   ["wait", "--fn", "document.body.innerText.includes('Command Center') && !document.body.innerText.includes('Loading your workspace')"],
+  ["eval", `(() => {
+    window.__qaSubmits = [];
+    document.addEventListener("submit", (event) => { window.__qaSubmits.push({ text: event.target.innerText.slice(0,300), prevented: event.defaultPrevented }); }, true);
+    return true;
+  })()`],
   ["click", "aside button"],
   ["find", "label", "Artist / band", "fill", "River Fold (fictional QA)"],
   ["find", "label", "Home city", "fill", "Test City (fictional)"],
@@ -23,7 +28,7 @@ const commands = [
   ["press", "Tab"],
   ["eval", `JSON.stringify([...document.querySelectorAll("[role=dialog] input")].map(input => ({value:input.value, controlled: input[Object.keys(input).find(key => key.startsWith("__reactProps"))]?.value})))`],
   ["find", "text", "Save profile", "click"],
-  ["eval", "if (!document.body.innerText.includes('River Fold (fictional QA)')) throw new Error('Profile was not applied by the form'); true"],
+  ["wait", "--fn", "document.body.innerText.includes('River Fold (fictional QA)') && !document.querySelector('[role=dialog] form')"],
   ["wait", "2000"],
   ["eval", "localStorage.removeItem('musician-os-v1'); true"],
   ["open", origin],
@@ -112,7 +117,7 @@ process.stderr.write(result.stderr ?? "");
 if (result.error) throw new Error("Interactive browser runner failed: " + result.error.message);
 if (result.status !== 0) {
   const diagnostic = spawnSync("npx", ["--yes", "agent-browser", "batch", "--bail"], {
-    input: JSON.stringify([["eval", "JSON.stringify({ body: document.body.innerText, profile: JSON.parse(localStorage.getItem('musician-os-v1') || 'null')?.state?.profile })"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
+    input: JSON.stringify([["eval", "JSON.stringify({ body: document.body.innerText, submits: window.__qaSubmits, profile: JSON.parse(localStorage.getItem('musician-os-v1') || 'null')?.state?.profile })"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
     encoding: "utf8", timeout: 30_000,
   });
   process.stdout.write(diagnostic.stdout ?? "");
