@@ -76,16 +76,16 @@ function BoardPage() {
 
   return (
     <div>
-      <section aria-label="Mission Control daily briefing" className="mb-6 overflow-hidden rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/10 via-surface to-surface p-5 shadow-card sm:p-7">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div><div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-accent"><Sparkles className="size-4" /> Mission Control 2.0</div><h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Your daily briefing</h2><p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Prioritized from your saved bookings, tasks, finances, and inventory. Updated whenever your workspace changes.</p></div>
+      <section aria-label="Mission Control daily briefing" className="command-surface relative isolate mb-8 overflow-hidden rounded-2xl p-5 sm:p-8">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" /><div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" /><div className="relative flex flex-wrap items-start justify-between gap-4">
+          <div><div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-accent"><Sparkles className="size-4" /> Mission Control 2.0</div><h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Your daily briefing</h2><p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Prioritized from your saved bookings, tasks, finances, and inventory. Updated whenever your workspace changes.</p></div>
           <Link to="/" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-accent px-4 text-xs font-bold text-accent-fg">Ask AI Advisor <ArrowUpRight className="size-4" /></Link>
         </div>
-        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        <div className="relative mt-7 grid gap-3 lg:grid-cols-2">
           {briefing.map((item) => <Link key={item.id} to={item.href} className="group flex items-start justify-between gap-3 rounded-xl border border-line bg-bg/80 p-4 transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"><div className="min-w-0"><div className="mb-2 flex items-center gap-2"><span className={cn("size-2 rounded-full", item.priority === "urgent" ? "bg-warn" : item.priority === "important" ? "bg-accent" : "bg-live")} /><span className="text-[10px] font-bold uppercase tracking-widest text-muted">{item.priority}</span></div><h3 className="text-sm font-bold">{item.title}</h3><p className="mt-1 text-xs leading-relaxed text-muted">{item.detail}</p></div><ArrowUpRight className="size-4 shrink-0 text-muted group-hover:text-accent" /></Link>)}
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">{briefing.slice(0, 3).map((item) => <button key={item.id} type="button" onClick={() => { window.sessionStorage.setItem("primal-briefing-prompt", makeBriefingActionPrompt(item)); window.location.assign("/"); }} className="min-h-10 rounded-lg border border-accent/40 bg-accent/10 px-3 text-xs font-bold text-accent hover:bg-accent/20">Plan: {item.title}</button>)}</div>
-        <p className="mt-4 text-[11px] text-muted">Workspace intelligence · Rule-based, not externally verified AI research · No messages are sent automatically.</p>
+        <div className="relative mt-5 flex flex-wrap gap-2">{briefing.slice(0, 3).map((item) => <button key={item.id} type="button" onClick={() => { window.sessionStorage.setItem("primal-briefing-prompt", makeBriefingActionPrompt(item)); window.location.assign("/"); }} className="min-h-10 rounded-lg border border-accent/40 bg-accent/10 px-3 text-xs font-bold text-accent hover:bg-accent/20">Plan: {item.title}</button>)}</div>
+        <p className="relative mt-5 border-t border-line/70 pt-4 text-[11px] text-muted">Workspace intelligence · Rule-based, not externally verified AI research · No messages are sent automatically.</p>
       </section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><Eyebrow>Overview / Booking board</Eyebrow><Link to="/gigs" className="rounded-xl border border-line bg-surface px-4 py-2 text-xs font-bold text-soft hover:border-accent hover:text-accent">View pipeline →</Link></div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
