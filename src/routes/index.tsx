@@ -36,6 +36,27 @@ const SUGGESTIONS = [
   },
 ];
 
+function buildBookingPitch(venue: string, city: string, profile: { artistName: string; city: string; genre: string; draw: string }) {
+  const artist = profile.artistName.trim() || "[Artist name]";
+  const hometown = profile.city.trim() || "[Home market]";
+  const genre = profile.genre.trim() || "original live music";
+  const draw = profile.draw.trim();
+  return `Subject: ${artist} — booking inquiry for ${venue}
+
+Hello ${venue} booking team,
+
+I'm reaching out on behalf of ${artist}, a ${genre} act based in ${hometown}. We'd love to be considered for an appropriate support slot or bill at ${venue}${city ? ` in ${city}` : ""}.
+
+${draw ? `Our recorded draw is ${draw} in our home market; we understand another market may differ. ` : ""}Could you share your booking submission process and any suitable upcoming opportunities?
+
+Music / live video: [add links]
+EPK: [add link]
+Contact: [name and reply email]
+
+Thanks for your consideration,
+${artist}`;
+}
+
 function AdvisorPage() {
   const owner = useCurrentUserState().user?.id ?? null;
   const ownerRef = useRef(owner);
@@ -341,6 +362,23 @@ function AdvisorPage() {
                         <span className="text-[11px] text-muted">
                           {longDate(g.date)} · Research prospect
                         </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={async () => {
+                            const profile = useMusician.getState().profile;
+                            const pitch = buildBookingPitch(g.venue || g.name, g.city, profile);
+                            try {
+                              await navigator.clipboard.writeText(pitch);
+                              toast("Booking pitch copied — review links and contact before sending");
+                            } catch {
+                              setInput(pitch);
+                              toast("Pitch inserted below — review and copy before sending");
+                            }
+                          }}
+                        >
+                          Copy pitch
+                        </Button>
                         <Button
                           size="sm"
                           onClick={() => {
