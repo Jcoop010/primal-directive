@@ -98,10 +98,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <SignInGate fallback={<SignInScreen />}>
       <div className="min-h-dvh md:flex">
         <DurableSync />
-        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-bg/90 md:flex">
-          <div className="px-5 pt-6 pb-4">
+        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-[#0b1016]/95 shadow-[12px_0_60px_#0002] md:flex">
+          <div className="relative overflow-hidden px-5 pt-8 pb-7"><div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" /><div className="relative">
             <div className="text-[12px] font-extrabold tracking-[0.19em] text-accent">PRIMAL DIRECTIVE</div>
-            <div className="mt-1 text-xs text-muted">Artist Command Center</div>
+            <div className="mt-1 text-xs text-muted">Artist Command Center</div><div className="mt-5 flex items-center gap-2 text-[10px] font-bold tracking-[.15em] text-live"><span className="size-1.5 rounded-full bg-live shadow-[0_0_12px_#55d49a]" /> YOUR OPERATIONS HUB</div></div>
           </div>
           <nav className="flex flex-1 flex-col gap-1 px-3">
             {NAV.map((item) => {
@@ -110,8 +110,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold transition-colors",
+                    "command-link flex h-11 items-center gap-3 rounded-lg px-4 text-sm font-semibold transition-colors",
                     active ? "bg-accent/10 text-accent ring-1 ring-accent/20" : "text-muted hover:bg-surface hover:text-fg",
                   )}
                 >
@@ -144,12 +145,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-          <header className="border-b border-line/60 bg-bg/70 px-4 pt-5 pb-5 backdrop-blur-xl md:px-8 md:pt-7 md:pb-6">
-            <div className="mx-auto flex max-w-7xl items-end justify-between gap-4">
+          <header className="relative isolate overflow-hidden border-b border-line/60 bg-bg/75 px-4 pt-5 pb-5 backdrop-blur-xl md:px-8 md:pt-8 md:pb-8">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" /><div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" /><div className="relative mx-auto flex max-w-7xl items-end justify-between gap-4">
               <div>
                 <div className="text-[11px] font-bold tracking-[0.22em] md:hidden">PRIMAL DIRECTIVE</div>
                 <div className="mt-1 text-xs text-muted md:hidden">Artist Command Center</div>
-                <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight md:mt-0">
+                <div className="mb-2 hidden items-center gap-2 md:flex"><span className="h-px w-6 bg-accent" /><span className="command-kicker text-accent">Artist operations / {pageTitle}</span></div><h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight md:mt-0 md:text-4xl">
                   {pathname === "/" ? "Command Center" : pageTitle}
                 </h1>
                 <div className="mt-1 text-xs text-muted">{todayLabel()}</div>
