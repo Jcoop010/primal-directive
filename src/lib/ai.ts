@@ -133,6 +133,21 @@ function citationsFrom(body: Record<string, unknown>): string[] {
   return [...new Set(urls)].slice(0, 6);
 }
 
+// Match the same evidence URL despite harmless query strings, fragments or
+// trailing slash differences. Never treat a shared domain as supporting proof.
+function sourceMatches(url: string | undefined, citations: string[]): boolean {
+  if (!url) return false;
+  const normalize = (value: string) => {
+    try {
+      const u = new URL(value);
+      if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+      return u.origin.toLowerCase() + u.pathname.replace(/\\/+$/, "") .toLowerCase();
+    } catch { return null; }
+  };
+  const claimed = normalize(url);
+  return claimed !== null && citations.some((candidate) => normalize(candidate) === claimed);
+}
+
 async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
@@ -364,7 +379,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
       // keep them out of the UI even if the model emitted plausible-looking entries.
-      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).filter((g) => g.sourceUrl && citations.includes(g.sourceUrl)).slice(0, 5).map((g) => ({
+      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).filter((g) => sourceMatches(g.sourceUrl, citations)).slice(0, 5).map((g) => ({
         name: g.name,
         venue: g.venue,
         city: g.city,
@@ -377,7 +392,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         status: "lead" as const,
       }));
       const people: SuggestedPerson[] = (citations.length ? safe.data.people ?? [] : [])
-        .filter((p) => p.sourceUrl && citations.includes(p.sourceUrl))
+        .filter((p) => sourceMatches(p.sourceUrl, citations))
         .slice(0, 5)
         .map((p) => ({
           name: p.name,
@@ -394,7 +409,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         && /\b(?:structured|shortlist|venues?)\b/i.test(safe.data.answer);
       const leadSummary = gigs.length
         ? gigs.map((g, i) => `${i + 1}. ${g.venue || g.name} — ${g.city || "City not verified"}\n   ${g.reason || "Booking fit requires review"}\n   Source: ${g.sourceUrl}`).join("\n\n")
-        : "No venue leads passed the citation-matching check. Source links below are research references, not verified booking contacts.";
+        : "No venue cards met the source requirements. The cited pages are research references, not verified booking contacts.";
       const answer = refersToMissingShortlist
         ? `Venue research results (${gigs.length} citation-matched leads):\n\n${leadSummary}\n\nResearch is incomplete. Verify capacity and booking contacts directly before outreach.`
         : safe.data.answer;
