@@ -41,7 +41,7 @@ export function createProviderPolicy(
   const now = options.now ?? Date.now,
     request = options.fetchImpl ?? fetch,
     blocks = options.blocks ?? sharedBlocks;
-  const deadline = now() + (options.timeoutMs ?? 55_000),
+  const deadline = now() + (options.timeoutMs ?? 145_000),
     attempted = new Set<AdvisorProvider>();
   return {
     blocked(provider: AdvisorProvider) {

@@ -64,7 +64,7 @@ try {
   await page.getByRole("button",{name:"Deep research",exact:true}).click();
   await page.getByPlaceholder("Ask about growth, rooms, bills, routing…",{exact:true}).fill("Research Caffè Lena in Saratoga Springs as a prospective regional venue for fictional River Fold in Albany, NY. Use official caffelena.org booking and contact pages. Return one source-cited gig lead with venueCapacity, capacitySourceUrl, bookingRoute, bookingContactName and bookingContactSourceUrl only where supported. Explain capacity, geographic and genre fit and uncertainty about our unverified draw. No available date or agreed fee is known. Give a complete answer now.");
   await page.getByRole("button",{name:"Send",exact:true}).click();
-  await page.waitForFunction(()=>document.querySelectorAll('[data-advisor-message="ai"]').length>1,{},{timeout:75000});
+  await page.waitForFunction(()=>document.querySelectorAll('[data-advisor-message="ai"]').length>1,{},{timeout:150000});
   const reply=page.locator('[data-advisor-message="ai"]').last();
   const text=await reply.innerText();
   console.log("REAL_BOOKING_RESEARCH_ANSWER="+JSON.stringify(text));

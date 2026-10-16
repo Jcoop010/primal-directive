@@ -33,13 +33,14 @@ const data = { message: "Help River Fold plan next week", context: "River Fold i
 
 test("booking research retains grounding through failover and rate limits", async (t) => {
   const { askGrowthAdvisor } = await import(moduleUrl("const regressionBlocks = new Map();\n" + source.replace("blocks:new Map()", "blocks:regressionBlocks")));
-  const keys = ["ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY", "GEMINI_SEARCH_GROUNDING_ENABLED"];
+  const keys = ["ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY", "GEMINI_SEARCH_GROUNDING_ENABLED", "GEMINI_MODEL"];
   const previous = keys.map((key) => process.env[key]);
   const researchData = { ...data, message: "Find venues in my home market" };
   const answer = { answer: "Review this fictional source before outreach.", gigs: [{ name: "Test Room", sourceUrl: "https://example.invalid/room?id=1", date: "2030-01-01", fee: 900, status: "booked" }] };
   const gemini = () => Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(answer) }] }, groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.invalid/room?id=1" } }] } }] });
   const xai = () => Response.json({ output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify(answer), annotations: [{ type: "url_citation", url: "https://example.invalid/room?id=1" }] }] }] });
   try {
+    delete process.env.GEMINI_MODEL;
     delete process.env.ANTHROPIC_API_KEY;
     process.env.GEMINI_API_KEY = "fictional-gemini";
     process.env.XAI_API_KEY = "fictional-xai";
@@ -58,6 +59,7 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal(result.gigs[0].fee, 0);
     });
     process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+    await t.test("current Gemini model and full search timeout are preserved", async(st)=>{const timeout=AbortSignal.timeout;const budgets=[];st.mock.method(AbortSignal,"timeout",ms=>{budgets.push(ms);return timeout(ms)});st.mock.method(globalThis,"fetch",async url=>{assert.match(String(url),/gemini-3[.]8-flash:generateContent$/);return gemini()});assert.equal((await askGrowthAdvisor({data:researchData})).gigs.length,1);assert.equal(budgets[0],45000)});
     await t.test("Google grounding redirects match the destination without fetching it", async (st) => {
       const urls = [];
       st.mock.method(globalThis, "fetch", async (url, options) => {

@@ -194,7 +194,7 @@ async function complete(args: {
   request: ReturnType<typeof createProviderPolicy>["request"];
 }) {
   if (args.provider === "gemini") {
-    const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+    const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
     const response = await args.request(
       args.provider,
       "https://generativelanguage.googleapis.com/v1beta/models/" +
