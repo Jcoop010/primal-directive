@@ -71,11 +71,12 @@ test("advisor handles provider failures without fabricating verified leads", asy
     await t.test("Gemini uses configured grounding and provider-returned sources", async (subtest) => {
       process.env.GEMINI_API_KEY = "fictional-gemini-key";
       process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+      const researchData = { ...data, message: "Research venues for River Fold next week" };
       const mocked = subtest.mock.method(globalThis, "fetch", async (url, options) => {
         assert.match(String(url), /generativelanguage.googleapis.com/);
         const request = JSON.parse(options.body);
         assert.deepEqual(request.tools, [{ google_search: {} }]);
-        assert.equal(request.contents.at(-1).parts[0].text, data.message);
+        assert.equal(request.contents.at(-1).parts[0].text, researchData.message);
         return Response.json({
           candidates: [{
             content: { parts: [{ text: JSON.stringify({ answer: "Fictional QA research example.", gigs: [{ name: "Fictional QA venue", sourceUrl: "https://example.invalid/source" }] }) }] },
@@ -83,7 +84,7 @@ test("advisor handles provider failures without fabricating verified leads", asy
           }],
         });
       });
-      const result = await askGrowthAdvisor({ data });
+      const result = await askGrowthAdvisor({ data: researchData });
       assert.equal(result.ok, true);
       assert.deepEqual(result.citations, ["https://example.invalid/source"]);
       assert.equal(result.gigs[0].status, "lead");
