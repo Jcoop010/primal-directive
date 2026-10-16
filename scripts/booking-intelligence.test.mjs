@@ -29,6 +29,12 @@ test('outreach pitch uses saved artist and contact without invented deal terms',
 test('untrusted evidence and malformed money/date inputs are rejected',()=>{
  for(const patch of [{website:'javascript:alert(1)'},{sourceUrl:'http://example.org'},{followUpDate:'2026-02-30'},{travelEstimate:NaN},{capacity:1.2}]) assert.equal(bookingSchema.safeParse({...emptyBooking(),...patch}).success,false);
 });
+test('incomplete source URLs during typing do not crash qualification or pitch rendering',()=>{
+ const draft={...emptyBooking(),website:'htt',sourceUrl:'https:',checkedOn:'2026-10-15',epkUrl:'https:/'};
+ assert.equal(evaluateOpportunity({...gig,booking:draft},[],'2026-10-15').score,0);
+ assert.doesNotThrow(()=>bookingPitch({...gig,booking:draft},{artistName:'Saved',city:'',genre:'',draw:'',feeTarget:0,notes:''},[]));
+ assert.equal(bookingSchema.safeParse(draft).success,false);
+});
 test('answer rendering unwraps nested JSON, deduplicates prose and rejects broken envelopes',()=>{
  assert.equal(readableAdvisorAnswer('{"answer":"Good advice","gigs":[]}').answer,'Good advice');
  assert.equal(readableAdvisorAnswer(JSON.stringify({answer:JSON.stringify({answer:'Once'})})).answer,'Once');

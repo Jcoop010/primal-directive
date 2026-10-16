@@ -2,7 +2,8 @@ import { z } from 'zod';
 import type { ArtistProfile, Gig, Person, OperationalTask } from './types.ts';
 import { validDay } from './workspace-intelligence.ts';
 
-const url = z.union([z.literal(''), z.string().url().max(2000).refine(v => new URL(v).protocol === 'https:', 'Use an HTTPS source URL.')]);
+function httpsUrl(value:string) { try { return new URL(value).protocol==='https:'; } catch { return false; } }
+const url = z.union([z.literal(''), z.string().url().max(2000).refine(httpsUrl, 'Use an HTTPS source URL.')]);
 const day = z.string().refine(v => !v || validDay(v), 'Enter a real calendar date.');
 const amount = z.number().finite().min(0).max(100000000).optional();
 export const bookingSchema = z.object({
@@ -16,10 +17,13 @@ export const bookingSchema = z.object({
 });
 export type BookingDetails = z.infer<typeof bookingSchema>;
 export const emptyBooking = (): BookingDetails => bookingSchema.parse({});
-const reviewed = (url:string, day:string, today:string) => Boolean(url && validDay(day) && day <= today);
+const reviewed = (value:string, day:string, today:string) => {
+  try { return new URL(value).protocol==='https:' && validDay(day) && day<=today; } catch { return false; }
+};
 export function evaluateOpportunity(gig:Gig, people:readonly Person[], today:string) {
   if(!validDay(today)) throw Error('A valid evaluation date is required.');
-  const b = bookingSchema.parse(gig.booking ?? {});
+  // Draft inputs are intentionally incomplete while typing; validate only on save.
+  const b = gig.booking ?? emptyBooking();
   const contact = people.find(p=>p.id===b.contactId);
   const evidence = [
     {label:'Venue source reviewed',points:20,earned:reviewed(b.sourceUrl,b.checkedOn,today)},
@@ -27,10 +31,10 @@ export function evaluateOpportunity(gig:Gig, people:readonly Person[], today:str
     {label:'Artist fit documented',points:15,earned:Boolean(b.fitNote.trim())},
     {label:'Geography documented',points:10,earned:Boolean(b.geographyNote.trim())},
     {label:'Market history documented',points:10,earned:Boolean(b.marketNote.trim())},
-    {label:'Revenue and cost estimates entered',points:15,earned:[b.revenueEstimate,b.travelEstimate,b.otherCostsEstimate].every(v=>v!==undefined)},
+    {label:'Revenue and cost estimates entered',points:15,earned:[b.revenueEstimate,b.travelEstimate,b.otherCostsEstimate].every(v=>v!==undefined && Number.isFinite(v) && v>=0)},
     {label:'Next follow-up scheduled',points:10,earned:validDay(b.followUpDate)},
   ];
-  const estimate = [b.revenueEstimate,b.travelEstimate,b.otherCostsEstimate].every(v=>v!==undefined)
+  const estimate = [b.revenueEstimate,b.travelEstimate,b.otherCostsEstimate].every(v=>v!==undefined && Number.isFinite(v) && v>=0)
     ? (Math.round(b.revenueEstimate!*100)-Math.round(b.travelEstimate!*100)-Math.round(b.otherCostsEstimate!*100))/100 : null;
   const next = !b.sourceUrl ? 'Record an official venue source' : !contact?.contact ? 'Identify and link a booking contact' : !b.fitNote.trim() ? 'Document artist-to-venue fit' : !b.followUpDate ? 'Schedule a next action' : b.followUpDate <= today ? 'Review the scheduled follow-up' : 'Prepare for the scheduled follow-up';
   return {details:b,contact,evidence,score:evidence.reduce((s,e)=>s+(e.earned?e.points:0),0),estimate,next,overdue:Boolean(b.followUpDate && b.followUpDate<today),capacityReviewed:reviewed(b.capacitySourceUrl,b.capacityCheckedOn,today)};
@@ -40,7 +44,7 @@ export function rankOpportunities(gigs:readonly Gig[], people:readonly Person[],
     .sort((a,b)=>Number(b.overdue)-Number(a.overdue)||b.score-a.score||a.gig.id.localeCompare(b.gig.id));
 }
 export function bookingPitch(gig:Gig, profile:ArtistProfile, people:readonly Person[]) {
-  const b=bookingSchema.parse(gig.booking??{}), contact=people.find(p=>p.id===b.contactId);
+  const b=gig.booking??emptyBooking(), contact=people.find(p=>p.id===b.contactId);
   return {subject: [profile.artistName||'Artist', 'booking inquiry', gig.venue||gig.name].join(' — '),
     body:[contact ? 'Hello '+contact.name+',' : 'Hello booking team,',
       'I’m reaching out on behalf of '+(profile.artistName||'[artist name]')+(profile.genre?' ('+profile.genre+')':'')+(profile.city?', based in '+profile.city:'')+'.',
