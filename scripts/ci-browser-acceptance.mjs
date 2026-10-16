@@ -16,28 +16,12 @@ const commands = [
   })()`],
   ["open", origin],
   ["wait", "--fn", "document.body.innerText.includes('Command Center') && !document.body.innerText.includes('Loading your workspace')"],
-  ["eval", `(() => {
-    window.__qaSubmits = [];
-    window.__qaProfiles = [];
-    document.addEventListener("submit", (event) => { window.__qaSubmits.push({ text: event.target.innerText.slice(0,300), prevented: event.defaultPrevented }); }, true);
-    return true;
-  })()`],
-  ["eval", `(async () => {
-    if (location.hostname === "127.0.0.1") {
-      const { useMusician } = await import("/src/lib/store.ts");
-      useMusician.subscribe((state) => window.__qaProfiles.push({ name: state.profile.artistName, open: state.composer.profileOpen }));
-    }
-    return true;
-  })()`],
   ["click", "aside button"],
   ["wait", "500"],
   ["find", "label", "Artist / band", "fill", "River Fold (fictional QA)"],
   ["find", "label", "Home city", "fill", "Test City (fictional)"],
   ["find", "label", "Genre", "fill", "Indie folk"],
   ["press", "Tab"],
-  ["eval", `JSON.stringify([...document.querySelectorAll("[role=dialog] input")].map(input => ({value:input.value, controlled: input[Object.keys(input).find(key => key.startsWith("__reactProps"))]?.value})))`],
-  ["eval", `JSON.stringify((() => {const b=document.querySelector("[role=dialog] button[type=submit]");const r=b.getBoundingClientRect();return {rect:{x:r.x,y:r.y,width:r.width,height:r.height},hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.outerHTML?.slice(0,500)};})())`],
-  ["screenshot", "/workspace/screenshots/profile-form.png"],
   ["scrollintoview", "[role=dialog] button[type=submit]"],
   ["click", "[role=dialog] button[type=submit]"],
   ["wait", "--fn", "document.body.innerText.includes('River Fold (fictional QA)') && !document.querySelector('[role=dialog] form')"],
@@ -47,9 +31,7 @@ const commands = [
   ["wait", "--fn", "document.body.innerText.includes('River Fold (fictional QA)') && !document.body.innerText.includes('Loading your workspace')"],
   ["click", "aside button"],
   ["wait", "500"],
-  ["eval", "if (document.querySelector('[role=dialog] input')?.value !== 'River Fold (fictional QA)') throw new Error('Profile editor did not recover saved account data'); true"],
-  ["eval", `JSON.stringify((() => {const b=document.querySelector("[role=dialog] button[type=submit]");const r=b.getBoundingClientRect();return {rect:{x:r.x,y:r.y,width:r.width,height:r.height},hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.outerHTML?.slice(0,500)};})())`],
-  ["screenshot", "/workspace/screenshots/profile-form.png"],
+  ["wait", "--fn", "document.querySelector('[role=dialog] input')?.value === 'River Fold (fictional QA)'"],
   ["scrollintoview", "[role=dialog] button[type=submit]"],
   ["click", "[role=dialog] button[type=submit]"],
   ["open", origin + "/people"],
@@ -82,8 +64,6 @@ const commands = [
   ["wait", "500"],
   ["find", "label", "Amount", "fill", "125"],
   ["find", "label", "Label", "fill", "Fictional QA show income"],
-  ["eval", `JSON.stringify((() => {const b=document.querySelector("[role=dialog] button[type=submit]");const r=b.getBoundingClientRect();return {rect:{x:r.x,y:r.y,width:r.width,height:r.height},hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.outerHTML?.slice(0,500)};})())`],
-  ["screenshot", "/workspace/screenshots/profile-form.png"],
   ["scrollintoview", "[role=dialog] button[type=submit]"],
   ["click", "[role=dialog] button[type=submit]"],
   ["wait", "2000"],
@@ -133,13 +113,15 @@ const commands = [
 const result = spawnSync("npx", [
   "--yes", "agent-browser", "--executable-path", chromium.executablePath(),
   "batch", "--bail",
-], { input: JSON.stringify(commands), encoding: "utf8", timeout: 240_000 });
+], { input: JSON.stringify(commands.map((command) => command[0] === "wait" && command[1] === "--fn"
+  ? ["wait", "--fn", "document.readyState === 'complete' && !document.body.innerText.includes('Preparing your artist workspace') && !document.body.innerText.includes('Loading your workspace') && (" + command[2] + ")"]
+  : command)), encoding: "utf8", timeout: 240_000 });
 process.stdout.write(result.stdout ?? "");
 process.stderr.write(result.stderr ?? "");
 if (result.error) throw new Error("Interactive browser runner failed: " + result.error.message);
 if (result.status !== 0) {
   const diagnostic = spawnSync("npx", ["--yes", "agent-browser", "batch", "--bail"], {
-    input: JSON.stringify([["eval", "JSON.stringify({ body: document.body.innerText, submits: window.__qaSubmits, changes: window.__qaProfiles, profile: JSON.parse(localStorage.getItem('musician-os-v1') || 'null')?.state?.profile })"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
+    input: JSON.stringify([["eval", "document.body.innerText"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
     encoding: "utf8", timeout: 30_000,
   });
   process.stdout.write(diagnostic.stdout ?? "");
