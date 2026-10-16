@@ -109,6 +109,17 @@ jobs:
           npm run preview:restart
           node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/built.png --baseline /workspace/screenshots/dev.json || { cat .grok/preview.log; exit 1; }
 
+      - name: Expose public and fictional QA screenshots for connector review
+        if: always()
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            for (const name of ["production-demo.png", "production-demo-mobile.png", "authenticated-money.png", "acceptance-failure.png"]) {
+              const path = "/workspace/screenshots/" + name;
+              if (fs.existsSync(path)) console.log("QA_PNG_JSON=" + JSON.stringify({ name, base64: fs.readFileSync(path).toString("base64") }));
+            }
+          '
+
       - name: Upload public browser screenshots and verdicts
         if: always()
         uses: actions/upload-artifact@v4
