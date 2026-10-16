@@ -138,6 +138,7 @@ try {
       await ready(route);
       assert.ok((await page.locator("main").innerText()).trim().length > 20, "Empty route: " + route);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1), false, "Horizontal overflow: " + route);
+      await page.screenshot({ path: "/workspace/screenshots/qa-" + viewport.width + "-" + (route.slice(1) || "advisor") + ".jpg", type: "jpeg", quality: 65, fullPage: true });
     }
   }
   await page.screenshot({ path: "/workspace/screenshots/authenticated-mobile.png" });
