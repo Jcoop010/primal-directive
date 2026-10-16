@@ -1,4 +1,5 @@
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { authClient } from "@/lib/auth/client";
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUp, LoaderCircle, Sparkles, ShieldCheck, Compass, ArrowUpRight } from "lucide-react";
@@ -75,6 +76,7 @@ function AdvisorPage() {
   const clearChat = useMusician((s) => s.clearChat);
   const [input, setInput] = useState("");
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
+  const [gmailConnection, setGmailConnection] = useState<"checking" | "connected" | "not-connected">("checking");
   const [busy, setBusy] = useState(false);
   const [answerMode, setAnswerMode] = useState<"quick" | "detailed" | "research">("quick");
   const [showMissions, setShowMissions] = useState(true);
@@ -140,6 +142,39 @@ function AdvisorPage() {
       });
     } finally {
       if (ownerRef.current === requestOwner) setBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!owner) {
+      setGmailConnection("not-connected");
+      return;
+    }
+    void authClient.listAccounts().then(({ data }) => {
+      if (cancelled) return;
+      const connected = data?.some((account) =>
+        account.providerId === "google" &&
+        (account.scopes || []).some((scope) => scope === "https://www.googleapis.com/auth/gmail.send")
+      );
+      setGmailConnection(connected ? "connected" : "not-connected");
+    }).catch(() => {
+      if (!cancelled) setGmailConnection("not-connected");
+    });
+    return () => { cancelled = true; };
+  }, [owner]);
+
+  async function requestGmailAccess() {
+    if (!owner) return;
+    try {
+      const result = await authClient.linkSocial({
+        provider: "google",
+        scopes: ["https://www.googleapis.com/auth/gmail.send"],
+        callbackURL: "/",
+      });
+      if (result.error) toast("Gmail authorization could not start. Check Google OAuth settings.");
+    } catch {
+      toast("Gmail authorization unavailable.");
     }
   }
 
@@ -334,6 +369,19 @@ Thanks,
           <span className="w-full text-[11px] text-muted">Drafts only. No messages are sent. Verify contacts and EPK links before outreach.</span>
         </div>
       ) : null}
+      <details className="rounded-xl border border-line bg-surface-2 p-3">
+        <summary className="cursor-pointer text-sm font-semibold">Gmail connection · {gmailConnection === "connected" ? "send permission granted" : gmailConnection === "checking" ? "checking" : "not connected"}</summary>
+        <p className="mt-2 text-xs text-muted">
+          Optional Google authorization for future approval-based booking outreach. Connecting grants the app permission to send Gmail messages, but this release does not send messages, read inboxes, or sync replies.
+        </p>
+        {gmailConnection !== "connected" ? (
+          <Button size="sm" className="mt-2" disabled={!owner} onClick={() => void requestGmailAccess()}>
+            Authorize Gmail sending
+          </Button>
+        ) : (
+          <p className="mt-2 text-xs text-soft">Gmail permission recorded. Continue using reviewed email drafts; automatic sends are disabled.</p>
+        )}
+      </details>
       {followUps.length > 0 ? (
         <details className="rounded-xl border border-line bg-surface-2 p-3">
           <summary className="cursor-pointer text-sm font-semibold">
