@@ -47,7 +47,6 @@ function GigsPage() {
                 g.outreachContact || "", g.outreachLastContactedAt || "",
                 g.outreachNextFollowUp || "", g.outreachNotes || "",
               ]),
-            ]),
             ])
           }
         >
