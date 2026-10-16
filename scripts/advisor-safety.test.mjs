@@ -14,7 +14,7 @@ source = source
   .replace('from "@/lib/venue-evidence"', "from " + JSON.stringify(new URL("../src/lib/venue-evidence.ts", import.meta.url).href))
   .replace('from "@/lib/advisor-answer"', "from " + JSON.stringify(new URL("../src/lib/advisor-answer.ts", import.meta.url).href))
   .replace('from "@/lib/provider-policy"', "from " + JSON.stringify(policyUrl))
-  .replace("createProviderPolicy()", "createProviderPolicy({blocks:new Map()})")
+  .replace("const policy = createProviderPolicy({", "const policy = createProviderPolicy({blocks:new Map(),")
 
   .replace('import { createServerFn } from "@tanstack/react-start";', `
     export const registeredMiddleware = [];
@@ -73,7 +73,7 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.match(result.answer, /Test Room/);
       assert.match(result.source, /LIVE WEB SEARCH/);
     });
-    await t.test("current Gemini model and full search timeout are preserved", async(st)=>{const timeout=AbortSignal.timeout;const budgets=[];st.mock.method(AbortSignal,"timeout",ms=>{budgets.push(ms);return timeout(ms)});st.mock.method(globalThis,"fetch",async url=>{assert.match(String(url),/gemini-3[.]8-flash:generateContent$/);return gemini()});assert.equal((await askGrowthAdvisor({data:researchData})).gigs.length,1);assert.equal(budgets[0],45000)});
+    await t.test("current Gemini model and full search timeout are preserved", async(st)=>{const timeout=AbortSignal.timeout;const budgets=[];st.mock.method(AbortSignal,"timeout",ms=>{budgets.push(ms);return timeout(ms)});st.mock.method(globalThis,"fetch",async url=>{assert.match(String(url),/gemini-3[.]8-flash:generateContent$/);return gemini()});assert.equal((await askGrowthAdvisor({data:researchData})).gigs.length,1);assert.equal(budgets[0],75000)});
     await t.test("Google grounding redirects match the destination without fetching it", async (st) => {
       const urls = [];
       st.mock.method(globalThis, "fetch", async (url, options) => {

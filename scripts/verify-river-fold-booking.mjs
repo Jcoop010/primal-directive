@@ -52,6 +52,12 @@ async function state() {
 }
 
 try {
+  const googleResponse=await context.request.post(origin+"/api/auth/sign-in/social",{headers:{origin},data:{provider:"google",callbackURL:origin+"/",disableRedirect:true}});
+  assert.equal(googleResponse.status(),200,"Configured Google authorization handoff failed");
+  const googleUrl=new URL((await googleResponse.json()).url);
+  assert.equal(googleUrl.hostname,"accounts.google.com");
+  assert.equal(new URL(googleUrl.searchParams.get("redirect_uri")).origin,origin);
+  console.log("Google OAuth authorization handoff passed; personal consent/callback completion is not automated.");
   await auth("sign-up/email", {name:"River Fold booking QA (fictional)",email:emailA,password});
   await ready("/");
   await page.locator("aside button").first().click();
@@ -63,8 +69,9 @@ try {
   await recover("/");
   await page.getByRole("button",{name:"Deep research",exact:true}).click();
   await page.getByPlaceholder("Ask about growth, rooms, bills, routing…",{exact:true}).fill("Research Caffè Lena in Saratoga Springs as a prospective regional venue for fictional River Fold in Albany, NY. Use official caffelena.org booking and contact pages. Return one source-cited gig lead with venueCapacity, capacitySourceUrl, bookingRoute, bookingContactName and bookingContactSourceUrl only where supported. Explain capacity, geographic and genre fit and uncertainty about our unverified draw. No available date or agreed fee is known. Give a complete answer now.");
+  const priorReplies=await page.locator('[data-advisor-message="ai"]').count();
   await page.getByRole("button",{name:"Send",exact:true}).click();
-  await page.waitForFunction(()=>document.querySelectorAll('[data-advisor-message="ai"]').length>1,{},{timeout:150000});
+  await page.waitForFunction(n=>document.querySelectorAll('[data-advisor-message="ai"]').length>n,priorReplies,{timeout:210000});
   const reply=page.locator('[data-advisor-message="ai"]').last();
   const text=await reply.innerText();
   console.log("REAL_BOOKING_RESEARCH_ANSWER="+JSON.stringify(text));
@@ -97,6 +104,15 @@ try {
   await recover("/tasks");
   const tasks=(await state()).tasks.filter(t=>t.sourceKey==="booking:"+lead.id+":followup");
   assert.equal(tasks.length,1);assert.equal(tasks[0].dueDate,"2027-05-21");
+  await ready("/calendar");
+  await page.getByRole("button",{name:/Booking follow-up:/}).first().click();
+  await page.getByLabel("Opportunity",{exact:true}).waitFor();
+  await page.getByLabel("Status",{exact:true}).selectOption("hold");
+  await page.getByLabel("Date",{exact:true}).fill("2027-06-12");
+  await page.getByLabel("Notes",{exact:true}).fill("FICTIONAL QA ROUTING SCENARIO. No real venue hold, date availability or fee agreement exists.");
+  await submitDialog();
+  await recover("/tour");
+  assert.match(await page.locator("main").innerText(),/Lena/i,"Held fictional scenario did not reach tour planning");
   await ready("/gigs");
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+1),false);
