@@ -25,6 +25,88 @@ source = source
 const { askGrowthAdvisor, registeredMiddleware } = await import(moduleUrl(source));
 const data = { message: "Help River Fold plan next week", context: "River Fold is a fictional test band.", history: [] };
 
+test("booking research retains grounding through failover and rate limits", async (t) => {
+  const { askGrowthAdvisor } = await import(moduleUrl(source + "\n// Isolated cooldown state for rate-limit regression tests."));
+  const keys = ["ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY", "GEMINI_SEARCH_GROUNDING_ENABLED"];
+  const previous = keys.map((key) => process.env[key]);
+  const researchData = { ...data, message: "Find venues in my home market" };
+  const answer = { answer: "Review this fictional source before outreach.", gigs: [{ name: "Test Room", sourceUrl: "https://example.invalid/room?id=1", date: "2030-01-01", fee: 900, status: "booked" }] };
+  const gemini = () => Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(answer) }] }, groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.invalid/room?id=1" } }] } }] });
+  const xai = () => Response.json({ output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify(answer), annotations: [{ type: "url_citation", url: "https://example.invalid/room?id=1" }] }] }] });
+  try {
+    delete process.env.ANTHROPIC_API_KEY;
+    process.env.GEMINI_API_KEY = "fictional-gemini";
+    process.env.XAI_API_KEY = "fictional-xai";
+    process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "false";
+    await t.test("search-disabled Gemini cannot stop grounded xAI discovery", async (st) => {
+      const mock = st.mock.method(globalThis, "fetch", async (url, options) => {
+        assert.equal(url, "https://api.x.ai/v1/responses");
+        assert.deepEqual(JSON.parse(options.body).tools, [{ type: "web_search" }]);
+        return xai();
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.equal(mock.mock.callCount(), 1);
+      assert.equal(result.gigs.length, 1);
+      assert.equal(result.gigs[0].status, "lead");
+      assert.equal(result.gigs[0].date, "");
+      assert.equal(result.gigs[0].fee, 0);
+    });
+    process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+    await t.test("short confirmation preserves venue research", async (st) => {
+      st.mock.method(globalThis, "fetch", async (_url, options) => {
+        assert.deepEqual(JSON.parse(options.body).tools, [{ google_search: {} }]);
+        return gemini();
+      });
+      assert.equal((await askGrowthAdvisor({ data: { ...data, message: "Do it", history: [{ role: "user", text: researchData.message }] } })).gigs.length, 1);
+    });
+    await t.test("invalid success and unsupported search fail over without dropping search", async (st) => {
+      process.env.ANTHROPIC_API_KEY = "fictional-anthropic";
+      const urls = [];
+      st.mock.method(globalThis, "fetch", async (url, options) => {
+        urls.push(url);
+        if (url.includes("anthropic")) return Response.json({ content: [{ type: "text", text: "{}" }] });
+        if (url.includes("googleapis")) return new Response("", { status: 400 });
+        assert.deepEqual(JSON.parse(options.body).tools, [{ type: "web_search" }]);
+        return xai();
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.equal(result.gigs.length, 1);
+      assert.equal(urls.length, 3);
+      delete process.env.ANTHROPIC_API_KEY;
+    });
+    await t.test("different query records and path case are not the same evidence", async (st) => {
+      st.mock.method(globalThis, "fetch", async () => {
+        const response = await gemini().json();
+        response.candidates[0].groundingMetadata.groundingChunks[0].web.uri = "https://example.invalid/room?id=2";
+        return Response.json(response);
+      });
+      assert.deepEqual((await askGrowthAdvisor({ data: researchData })).gigs, []);
+    });
+    await t.test("429 immediately fails over and honors Retry-After on later requests", async (st) => {
+      let now = Date.now();
+      st.mock.method(Date, "now", () => now);
+      let geminiCalls = 0;
+      st.mock.method(globalThis, "fetch", async (url) => {
+        if (url.includes("googleapis")) {
+          geminiCalls++;
+          return new Response("", { status: 429, headers: { "retry-after": "30" } });
+        }
+        return xai();
+      });
+      assert.equal((await askGrowthAdvisor({ data: researchData })).gigs.length, 1);
+      assert.equal((await askGrowthAdvisor({ data: researchData })).gigs.length, 1);
+      assert.equal(geminiCalls, 1);
+      now += 31_000;
+      assert.equal((await askGrowthAdvisor({ data: researchData })).gigs.length, 1);
+      assert.equal(geminiCalls, 2);
+      // Expire the cooldown before other tests run.
+      now += 31_000;
+    });
+  } finally {
+    keys.forEach((key, index) => { if (previous[index] === undefined) delete process.env[key]; else process.env[key] = previous[index]; });
+  }
+});
+
 test("advisor registers authentication before handling requests", () => {
   assert.deepEqual(registeredMiddleware, ["verified-session-middleware"]);
 });

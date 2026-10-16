@@ -314,7 +314,8 @@ export const useMusician = create<State & Actions>()(
               existing.name.trim().toLowerCase() === g.name.trim().toLowerCase() &&
               (existing.venue || "").trim().toLowerCase() ===
                 (g.venue || "").trim().toLowerCase() &&
-              (existing.date || "") === (g.date || ""),
+              (existing.city || "").trim().toLowerCase() === (g.city || "").trim().toLowerCase() &&
+              !existing.date,
           );
           if (duplicate) return s;
           return {
@@ -324,8 +325,8 @@ export const useMusician = create<State & Actions>()(
                 name: g.name,
                 venue: g.venue,
                 city: g.city,
-                date: g.date,
-                fee: g.fee,
+                date: "",
+                fee: 0,
                 conf: g.conf,
                 status: "lead",
                 researchSourceUrl: g.sourceUrl,
@@ -461,11 +462,15 @@ export function buildAdvisorContext() {
     .slice(0, 15)
     .map((product) => `- ${product.name} [${product.sku || "no SKU"}] | stock ${product.stockOnHand} | price ${product.price} | cost ${product.unitCost}${product.active && product.stockOnHand <= product.reorderAt ? " | REORDER" : ""}`)
     .join("\\n");
-  const gigLines = s.gigs
+  const gigLines = [...s.gigs]
+    .sort((a, b) => {
+      const priority = (gig: Gig) => ["completed", "passed"].includes(gig.status) ? "9999" : gig.outreachNextFollowUp || "9998";
+      return priority(a).localeCompare(priority(b));
+    })
     .slice(0, 12)
     .map(
       (g) =>
-        `- ${g.name} @ ${g.venue}, ${g.city} | ${g.date || "TBD"} | $${g.fee} | ${g.status} | conf ${Math.round(g.conf * 100)}% | ${g.notes}`,
+        `- ${g.name} @ ${g.venue}, ${g.city} | ${g.date || "TBD"} | $${g.fee} | ${g.status} | source ${g.researchSourceUrl || "not recorded"} | source reviewed ${g.researchVerifiedAt || "no"} | contact ${g.outreachContact || "not recorded"} | last contacted ${g.outreachLastContactedAt || "never recorded"} | follow-up ${g.outreachNextFollowUp || "not set"} | ${g.outreachNotes?.slice(0, 180) || ""} | ${g.notes.slice(0, 180)}`,
     )
     .join("\n");
   const peopleLines = s.people
@@ -477,17 +482,17 @@ HOME: ${s.profile.city}
 GENRE: ${s.profile.genre}
 TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
-NOTES: ${s.profile.notes}
+NOTES: ${s.profile.notes.slice(0, 500)}
 
 MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
 MERCH: recorded sales ${merchRevenue}, gross profit ${merchGrossProfit}, units sold ${merchUnitsSold}, low-stock items ${lowStock.length}
-
-MERCH INVENTORY:
-${merchLines || "(empty)"}
 
 GIG PIPELINE:
 ${gigLines || "(empty)"}
 
 PEOPLE:
-${peopleLines || "(empty)"}`;
+${peopleLines || "(empty)"}
+
+MERCH INVENTORY:
+${merchLines || "(empty)"}`.slice(0, 4500);
 }
