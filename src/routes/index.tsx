@@ -259,37 +259,6 @@ function AdvisorPage() {
                   : "border border-line bg-surface-2 text-fg",
               )}
             >
-              {m.text}
-              {m.role === "ai" && m.source ? (
-                <div className="mt-2 text-[9px] font-bold tracking-[0.14em] text-muted uppercase">
-                  {m.source}
-                </div>
-              ) : null}
-              {m.citations && m.citations.length > 0 ? (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {m.citations.map((url, index) => (
-                    <a
-                      key={url}
-                      href={url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-full border border-line bg-bg px-2 py-0.5 text-[10px] font-medium text-soft hover:border-muted"
-                    >
-                      {`Source ${index + 1}: ${hostFromUrl(url)}`}
-                    </a>
-                  ))}
-                </div>
-              ) : null}
-              {m.moves && m.moves.length > 0 ? (
-                <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
-                  {m.moves.map((move) => (
-                    <li key={move} className="text-xs text-soft">
-                      <span className="mr-2 text-accent">→</span>
-                      {move}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
               {m.gigs && m.gigs.length > 0 ? (
                 <div className="mt-3 min-w-0 space-y-2 border-t border-line pt-3">
                   {m.gigs.map((g, i) => (
@@ -389,6 +358,37 @@ function AdvisorPage() {
                     </div>
                   ))}
                 </div>
+              ) : null}
+              {m.text}
+              {m.role === "ai" && m.source ? (
+                <div className="mt-2 text-[9px] font-bold tracking-[0.14em] text-muted uppercase">
+                  {m.source}
+                </div>
+              ) : null}
+              {m.citations && m.citations.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {m.citations.map((url, index) => (
+                    <a
+                      key={url}
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full border border-line bg-bg px-2 py-0.5 text-[10px] font-medium text-soft hover:border-muted"
+                    >
+                      {`Source ${index + 1}: ${hostFromUrl(url)}`}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+              {m.moves && m.moves.length > 0 ? (
+                <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
+                  {m.moves.map((move) => (
+                    <li key={move} className="text-xs text-soft">
+                      <span className="mr-2 text-accent">→</span>
+                      {move}
+                    </li>
+                  ))}
+                </ul>
               ) : null}
               {m.people && m.people.length > 0 ? (
                 <div className="mt-3 space-y-2 border-t border-line pt-3">
