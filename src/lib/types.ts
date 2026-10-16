@@ -65,6 +65,7 @@ export type Gig = import("./venue-evidence").VenueEvidence & {
   researchSourceUrl?: string;
   researchVerifiedAt?: string;
   outreachContact?: string;
+  outreachEmail?: string;
   outreachLastContactedAt?: string;
   outreachNextFollowUp?: string;
   outreachNotes?: string;
