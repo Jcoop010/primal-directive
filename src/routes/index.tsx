@@ -14,24 +14,24 @@ export const Route = createFileRoute("/")({ component: AdvisorPage });
 
 const SUGGESTIONS = [
   {
-    label: "Audit my pipeline",
+    label: "Prioritize booking leads",
     q: "Audit my saved gig pipeline. Rank the three most urgent open opportunities using only recorded evidence, explain what is missing, and give me a concrete next action for each. Do not invent contacts, dates, guarantees, or venue availability.",
   },
   {
-    label: "Grow local draw",
-    q: "How do we grow our local draw in the next 90 days given our current pipeline and home city?",
+    label: "Find matching venues",
+    q: "Act as my booking agent: identify realistic venue prospects for my genre, draw, and home market. Include official venue URLs when supported, mark capacity and booking contacts unverified unless confirmed by sources, and do not invent availability or guarantees.",
   },
   {
-    label: "Build a 3-band bill",
-    q: "Build me a realistic 3-band bill for a 250-cap room that fits our sound and draw.",
+    label: "Draft booking pitch",
+    q: "Write a concise personalized venue booking pitch using only my saved artist profile and booking history. Include a clear ask, realistic draw information, and placeholders for any missing EPK or contact details. Do not claim unverified accomplishments.",
   },
   {
-    label: "Northeast routing",
-    q: "Find regional routing opportunities in the Northeast so we are not driving six hours for one gig.",
+    label: "Plan a weekend run",
+    q: "Act as my booking agent and propose a realistic three-show weekend routing based on my home market, draw, and genre. Separate researched facts from estimates, highlight drive-time and budget assumptions, and list the outreach needed to confirm each date.",
   },
   {
-    label: "Content that sells tickets",
-    q: "What should we post this month that actually grows fans and ticket sales, not vanity metrics?",
+    label: "Prepare follow-ups",
+    q: "Review my open booking pipeline and draft short, professional follow-up messages for the most urgent leads. Prioritize saved negotiations and overdue outreach, avoid invented contacts or dates, and do not send messages without my approval.",
   },
 ];
 
@@ -110,9 +110,9 @@ function AdvisorPage() {
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" />
         <div className="relative flex flex-wrap items-start justify-between gap-5">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-accent command-kicker"><Sparkles className="size-4" /> INTELLIGENCE / YOUR NEXT MOVE</div>
-            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">The right move. <span className="text-accent">Before the next show.</span></h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-soft">Turn your real bookings, finances, and artist goals into a sharper plan. Research opportunities, pressure-test decisions, and move with purpose.</p>
+            <div className="flex items-center gap-2 text-accent command-kicker"><Sparkles className="size-4" /> BOOKING INTELLIGENCE / YOUR NEXT SHOW</div>
+            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Book the right room. <span className="text-accent">Build the next tour.</span></h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-soft">Your AI booking agent for venue discovery, personalized pitches, follow-ups, and smarter routing. Work from your real artist profile and pipeline; verify venue details before outreach.</p>
           </div>
           <div className="flex flex-col gap-2 text-[11px] font-semibold text-soft">
             <span className="flex items-center gap-2 rounded-full border border-live/25 bg-live/10 px-3 py-2"><span className="size-2 rounded-full bg-live" /> ADVISOR WORKSPACE</span>
@@ -120,14 +120,14 @@ function AdvisorPage() {
           </div>
         </div>
         <div className="relative mt-6 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
-          <span className="mr-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"><Compass className="size-4" /> Start with a mission</span>
+          <span className="mr-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"><Compass className="size-4" /> Start booking</span>
           {SUGGESTIONS.map((s) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line-strong bg-bg/75 px-3 text-xs font-semibold text-soft transition-colors hover:border-accent hover:text-fg disabled:opacity-50">{s.label}<ArrowUpRight className="size-3" /></button>)}
         </div>
       </section>
 
       <Card className="command-surface flex min-h-[min(62dvh,38rem)] flex-1 flex-col overflow-hidden rounded-2xl p-0">
         <div className="flex items-center justify-between border-b border-line bg-surface/80 px-4 py-3">
-          <strong className="flex items-center gap-2 text-sm"><span className="grid size-8 place-items-center rounded-lg bg-accent/15 text-accent"><Sparkles className="size-4" /></span> Primal Directive AI</strong>
+          <strong className="flex items-center gap-2 text-sm"><span className="grid size-8 place-items-center rounded-lg bg-accent/15 text-accent"><Sparkles className="size-4" /></span> Primal Booking Agent</strong>
           <div className="flex items-center gap-3">
             <button
               type="button"
