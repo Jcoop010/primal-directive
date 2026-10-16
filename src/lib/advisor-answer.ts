@@ -10,7 +10,15 @@ export function readableAdvisorAnswer(raw: string): { answer: string; object?: u
         object = value; text = value.answer; continue;
       }
       return { answer: '' };
-    } catch { break; }
+    } catch {
+      const start=text.indexOf('{'), end=text.lastIndexOf('}');
+      if(start<0 || end<=start) break;
+      try {
+        const value: unknown=JSON.parse(text.slice(start,end+1));
+        if(value && typeof value==='object' && 'answer' in value && typeof value.answer==='string') { object=value; text=value.answer; continue; }
+      } catch { /* Malformed provider envelope is never displayed. */ }
+      break;
+    }
   }
   if (text.trim().startsWith('[') || text.trim().startsWith('{') || /"(?:answer|gigs|people|moves)"\s*:/.test(text)) return { answer: '' };
   const paragraphs = text.replace(/\\n/g, '\n').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);

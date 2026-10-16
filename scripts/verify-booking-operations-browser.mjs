@@ -11,7 +11,7 @@ page.on('pageerror',error=>{ errors.push('uncaught_browser_error'); console.log(
 page.on('requestfailed',request=>console.log('QA_NETWORK_ERROR '+new URL(request.url()).pathname+' '+request.failure()?.errorText));
 page.on('console',message=>{if(message.type()==='error') console.log('QA_CONSOLE_ERROR '+message.text());});
 const dialog=()=>page.getByRole('dialog');
-const nav=async name=>page.getByRole('link',{name,exact:true}).filter({visible:true}).first().click();
+const nav=async name=>{await page.getByRole('link',{name,exact:true}).filter({visible:true}).first().click();await page.waitForLoadState('networkidle');};
 const saved=marker=>page.waitForResponse(r=>r.status()===200&&r.request().method()==='POST'&&r.request().postData()?.includes('expectedVersion')&&r.request().postData()?.includes(marker),{timeout:30000});
 const day=offset=>{const d=new Date();d.setDate(d.getDate()+offset);return d.toISOString().slice(0,10);};
 async function signup(){

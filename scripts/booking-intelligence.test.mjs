@@ -40,4 +40,5 @@ test('answer rendering unwraps nested JSON, deduplicates prose and rejects broke
  assert.equal(readableAdvisorAnswer(JSON.stringify({answer:JSON.stringify({answer:'Once'})})).answer,'Once');
  assert.equal(readableAdvisorAnswer('One.\n\nOne.').answer,'One.');assert.equal(readableAdvisorAnswer('{"answer":"bad"').answer,'');
  assert.equal(readableAdvisorAnswer('```json\n{"answer":"Clean"}\n```').answer,'Clean');
+ assert.equal(readableAdvisorAnswer('Here is the answer:\n{"answer":"Only once","gigs":[]}\nEnd.').answer,'Only once');
 });

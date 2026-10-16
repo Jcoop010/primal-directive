@@ -12,7 +12,7 @@ page.on('pageerror',()=>errors.push('uncaught_browser_error'));
 page.on('request',request=>{if(request.method()==='POST' && request.url().includes('/_serverFn/') && request.postData()?.includes('expectedVersion')) saveEndpoint=request.url();});
 const pass=test=>{results.push({test,passed:true});console.log(JSON.stringify({test,passed:true}));};
 const dialog=()=>page.getByRole('dialog');
-const nav=async name=>page.getByRole('link',{name,exact:true}).filter({visible:true}).first().click();
+const nav=async name=>{await page.getByRole('link',{name,exact:true}).filter({visible:true}).first().click();await page.waitForLoadState('networkidle');};
 const saved=(marker='Cedar')=>page.waitForResponse(response=>response.status()===200 && response.request().method()==='POST' && response.request().postData()?.includes('expectedVersion') && response.request().postData()?.includes(marker),{timeout:20000});
 const date=days=>{const d=new Date();d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);};
 async function signup(){
@@ -28,7 +28,7 @@ async function ask(message){
  const before=await page.locator('[data-advisor-message]').count();await page.getByPlaceholder('Ask about growth, rooms, bills, routing…').fill(message);await page.getByRole('button',{name:'Send',exact:true}).click();
  await page.waitForFunction(n=>document.querySelectorAll('[data-advisor-message]').length>=n,before+2,{timeout:70000});const answer=await page.locator('[data-advisor-message]').last().innerText();
  if(attempt===0 && /HTTP (502|503|504)|network error or timeout|connection failed or timed out/i.test(answer) && !/HTTP 429/.test(answer)){await saved();pass('Temporary Claude failure explicitly labelled; one delayed verification retry');await page.waitForTimeout(10000);continue;}
- assert.match(answer,/CLAUDE AI — SAVED DATA AND ADVICE; EXTERNAL FACTS NOT VERIFIED/);assert.doesNotMatch(answer,/LOCAL WORKSPACE FALLBACK|OFFLINE MODE|AI SERVICE UNAVAILABLE|LIVE RESEARCH NOT VERIFIED/);await saved();answers.push({question:message,answer});await writeFile('qa-evidence/continuity-claude-answers.json',JSON.stringify(answers,null,2));console.log('QA_GEMINI_ANSWER '+JSON.stringify({question:message,answer}));return answer;
+ assert.match(answer,/CLAUDE AI — SAVED DATA AND ADVICE; EXTERNAL FACTS NOT VERIFIED/);assert.doesNotMatch(answer,/LOCAL WORKSPACE FALLBACK|OFFLINE MODE|AI SERVICE UNAVAILABLE|LIVE RESEARCH NOT VERIFIED/);await saved();answers.push({question:message,answer});await writeFile('qa-evidence/continuity-claude-answers.json',JSON.stringify(answers,null,2));console.log('QA_CLAUDE_ANSWER '+JSON.stringify({question:message,answer}));return answer;
  }
 }
 await mkdir('qa-evidence',{recursive:true});
