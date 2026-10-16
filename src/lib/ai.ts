@@ -183,7 +183,7 @@ async function complete(args: {
   signal: AbortSignal;
 }) {
   if (args.provider === "gemini") {
-    const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+    const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey },
@@ -328,7 +328,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let ungroundedResponse: Response | null = null;
     let attemptedProvider = providers[0]?.provider ?? "none";
     const needsResearch = researchNeeded(data.message, data.history);
-    const deadline = Date.now() + 55_000;
+    const deadline = Date.now() + 120_000;
     // Fail over to another configured provider on availability errors. Keep
     // each provider's search settings intact and never claim unreturned citations.
     for (const { provider, apiKey } of providers) {
@@ -345,7 +345,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
             : true);
         // Search-disabled providers cannot satisfy current venue research.
         if (needsResearch && !search) continue;
-        res = await complete({ apiKey, messages, search, provider, signal: AbortSignal.timeout(Math.min(18_000, deadline - Date.now())) });
+        res = await complete({ apiKey, messages, search, provider, signal: AbortSignal.timeout(Math.min(45_000, deadline - Date.now())) });
         if (res.status === 429) {
           const retryAfter = res.headers.get("retry-after");
           const seconds = retryAfter === null ? NaN : Number(retryAfter);
