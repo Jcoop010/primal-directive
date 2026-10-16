@@ -99,7 +99,6 @@ export function DurableSync() {
 
   useEffect(() => {
     if (!userId) return;
-    const userId = user.id;
     const unsubscribe = useMusician.subscribe(() => {
       if (readyFor.current !== userId || activeUserId.current !== userId || loading.current) return;
       if (timer.current) clearTimeout(timer.current);
