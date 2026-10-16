@@ -140,14 +140,14 @@ async function complete(args: {
   provider: "xai" | "anthropic" | "gemini";
 }) {
   if (args.provider === "gemini") {
-    const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+    const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: args.messages.filter((message) => message.role === "system").map((message) => message.content).join("\n\n") }] },
         contents: args.messages.filter((message) => message.role !== "system").map((message) => ({ role: message.role === "assistant" ? "model" : "user", parts: [{ text: message.content }] })),
-        generationConfig: { maxOutputTokens: 3600 },
+        generationConfig: { maxOutputTokens: 1600 },
         ...(args.search ? { tools: [{ google_search: {} }] } : {}),
       }),
       signal: AbortSignal.timeout(45_000),
@@ -168,7 +168,7 @@ async function complete(args: {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": args.apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3200, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] } : {}), }),
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1600, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] } : {}), }),
       signal: AbortSignal.timeout(45_000),
     });
     if (!response.ok) return response;
@@ -262,13 +262,16 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     for (const { provider, apiKey } of providers) {
       attemptedProvider = provider;
       try {
-        const search = provider === "gemini"
+        // Ordinary chat should not require paid web-search tools. Only use
+        // grounding for questions asking for current external information.
+        const needsResearch = /\\b(find|research|verify|source|venue|booking contact|capacity|official website|latest|today|current|search|tour route)\\b/i.test(data.message);
+        const search = needsResearch && (provider === "gemini"
           ? process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true"
           : provider === "anthropic"
             ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED !== "false"
-            : true;
+            : true);
         res = await complete({ apiKey, messages, search, provider });
-        if (!res.ok && res.status === 400 && search) {
+        if (!res.ok && [400, 404, 422].includes(res.status) && search) {
           res = await complete({ apiKey, messages, search: false, provider });
         }
         if (res.ok) break;
