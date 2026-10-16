@@ -93,7 +93,7 @@ jobs:
         run: |
           sudo mkdir -p /workspace/screenshots
           sudo chown "$USER" /workspace/screenshots
-          npm run dev > /tmp/primal-browser-dev.log 2>&1 &
+          npm run dev -- --force > /tmp/primal-browser-dev.log 2>&1 &
           BROWSER_DEV_PID=$!
           trap 'kill "$BROWSER_DEV_PID" 2>/dev/null || true; npm run preview:stop' EXIT
           for attempt in $(seq 1 60); do
@@ -102,7 +102,7 @@ jobs:
             fi
             sleep 2
           done
-          BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/ /workspace/screenshots/production.png
+          # Warm the local Vite module graph before comparing dev and built output.\n          curl --silent --fail --retry 5 --retry-delay 2 http://127.0.0.1:8080/ > /dev/null\n          BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/ /workspace/screenshots/production.png
           BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/demo /workspace/screenshots/production-demo.png
           node scripts/browser-smoke.mjs http://127.0.0.1:8080/ /workspace/screenshots/dev.png
           npm run preview:restart
