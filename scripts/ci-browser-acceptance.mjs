@@ -64,7 +64,7 @@ try {
   await submitDialog();
 
   await ready("/people");
-  await page.getByRole("button", { name: "Add contact", exact: true }).click();
+  await page.getByRole("button", { name: "Add contact", exact: true }).first().click();
   await page.getByLabel("Name", { exact: true }).fill("Fictional QA Booker");
   await page.getByLabel("Contact", { exact: true }).fill("fictional-booker@example.invalid");
   await submitDialog();
