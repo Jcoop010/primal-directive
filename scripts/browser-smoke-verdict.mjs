@@ -124,5 +124,8 @@ export function exitCodeFor(viewports) {
   if (list.some((v) => (v.consoleErrors?.length ?? 0) > 0 || (v.pageErrors?.length ?? 0) > 0)) {
     return 2;
   }
+  if (list.some((v) => v.horizontalOverflow || (!v.hasCanvas && (v.bodyTextLen ?? 0) < 20))) {
+    return 3;
+  }
   return 0;
 }
