@@ -1,42 +1,55 @@
 #!/usr/bin/env node
-
+import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 
-const base = "http://127.0.0.1:8080/api/auth";
-const email = `ci-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
-const password = `Ci-${randomBytes(24).toString("base64url")}!`;
+const origin = "http://127.0.0.1:8080";
+const base = origin + "/api/auth";
+const suffix = randomBytes(12).toString("hex");
+const password = "Ci-" + randomBytes(24).toString("base64url") + "!";
 
-async function post(path, payload) {
-  const response = await fetch(`${base}/${path}`, {
-    method: "POST",
+// Only the ephemeral CI database is used. Never log passwords or session tokens.
+async function request(path, { payload, token, status = 200 } = {}) {
+  const response = await fetch(base + "/" + path, {
+    method: payload === undefined ? "GET" : "POST",
     headers: {
       "content-type": "application/json",
-      origin: "http://127.0.0.1:8080",
+      origin,
+      ...(token ? { authorization: "Bearer " + token } : {}),
     },
-    body: JSON.stringify(payload),
+    ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
   });
-  const body = await response.json().catch(() => null);
-  if (!response.ok) {
-    console.error(`Auth integration failed at ${path}: HTTP ${response.status}`, body);
-    process.exit(1);
-  }
-  return body;
+  assert.equal(response.status, status, path + " returned unexpected HTTP status");
+  return response.json();
 }
 
-const created = await post("sign-up/email", {
-  name: "CI Auth Test",
-  email,
-  password,
+const aliceEmail = "river-fold-a-" + suffix + "@example.invalid";
+const bobEmail = "river-fold-b-" + suffix + "@example.invalid";
+const alice = await request("sign-up/email", {
+  payload: { name: "River Fold A (fictional CI account)", email: aliceEmail, password },
 });
-if (created?.user?.email !== email) {
-  console.error("Sign-up endpoint did not return the newly created test user.", created);
-  process.exit(1);
-}
+const bob = await request("sign-up/email", {
+  payload: { name: "River Fold B (fictional CI account)", email: bobEmail, password },
+});
+assert.equal(alice.user.email, aliceEmail);
+assert.equal(bob.user.email, bobEmail);
+assert.notEqual(alice.user.id, bob.user.id);
 
-const signedIn = await post("sign-in/email", { email, password });
-if (signedIn?.user?.email !== email) {
-  console.error("Sign-in endpoint did not return the authenticated test user.", signedIn);
-  process.exit(1);
-}
-
-console.log("Auth integration passed: sign-up and sign-in both succeeded.");
+const signedIn = await request("sign-in/email", { payload: { email: aliceEmail, password } });
+assert.equal(signedIn.user.id, alice.user.id);
+assert.equal(typeof signedIn.token, "string");
+const recovered = await request("get-session", { token: signedIn.token });
+assert.equal(recovered.user.id, alice.user.id);
+const bobSession = await request("get-session", { token: bob.token });
+assert.equal(bobSession.user.id, bob.user.id);
+assert.equal(await request("get-session"), null);
+await request("sign-in/email", {
+  payload: { email: aliceEmail, password: password + "-incorrect" }, status: 401,
+});
+await request("sign-out", { payload: {}, token: signedIn.token });
+assert.equal(await request("get-session", { token: signedIn.token }), null);
+assert.equal((await request("get-session", { token: bob.token })).user.id, bob.user.id);
+const restored = await request("sign-in/email", { payload: { email: aliceEmail, password } });
+assert.equal((await request("get-session", { token: restored.token })).user.id, alice.user.id);
+await request("sign-out", { payload: {}, token: restored.token });
+await request("sign-out", { payload: {}, token: bob.token });
+console.log("Auth integration passed: separate accounts, sign-in, session recovery, invalid password, anonymous access, logout/revocation, and sign-in recovery.");
