@@ -143,11 +143,10 @@ export async function signIn(
     return;
   }
 
-  const { data, error } = await authClient.signIn.oauth2({
-    providerId,
-    callbackURL,
-    errorCallbackURL,
-  });
+  const directProvider = providerId === "grok-google" ? "google" : providerId === "grok-x" ? "twitter" : null;
+  const { data, error } = directProvider
+    ? await authClient.signIn.social({ provider: directProvider, callbackURL, errorCallbackURL })
+    : await authClient.signIn.oauth2({ providerId, callbackURL, errorCallbackURL });
   if (error) throw new Error(error.message ?? "Sign-in failed");
   if (data?.url) window.location.href = data.url;
 }
