@@ -64,12 +64,12 @@ const LOCAL_DEV_ORIGINS: string[] = [
   "http://127.0.0.1:8080",
   "http://[::1]:8080",
 ];
-const PRODUCTION_HOST = "primal-directive.vercel.app";
+const PRODUCTION_HOST = "primal-directive-loose-ends-co.vercel.app";
 const baseURL = explicitBaseURL ?? deploymentOrigins[0] ?? {
   allowedHosts: [
     ...previewAllowedHosts,
     ...deploymentOrigins.map((origin) => origin.replace(/^https?:\/\//, "")),
-    "primal-directive.vercel.app",
+    "primal-directive-loose-ends-co.vercel.app",
     "localhost",
     "127.0.0.1",
     "[::1]",
@@ -81,7 +81,7 @@ const baseURL = explicitBaseURL ?? deploymentOrigins[0] ?? {
 const trustedOrigins: string[] = [
   ...(explicitBaseURL ? [originForHost(explicitBaseURL)] : []),
   ...deploymentOrigins,
-  "https://primal-directive.vercel.app",
+  "https://primal-directive-loose-ends-co.vercel.app",
   ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
   ...LOCAL_DEV_ORIGINS,
 ].filter((origin, index, all) => all.indexOf(origin) === index);
