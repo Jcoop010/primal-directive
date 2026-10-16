@@ -34,6 +34,23 @@ export function buildDailyBriefing(
       href: pending.length ? "/tasks" : "/calendar",
     });
   }
+  const followUps = data.gigs.filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status) && gig.outreachNextFollowUp && gig.outreachNextFollowUp <= today).sort((a, b) => (a.outreachNextFollowUp || "").localeCompare(b.outreachNextFollowUp || ""));
+  if (followUps.length) {
+    const overdueFollowUps = followUps.filter((gig) => (gig.outreachNextFollowUp || "") < today).length;
+    items.push({
+      id: "booking-followups", priority: overdueFollowUps ? "urgent" : "important",
+      title: `${followUps.length} booking follow-up${followUps.length === 1 ? "" : "s"} due`,
+      detail: `${overdueFollowUps ? `${overdueFollowUps} overdue. ` : ""}Next: ${followUps[0].venue || followUps[0].name}. Review outreach notes and contact details before following up; no messages are sent automatically.`,
+      href: "/gigs",
+    });
+  }
+  const unsourcedLeads = data.gigs.filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status) && !gig.researchSourceUrl && !gig.researchVerifiedAt);
+  if (unsourcedLeads.length) items.push({
+    id: "verify-research", priority: "opportunity",
+    title: `${unsourcedLeads.length} booking lead${unsourcedLeads.length === 1 ? "" : "s"} need source review`,
+    detail: "Add research sources and verify venue details before treating leads as confirmed opportunities.",
+    href: "/gigs",
+  });
   const lowStock = data.merchProducts.filter((product) => product.active && product.stockOnHand <= product.reorderAt);
   if (lowStock.length) items.push({
     id: "merch", priority: "important", title: `${lowStock.length} merch item${lowStock.length === 1 ? "" : "s"} low on stock`,
