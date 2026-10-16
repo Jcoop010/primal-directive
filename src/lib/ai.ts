@@ -264,7 +264,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       try {
         // Ordinary chat should not require paid web-search tools. Only use
         // grounding for questions asking for current external information.
-        const needsResearch = /\\b(find|research|verify|source|venue|booking contact|capacity|official website|latest|today|current|search|tour route)\\b/i.test(data.message);
+        const needsResearch = /\b(find|research|verify|source|venue|booking contact|capacity|official website|latest|today|current|search|tour route)\b/i.test(data.message);
         const search = needsResearch && (provider === "gemini"
           ? process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true"
           : provider === "anthropic"
