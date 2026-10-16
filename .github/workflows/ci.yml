@@ -87,7 +87,7 @@ jobs:
         run: npm run build
 
       - name: Install Chromium for desktop and mobile smoke checks
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Browser smoke checks on dev, built output and current production
         run: |
