@@ -22,12 +22,13 @@ function GigsPage() {
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
   const [view, setView] = useState<"board" | "list">("board");
   const [query, setQuery] = useState("");
+  const [followUpOnly, setFollowUpOnly] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
   const active = gigs.filter((g) => ["lead", "outreach", "negotiating", "hold"].includes(g.status));
   const due = active.filter((g) => g.outreachNextFollowUp && g.outreachNextFollowUp <= today);
   const sourced = active.filter((g) => Boolean(g.researchSourceUrl));
   const filtered = filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
-  const shown = filtered.filter((g) => [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const shown = filtered.filter((g) => (!followUpOnly || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <div>
@@ -70,6 +71,7 @@ function GigsPage() {
         <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Open pipeline</div><div className="mt-2 font-display text-2xl font-extrabold tabular text-live">{money(pipelineValue(gigs))}</div><p className="mt-1 text-xs text-muted">Unconfirmed opportunity value</p></div>
       </section>
       <label className="mb-4 flex min-h-11 items-center gap-3 rounded-xl border border-line-strong bg-surface px-4 text-sm text-muted"><Search className="size-4 shrink-0" /><span className="sr-only">Search bookings</span><input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search venue, city, opportunity, or contact…" className="min-w-0 w-full bg-transparent text-fg outline-none placeholder:text-muted" /></label>
+      <button type="button" aria-pressed={followUpOnly} onClick={() => setFollowUpOnly((value) => !value)} className={cn("mb-3 rounded-lg border px-3 py-2 text-xs font-semibold", followUpOnly ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:text-fg")}>Follow-ups due ({due.length}) {followUpOnly ? "· Showing due" : "· Show only"}</button>
       <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
         <FilterChip
           active={filter === "all"}
@@ -171,10 +173,10 @@ function GigsPage() {
                   const subject = "Booking inquiry — " + artist + " / " + venue;
                   const body = "Hello,\n\nI'm reaching out on behalf of " + artist + " to ask about potential booking opportunities at " + venue + (g.city ? " in " + g.city : "") + ". We'd love to learn about your submission process and any appropriate upcoming dates.\n\nHappy to share our EPK, live footage, and recent draw information if useful.\n\nThanks for your consideration,\n" + artist;
                   const draft = "Subject: " + subject + "\n\n" + body;
-                  void navigator.clipboard?.writeText(draft);
+                  if (navigator.clipboard?.writeText) void navigator.clipboard.writeText(draft).catch(() => {});
                   updateGig(g.id, {outreachNotes: [g.outreachNotes, "DRAFT (not sent) — " + new Date().toISOString().slice(0,10) + "\n" + draft].filter(Boolean).join("\n\n")});
                 }}>Prepare draft and copy</button>
-                <p className="mt-2 text-muted">Draft saved to outreach notes. Clipboard access depends on browser permission.</p>
+                <p className="mt-2 text-muted">Draft is saved to outreach notes when prepared. Select and copy from notes if clipboard access is unavailable.</p>
               </div>
               <p className="mt-2 text-muted">Manual record only; no messages are sent automatically.</p>
             </details>
