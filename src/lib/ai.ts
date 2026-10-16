@@ -226,7 +226,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "OFFLINE MODE — AI PROVIDER NOT CONFIGURED",
-        answer: `No AI provider is configured. Set ANTHROPIC_API_KEY, GEMINI_API_KEY, or XAI_API_KEY in Vercel and redeploy. Offline guidance uses saved artist data only; current external facts are not verified.\n\n${local.answer}`,
+        answer: `AI advice is unavailable for this workspace right now. Offline guidance uses saved artist data only; current external facts are not verified.\n\n${local.answer}`,
         gigs: [],
         people: [],
         moves: [],
@@ -276,7 +276,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         gigs: [],
         people: [],
         moves: [],
-        answer: `Live research is temporarily unavailable (provider: ${provider}, status: ${res?.status ?? "connection failure"}). No current venue, contact, or booking details have been verified.\n\n${local.answer}`,
+        answer: `Live research is temporarily unavailable. No current venue, contact, or booking details have been verified.\n\n${local.answer}`,
       };
     }
 
