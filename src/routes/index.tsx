@@ -295,7 +295,7 @@ function AdvisorPage() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Find venues, draft pitches, or plan a tour…"
+            placeholder="Ask about growth, rooms, bills, routing…"
             className="h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-bg px-3 text-sm outline-none placeholder:text-muted focus:border-muted"
             autoComplete="off"
           />
