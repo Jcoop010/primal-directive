@@ -93,6 +93,40 @@ test("advisor handles provider failures without fabricating verified leads", asy
       assert.equal(mocked.mock.callCount(), 1);
       delete process.env.GEMINI_API_KEY;
     });
+    await t.test("citation normalization accepts same page without tracking query", async (subtest) => {
+      process.env.GEMINI_API_KEY = "fictional-gemini-key";
+      process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+      const researchData = { ...data, message: "Research venues for River Fold" };
+      subtest.mock.method(globalThis, "fetch", async () => Response.json({
+        candidates: [{
+          content: { parts: [{ text: JSON.stringify({
+            answer: "Verified fictional source only.",
+            gigs: [{ name: "Fictional room", sourceUrl: "https://example.invalid/venue/" }],
+          }) }] },
+          groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.invalid/venue?utm_source=google" } }] },
+        }],
+      }));
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.equal(result.gigs.length, 1);
+      assert.equal(result.gigs[0].status, "lead");
+      delete process.env.GEMINI_API_KEY;
+    });
+    await t.test("citation matching refuses unrelated pages on the same site", async (subtest) => {
+      process.env.GEMINI_API_KEY = "fictional-gemini-key";
+      process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+      subtest.mock.method(globalThis, "fetch", async () => Response.json({
+        candidates: [{
+          content: { parts: [{ text: JSON.stringify({
+            answer: "Research is preliminary.",
+            gigs: [{ name: "Fictional room", sourceUrl: "https://example.invalid/venue" }],
+          }) }] },
+          groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.invalid/unrelated" } }] },
+        }],
+      }));
+      const result = await askGrowthAdvisor({ data: { ...data, message: "Research venues for River Fold" } });
+      assert.equal(result.gigs.length, 0);
+      delete process.env.GEMINI_API_KEY;
+    });
     await t.test("Gemini HTTP failure returns offline guidance without retrying paid calls", async (subtest) => {
       process.env.GEMINI_API_KEY = "fictional-gemini-key";
       const mocked = subtest.mock.method(globalThis, "fetch", async () => new Response("", { status: 503 }));
