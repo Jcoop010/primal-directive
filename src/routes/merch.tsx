@@ -234,7 +234,7 @@ function MerchPage() {
                 <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="MOSS-L" className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
               </label>
               <label className="text-xs font-semibold text-muted">Category
-                <select value={category} onChange={(e) => setCategory(e.target.value as MerchCategory)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
+                <select aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value as MerchCategory)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
                   {MERCH_CATEGORIES.map((item) => <option key={item} value={item}>{categoryLabel[item]}</option>)}
                 </select>
               </label>
@@ -351,7 +351,7 @@ function MerchPage() {
             <p className="mb-3 text-xs leading-relaxed text-muted">Build a multi-item order, then record it after payment has been collected. This manual flow does not process card payments or confirm external provider payments.</p>
             <form onSubmit={submitSale} className="space-y-3">
               <label className="block text-xs font-semibold text-muted">Product
-                <select value={saleProductId} onChange={(e) => { const id = e.target.value; setSaleProductId(id); setSalePrice(""); }} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
+                <select aria-label="Product" value={saleProductId} onChange={(e) => { const id = e.target.value; setSaleProductId(id); setSalePrice(""); }} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
                   <option value="">Choose merch item</option>
                   {activeProducts.map((product) => <option key={product.id} value={product.id}>{product.name} — {product.stockOnHand} left</option>)}
                 </select>
@@ -368,13 +368,13 @@ function MerchPage() {
                   <input type="date" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg" />
                 </label>
                 <label className="text-xs font-semibold text-muted">Payment
-                  <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as MerchPaymentMethod)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
+                  <select aria-label="Payment" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as MerchPaymentMethod)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
                     {MERCH_PAYMENT_METHODS.map((item) => <option key={item} value={item}>{paymentLabel[item]}</option>)}
                   </select>
                 </label>
               </div>
               <label className="block text-xs font-semibold text-muted">Link to show (optional)
-                <select value={gigId} onChange={(e) => setGigId(e.target.value)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
+                <select aria-label="Link to show (optional)" value={gigId} onChange={(e) => setGigId(e.target.value)} className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
                   <option value="">Not linked to a show</option>
                   {gigs.map((gig) => <option key={gig.id} value={gig.id}>{gig.date || "No date"} · {gig.venue || gig.name}</option>)}
                 </select>
@@ -410,14 +410,14 @@ function MerchPage() {
           <Card className="p-4">
             <form onSubmit={submitRestock} className="space-y-3">
               <label className="block text-xs font-semibold text-muted">Product
-                <select value={restockProductId} onChange={(e) => setRestockProductId(e.target.value)} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
+                <select aria-label="Product" value={restockProductId} onChange={(e) => setRestockProductId(e.target.value)} required className="mt-1 w-full rounded-md border border-line bg-bg px-3 py-2.5 text-sm text-fg">
                   <option value="">Choose item</option>
                   {products.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
                 </select>
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <label className="text-xs font-semibold text-muted">Reason
-                  <select value={adjustmentReason} onChange={(e) => {
+                  <select aria-label="Reason" value={adjustmentReason} onChange={(e) => {
                     const next = e.target.value as typeof adjustmentReason;
                     setAdjustmentReason(next);
                     setRestockQuantity((current) => {
