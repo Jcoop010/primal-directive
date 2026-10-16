@@ -79,7 +79,7 @@ function AdvisorPage() {
     const history = useMusician
       .getState()
       .chat.slice(-8)
-      .map((m) => ({ role: m.role, text: m.text }));
+      .map((m) => ({ role: m.role, text: m.text.slice(-12000) }));
     setInput("");
     setShowMissions(false);
     addUserMessage(q);

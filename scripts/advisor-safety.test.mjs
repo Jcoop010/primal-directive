@@ -59,6 +59,20 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal(result.gigs[0].fee, 0);
     });
     process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+    await t.test("an unknown fee cannot discard an otherwise grounded booking lead", async (st) => {
+      st.mock.method(globalThis, "fetch", async () => {
+        const response = await gemini().json();
+        response.candidates[0].content.parts[0].text = JSON.stringify({ ...answer, answer: "Verified venue lead returned. See answer above.", gigs: [{ ...answer.gigs[0], fee: "", date: null, status: "unconfirmed" }] });
+        return Response.json(response);
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.equal(result.gigs.length, 1);
+      assert.equal(result.gigs[0].fee, 0);
+      assert.equal(result.gigs[0].date, "");
+      assert.equal(result.gigs[0].status, "lead");
+      assert.match(result.answer, /Test Room/);
+      assert.match(result.source, /LIVE WEB SEARCH/);
+    });
     await t.test("current Gemini model and full search timeout are preserved", async(st)=>{const timeout=AbortSignal.timeout;const budgets=[];st.mock.method(AbortSignal,"timeout",ms=>{budgets.push(ms);return timeout(ms)});st.mock.method(globalThis,"fetch",async url=>{assert.match(String(url),/gemini-3[.]8-flash:generateContent$/);return gemini()});assert.equal((await askGrowthAdvisor({data:researchData})).gigs.length,1);assert.equal(budgets[0],45000)});
     await t.test("Google grounding redirects match the destination without fetching it", async (st) => {
       const urls = [];

@@ -11,7 +11,7 @@ import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
-import { GIG_STATUSES, PERSON_ROLES } from "@/lib/types";
+import { PERSON_ROLES } from "@/lib/types";
 
 const HistoryItem = z.object({
   role: z.enum(["user", "ai"]),
@@ -30,11 +30,8 @@ const GigOut = z.object({
   name: z.string(),
   venue: z.string().default(""),
   city: z.string().default(""),
-  date: z.string().default(""),
-  fee: z.number().default(0),
   conf: z.number().min(0).max(1).default(0.4),
   reason: z.string().default(""),
-  status: z.enum(GIG_STATUSES).optional(),
   sourceUrl: z.string().url().optional(),
 });
 
