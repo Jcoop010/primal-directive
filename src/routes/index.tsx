@@ -44,6 +44,8 @@ function AdvisorPage() {
   const clearChat = useMusician((s) => s.clearChat);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showMissions, setShowMissions] = useState(true);
+  const [selectedMission, setSelectedMission] = useState<number | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,6 +66,7 @@ function AdvisorPage() {
     const q = text.trim();
     if (!q || busy) return;
     setInput("");
+    setShowMissions(false);
     addUserMessage(q);
     setBusy(true);
     try {
@@ -120,10 +123,10 @@ function AdvisorPage() {
           </div>
         </div>
         <div className="relative mt-6 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
-          <span className="mr-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"><Compass className="size-4" /> Start booking</span>
-          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Booking agent quick actions">
-            {SUGGESTIONS.map((s, i) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className={cn("group flex min-h-14 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors disabled:opacity-50", i === 1 ? "border-accent/50 bg-accent/10 text-fg hover:bg-accent/15" : "border-line-strong bg-bg/75 text-soft hover:border-accent/60 hover:text-fg")}><span className="flex items-center gap-3"><span className="text-[10px] font-bold tabular text-muted">{String(i + 1).padStart(2, "0")}</span>{s.label}</span><ArrowUpRight className="size-4 shrink-0 text-accent transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></button>)}
-          </div>
+          <button type="button" onClick={() => setShowMissions((visible) => !visible)} aria-expanded={showMissions} aria-controls="booking-missions" className="mr-2 flex min-h-9 items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted hover:text-fg"><Compass className="size-4" /> {showMissions ? "Hide booking actions" : "Show booking actions"}</button>
+          {showMissions ? <div id="booking-missions" className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Booking agent quick actions">
+            {SUGGESTIONS.map((s, i) => <button key={s.label} type="button" disabled={busy} onClick={() => { setSelectedMission(i); void send(s.q); }} aria-label={`Start booking mission: ${s.label}`} className={cn("group flex min-h-14 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors disabled:opacity-50", i === 1 || selectedMission === i ? "border-accent/50 bg-accent/10 text-fg hover:bg-accent/15" : "border-line-strong bg-bg/75 text-soft hover:border-accent/60 hover:text-fg")}><span className="flex items-center gap-3"><span className="text-[10px] font-bold tabular text-muted">{String(i + 1).padStart(2, "0")}</span>{s.label}</span><ArrowUpRight className="size-4 shrink-0 text-accent transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></button>)}
+          </div> : null}
         </div>
       </section>
 
@@ -135,6 +138,8 @@ function AdvisorPage() {
               type="button"
               onClick={() => {
                 clearChat();
+                setSelectedMission(null);
+                setShowMissions(true);
                 toast("Thread cleared");
               }}
               className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-fg"
@@ -264,7 +269,7 @@ function AdvisorPage() {
           {busy ? (
             <div className="flex max-w-[88%] items-center gap-2 rounded-lg border border-line bg-surface-2 px-3.5 py-3 text-sm text-muted">
               <LoaderCircle className="size-4 animate-spin text-accent" />
-              Searching the live web…
+              Working on your booking request…
             </div>
           ) : null}
         </div>

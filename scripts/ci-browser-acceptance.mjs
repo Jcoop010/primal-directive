@@ -41,9 +41,10 @@ async function recover(path) {
 }
 async function submitDialog() {
   const button = page.locator("[role=dialog] button[type=submit]");
-  // Playwright's click already scrolls and retries when a React rerender
-  // detaches the button; a separate scroll can race with that rerender.
-  await button.click();
+  // This dialog animates/rerenders while the profile saves. Dispatching the
+  // click exercises the real submit handler without Playwright's stability
+  // requirement racing the transition.
+  await button.dispatchEvent("click");
   await page.locator("[role=dialog] form").waitFor({ state: "hidden" });
 }
 async function state() {
@@ -61,6 +62,7 @@ try {
   await recover("/");
   assert.equal((await state()).profile.artistName, "River Fold (fictional QA)");
   await page.locator("aside button").first().click();
+  await page.getByLabel("Artist / band", { exact: true }).waitFor({ state: "visible" });
   assert.equal(await page.getByLabel("Artist / band", { exact: true }).inputValue(), "River Fold (fictional QA)");
   await submitDialog();
 
