@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LayoutGrid, List, ArrowUpRight } from "lucide-react";
+import { LayoutGrid, List, ArrowUpRight, Search, CalendarClock } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
@@ -21,8 +21,13 @@ function GigsPage() {
   const updateGig = useMusician((s) => s.updateGig);
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
   const [view, setView] = useState<"board" | "list">("board");
-  const shown =
-    filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
+  const [query, setQuery] = useState("");
+  const today = new Date().toISOString().slice(0, 10);
+  const active = gigs.filter((g) => ["lead", "outreach", "negotiating", "hold"].includes(g.status));
+  const due = active.filter((g) => g.outreachNextFollowUp && g.outreachNextFollowUp <= today);
+  const sourced = active.filter((g) => Boolean(g.researchSourceUrl));
+  const filtered = filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
+  const shown = filtered.filter((g) => [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <div>
@@ -60,6 +65,13 @@ function GigsPage() {
           <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")} className={cn("inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold", view === "list" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}><List className="size-4" /> List</button>
         </div>
       </div>
+      <section aria-label="Booking pipeline health" className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Active leads</div><div className="mt-2 font-display text-3xl font-extrabold tabular text-info">{active.length}</div><p className="mt-1 text-xs text-muted">Not confirmed bookings</p></div>
+        <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Follow-ups due</div><div className="mt-2 font-display text-3xl font-extrabold tabular text-accent">{due.length}</div><p className="mt-1 text-xs text-muted">Due today or overdue</p></div>
+        <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Source recorded</div><div className="mt-2 font-display text-3xl font-extrabold tabular">{sourced.length}<span className="text-sm text-muted"> / {active.length}</span></div><p className="mt-1 text-xs text-muted">Source recorded ≠ verified</p></div>
+        <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Open pipeline</div><div className="mt-2 font-display text-2xl font-extrabold tabular text-live">{money(pipelineValue(gigs))}</div><p className="mt-1 text-xs text-muted">Unconfirmed opportunity value</p></div>
+      </section>
+      <label className="mb-4 flex min-h-11 items-center gap-3 rounded-xl border border-line-strong bg-surface px-4 text-sm text-muted"><Search className="size-4 shrink-0" /><span className="sr-only">Search bookings</span><input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search venue, city, opportunity, or contact…" className="min-w-0 w-full bg-transparent text-fg outline-none placeholder:text-muted" /></label>
       <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
         <FilterChip
           active={filter === "all"}
@@ -76,7 +88,7 @@ function GigsPage() {
         ))}
       </div>
       <Card className="command-surface mb-5 p-5 sm:p-6">
-        <div className="font-display text-lg font-bold">Upcoming booking follow-ups</div>
+        <div className="flex items-center gap-2 font-display text-lg font-bold"><CalendarClock className="size-5 text-accent" /> Upcoming booking follow-ups</div>
         <p className="mt-1 text-xs text-muted">Scheduled reminders only; no emails or messages are sent automatically.</p>
         {gigs.filter((g) => g.outreachNextFollowUp && ["lead","outreach","negotiating","hold"].includes(g.status)).sort((a,b) => (a.outreachNextFollowUp || "").localeCompare(b.outreachNextFollowUp || "")).slice(0,6).map((g) => (
           <button key={g.id} type="button" onClick={() => openGig(g.id)} className="mt-3 flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-line bg-bg/70 px-4 py-3 text-left text-xs transition-colors hover:border-accent/50 hover:bg-surface-2">
