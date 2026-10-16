@@ -328,6 +328,7 @@ export const useMusician = create<State & Actions>()(
                 fee: g.fee,
                 conf: g.conf,
                 status: "lead",
+                researchSourceUrl: g.sourceUrl,
                 notes: [g.reason, g.sourceUrl ? `Research source: ${g.sourceUrl}` : "", "Unconfirmed research lead; verify booking terms before outreach."].filter(Boolean).join("\n"),
               },
               ...s.gigs,
