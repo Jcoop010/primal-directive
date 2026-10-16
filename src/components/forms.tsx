@@ -13,7 +13,6 @@ import { useMusician } from "@/lib/store";
 import {
   GIG_STATUS_LABEL,
   GIG_STATUSES,
-  GIG_STATUS_LABEL,
   MONEY_TYPE_LABEL,
   MONEY_TYPES,
   PERSON_ROLE_LABEL,
