@@ -84,9 +84,16 @@ try {
   await page.getByLabel("Date", { exact: true }).fill("2027-06-12");
   await page.getByLabel("Fee", { exact: true }).fill("500");
   await page.getByLabel("Status", { exact: true }).selectOption("booked");
+  await page.getByLabel("Next booking follow-up", {exact:true}).fill("2027-05-20");
+  await page.getByLabel("Official research source", {exact:true}).fill("https://example.invalid/fictional-qa");
+  await page.getByRole("button", {name:"Prepare personalized pitch",exact:true}).click();
+  assert.match(await page.getByLabel("Conversation and deal notes",{exact:true}).inputValue(), /River Fold/);
   await submitDialog();
   await recover("/tasks");
   const beforeTasks = await state();
+  assert.equal(beforeTasks.tasks.filter(t=>t.sourceKey?.startsWith("booking:")).length,1);
+  assert.equal(beforeTasks.gigs[0].outreachNextFollowUp,"2027-05-20");
+  assert.match(beforeTasks.gigs[0].outreachNotes,/River Fold/);
   assert.ok(beforeTasks.tasks.length > 0, "Booking did not generate operational tasks");
   await page.getByRole("button", { name: "Mark task complete", exact: true }).first().click();
   await recover("/tasks");

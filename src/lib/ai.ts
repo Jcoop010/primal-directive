@@ -1,3 +1,11 @@
+import { readableAdvisorAnswer } from "@/lib/advisor-answer";
+import {
+  venueEvidenceShape,
+  citedVenueEvidence,
+  citationMatches,
+  evidencePage,
+} from "@/lib/venue-evidence";
+import { createProviderPolicy } from "@/lib/provider-policy";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
@@ -7,21 +15,21 @@ import { PERSON_ROLES } from "@/lib/types";
 
 const HistoryItem = z.object({
   role: z.enum(["user", "ai"]),
-  text: z.string(),
+  text: z.string().max(12000),
 });
 
 const Input = z.object({
-  message: z.string().min(1).max(2000),
+  message: z.string().trim().min(1).max(2000),
+  mode: z.enum(["quick", "detailed", "research"]).default("quick"),
   history: z.array(HistoryItem).max(10),
   context: z.string().max(4500),
 });
 
 const GigOut = z.object({
+  ...venueEvidenceShape,
   name: z.string(),
   venue: z.string().default(""),
   city: z.string().default(""),
-  // Date, fee and status are intentionally omitted: researched suggestions
-  // always become undated, zero-fee leads, regardless of provider formatting.
   conf: z.number().min(0).max(1).default(0.4),
   reason: z.string().default(""),
   sourceUrl: z.string().url().optional(),
@@ -133,44 +141,44 @@ function citationsFrom(body: Record<string, unknown>): string[] {
       if (typeof u === "string") urls.push(u);
     }
   }
-  return [...new Set(urls)].slice(0, 16);
+  return [...new Set(urls.filter((url) => evidencePage(url) !== null))].slice(0, 16);
 }
 
-// Match the same evidence URL despite tracking query strings, fragments or
+// Match the same evidence URL despite harmless query strings, fragments or
 // trailing slash differences. Never treat a shared domain as supporting proof.
-function sourceMatches(url: string | undefined, citations: string[]): boolean {
-  if (!url) return false;
-  const normalize = (value: string) => {
-    try {
-      const u = new URL(value);
-      if (u.protocol !== "https:" && u.protocol !== "http:") return null;
-      for (const key of [...u.searchParams.keys()]) {
-        if (/^(utm_.+|gclid|fbclid)$/i.test(key)) u.searchParams.delete(key);
-      }
-      u.searchParams.sort();
-      return u.origin + u.pathname.replace(/\/+$/, "") + u.search;
-    } catch { return null; }
-  };
-  const claimed = normalize(url);
-  return claimed !== null && citations.some((candidate) => normalize(candidate) === claimed);
+function sourceMatches(url: string | undefined, citations: string[]) {
+  return citationMatches(url, citations);
 }
 
-async function groundingUrls(urls: string[], signal: AbortSignal): Promise<string[]> {
+async function groundingUrls(urls: string[]): Promise<string[]> {
   // Gemini may cite Google's opaque redirect URLs while its answer names the
   // destination page. Resolve only Google's known redirect endpoint, never a
   // model-supplied host, and do not follow the redirect to the external site.
-  const resolved = await Promise.all(urls.slice(0, 8).map(async (value) => {
-    try {
-      const url = new URL(value);
-      if (url.origin !== "https://vertexaisearch.cloud.google.com" || !url.pathname.startsWith("/grounding-api-redirect/")) return value;
-      const response = await fetch(url, { redirect: "manual", signal: AbortSignal.any([signal, AbortSignal.timeout(3000)]) });
-      const location = response.headers.get("location");
-      await response.body?.cancel();
-      if (![301, 302, 303, 307, 308].includes(response.status) || !location) return value;
-      const destination = new URL(location, url);
-      return destination.protocol === "https:" && !destination.username && !destination.password ? destination.href : value;
-    } catch { return value; }
-  }));
+  const resolved = await Promise.all(
+    urls.slice(0, 8).map(async (value) => {
+      try {
+        const url = new URL(value);
+        if (
+          url.origin !== "https://vertexaisearch.cloud.google.com" ||
+          !url.pathname.startsWith("/grounding-api-redirect/")
+        )
+          return value;
+        const response = await fetch(url, {
+          redirect: "manual",
+          signal: AbortSignal.timeout(3000),
+        });
+        const location = response.headers.get("location");
+        await response.body?.cancel();
+        if (![301, 302, 303, 307, 308].includes(response.status) || !location) return value;
+        const destination = new URL(location, url);
+        return destination.protocol === "https:" && !destination.username && !destination.password
+          ? destination.href
+          : value;
+      } catch {
+        return value;
+      }
+    }),
+  );
   return [...new Set([...resolved, ...urls])];
 }
 
@@ -179,53 +187,108 @@ async function complete(args: {
   messages: { role: string; content: string }[];
   search: boolean;
   provider: "xai" | "anthropic" | "gemini";
-  signal: AbortSignal;
+  mode?: "quick" | "detailed" | "research";
+  request: ReturnType<typeof createProviderPolicy>["request"];
 }) {
   if (args.provider === "gemini") {
     const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: args.messages.filter((message) => message.role === "system").map((message) => message.content).join("\n\n") }] },
-        contents: args.messages.filter((message) => message.role !== "system").map((message) => ({ role: message.role === "assistant" ? "model" : "user", parts: [{ text: message.content }] })),
-        generationConfig: { maxOutputTokens: 3200 },
-        ...(args.search ? { tools: [{ google_search: {} }] } : {}),
-      }),
-      signal: args.signal,
-    });
+    const response = await args.request(
+      args.provider,
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
+        encodeURIComponent(model) +
+        ":generateContent",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [
+              {
+                text: args.messages
+                  .filter((message) => message.role === "system")
+                  .map((message) => message.content)
+                  .join("\n\n"),
+              },
+            ],
+          },
+          contents: args.messages
+            .filter((message) => message.role !== "system")
+            .map((message) => ({
+              role: message.role === "assistant" ? "model" : "user",
+              parts: [{ text: message.content }],
+            })),
+          generationConfig: {
+            maxOutputTokens: args.search ? 3000 : args.mode === "detailed" ? 2000 : 900,
+          },
+          ...(args.search ? { tools: [{ google_search: {} }] } : {}),
+        }),
+      },
+    );
     if (!response.ok) return response;
-    const payload = await response.json() as {
+    const payload = (await response.json()) as {
       candidates?: Array<{
         content?: { parts?: Array<{ text?: string; thought?: boolean }> };
         groundingMetadata?: { groundingChunks?: Array<{ web?: { uri?: string } }> };
       }>;
     };
     const candidate = payload.candidates?.[0];
-    const text = (candidate?.content?.parts ?? []).filter((part) => !part.thought && typeof part.text === "string").map((part) => part.text).join("\n");
-    const urls = (candidate?.groundingMetadata?.groundingChunks ?? []).map((chunk) => chunk.web?.uri).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
-    const citations = await groundingUrls(urls, args.signal);
+    const text = (candidate?.content?.parts ?? [])
+      .filter((part) => !part.thought && typeof part.text === "string")
+      .map((part) => part.text)
+      .join("\n");
+    const urls = (candidate?.groundingMetadata?.groundingChunks ?? [])
+      .map((chunk) => chunk.web?.uri)
+      .filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    const citations = await groundingUrls(urls);
     return Response.json({ choices: [{ message: { content: text } }], citations });
   }
   if (args.provider === "anthropic") {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await args.request(args.provider, "https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": args.apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1600, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] } : {}), }),
-      signal: args.signal,
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": args.apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: args.search ? 3000 : args.mode === "detailed" ? 2000 : 900,
+        temperature: 0.2,
+        system: args.messages
+          .filter((m) => m.role === "system")
+          .map((m) => m.content)
+          .join("\n\n"),
+        messages: args.messages
+          .filter((m) => m.role !== "system")
+          .map((m) => ({ role: m.role, content: m.content })),
+        ...(args.search
+          ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] }
+          : {}),
+      }),
     });
     if (!response.ok) return response;
-    const payload = await response.json() as { content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }> }> };
+    const payload = (await response.json()) as {
+      content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }> }>;
+    };
     const content = payload.content ?? [];
-    const text = content.filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n");
-    const citations = content.flatMap((b) => b.citations ?? []).map((cite) => cite.url).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
-    return new Response(JSON.stringify({ choices: [{ message: { content: text } }], citations }), { status: 200, headers: { "Content-Type": "application/json" } });
+    const text = content
+      .filter((b) => b.type === "text")
+      .map((b) => b.text ?? "")
+      .join("\n");
+    const citations = content
+      .flatMap((b) => b.citations ?? [])
+      .map((cite) => cite.url)
+      .filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    return new Response(JSON.stringify({ choices: [{ message: { content: text } }], citations }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   const body: Record<string, unknown> = {
     model: "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
-    max_tokens: 3200,
+    max_tokens: args.search ? 3000 : args.mode === "detailed" ? 2000 : 900,
   };
   if (args.search) {
     // Server-side web search is supported by the Responses API.
@@ -236,38 +299,60 @@ async function complete(args: {
     body.tools = [{ type: "web_search" }];
     body.store = false;
   }
-  const endpoint = args.search ? "https://api.x.ai/v1/responses" : "https://api.x.ai/v1/chat/completions";
-  const res = await fetch(endpoint, {
+  const endpoint = args.search
+    ? "https://api.x.ai/v1/responses"
+    : "https://api.x.ai/v1/chat/completions";
+  const res = await args.request(args.provider, endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${args.apiKey}`,
     },
     body: JSON.stringify(body),
-    signal: args.signal,
   });
   if (args.search && res.ok) {
-    const payload = await res.json() as {
-      output?: Array<{ type?: string; content?: Array<{ type?: string; text?: string; annotations?: Array<{ type?: string; url?: string }> }> }>;
+    const payload = (await res.json()) as {
+      output?: Array<{
+        type?: string;
+        content?: Array<{
+          type?: string;
+          text?: string;
+          annotations?: Array<{ type?: string; url?: string }>;
+        }>;
+      }>;
       citations?: string[];
     };
-    const parts = (payload.output ?? []).filter((item) => item.type === "message").flatMap((item) => item.content ?? []).filter((item) => item.type === "output_text");
-    const citations = [...(payload.citations ?? []), ...parts.flatMap((part) => part.annotations ?? []).filter((item) => item.type === "url_citation").map((item) => item.url).filter((url): url is string => typeof url === "string")];
-    return Response.json({ choices: [{ message: { content: parts.map((part) => part.text ?? "").join("\n") } }], citations });
+    const parts = (payload.output ?? [])
+      .filter((item) => item.type === "message")
+      .flatMap((item) => item.content ?? [])
+      .filter((item) => item.type === "output_text");
+    const citations = [
+      ...(payload.citations ?? []),
+      ...parts
+        .flatMap((part) => part.annotations ?? [])
+        .filter((item) => item.type === "url_citation")
+        .map((item) => item.url)
+        .filter((url): url is string => typeof url === "string"),
+    ];
+    return Response.json({
+      choices: [{ message: { content: parts.map((part) => part.text ?? "").join("\n") } }],
+      citations,
+    });
   }
   return res;
 }
 
-// A short, per-instance circuit breaker avoids hammering an exhausted provider.
-// It is best-effort on serverless instances; never persist credentials or prompts.
-const providerCooldown = new Map<string, number>();
-
 function researchNeeded(message: string, history: z.infer<typeof HistoryItem>[]) {
-  const research = /\b(find|research|verify|source|venues?|booking contacts?|capacity|official website|latest|today|current|search|tour rout\w*|routing)\b/i;
+  const research =
+    /\b(find|research|verify|source|venues?|booking contacts?|capacity|official website|latest|today|current|search|tour rout\w*|routing)\b/i;
   if (research.test(message)) return true;
   // Resolve short confirmations against the latest actual user request only.
-  if (/^(yes|yeah|ok(?:ay)?|do it|go ahead|continue|those|that one)[.!\s]*$/i.test(message.trim())) {
-    const previous = history.filter((item) => item.role === "user" && item.text.trim() !== message.trim()).at(-1);
+  if (
+    /^(yes|yeah|ok(?:ay)?|do it|go ahead|continue|those|that one)[.!\s]*$/i.test(message.trim())
+  ) {
+    const previous = history
+      .filter((item) => item.role === "user" && item.text.trim() !== message.trim())
+      .at(-1);
     return Boolean(previous && research.test(previous.text));
   }
   return false;
@@ -311,111 +396,121 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     }
 
     const messages = [
-      { role: "system", content: SYSTEM },
+      {
+        role: "system",
+        content:
+          "For each venue, optionally include venueCapacity with capacitySourceUrl, bookingRoute, bookingContactName and bookingContactSourceUrl. Every claim must have its own exact retrieved supporting HTTPS URL. If unsupported, omit the field. Label source-cited facts separately from artist fit estimates; do not call a citation independent verification.\n" +
+          SYSTEM +
+          (data.mode === "quick"
+            ? "\nAnswer first, normally 100–150 words for ordinary questions. Research shortlists must still be complete and self-contained."
+            : "\nProvide detailed practical reasoning with clear uncertainty."),
+      },
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${data.context}`,
       },
-      ...data.history.slice(-8).map((h) => ({
+      ...data.history.slice(-4).map((h) => ({
         role: h.role === "ai" ? "assistant" : "user",
-        content: h.text,
+        content: h.text.slice(-1200),
       })),
       { role: "user", content: data.message },
     ];
 
     let res: Response | null = null;
-    let ungroundedResponse: Response | null = null;
-    let attemptedProvider = providers[0]?.provider ?? "none";
-    const needsResearch = researchNeeded(data.message, data.history);
-    const deadline = Date.now() + 120_000;
-    // Fail over to another configured provider on availability errors. Keep
-    // each provider's search settings intact and never claim unreturned citations.
+    let attemptedProvider = "none";
+    const researchRequested =
+      data.mode === "research" || researchNeeded(data.message, data.history);
+    const policy = createProviderPolicy();
+    const failures: string[] = [];
     for (const { provider, apiKey } of providers) {
-      if ((providerCooldown.get(provider) ?? 0) > Date.now()) continue;
-      if (Date.now() >= deadline) break;
-      attemptedProvider = provider;
-      try {
-        // Ordinary chat should not require paid web-search tools. Only use
-        // grounding for questions asking for current external information.
-        const search = needsResearch && (provider === "gemini"
+      const blocked = policy.blocked(provider);
+      if (blocked) {
+        failures.push(
+          provider + ": cooling down for " + blocked.seconds + "s (HTTP " + blocked.status + ")",
+        );
+        continue;
+      }
+      const searchEnabled =
+        provider === "gemini"
           ? process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true"
           : provider === "anthropic"
             ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED !== "false"
-            : true);
-        // Search-disabled providers cannot satisfy current venue research.
-        if (needsResearch && !search) continue;
-        res = await complete({ apiKey, messages, search, provider, signal: AbortSignal.timeout(Math.min(45_000, deadline - Date.now())) });
-        if (res.status === 429) {
-          const retryAfter = res.headers.get("retry-after");
-          const seconds = retryAfter === null ? NaN : Number(retryAfter);
-          const delay = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter ?? "") - Date.now();
-          providerCooldown.set(provider, Date.now() + Math.min(300_000, Math.max(1000, Number.isFinite(delay) ? delay : 60_000)));
-        }
-        if (res.ok) {
-          const payload = await res.clone().json() as Record<string, unknown>;
-          const choices = payload?.choices as Array<{ message?: { content?: unknown } }> | undefined;
-          const raw = choices?.[0]?.message?.content;
-          if (typeof raw !== "string" || !AiJson.safeParse(extractJson(raw)).success) {
-            ungroundedResponse ??= res;
-            res = null;
-            continue;
-          }
-          if (search) {
-            // An HTTP 200 without grounding is not successful live research.
-            // Try another configured provider before presenting an unsourced answer.
-            try {
-              const payload = await res.clone().json() as Record<string, unknown>;
-              if (citationsFrom(payload).length === 0) {
-                console.warn("[advisor] research returned no grounded sources", { provider });
-                ungroundedResponse = res;
-                res = null;
-                continue;
-              }
-            } catch {
-              console.warn("[advisor] research response could not be checked", { provider });
-              ungroundedResponse = res;
-              res = null;
-              continue;
-            }
-          }
-          break;
-        }
-        // A failed Claude request must remain visible even when Gemini also fails.
-        // Do not log API keys, response bodies, or artist context.
-        console.warn("[advisor] provider attempt failed", { provider, status: res.status });
-        // Credentials are specific to each provider. Try the next configured
-        // provider if one rejects its key; never retry the rejected provider.
-        if (res.status === 401 || res.status === 403) {
-          console.warn("[advisor] provider credentials rejected; trying next provider", { provider, status: res.status });
+            : true;
+      if (researchRequested && !searchEnabled) {
+        failures.push(provider + ": web search disabled");
+        continue;
+      }
+      try {
+        const response = await complete({
+          apiKey,
+          messages,
+          search: researchRequested,
+          provider,
+          mode: data.mode,
+          request: policy.request,
+        });
+        if (!response.ok) {
+          failures.push(provider + ": HTTP " + response.status);
+          console.warn("[advisor] provider unavailable", { provider, status: response.status });
           continue;
         }
+        const envelope = (await response.clone().json()) as Record<string, unknown>;
+        const choices =
+          envelope && typeof envelope === "object"
+            ? (envelope.choices as Array<{ message?: { content?: unknown } }>)
+            : undefined;
+        if (
+          !Array.isArray(choices) ||
+          typeof choices[0]?.message?.content !== "string" ||
+          !choices[0].message.content.trim()
+        ) {
+          failures.push(provider + ": invalid response");
+          continue;
+        }
+        if (
+          !AiJson.safeParse(
+            readableAdvisorAnswer(choices[0].message.content).object ??
+              extractJson(choices[0].message.content),
+          ).success
+        ) {
+          failures.push(provider + ": invalid structured response");
+          continue;
+        }
+        if (researchRequested && !citationsFrom(envelope).length) {
+          failures.push(provider + ": no research sources returned");
+          continue;
+        }
+        attemptedProvider = provider;
+        res = response;
+        break;
       } catch (error) {
-        console.warn("[advisor] provider attempt threw", { provider, reason: error instanceof Error ? error.name : "unknown" });
-        res = null;
+        failures.push(provider + ": connection timeout or invalid response");
+        console.warn("[advisor] provider request failed", {
+          provider,
+          reason: error instanceof Error ? error.name : "unknown",
+        });
       }
     }
-
-    // If all providers lack grounded research, preserve a useful AI answer but label it unverified.
-    if (!res?.ok && ungroundedResponse) res = ungroundedResponse;
-
-    // Do not silently substitute an ungrounded provider for live research.
-    // Report only the upstream HTTP status; never log tokens or response bodies.
-    if (!res?.ok) {
-      console.error("[advisor] primary provider unavailable", {
-        provider: attemptedProvider,
-        status: res?.status ?? "network-error",
-      });
+    if (!res) {
       const local = fallback();
       return {
         ...local,
-        source: "AI PROVIDER UNAVAILABLE — LIVE FACTS NOT VERIFIED",
+        source: researchRequested
+          ? "LIVE RESEARCH UNAVAILABLE — NO FACTS VERIFIED"
+          : "AI PROVIDER UNAVAILABLE — OFFLINE GUIDANCE",
         gigs: [],
         people: [],
         moves: [],
-        answer: `Live research is temporarily unavailable. No current venue, contact, or booking details have been verified.\n\n${local.answer}`,
+        answer: researchRequested
+          ? "Live venue research could not be verified. No current venue capacity, contact, availability or deal terms were confirmed, and no leads were generated.\n\nProvider status: " +
+            failures.join("; ") +
+            ". Wait for a cooldown or check the configured provider account; repeating the request will not bypass its quota."
+          : "AI is temporarily unavailable. The following is offline guidance from saved information, not an AI response.\n\n" +
+            local.answer +
+            "\n\nProvider status: " +
+            failures.join("; "),
       };
     }
-
 
     let body: Record<string, unknown>;
     try {
@@ -434,35 +529,39 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         moves: [],
       };
     }
-    const choices = body.choices as
-      | Array<{ message?: { content?: string } }>
-      | undefined;
+    const choices = body.choices as Array<{ message?: { content?: string } }> | undefined;
     const content = choices?.[0]?.message?.content;
     const raw = typeof content === "string" ? content : "";
-    const parsed = extractJson(raw);
+    const decoded = readableAdvisorAnswer(raw);
+    const parsed = decoded.object ?? extractJson(raw);
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
-    const citations = citationsFrom(body);
+    const citations = researchRequested ? citationsFrom(body) : [];
     const source = citations.length
-      ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
-      : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
+      ? attemptedProvider.toUpperCase() + " LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH CLAIM"
+      : attemptedProvider.toUpperCase() +
+        " AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
       // keep them out of the UI even if the model emitted plausible-looking entries.
-      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).filter((g) => sourceMatches(g.sourceUrl, citations)).slice(0, 5).map((g) => ({
-        name: g.name,
-        venue: g.venue,
-        city: g.city,
-        // An AI research suggestion is never proof of a scheduled show or an agreed fee.
-        date: "",
-        fee: 0,
-        conf: g.conf,
-        reason: g.reason,
-        sourceUrl: g.sourceUrl,
-        status: "lead" as const,
-      }));
-      const people: SuggestedPerson[] = (citations.length ? safe.data.people ?? [] : [])
+      const gigs: SuggestedGig[] = (citations.length ? (safe.data.gigs ?? []) : [])
+        .filter((g) => sourceMatches(g.sourceUrl, citations))
+        .slice(0, 5)
+        .map((g) => ({
+          ...citedVenueEvidence(g, citations),
+          name: g.name,
+          venue: g.venue,
+          city: g.city,
+          // An AI research suggestion is never proof of a scheduled show or an agreed fee.
+          date: "",
+          fee: 0,
+          conf: g.conf,
+          reason: g.reason,
+          sourceUrl: g.sourceUrl,
+          status: "lead" as const,
+        }));
+      const people: SuggestedPerson[] = (citations.length ? (safe.data.people ?? []) : [])
         .filter((p) => sourceMatches(p.sourceUrl, citations))
         .slice(0, 5)
         .map((p) => ({
@@ -476,14 +575,21 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       // Venue cards render below the answer, not "above". A provider may
       // also omit structured leads or supply URLs that fail source matching.
       // Never expose a dangling "see above" placeholder as the full answer.
-      const refersToMissingShortlist = /\b(?:see|refer to|shown|listed)\b.{0,45}\b(?:above|shortlist)\b/i.test(safe.data.answer)
-        && /\b(?:structured|shortlist|venues?)\b/i.test(safe.data.answer);
+      const refersToMissingShortlist =
+        /\b(?:see|refer to|shown|listed)\b.{0,45}\b(?:above|shortlist)\b/i.test(safe.data.answer) &&
+        /\b(?:structured|shortlist|venues?)\b/i.test(safe.data.answer);
       const leadSummary = gigs.length
-        ? gigs.map((g, i) => `${i + 1}. ${g.venue || g.name} — ${g.city || "City not verified"}\n   ${g.reason || "Booking fit requires review"}\n   Source: ${g.sourceUrl}`).join("\n\n")
+        ? gigs
+            .map(
+              (g, i) =>
+                `${i + 1}. ${g.venue || g.name} — ${g.city || "City not verified"}\n   ${g.reason || "Booking fit requires review"}\n   Source: ${g.sourceUrl}`,
+            )
+            .join("\n\n")
         : "No venue cards met the source requirements. The cited pages are research references, not verified booking contacts.";
       const answer = refersToMissingShortlist
         ? `Venue research results (${gigs.length} citation-matched leads):\n\n${leadSummary}\n\nResearch is incomplete. Verify capacity and booking contacts directly before outreach.`
-        : safe.data.answer;
+        : readableAdvisorAnswer(safe.data.answer).answer ||
+          "The provider returned unreadable content. Please try a shorter question.";
       return {
         ok: true,
         answer,
@@ -491,17 +597,19 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         citations,
         gigs,
         people,
-        moves: (safe.data.moves ?? []).filter((move) => !/\b(?:say ['"]?continue|next turn|search pass)\b/i.test(move)).slice(0, 3),
+        moves: (safe.data.moves ?? [])
+          .filter((move) => !/\b(?:say ['"]?continue|next turn|search pass)\b/i.test(move))
+          .slice(0, 3),
       };
     }
 
     // Never discard an otherwise useful response merely because
     // its optional JSON envelope was malformed or truncated.
     // Keep structured leads disabled; expose the answer only as unverified prose.
-    if (raw.trim() && !raw.trim().startsWith("{") && !raw.trim().startsWith("```")) {
+    if (decoded.answer) {
       return {
         ok: true,
-        answer: raw.trim().slice(0, 8000),
+        answer: decoded.answer,
         source: "AI RESPONSE — STRUCTURED FORMAT INVALID; FACTS NOT VERIFIED",
         citations: [],
         gigs: [],
