@@ -44,6 +44,7 @@ function AdvisorPage() {
   const clearChat = useMusician((s) => s.clearChat);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showMissions, setShowMissions] = useState(true);
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,6 +65,7 @@ function AdvisorPage() {
     const q = text.trim();
     if (!q || busy) return;
     setInput("");
+    setShowMissions(false);
     addUserMessage(q);
     setBusy(true);
     try {
@@ -120,10 +122,10 @@ function AdvisorPage() {
           </div>
         </div>
         <div className="relative mt-6 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
-          <span className="mr-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"><Compass className="size-4" /> Start booking</span>
-          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Booking agent quick actions">
+          <button type="button" onClick={() => setShowMissions((visible) => !visible)} aria-expanded={showMissions} aria-controls="booking-missions" className="mr-2 flex min-h-9 items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted hover:text-fg"><Compass className="size-4" /> {showMissions ? "Hide booking actions" : "Show booking actions"}</button>
+          {showMissions ? <div id="booking-missions" className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Booking agent quick actions">
             {SUGGESTIONS.map((s, i) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className={cn("group flex min-h-14 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors disabled:opacity-50", i === 1 ? "border-accent/50 bg-accent/10 text-fg hover:bg-accent/15" : "border-line-strong bg-bg/75 text-soft hover:border-accent/60 hover:text-fg")}><span className="flex items-center gap-3"><span className="text-[10px] font-bold tabular text-muted">{String(i + 1).padStart(2, "0")}</span>{s.label}</span><ArrowUpRight className="size-4 shrink-0 text-accent transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></button>)}
-          </div>
+          </div> : null}
         </div>
       </section>
 
@@ -293,7 +295,7 @@ function AdvisorPage() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about growth, rooms, bills, routing…"
+            placeholder="Find venues, draft pitches, or plan a tour…"
             className="h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-bg px-3 text-sm outline-none placeholder:text-muted focus:border-muted"
             autoComplete="off"
           />
