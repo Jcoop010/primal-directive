@@ -41,7 +41,7 @@ export function createProviderPolicy(
   const now = options.now ?? Date.now,
     request = options.fetchImpl ?? fetch,
     blocks = options.blocks ?? sharedBlocks;
-  const deadline = now() + (options.timeoutMs ?? 145_000),
+  const deadline = now() + (options.timeoutMs ?? 120_000),
     attempted = new Set<AdvisorProvider>();
   return {
     blocked(provider: AdvisorProvider) {
@@ -63,7 +63,7 @@ export function createProviderPolicy(
       const response = await request(url, {
         ...init,
         signal: AbortSignal.timeout(
-          Math.max(1, Math.min(options.attemptMs ?? 20_000, deadline - now())),
+          Math.max(1, Math.min(options.attemptMs ?? 45_000, deadline - now())),
         ),
       });
       const text = await response.text();
