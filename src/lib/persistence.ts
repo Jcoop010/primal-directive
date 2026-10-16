@@ -33,6 +33,12 @@ const gigSchema = z.object({
   conf: z.number(),
   status: z.enum(GIG_STATUSES),
   notes: z.string(),
+  researchSourceUrl: z.string().optional(),
+  researchVerifiedAt: z.string().optional(),
+  outreachContact: z.string().optional(),
+  outreachLastContactedAt: z.string().optional(),
+  outreachNextFollowUp: z.string().optional(),
+  outreachNotes: z.string().optional(),
 });
 
 const personSchema = z.object({
