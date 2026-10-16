@@ -139,6 +139,9 @@ const grokOAuthPlugin = authConfigured
     })
   : null;
 
+const googleOAuthConfigured = Boolean(env("GOOGLE_CLIENT_ID") && env("GOOGLE_CLIENT_SECRET"));
+const xOAuthConfigured = Boolean(env("TWITTER_CLIENT_ID") && env("TWITTER_CLIENT_SECRET"));
+
 const configuredAuthSecret = env("BETTER_AUTH_SECRET");
 if (process.env.VERCEL_ENV === "production" && !configuredAuthSecret) {
   throw new Error("Production authentication requires BETTER_AUTH_SECRET.");
@@ -149,6 +152,10 @@ export const auth = betterAuth({
   secret: configuredAuthSecret ?? previewAuthSecret(),
   database,
   trustedOrigins,
+  socialProviders: {
+    ...(googleOAuthConfigured ? { google: { clientId: env("GOOGLE_CLIENT_ID")!, clientSecret: env("GOOGLE_CLIENT_SECRET")! } } : {}),
+    ...(xOAuthConfigured ? { twitter: { clientId: env("TWITTER_CLIENT_ID")!, clientSecret: env("TWITTER_CLIENT_SECRET")! } } : {}),
+  },
   account: {
     encryptOAuthTokens: true,
     accountLinking: {
