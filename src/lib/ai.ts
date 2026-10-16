@@ -141,7 +141,7 @@ function sourceMatches(url: string | undefined, citations: string[]): boolean {
     try {
       const u = new URL(value);
       if (u.protocol !== "https:" && u.protocol !== "http:") return null;
-      return u.origin.toLowerCase() + u.pathname.replace(/\\/+$/, "") .toLowerCase();
+      return u.origin.toLowerCase() + u.pathname.replace(/\/+$/, "").toLowerCase();
     } catch { return null; }
   };
   const claimed = normalize(url);
