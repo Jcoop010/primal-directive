@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, CheckCircle2, CircleAlert, ListChecks, Target, TrendingUp, ArrowRight } from "lucide-react";
+import { CalendarDays, CheckCircle2, CircleAlert, ListChecks, Target, TrendingUp, ArrowRight, Download } from "lucide-react";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
@@ -18,6 +18,34 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/board")({ component: BoardPage });
+
+function exportWorkspaceBackup() {
+  const state = useMusician.getState();
+  const data = {
+    format: "primal-directive-workspace-backup",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    profile: state.profile,
+    gigs: state.gigs,
+    people: state.people,
+    money: state.money,
+    merchProducts: state.merchProducts,
+    merchSales: state.merchSales,
+    merchOrders: state.merchOrders,
+    merchInventoryAdjustments: state.merchInventoryAdjustments,
+    merchRefunds: state.merchRefunds,
+    tasks: state.tasks,
+    chat: state.chat,
+  };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "primal-directive-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 function BoardPage() {
   const gigs = useMusician((s) => s.gigs);
@@ -81,6 +109,10 @@ function BoardPage() {
 
   return (
     <div className="space-y-7">
+      <section aria-label="Workspace data protection" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+        <div className="min-w-0"><h3 className="text-sm font-bold">Protect your workspace data</h3><p className="mt-1 max-w-xl text-xs leading-relaxed text-muted">Workspace records are currently stored in this browser. They may not follow you to another device and can be lost if browser storage is cleared. Save a local JSON backup regularly; it may contain private contact and financial information. Backup restoration is not yet supported.</p></div>
+        <button type="button" onClick={exportWorkspaceBackup} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-4 text-xs font-bold hover:border-accent"><Download className="size-4" /> Download backup</button>
+      </section>
       <section aria-label="Career command overview" className="command-surface relative isolate overflow-hidden rounded-[24px] px-5 py-7 sm:px-8 sm:py-9">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" />
