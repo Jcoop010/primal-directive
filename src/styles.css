@@ -141,3 +141,35 @@
 @media (prefers-reduced-motion: reduce) {
   .command-link::before { transition: none; }
 }
+
+/* Final polish: consistent tactile surfaces, readable data, and mobile-safe layouts. */
+@layer components {
+  .command-surface {
+    position: relative;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, .028), transparent 42%),
+      linear-gradient(150deg, rgba(28, 37, 47, .94), rgba(13, 18, 24, .97));
+    border-color: rgba(139, 158, 177, .25);
+    border-radius: var(--radius-lg);
+  }
+  .command-surface:focus-within {
+    border-color: rgba(255, 122, 24, .45);
+  }
+  .metric-value, .tabular { font-variant-numeric: tabular-nums; }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .command-surface { transition: border-color 180ms ease, box-shadow 180ms ease; }
+  .command-surface:hover {
+    border-color: rgba(139, 158, 177, .38);
+    box-shadow: 0 24px 65px rgba(0, 0, 0, .32), inset 0 1px rgba(255, 255, 255, .045);
+  }
+}
+@media (max-width: 639px) {
+  .command-surface { border-radius: 14px; }
+  .command-kicker { letter-spacing: .15em; }
+  main { overflow-wrap: anywhere; }
+}
+@media (forced-colors: active) {
+  .command-surface, .glass-panel { border: 1px solid CanvasText; }
+  .command-link[aria-current="page"] { outline: 2px solid Highlight; outline-offset: -2px; }
+}
