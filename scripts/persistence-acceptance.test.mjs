@@ -1,13 +1,23 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 
 // Database-level acceptance of the same user-scoped SQL and optimistic locking
 // employed by loadAppState/saveAppState. No production credentials or writes.
 test("two users persist independently and stale writes cannot overwrite data", async () => {
-  const db = new PGlite();
+  const directory = await mkdtemp(join(tmpdir(), "primal-persistence-"));
+  let db = new PGlite(directory);
   try {
-    await db.exec("create table app_state (user_id text primary key, state jsonb not null, version integer not null, updated_at timestamp not null default current_timestamp)");
+    for (const migration of ["0001_auth.sql", "0002_app_state.sql", "0003_security_hardening.sql"]) {
+      await db.exec(await readFile(new URL("../migrations/" + migration, import.meta.url), "utf8"));
+    }
+    await db.query('insert into "user" ("id", "name", "email", "emailVerified") values ($1, $2, $3, false), ($4, $5, $6, false)', [
+      "alice", "River Fold test A (fictional)", "river-fold-a@example.invalid",
+      "bob", "River Fold test B (fictional)", "river-fold-b@example.invalid",
+    ]);
     const save = async (userId, state, expectedVersion) => {
       const serialized = JSON.stringify(state);
       const rows = expectedVersion === 0
@@ -33,7 +43,29 @@ test("two users persist independently and stale writes cannot overwrite data", a
     assert.deepEqual((await load("alice")).state, revised);
     assert.deepEqual((await load("bob")).state, bob);
     assert.deepEqual(await load("unknown"), { state: null, version: 0 });
+    await assert.rejects(save("unknown", alice, 0), /foreign key/i);
+
+    // Two tabs reading the same version: exactly one write must succeed.
+    const competing = await Promise.allSettled([
+      save("alice", { ...revised, tasks: [{ id: "tab-one" }] }, 2),
+      save("alice", { ...revised, tasks: [{ id: "tab-two" }] }, 2),
+    ]);
+    assert.equal(competing.filter((result) => result.status === "fulfilled").length, 1);
+    assert.equal(competing.filter((result) => result.status === "rejected").length, 1);
+    const winner = await load("alice");
+    assert.equal(Number(winner.version), 3);
+    assert.deepEqual((await load("bob")).state, bob);
+
+    // A fresh database connection must recover saved records and versions.
+    await db.close();
+    db = new PGlite(directory);
+    assert.deepEqual(await load("alice"), winner);
+    assert.deepEqual((await load("bob")).state, bob);
+    await assert.rejects(save("alice", alice, 2), /Workspace changed/);
+    assert.equal(await save("alice", revised, 3), 4);
+    assert.deepEqual((await load("alice")).state, revised);
   } finally {
     await db.close();
+    await rm(directory, { recursive: true, force: true });
   }
 });
