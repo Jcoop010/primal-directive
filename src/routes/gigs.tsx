@@ -66,6 +66,15 @@ function GigsPage() {
           />
         ))}
       </div>
+      <Card className="mb-4 p-4">
+        <div className="text-sm font-semibold">Upcoming booking follow-ups</div>
+        <p className="mt-1 text-xs text-muted">Scheduled reminders only; no emails or messages are sent automatically.</p>
+        {gigs.filter((g) => g.outreachNextFollowUp && ["lead","outreach","negotiating","hold"].includes(g.status)).sort((a,b) => (a.outreachNextFollowUp || "").localeCompare(b.outreachNextFollowUp || "")).slice(0,6).map((g) => (
+          <button key={g.id} type="button" onClick={() => openGig(g.id)} className="mt-2 flex w-full justify-between gap-3 rounded border border-line p-2 text-left text-xs hover:bg-surface-2">
+            <span>{g.venue || g.name}</span><span>{g.outreachNextFollowUp}</span>
+          </button>
+        ))}
+      </Card>
       <Card className="p-0">
         {shown.length === 0 ? (
           <EmptyState
