@@ -278,7 +278,8 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           console.warn("[advisor] provider credentials rejected; trying next provider", { provider, status: res.status });
           continue;
         }
-      } catch {
+      } catch (error) {
+        console.warn("[advisor] provider attempt threw", { provider, reason: error instanceof Error ? error.name : "unknown" });
         res = null;
       }
     }
