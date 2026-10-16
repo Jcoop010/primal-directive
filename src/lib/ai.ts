@@ -266,9 +266,12 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           res = await complete({ apiKey, messages, search: false, provider });
         }
         if (res.ok) break;
-        // Auth failures should be surfaced rather than repeatedly billed or
-        // retried across providers; other provider failures permit failover.
-        if (res.status === 401 || res.status === 403) break;
+        // An invalid key is provider-specific. Try the next configured
+        // provider rather than disabling the entire booking agent.
+        if (res.status === 401 || res.status === 403) {
+          console.warn("[advisor] provider credentials rejected; trying next provider", { provider, status: res.status });
+          continue;
+        }
       } catch {
         res = null;
       }
