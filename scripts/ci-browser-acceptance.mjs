@@ -2,7 +2,8 @@ import { spawnSync } from "node:child_process";
 import { chromium } from "playwright";
 import { randomUUID } from "node:crypto";
 
-const origin = "http://127.0.0.1:8080";
+const origin = process.env.AUTH_SMOKE_ORIGIN ?? "http://127.0.0.1:8080";
+if (!["http://127.0.0.1:8080", "https://primal-directive-loose-ends-co.vercel.app"].includes(origin)) throw new Error("Unexpected acceptance target");
 const suffix = randomUUID();
 const commands = [
   ["open", origin],
@@ -34,6 +35,21 @@ const commands = [
   ["find", "label", "Contact", "fill", "fictional-booker@example.invalid"],
   ["find", "text", "Save contact", "click"],
   ["wait", "2000"],
+  ["open", origin + "/gigs"],
+  ["wait", "--fn", "document.querySelector('main') && !document.body.innerText.includes('Loading your workspace')"],
+  ["click", "button[aria-label=Add]"],
+  ["find", "label", "Opportunity", "fill", "Fictional QA booking"],
+  ["find", "label", "Venue", "fill", "Fictional QA Hall"],
+  ["find", "label", "City", "fill", "Test City (fictional)"],
+  ["find", "label", "Date", "fill", "2027-06-12"],
+  ["find", "label", "Fee", "fill", "500"],
+  ["find", "label", "Status", "select", "booked"],
+  ["find", "text", "Save gig", "click"],
+  ["wait", "2000"],
+  ["open", origin + "/tasks"],
+  ["wait", "--fn", "document.querySelector('button[aria-label=\\"Mark task complete\\"]') && !document.body.innerText.includes('Loading your workspace')"],
+  ["click", "button[aria-label='Mark task complete']:first-of-type"],
+  ["wait", "2000"],
   ["open", origin + "/money"],
   ["wait", "--fn", "document.body.innerText.includes('Financial activity') && !document.body.innerText.includes('Loading your workspace')"],
   ["find", "text", "Add entry", "click"],
@@ -45,11 +61,28 @@ const commands = [
   ["open", origin + "/money"],
   ["wait", "--fn", "document.body.innerText.includes('Fictional QA show income') && !document.body.innerText.includes('Loading your workspace')"],
   ["screenshot", "/workspace/screenshots/authenticated-money.png"],
+  ["open", origin + "/merch"],
+  ["wait", "--fn", "document.querySelector('main') && !document.body.innerText.includes('Loading your workspace')"],
+  ["find", "text", "Add product", "click"],
+  ["find", "label", "Product name", "fill", "Fictional River Fold QA tee"],
+  ["find", "label", "Opening stock", "fill", "10"],
+  ["find", "text", "Save product", "click"],
+  ["wait", "2000"],
+  ["eval", "localStorage.removeItem('musician-os-v1'); true"],
+  ["open", origin + "/merch"],
+  ["wait", "--fn", "document.body.innerText.includes('Fictional River Fold QA tee') && !document.body.innerText.includes('Loading your workspace')"],
   ...["board", "gigs", "calendar", "tour", "merch", "tasks"].flatMap((route) => [
     ["open", origin + "/" + route],
     ["wait", "--fn", "document.querySelector('main')?.innerText.trim().length > 20 && !document.body.innerText.includes('Loading your workspace')"],
     ["eval", "if (document.documentElement.scrollWidth > document.documentElement.clientWidth + 1) throw new Error('Horizontal overflow'); true"],
   ]),
+  ["set", "viewport", "390", "844"],
+  ...["board", "gigs", "people", "money", "calendar", "tour", "merch", "tasks"].flatMap((route) => [
+    ["open", origin + "/" + route],
+    ["wait", "--fn", "document.querySelector('main')?.innerText.trim().length > 20 && !document.body.innerText.includes('Loading your workspace')"],
+    ["eval", "if (document.documentElement.scrollWidth > document.documentElement.clientWidth + 1) throw new Error('Mobile horizontal overflow'); true"],
+  ]),
+  ["screenshot", "/workspace/screenshots/authenticated-mobile.png"],
   ["eval", `(async () => {
     const response = await fetch("/api/auth/sign-up/email", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "River Fold B (fictional QA)", email: "river-fold-b-${suffix}@example.invalid", password: sessionStorage.getItem("__qa_password") }) });
     if (!response.ok) throw new Error("Second disposable account registration failed: " + response.status);
@@ -64,7 +97,7 @@ const commands = [
     return true;
   })()`],
   ["open", origin + "/money"],
-  ["wait", "--fn", "document.body.innerText.includes('Sign in to access your private workspace')"],
+  ["wait", "--fn", "document.body.innerText.includes('Sign in to access your private pipeline')"],
   ["close"],
 ];
 const result = spawnSync("npx", [
