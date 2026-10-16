@@ -157,6 +157,7 @@ function AdvisorPage() {
     const today = new Date().toISOString().slice(0, 10);
     useMusician.getState().updateGig(gigId, {
       outreachLastContactedAt: today,
+      outreachReplyStatus: "awaiting",
       ...(gig.status === "lead" ? { status: "outreach" as const } : {}),
     });
     toast("Contact date recorded. No email was sent.");
@@ -332,11 +333,30 @@ Thanks,
                   value={gig.outreachNextFollowUp || ""}
                   onChange={(event) => useMusician.getState().updateGig(gig.id, { outreachNextFollowUp: event.target.value })}
                 />
+                <select
+                  aria-label={`Reply status for ${gig.venue || gig.name}`}
+                  className="min-h-9 rounded-md border border-line bg-bg px-2 text-xs"
+                  value={gig.outreachReplyStatus || "awaiting"}
+                  onChange={(event) => {
+                    const status = event.target.value as "awaiting" | "interested" | "declined";
+                    useMusician.getState().updateGig(gig.id, {
+                      outreachReplyStatus: status,
+                      outreachReplyReceivedAt: status === "awaiting" ? "" : new Date().toISOString().slice(0, 10),
+                      ...(status === "interested" && gig.status === "lead" ? { status: "negotiating" as const } : {}),
+                      ...(status === "declined" ? { status: "passed" as const, outreachNextFollowUp: "" } : {}),
+                    });
+                    toast("Reply status updated manually");
+                  }}
+                >
+                  <option value="awaiting">Awaiting reply</option>
+                  <option value="interested">Interested</option>
+                  <option value="declined">Declined</option>
+                </select>
                 <Button size="sm" variant="ghost" onClick={() => void copyFollowUp(gig.id)}>Copy follow-up</Button>
                 <Button size="sm" variant="ghost" onClick={() => recordContact(gig.id)}>Mark contacted</Button>
               </div>
             ))}
-            <p className="text-[11px] text-muted">Dates and contact activity are manually recorded. No messages are sent automatically.</p>
+            <p className="text-[11px] text-muted">Reply status, dates, and contact activity are manually recorded. Email is not connected; no messages are sent automatically.</p>
           </div>
         </details>
       ) : null}
