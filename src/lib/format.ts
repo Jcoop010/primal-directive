@@ -1,3 +1,5 @@
+import { safeCsvCell } from './workspace-export';
+
 export function parseDay(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1);
@@ -66,9 +68,7 @@ export function downloadCsv(filename: string, rows: string[][]) {
     .map((row) =>
       row
         .map((cell) => {
-          const v = String(cell ?? "");
-          if (/[",\n]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
-          return v;
+          return safeCsvCell(cell);
         })
         .join(","),
     )

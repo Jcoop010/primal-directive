@@ -60,7 +60,7 @@ function PlanningWorkspace({ onExplain, busy }: { onExplain: () => void; busy: b
   const [error, setError] = useState('');
   const workspace = { tasks, gigs, money, merchProducts };
   function run(action: () => void) { try { action(); setError(''); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not update planning.'); } }
-  return <details open className="my-3 rounded-lg border border-line bg-surface">
+  return <details className="my-3 rounded-lg border border-line bg-surface">
     <summary className="min-h-11 cursor-pointer px-4 py-3 text-sm font-semibold">Goals & weekly plan · {planning.goals.length} goals · {planning.memories.length} saved notes</summary>
     <div className="space-y-5 border-t border-line p-4">
       <section aria-label="Saved goals" className="space-y-3">

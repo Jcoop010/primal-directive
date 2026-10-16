@@ -5,6 +5,7 @@ import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
 import { validDay } from "@/lib/workspace-intelligence";
+import { workspaceExport } from "@/lib/workspace-export";
 import { parseLedgerAmount } from "@/lib/money-ledger";
 import { isSourceManagedMoneyEntry } from "@/lib/merch-ops";
 import { useMusician } from "@/lib/store";
@@ -557,6 +558,14 @@ function ProfileForm() {
           <Button type="submit" className="w-full">
             Save profile
           </Button>
+          <Button type="button" variant="ghost" className="min-h-11 w-full" onClick={() => {
+            const data = workspaceExport(useMusician.getState());
+            const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+            const link = document.createElement('a'); link.href = url; link.download = 'primal-directive-workspace-' + toIsoDay(new Date()) + '.json'; link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            toast.success('Workspace export downloaded. Keep this private file safe.');
+          }}>Download workspace export</Button>
+          <p className="text-xs text-muted">Includes your current records, conversations, evidence and planning. No credentials. This file is a portable snapshot; automatic restore is not provided.</p>
           <div className="flex gap-2 pt-2">
             <Button
               type="button"
