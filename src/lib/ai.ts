@@ -625,7 +625,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         gigs,
         people,
         moves: (safe.data.moves ?? [])
-          .filter((move) => !/\b(?:say ['"]?continue|next turn|search pass)\b/i.test(move))
+          .filter((move) => !/\b(?:say ['"]?continue|next turn|search pass|run (?:a |another |dedicated )?(?:live )?search|search for .*booking)\b/i.test(move))
           .slice(0, 3),
       };
     }
