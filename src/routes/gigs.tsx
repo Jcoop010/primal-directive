@@ -38,16 +38,14 @@ function GigsPage() {
           className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-fg"
           onClick={() =>
             downloadCsv("gigs.csv", [
-              ["name", "venue", "city", "date", "fee", "confidence", "status", "notes"],
+              ["name", "venue", "city", "date", "fee", "confidence", "status", "notes", "research_source_url", "source_reviewed_at", "outreach_contact", "last_contacted_at", "next_follow_up", "outreach_notes"],
               ...gigs.map((g) => [
-                g.name,
-                g.venue,
-                g.city,
-                g.date,
-                String(g.fee),
-                String(g.conf),
-                g.status,
-                g.notes,
+                g.name, g.venue, g.city, g.date,
+                g.fee > 0 ? String(g.fee) : "",
+                String(g.conf), g.status, g.notes,
+                g.researchSourceUrl || "", g.researchVerifiedAt || "",
+                g.outreachContact || "", g.outreachLastContactedAt || "",
+                g.outreachNextFollowUp || "", g.outreachNotes || "",
               ]),
             ])
           }
@@ -146,8 +144,8 @@ function GigsPage() {
                 </div>
               </div>
               <div className="shrink-0 text-right">
-                <div className="text-sm font-semibold tabular">{money(g.fee)}</div>
-                <div className="text-xs text-muted">{longDate(g.date)}</div>
+                <div className="text-sm font-semibold tabular">{g.fee > 0 ? money(g.fee) : "Fee unconfirmed"}</div>
+                <div className="text-xs text-muted">{g.date ? longDate(g.date) : "Date unconfirmed"}</div>
                 <div className="text-[11px] text-muted">
                   {Math.round(g.conf * 100)}% conf
                 </div>
