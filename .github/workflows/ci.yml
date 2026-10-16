@@ -118,7 +118,7 @@ jobs:
         run: |
           node --input-type=module -e '
             import fs from "node:fs";
-            for (const name of ["production-demo.png", "production-demo-mobile.png", "authenticated-money.png", "authenticated-mobile.png", "acceptance-failure.png"]) {
+            for (const name of ["production-demo.png", "production-demo-mobile.png", "authenticated-money.png", "authenticated-mobile.png", "acceptance-failure.png", "profile-form.png"]) {
               const path = "/workspace/screenshots/" + name;
               if (fs.existsSync(path)) console.log("QA_PNG_JSON=" + JSON.stringify({ name, base64: fs.readFileSync(path).toString("base64") }));
             }
