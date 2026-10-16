@@ -243,7 +243,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         gigs: [],
         people: [],
         moves: [],
-        answer: `Live research is temporarily unavailable (provider: ${provider}, status: ${res?.status ?? "connection failure"}). No current venue, contact, or booking details have been verified.\\n\\n${local.answer}`,
+        answer: `Live research is temporarily unavailable (provider: ${provider}, status: ${res?.status ?? "connection failure"}). No current venue, contact, or booking details have been verified.\n\n${local.answer}`,
       };
     }
 
