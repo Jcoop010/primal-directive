@@ -139,9 +139,14 @@ const grokOAuthPlugin = authConfigured
     })
   : null;
 
+const configuredAuthSecret = env("BETTER_AUTH_SECRET");
+if (process.env.VERCEL_ENV === "production" && !configuredAuthSecret) {
+  throw new Error("Production authentication requires BETTER_AUTH_SECRET.");
+}
+
 export const auth = betterAuth({
   baseURL,
-  secret: env("BETTER_AUTH_SECRET") ?? previewAuthSecret(),
+  secret: configuredAuthSecret ?? previewAuthSecret(),
   database,
   trustedOrigins,
   account: {
