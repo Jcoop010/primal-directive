@@ -143,7 +143,7 @@ export async function signIn(
     return;
   }
 
-  const directProvider = providerId === "grok-google" ? "google" : providerId === "grok-x" ? "twitter" : null;
+  const directProvider = providerId === "grok-google" ? "google" : null;
   const { data, error } = directProvider
     ? await authClient.signIn.social({ provider: directProvider, callbackURL, errorCallbackURL })
     : await authClient.signIn.oauth2({ providerId, callbackURL, errorCallbackURL });
