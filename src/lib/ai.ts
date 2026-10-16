@@ -137,7 +137,7 @@ function citationsFrom(body: Record<string, unknown>): string[] {
   return [...new Set(urls)].slice(0, 16);
 }
 
-// Match the same evidence URL despite harmless query strings, fragments or
+// Match the same evidence URL despite tracking query strings, fragments or
 // trailing slash differences. Never treat a shared domain as supporting proof.
 function sourceMatches(url: string | undefined, citations: string[]): boolean {
   if (!url) return false;
@@ -145,11 +145,34 @@ function sourceMatches(url: string | undefined, citations: string[]): boolean {
     try {
       const u = new URL(value);
       if (u.protocol !== "https:" && u.protocol !== "http:") return null;
-      return u.origin.toLowerCase() + u.pathname.replace(/\/+$/, "").toLowerCase();
+      for (const key of [...u.searchParams.keys()]) {
+        if (/^(utm_.+|gclid|fbclid)$/i.test(key)) u.searchParams.delete(key);
+      }
+      u.searchParams.sort();
+      return u.origin + u.pathname.replace(/\/+$/, "") + u.search;
     } catch { return null; }
   };
   const claimed = normalize(url);
   return claimed !== null && citations.some((candidate) => normalize(candidate) === claimed);
+}
+
+async function groundingUrls(urls: string[], signal: AbortSignal): Promise<string[]> {
+  // Gemini may cite Google's opaque redirect URLs while its answer names the
+  // destination page. Resolve only Google's known redirect endpoint, never a
+  // model-supplied host, and do not follow the redirect to the external site.
+  const resolved = await Promise.all(urls.slice(0, 8).map(async (value) => {
+    try {
+      const url = new URL(value);
+      if (url.origin !== "https://vertexaisearch.cloud.google.com" || !url.pathname.startsWith("/grounding-api-redirect/")) return value;
+      const response = await fetch(url, { redirect: "manual", signal: AbortSignal.any([signal, AbortSignal.timeout(3000)]) });
+      const location = response.headers.get("location");
+      await response.body?.cancel();
+      if (![301, 302, 303, 307, 308].includes(response.status) || !location) return value;
+      const destination = new URL(location, url);
+      return destination.protocol === "https:" && !destination.username && !destination.password ? destination.href : value;
+    } catch { return value; }
+  }));
+  return [...new Set([...resolved, ...urls])];
 }
 
 async function complete(args: {
@@ -157,6 +180,7 @@ async function complete(args: {
   messages: { role: string; content: string }[];
   search: boolean;
   provider: "xai" | "anthropic" | "gemini";
+  signal: AbortSignal;
 }) {
   if (args.provider === "gemini") {
     const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
@@ -166,10 +190,10 @@ async function complete(args: {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: args.messages.filter((message) => message.role === "system").map((message) => message.content).join("\n\n") }] },
         contents: args.messages.filter((message) => message.role !== "system").map((message) => ({ role: message.role === "assistant" ? "model" : "user", parts: [{ text: message.content }] })),
-        generationConfig: { maxOutputTokens: 1600 },
+        generationConfig: { maxOutputTokens: 3200 },
         ...(args.search ? { tools: [{ google_search: {} }] } : {}),
       }),
-      signal: AbortSignal.timeout(45_000),
+      signal: args.signal,
     });
     if (!response.ok) return response;
     const payload = await response.json() as {
@@ -180,7 +204,8 @@ async function complete(args: {
     };
     const candidate = payload.candidates?.[0];
     const text = (candidate?.content?.parts ?? []).filter((part) => !part.thought && typeof part.text === "string").map((part) => part.text).join("\n");
-    const citations = (candidate?.groundingMetadata?.groundingChunks ?? []).map((chunk) => chunk.web?.uri).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    const urls = (candidate?.groundingMetadata?.groundingChunks ?? []).map((chunk) => chunk.web?.uri).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    const citations = await groundingUrls(urls, args.signal);
     return Response.json({ choices: [{ message: { content: text } }], citations });
   }
   if (args.provider === "anthropic") {
@@ -188,7 +213,7 @@ async function complete(args: {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": args.apiKey, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1600, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] } : {}), }),
-      signal: AbortSignal.timeout(45_000),
+      signal: args.signal,
     });
     if (!response.ok) return response;
     const payload = await response.json() as { content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }> }> };
@@ -203,15 +228,16 @@ async function complete(args: {
     temperature: 0.2,
     max_tokens: 3200,
   };
-  if (args.search && args.provider === "xai") {
-    body.search_parameters = {
-      mode: "on",
-      return_citations: true,
-      max_search_results: 8,
-      sources: [{ type: "web" }, { type: "news" }],
-    };
+  if (args.search) {
+    // Server-side web search is supported by the Responses API.
+    delete body.messages;
+    delete body.max_tokens;
+    body.input = args.messages;
+    body.max_output_tokens = 3200;
+    body.tools = [{ type: "web_search" }];
+    body.store = false;
   }
-  const endpoint = "https://api.x.ai/v1/chat/completions";
+  const endpoint = args.search ? "https://api.x.ai/v1/responses" : "https://api.x.ai/v1/chat/completions";
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
@@ -219,9 +245,33 @@ async function complete(args: {
       Authorization: `Bearer ${args.apiKey}`,
     },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(45_000),
+    signal: args.signal,
   });
+  if (args.search && res.ok) {
+    const payload = await res.json() as {
+      output?: Array<{ type?: string; content?: Array<{ type?: string; text?: string; annotations?: Array<{ type?: string; url?: string }> }> }>;
+      citations?: string[];
+    };
+    const parts = (payload.output ?? []).filter((item) => item.type === "message").flatMap((item) => item.content ?? []).filter((item) => item.type === "output_text");
+    const citations = [...(payload.citations ?? []), ...parts.flatMap((part) => part.annotations ?? []).filter((item) => item.type === "url_citation").map((item) => item.url).filter((url): url is string => typeof url === "string")];
+    return Response.json({ choices: [{ message: { content: parts.map((part) => part.text ?? "").join("\n") } }], citations });
+  }
   return res;
+}
+
+// A short, per-instance circuit breaker avoids hammering an exhausted provider.
+// It is best-effort on serverless instances; never persist credentials or prompts.
+const providerCooldown = new Map<string, number>();
+
+function researchNeeded(message: string, history: z.infer<typeof HistoryItem>[]) {
+  const research = /\b(find|research|verify|source|venues?|booking contacts?|capacity|official website|latest|today|current|search|tour rout\w*|routing)\b/i;
+  if (research.test(message)) return true;
+  // Resolve short confirmations against the latest actual user request only.
+  if (/^(yes|yeah|ok(?:ay)?|do it|go ahead|continue|those|that one)[.!\s]*$/i.test(message.trim())) {
+    const previous = history.filter((item) => item.role === "user" && item.text.trim() !== message.trim()).at(-1);
+    return Boolean(previous && research.test(previous.text));
+  }
+  return false;
 }
 
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
@@ -277,24 +327,40 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let res: Response | null = null;
     let ungroundedResponse: Response | null = null;
     let attemptedProvider = providers[0]?.provider ?? "none";
+    const needsResearch = researchNeeded(data.message, data.history);
+    const deadline = Date.now() + 55_000;
     // Fail over to another configured provider on availability errors. Keep
     // each provider's search settings intact and never claim unreturned citations.
     for (const { provider, apiKey } of providers) {
+      if ((providerCooldown.get(provider) ?? 0) > Date.now()) continue;
+      if (Date.now() >= deadline) break;
       attemptedProvider = provider;
       try {
         // Ordinary chat should not require paid web-search tools. Only use
         // grounding for questions asking for current external information.
-        const needsResearch = /\b(find|research|verify|source|venue|booking contact|capacity|official website|latest|today|current|search|tour route)\b/i.test(data.message);
         const search = needsResearch && (provider === "gemini"
           ? process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true"
           : provider === "anthropic"
             ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED !== "false"
             : true);
-        res = await complete({ apiKey, messages, search, provider });
-        if (!res.ok && [400, 404, 422].includes(res.status) && search) {
-          res = await complete({ apiKey, messages, search: false, provider });
+        // Search-disabled providers cannot satisfy current venue research.
+        if (needsResearch && !search) continue;
+        res = await complete({ apiKey, messages, search, provider, signal: AbortSignal.timeout(Math.min(18_000, deadline - Date.now())) });
+        if (res.status === 429) {
+          const retryAfter = res.headers.get("retry-after");
+          const seconds = retryAfter === null ? NaN : Number(retryAfter);
+          const delay = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter ?? "") - Date.now();
+          providerCooldown.set(provider, Date.now() + Math.min(300_000, Math.max(1000, Number.isFinite(delay) ? delay : 60_000)));
         }
         if (res.ok) {
+          const payload = await res.clone().json() as Record<string, unknown>;
+          const choices = payload?.choices as Array<{ message?: { content?: unknown } }> | undefined;
+          const raw = choices?.[0]?.message?.content;
+          if (typeof raw !== "string" || !AiJson.safeParse(extractJson(raw)).success) {
+            ungroundedResponse ??= res;
+            res = null;
+            continue;
+          }
           if (search) {
             // An HTTP 200 without grounding is not successful live research.
             // Try another configured provider before presenting an unsourced answer.
@@ -303,11 +369,13 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
               if (citationsFrom(payload).length === 0) {
                 console.warn("[advisor] research returned no grounded sources", { provider });
                 ungroundedResponse = res;
+                res = null;
                 continue;
               }
             } catch {
               console.warn("[advisor] research response could not be checked", { provider });
               ungroundedResponse = res;
+              res = null;
               continue;
             }
           }
