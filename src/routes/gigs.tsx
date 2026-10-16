@@ -27,8 +27,11 @@ function GigsPage() {
   const active = gigs.filter((g) => ["lead", "outreach", "negotiating", "hold"].includes(g.status));
   const due = active.filter((g) => g.outreachNextFollowUp && g.outreachNextFollowUp <= today);
   const sourced = active.filter((g) => Boolean(g.researchSourceUrl));
+  const unsourced = active.filter((g) => !g.researchSourceUrl);
+  const missingContact = active.filter((g) => !g.outreachContact?.trim());
+  const [attentionFilter, setAttentionFilter] = useState<"all" | "unsourced" | "contact">("all");
   const filtered = filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
-  const shown = filtered.filter((g) => (!followUpOnly || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const shown = filtered.filter((g) => (!followUpOnly || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && (attentionFilter === "all" || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && (attentionFilter === "unsourced" ? !g.researchSourceUrl : !g.outreachContact?.trim()))) && [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <div>
@@ -70,8 +73,16 @@ function GigsPage() {
         <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Source recorded</div><div className="mt-2 font-display text-3xl font-extrabold tabular">{sourced.length}<span className="text-sm text-muted"> / {active.length}</span></div><p className="mt-1 text-xs text-muted">Source recorded ≠ verified</p></div>
         <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Open pipeline</div><div className="mt-2 font-display text-2xl font-extrabold tabular text-live">{money(pipelineValue(gigs))}</div><p className="mt-1 text-xs text-muted">Unconfirmed opportunity value</p></div>
       </section>
+      <section aria-label="Booking action queue" className="mb-5 rounded-2xl border border-line-strong bg-surface p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="font-display text-base font-bold">Action queue</div><p className="mt-1 text-xs text-muted">Review gaps before outreach. Research sources and contacts are manually recorded, not automatically verified.</p></div><button type="button" className="text-xs font-semibold text-accent hover:underline" onClick={() => { setAttentionFilter("all"); setFollowUpOnly(false); setFilter("all"); setQuery(""); }}>Clear filters</button></div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          <button type="button" aria-pressed={followUpOnly} onClick={() => {setFollowUpOnly(true);setAttentionFilter("all");setFilter("all");}} className="rounded-xl border border-line bg-bg/70 p-3 text-left hover:border-accent/50"><div className="text-2xl font-bold tabular text-accent">{due.length}</div><div className="mt-1 text-xs font-semibold">Follow-ups due</div><div className="mt-1 text-[11px] text-muted">Due today or overdue</div></button>
+          <button type="button" aria-pressed={attentionFilter === "unsourced"} onClick={() => {setAttentionFilter("unsourced");setFollowUpOnly(false);setFilter("all");}} className="rounded-xl border border-line bg-bg/70 p-3 text-left hover:border-accent/50"><div className="text-2xl font-bold tabular text-warn">{unsourced.length}</div><div className="mt-1 text-xs font-semibold">Source missing</div><div className="mt-1 text-[11px] text-muted">Active leads without a research URL</div></button>
+          <button type="button" aria-pressed={attentionFilter === "contact"} onClick={() => {setAttentionFilter("contact");setFollowUpOnly(false);setFilter("all");}} className="rounded-xl border border-line bg-bg/70 p-3 text-left hover:border-accent/50"><div className="text-2xl font-bold tabular text-info">{missingContact.length}</div><div className="mt-1 text-xs font-semibold">Contact missing</div><div className="mt-1 text-[11px] text-muted">Active leads needing a contact</div></button>
+        </div>
+      </section>
       <label className="mb-4 flex min-h-11 items-center gap-3 rounded-xl border border-line-strong bg-surface px-4 text-sm text-muted"><Search className="size-4 shrink-0" /><span className="sr-only">Search bookings</span><input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search venue, city, opportunity, or contact…" className="min-w-0 w-full bg-transparent text-fg outline-none placeholder:text-muted" /></label>
-      <button type="button" aria-pressed={followUpOnly} onClick={() => setFollowUpOnly((value) => !value)} className={cn("mb-3 rounded-lg border px-3 py-2 text-xs font-semibold", followUpOnly ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:text-fg")}>Follow-ups due ({due.length}) {followUpOnly ? "· Showing due" : "· Show only"}</button>
+      <button type="button" aria-pressed={followUpOnly} onClick={() => {setFollowUpOnly((value) => !value);setAttentionFilter("all");}} className={cn("mb-3 rounded-lg border px-3 py-2 text-xs font-semibold", followUpOnly ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:text-fg")}>Follow-ups due ({due.length}) {followUpOnly ? "· Showing due" : "· Show only"}</button>
       <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
         <FilterChip
           active={filter === "all"}
