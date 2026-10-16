@@ -74,4 +74,12 @@ const result = spawnSync("npx", [
 process.stdout.write(result.stdout ?? "");
 process.stderr.write(result.stderr ?? "");
 if (result.error) throw new Error("Interactive browser runner failed: " + result.error.message);
+if (result.status !== 0) {
+  const diagnostic = spawnSync("npx", ["--yes", "agent-browser", "batch", "--bail"], {
+    input: JSON.stringify([["eval", "document.body.innerText"], ["errors"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
+    encoding: "utf8", timeout: 30_000,
+  });
+  process.stdout.write(diagnostic.stdout ?? "");
+  process.stderr.write(diagnostic.stderr ?? "");
+}
 process.exitCode = result.status ?? 1;
