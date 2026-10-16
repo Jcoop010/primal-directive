@@ -282,7 +282,7 @@ async function complete(args: {
           .filter((m) => m.role !== "system")
           .map((m) => ({ role: m.role, content: m.content })),
         ...(args.search
-          ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] }
+          ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 2 }], tool_choice: { type: "tool", name: "web_search" } }
           : {}),
       }),
     });
