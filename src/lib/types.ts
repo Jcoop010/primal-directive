@@ -61,6 +61,13 @@ export type Gig = {
   conf: number;
   status: GigStatus;
   notes: string;
+  /** Research is not proof that the booking contact or opportunity is verified. */
+  researchSourceUrl?: string;
+  researchVerifiedAt?: string;
+  outreachContact?: string;
+  outreachLastContactedAt?: string;
+  outreachNextFollowUp?: string;
+  outreachNotes?: string;
 };
 
 export type Person = {
