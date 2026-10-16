@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LayoutGrid, List, ArrowUpRight } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
@@ -19,6 +20,7 @@ function GigsPage() {
   const openGig = useMusician((s) => s.openGig);
   const updateGig = useMusician((s) => s.updateGig);
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
+  const [view, setView] = useState<"board" | "list">("board");
   const shown =
     filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
 
@@ -51,6 +53,13 @@ function GigsPage() {
       <p className="mb-3 px-1 text-xs text-muted">
         {money(pipelineValue(gigs))} open · {gigs.length} total
       </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div><div className="font-display text-xl font-bold">Opportunity workspace</div><p className="mt-1 text-xs text-muted">Research leads are not confirmed bookings. Select a card to review or update it.</p></div>
+        <div className="inline-flex rounded-xl border border-line-strong bg-surface p-1" aria-label="Booking display mode">
+          <button type="button" aria-pressed={view === "board"} onClick={() => setView("board")} className={cn("inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold", view === "board" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}><LayoutGrid className="size-4" /> Board</button>
+          <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")} className={cn("inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold", view === "list" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}><List className="size-4" /> List</button>
+        </div>
+      </div>
       <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
         <FilterChip
           active={filter === "all"}
@@ -75,7 +84,25 @@ function GigsPage() {
           </button>
         ))}
       </Card>
-      <Card className="command-surface overflow-hidden p-0">
+      {view === "board" ? (
+        <section aria-label="Booking pipeline board" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {GIG_STATUSES.filter((status) => status !== "cancelled").map((status) => {
+            const items = shown.filter((gig) => gig.status === status);
+            return <div key={status} className="command-surface min-w-0 rounded-2xl p-3">
+              <div className="mb-3 flex items-center justify-between gap-2 border-b border-line pb-3"><h2 className="text-xs font-bold uppercase tracking-wider text-soft">{GIG_STATUS_LABEL[status]}</h2><span className="rounded-full bg-surface-2 px-2 py-1 text-[11px] font-bold tabular text-muted">{items.length}</span></div>
+              <div className="space-y-2">
+                {items.map((gig) => <button key={gig.id} type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                  <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location not entered"}</div></div><ArrowUpRight className="size-4 shrink-0 text-muted" /></div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
+                  <div className="mt-2 border-t border-line pt-2 text-[10px] font-semibold">{gig.researchVerifiedAt ? <span className="text-live">Source reviewed · not booking confirmation</span> : <span className="text-warn">Research unverified</span>}</div>
+                  {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
+                </button>)}
+                {items.length === 0 ? <div className="rounded-xl border border-dashed border-line px-3 py-6 text-center text-xs text-muted">No opportunities</div> : null}
+              </div>
+            </div>;
+          })}
+        </section>
+      ) : <Card className="command-surface overflow-hidden p-0">
         {shown.length === 0 ? (
           <EmptyState
             title="No gigs yet"
@@ -130,7 +157,7 @@ function GigsPage() {
             </div>
           ))
         )}
-      </Card>
+      </Card>}
     </div>
   );
 }
