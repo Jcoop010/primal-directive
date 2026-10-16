@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
@@ -14,17 +14,20 @@ const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
 function CalendarPage() {
   const gigs = useMusician((s) => s.gigs);
+  const tasks = useMusician(s => s.tasks);
+  const today = toIsoDay(new Date());
   const openGig = useMusician((s) => s.openGig);
   const [cursor, setCursor] = useState(() => {
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), 1);
   });
   const [selected, setSelected] = useState<string | null>(null);
+  const scheduled = tasks.filter(t => t.status === "open" && t.dueDate && (selected ? t.dueDate === selected : t.dueDate >= today)).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
 
   const byDay = useMemo(() => {
     const map = new Map<string, typeof gigs>();
     for (const g of gigs) {
-      if (!g.date) continue;
+      if (!g.date || g.status === "passed") continue;
       const list = map.get(g.date) ?? [];
       list.push(g);
       map.set(g.date, list);
@@ -39,7 +42,7 @@ function CalendarPage() {
   });
   const selectedGigs = selected ? (byDay.get(selected) ?? []) : [];
   const upcoming = [...gigs]
-    .filter((g) => g.date && g.status !== "passed")
+    .filter((g) => g.date >= today && g.status !== "passed" && g.status !== "completed")
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return (
@@ -49,7 +52,7 @@ function CalendarPage() {
         <div className="mb-4 flex items-center justify-between">
           <button
             type="button"
-            className="flex size-10 items-center justify-center rounded-md border border-line hover:bg-surface-2"
+            className="flex size-11 items-center justify-center rounded-md border border-line hover:bg-surface-2"
             onClick={() =>
               setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))
             }
@@ -81,13 +84,16 @@ function CalendarPage() {
             if (!cell) return <div key={`pad-${i}`} />;
             const iso = toIsoDay(cell);
             const items = byDay.get(iso) ?? [];
+            const taskCount = tasks.filter(t=>t.status==="open" && t.dueDate===iso).length;
             const isToday = iso === toIsoDay(new Date());
             const isSel = selected === iso;
             return (
               <button
                 key={iso}
                 type="button"
-                onClick={() => setSelected(iso)}
+                aria-label={longDate(iso)+": "+items.length+" shows, "+taskCount+" open tasks"}
+                aria-pressed={isSel}
+                onClick={() => setSelected(isSel ? null : iso)}
                 className={cn(
                   "flex min-h-11 flex-col items-center justify-center rounded-md text-sm",
                   isSel && "bg-accent text-accent-fg",
@@ -96,7 +102,7 @@ function CalendarPage() {
                 )}
               >
                 {cell.getDate()}
-                {items.length > 0 ? (
+                {items.length + taskCount > 0 ? (
                   <span
                     className={cn(
                       "mt-0.5 size-1 rounded-full",
@@ -112,6 +118,7 @@ function CalendarPage() {
         </div>
       </Card>
 
+      <section aria-label="Scheduled tasks" className="my-5 rounded-xl border border-line bg-surface p-4"><h2 className="font-semibold">{selected ? "Tasks on "+longDate(selected) : "Upcoming deadlines & follow-ups"}</h2>{scheduled.length ? scheduled.slice(0,30).map(t=><Link key={t.id} to="/tasks" className="mt-3 flex min-h-11 justify-between gap-3 border-t border-line pt-3 text-sm"><span>{t.title}</span><span className="shrink-0 text-muted">{longDate(t.dueDate)}</span></Link>):<p className="mt-2 text-sm text-muted">No open dated tasks in this view.</p>}</section>
       <Eyebrow>{selected ? longDate(selected) : "Upcoming"}</Eyebrow>
       <Card className="p-0">
         {(selected ? selectedGigs : upcoming).length === 0 ? (

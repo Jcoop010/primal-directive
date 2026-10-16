@@ -23,6 +23,41 @@ const STATUS_PRIORITY: Record<string, number> = {
   hold: 3,
 };
 
+type LinkedMoneyRecord = {
+  date: string;
+  type: "collected" | "outstanding" | "cost";
+  amount: number;
+  gigId: string;
+  gigName: string;
+};
+
+function parseLinkedMoneyLedger(context: string): LinkedMoneyRecord[] {
+  const header = context.match(/^MONEY LEDGER[^\n]*\n/m);
+  if (!header || header.index === undefined) return [];
+  const remainder = context.slice(header.index + header[0].length);
+  const blankLine = remainder.indexOf("\n\n");
+  const section = blankLine === -1 ? remainder : remainder.slice(0, blankLine);
+  if (!section || section.trim() === "(empty)") return [];
+  const records: LinkedMoneyRecord[] = [];
+
+  for (const line of section.split("\n")) {
+    const match = line.match(/^- date:([^|]*) \| type:(collected|outstanding|cost) \| amount:(-?\d+(?:\.\d+)?) \| gigId:([^|]+) \| gig:([^|]+) \| (?:member:[^|]* \| )?label:(.*)$/);
+    if (!match) continue;
+    const amount = Number(match[3]);
+    const gigId = match[4].trim();
+    const gigName = match[5].trim();
+    if (!Number.isFinite(amount) || !gigId || gigId === "none" || gigName === "unlinked" || gigName === "unknown") continue;
+    records.push({
+      date: match[1].trim(),
+      type: match[2] as LinkedMoneyRecord["type"],
+      amount,
+      gigId,
+      gigName,
+    });
+  }
+  return records;
+}
+
 /**
  * Conservative offline fallback. It never generates real-world leads.
  * It can still prioritize an opportunity explicitly present in the supplied
@@ -31,11 +66,11 @@ const STATUS_PRIORITY: Record<string, number> = {
  */
 export function localGrowthAdvice(message: string, context: string): LocalAdvice {
   const q = message.toLowerCase();
-  const artist = pick(context, /^ARTIST:\s*(.*)$/m);
-  const home = pick(context, /^HOME:\s*(.*)$/m);
-  const genre = pick(context, /^GENRE:\s*(.*)$/m);
-  const draw = pick(context, /^TYPICAL DRAW:\s*(.*)$/m);
-  const fee = pick(context, /^FEE TARGET:\s*(.*)$/m);
+  const artist = pick(context, /^ARTIST:[ \t]*([^\r\n]*)$/m);
+  const home = pick(context, /^HOME:[ \t]*([^\r\n]*)$/m);
+  const genre = pick(context, /^GENRE:[ \t]*([^\r\n]*)$/m);
+  const draw = pick(context, /^TYPICAL DRAW:[ \t]*([^\r\n]*)$/m);
+  const fee = pick(context, /^FEE TARGET:[ \t]*([^\r\n]*)$/m);
   const pipeline = parsePipeline(context);
   const bestOpen = pipeline
     .filter((item) => OPEN_STATUSES.has(item.status))
@@ -48,7 +83,120 @@ export function localGrowthAdvice(message: string, context: string): LocalAdvice
   let focus: string;
   let moves: string[];
 
-  if (/(contact|booker|promoter|email|phone|venue|room|gig|show|booking|available|availability|lineup|bill|tour|rout|date|guarantee|fee)/.test(q)) {
+  const asksMerch = /(merch|inventory|stock|shirt|product|sell-through)/.test(q);
+  const asksFinance = /(financial|finance|revenue|income|expense|cash flow|profit|settlement|payout|money|collected|outstanding|\bspent\b|\bearned\b|\bmade\b)/.test(q) && !asksMerch;
+
+  const asksGigFinance = /(by gig|per gig|each gig|which gigs?|show[- ]level|tour profitability|profit.*gig|gig.*profit)/.test(q);
+
+  if (asksFinance && asksGigFinance) {
+    const ledger = parseLinkedMoneyLedger(context);
+    const byGig = new Map<string, {
+      name: string;
+      collected: number;
+      costs: number;
+      hasCollected: boolean;
+      hasCosts: boolean;
+    }>();
+    for (const entry of ledger) {
+      if (entry.type === "outstanding") continue;
+      const group = byGig.get(entry.gigId) ?? {
+        name: entry.gigName,
+        collected: 0,
+        costs: 0,
+        hasCollected: false,
+        hasCosts: false,
+      };
+      group.name = entry.gigName;
+      if (entry.type === "collected") {
+        group.collected += entry.amount;
+        group.hasCollected = true;
+      } else {
+        group.costs += entry.amount;
+        group.hasCosts = true;
+      }
+      byGig.set(entry.gigId, group);
+    }
+    const summaries = [...byGig.values()].map((gig) => ({
+      ...gig,
+      complete: gig.hasCollected && gig.hasCosts,
+      difference: gig.hasCollected && gig.hasCosts ? gig.collected - gig.costs : undefined,
+    }));
+    const comparable = summaries.filter((gig) => gig.complete)
+      .sort((a, b) => (b.difference ?? 0) - (a.difference ?? 0));
+    const money = (value: number) => new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 2,
+    }).format(value);
+
+    if (summaries.length > 0) {
+      const lines = summaries
+        .sort((a, b) => {
+          if (a.complete !== b.complete) return a.complete ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        })
+        .map((gig) => `- ${gig.name}: ${gig.hasCollected ? `collected ${money(gig.collected)}` : "no collected income linked"}; ${gig.hasCosts ? `recorded costs ${money(gig.costs)}` : "no costs linked"}; ${gig.complete ? `cash-based difference ${money(gig.difference!)}` : "incomplete — cannot compare reliably"}`)
+        .join("\\n");
+      const ranking = comparable.length >= 2
+        ? `Among the ${comparable.length} gigs with both collected income and costs recorded, the highest cash-based difference is ${comparable[0].name} at ${money(comparable[0].difference!)}. This ranks only the linked records supplied, not guaranteed future profit.`
+        : "There are not enough gigs with both collected income and linked costs to produce a reliable ranking.";
+      focus = `Gig-linked cash summary from app records (not bank-verified):\n${lines}\n\n${ranking}\n\nLimits: outstanding amounts are excluded from collected cash. The context includes only up to 18 ledger records and may be incomplete; unlinked expenses, missing entries, or later refunds can change the comparison. Cash-based difference is not necessarily accounting profit or taxable income.`;
+      moves = [
+        "Reconcile each gig's collected payments against settlement and invoices.",
+        "Link travel, lodging, production, merch cost, and other relevant costs to the correct gig.",
+        "Review missing or unlinked records before using the comparison to decide future guarantees or routes.",
+      ];
+    } else {
+      focus = "I can't reliably rank gig profitability because no collected-income or cost entries linked to individual gigs were included in the advisor context. I won't infer show profit from proposed pipeline fees. Link actual collected payments and relevant costs to each gig in Money, then ask again.";
+      moves = [
+        "Open Money and link collected income entries to the gig they belong to.",
+        "Link costs to the relevant gig; keep unpaid fees in outstanding rather than collected.",
+        "Reconcile each gig closeout before comparing shows.",
+      ];
+    }
+  } else if (asksFinance) {
+    const moneyLine = context.match(/^MONEY:.*$/m)?.[0];
+    const readAmount = (label: string): number | undefined => {
+      if (!moneyLine) return undefined;
+      const match = moneyLine.match(new RegExp(`(?:^|[, ])${label}\\s+(-?\\d+(?:\\.\\d+)?)`, "i"));
+      if (!match) return undefined;
+      const value = Number(match[1]);
+      return Number.isFinite(value) ? value : undefined;
+    };
+    const collected = readAmount("collected");
+    const outstanding = readAmount("outstanding");
+    const costs = readAmount("costs");
+    const reportedProfit = readAmount("profit");
+    const memberPayouts = readAmount("member payouts");
+    const cashDifference = collected !== undefined && costs !== undefined ? collected - costs : undefined;
+    const afterPayouts = cashDifference !== undefined && memberPayouts !== undefined ? cashDifference - memberPayouts : undefined;
+    const money = (value: number) => new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 2,
+    }).format(value);
+
+    if (collected !== undefined && outstanding !== undefined && costs !== undefined) {
+      const profitNote = reportedProfit !== undefined && cashDifference !== undefined && Math.abs(reportedProfit - cashDifference) > 0.01
+        ? `\n- App-reported profit: ${money(reportedProfit)} (does not match collected minus recorded costs; check what the app includes in this figure).`
+        : reportedProfit !== undefined
+          ? `\n- App-reported profit: ${money(reportedProfit)}.`
+          : "";
+      focus = `App-recorded financial summary (not independently verified against bank statements):\n- Collected: ${money(collected)}\n- Outstanding: ${money(outstanding)}\n- Recorded costs: ${money(costs)}\n- Cash-based difference (collected minus recorded costs): ${money(cashDifference!)}${profitNote}${memberPayouts !== undefined ? `\n- Member payouts (tracked separately from operating costs): ${money(memberPayouts)}` : ""}${afterPayouts !== undefined ? `\n- Difference after recorded payouts: ${money(afterPayouts)}` : ""}\n\nImportant limits: member payouts are distributions, not operating expenses; outstanding amounts are not collected cash; pipeline fees are not guaranteed revenue; and unrecorded transactions or missing costs can make the real result different. The cash-based difference is not necessarily accounting profit or taxable income, and the difference after payouts is not a verified bank balance. These totals describe the records supplied to the advisor, not a verified tax figure or bank balance.`;
+      moves = [
+        "Reconcile collected and outstanding amounts against invoices and payments received.",
+        "Review uncategorized or missing expenses before relying on the profit figure.",
+        "For a gig-level result, link each income and cost entry to the correct gig and reconcile its closeout.",
+      ];
+    } else {
+      focus = "I can't calculate a trustworthy financial summary because one or more required totals are missing from the context supplied to the advisor. I won't fill the gaps with guesses. Open the Money view, verify collected income, outstanding amounts, and recorded costs, then ask again.";
+      moves = [
+        "Open Money and verify the income and cost entries are recorded.",
+        "Mark amounts as collected only after payment is received; keep unpaid amounts outstanding.",
+        "Re-run the summary after the records are complete.",
+      ];
+    }
+  } else if (/(contact|booker|promoter|email|phone|venue|room|gig|show|booking|available|availability|lineup|bill|tour|rout|date|guarantee|fee)/.test(q)) {
     const profile = [
       artist ? `Artist: ${artist}.` : "",
       home ? `Home market: ${home}.` : "",

@@ -1,0 +1,60 @@
+name: Booking operations browser acceptance
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [verify/booking-operations-20261015]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Test candidate locally before release
+        if: github.event_name == 'pull_request'
+        env:
+          QA_BASE_URL: https://127.0.0.1:8443
+          BETTER_AUTH_URL: https://127.0.0.1:8443
+          QA_TLS_KEY: /tmp/primal-qa.key
+          QA_TLS_CERT: /tmp/primal-qa.crt
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout "$QA_TLS_KEY" -out "$QA_TLS_CERT" -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' > /dev/null 2>&1
+          node scripts/qa-https-proxy.mjs > /tmp/primal-proxy.log 2>&1 &
+          PROXY_PID=$!
+          npm run dev > /tmp/primal-dev.log 2>&1 &
+          DEV_PID=$!
+          trap 'kill "$DEV_PID" "$PROXY_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:8080/__app-env > /dev/null; then
+              node --input-type=module -e 'import {chromium} from "playwright";const browser=await chromium.launch();const page=await browser.newPage({ignoreHTTPSErrors:true});await page.goto(process.env.QA_BASE_URL,{waitUntil:"networkidle"});await page.waitForTimeout(4000);await browser.close();'
+              node scripts/verify-booking-operations-browser.mjs || { cat /tmp/primal-dev.log; cat /tmp/primal-proxy.log; exit 1; }
+              exit $?
+            fi
+            sleep 2
+          done
+          cat /tmp/primal-dev.log
+          exit 1
+      - name: Test canonical production release
+        if: github.event_name == 'push'
+        run: node scripts/verify-booking-operations-browser.mjs
+      - name: Preserve synthetic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: booking-operations-evidence
+          path: qa-evidence/
+          retention-days: 7
+      - name: Export review screenshots and results
+        if: always()
+        run: |
+          node --input-type=module -e 'import fs from "node:fs";for(const name of ["booking-desktop.png","booking-mobile.png","booking-failure.png"]){const p="qa-evidence/"+name;if(fs.existsSync(p))console.log("QA_IMAGE "+name+" "+fs.readFileSync(p).toString("base64"));}if(fs.existsSync("qa-evidence/booking-results.json"))console.log("QA_RESULTS "+fs.readFileSync("qa-evidence/booking-results.json","utf8"));'

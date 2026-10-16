@@ -1,3 +1,4 @@
+import { AdvisorAnswer } from "@/components/advisor-answer";
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUp, LoaderCircle } from "lucide-react";
@@ -9,10 +10,16 @@ import { askGrowthAdvisor } from "@/lib/ai";
 import { hostFromUrl, longDate, money } from "@/lib/format";
 import { buildAdvisorContext, useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { intelligenceWorkspace } from "@/lib/workspace-intelligence";
+import { WorkspaceBrief } from "@/components/workspace-brief";
+import { AdvisorTaskReview } from "@/components/advisor-task-review";
+import { ArtistPlanning } from "@/components/artist-planning";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 export const Route = createFileRoute("/")({ component: AdvisorPage });
 
 const SUGGESTIONS = [
+  { label: "Analyze workspace", q: "Analyze my full recorded workspace. Explain the financial position, rank the most useful next priorities with reasons, and give three short actions. Distinguish recorded results from estimates and unknown costs; avoid repeating completed tasks." },
   {
     label: "Grow local draw",
     q: "How do we grow our local draw in the next 90 days given our current pipeline and home city?",
@@ -32,14 +39,27 @@ const SUGGESTIONS = [
 ];
 
 function AdvisorPage() {
+  const { user } = useCurrentUserState();
+  const owner = user?.id ?? null;
+  const ownerRef = useRef<string | null>(owner);
+  useEffect(() => {
+    ownerRef.current = owner;
+    return () => { ownerRef.current = null; };
+  }, [owner]);
   const chat = useMusician((s) => s.chat);
   const addUserMessage = useMusician((s) => s.addUserMessage);
   const addAiMessage = useMusician((s) => s.addAiMessage);
   const ingestSuggestedGig = useMusician((s) => s.ingestSuggestedGig);
   const ingestSuggestedPerson = useMusician((s) => s.ingestSuggestedPerson);
   const clearChat = useMusician((s) => s.clearChat);
+  const resetSample = useMusician((s) => s.resetSample);
+  const profile = useMusician((s) => s.profile);
+  const gigs = useMusician((s) => s.gigs);
+  const people = useMusician((s) => s.people);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [answerMode, setAnswerMode] = useState<"quick"|"detailed"|"research">("quick");
+  const [taskSuggestion, setTaskSuggestion] = useState<{ owner: string; text: string } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,36 +67,32 @@ function AdvisorPage() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [chat, busy]);
 
-  useEffect(() => {
-    const queued = window.sessionStorage.getItem("primal-briefing-prompt");
-    if (!queued) return;
-    window.sessionStorage.removeItem("primal-briefing-prompt");
-    void send(queued);
-    // A queued briefing is consumed only on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function send(text: string) {
     const q = text.trim();
-    if (!q || busy) return;
+    const requestOwner = ownerRef.current;
+    if (!q || busy || !requestOwner) return;
+    const history = useMusician.getState().chat.slice(-8).map((m) => ({
+      role: m.role,
+      text: m.text,
+    }));
     setInput("");
     addUserMessage(q);
     setBusy(true);
     try {
-      const history = useMusician.getState().chat.slice(-8).map((m) => ({
-        role: m.role,
-        text: m.text,
-      }));
       const res = await askGrowthAdvisor({
         data: {
           message: q,
+          mode: answerMode,
           history,
           context: buildAdvisorContext(),
+          workspace: intelligenceWorkspace(useMusician.getState()),
+          planning: useMusician.getState().planning,
         },
       });
+      if (ownerRef.current !== requestOwner) return;
       if (!res.ok) {
         addAiMessage({
-          text: res.error,
+          text: 'The Advisor could not answer this request.',
           source: "ADVISOR UNAVAILABLE",
         });
       } else {
@@ -90,23 +106,44 @@ function AdvisorPage() {
         });
       }
     } catch {
+      if (ownerRef.current !== requestOwner) return;
       addAiMessage({
         text: "The live connector dropped. Check the board and pipeline, then try the advisor again.",
         source: "CONNECTOR",
       });
     } finally {
-      setBusy(false);
+      if (ownerRef.current === requestOwner) setBusy(false);
     }
   }
 
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2"><Eyebrow>Intelligence / Growth advisor</Eyebrow><span className="rounded-full border border-live/25 bg-live/10 px-3 py-1 text-[10px] font-bold tracking-widest text-live">ADVISOR WORKSPACE</span></div>
+  useEffect(() => {
+    const queued = window.sessionStorage.getItem("primal-briefing-prompt");
+    if (queued && owner) { window.sessionStorage.removeItem("primal-briefing-prompt"); setInput(queued); }
+  }, [owner]);
 
-      <Card className="flex min-h-[min(65dvh,40rem)] flex-1 flex-col overflow-hidden p-0">
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <Eyebrow>Growth advisor</Eyebrow>
+      <div className="my-3"><WorkspaceBrief /></div>
+      <ArtistPlanning busy={busy} onExplain={() => void send('Explain my saved weekly plan and goal progress. Use the provided records, available capacity and completed work. Give the best next internal steps.')} />
+      {taskSuggestion !== null && taskSuggestion.owner === owner && <AdvisorTaskReview key={taskSuggestion.text} suggestion={taskSuggestion.text} onClose={() => setTaskSuggestion(null)} />}
+
+      <Card className="flex min-h-[28rem] flex-1 flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
           <strong className="text-sm">Primal Directive AI</strong>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (!window.confirm("Load fictional demo artist River Fold? This replaces your current local workspace, including gigs, contacts, finances, merch, tasks, and chat. This cannot be undone.")) return;
+                resetSample();
+                toast.success("Fictional demo workspace loaded. Ask the Advisor to analyze River Fold.");
+              }}
+              disabled={busy}
+              className="rounded-md border border-live/40 bg-live/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-live hover:bg-live/20 disabled:opacity-50"
+            >
+              Load demo artist
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -118,23 +155,28 @@ function AdvisorPage() {
               Clear
             </button>
             <span className="text-[10px] font-bold tracking-[0.12em] text-live">
-              {busy ? "SEARCHING" : "READY"}
+              {busy ? "THINKING" : "READY"}
             </span>
           </div>
         </div>
 
-        <div ref={scroller} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
+        <div className="border-b border-line px-4 py-2 text-xs text-muted">
+          {profile.artistName ? <span>Workspace: <strong className="text-fg">{profile.artistName}</strong> · {gigs.length} shows · {people.length} contacts {profile.artistName === "River Fold" ? "· FICTIONAL SAMPLE DATA" : ""}</span> : <span>No artist profile loaded. Use <strong>Load demo artist</strong> to explore the product with fictional data.</span>}
+        </div>
+        <div className="flex flex-wrap gap-2 border-b border-line px-4 py-2" role="group" aria-label="Advisor response mode">{(["quick","detailed","research"] as const).map(mode=><button type="button" key={mode} disabled={busy} aria-pressed={answerMode===mode} onClick={()=>setAnswerMode(mode)} className={cn("min-h-11 rounded-md px-3 text-sm font-semibold", answerMode===mode?"bg-accent text-accent-fg":"text-muted hover:bg-surface-2")}>{mode==="quick"?"Quick":mode==="detailed"?"Detailed":"Deep research"}</button>)}</div>
+        <div ref={scroller} className="flex-1 space-y-3 overflow-y-auto px-3 py-4">
           {chat.map((m) => (
             <div
               key={m.id}
+              data-advisor-message={m.role}
               className={cn(
-                "max-w-[95%] rounded-xl sm:max-w-[82%] px-3.5 py-3 text-sm leading-relaxed whitespace-pre-wrap",
+                "max-w-[88%] rounded-lg px-3.5 py-3 text-sm leading-relaxed whitespace-pre-wrap",
                 m.role === "user"
                   ? "ml-auto bg-accent font-medium text-accent-fg"
                   : "border border-line bg-surface-2 text-fg",
               )}
             >
-              {m.text}
+              {m.role === "ai" ? <AdvisorAnswer text={m.text} /> : m.text}
               {m.role === "ai" && m.source ? (
                 <div className="mt-2 text-[9px] font-bold tracking-[0.14em] text-muted uppercase">
                   {m.source}
@@ -157,10 +199,10 @@ function AdvisorPage() {
               ) : null}
               {m.moves && m.moves.length > 0 ? (
                 <ul className="mt-3 space-y-1.5 border-t border-line pt-3">
-                  {m.moves.map((move) => (
-                    <li key={move} className="text-xs text-soft">
-                      <span className="mr-2 text-accent">→</span>
-                      {move}
+                  {m.moves.map((move, index) => (
+                    <li key={`${index}-${move}`} className="space-y-1 text-xs text-soft">
+                      <div><span className="mr-2 text-accent">→</span>{move}</div>
+                      <button type="button" disabled={busy || !owner} onClick={() => { if (owner) setTaskSuggestion({ owner, text: move }); }} className="min-h-11 rounded-md border border-line px-3 text-xs font-semibold text-accent disabled:opacity-50">Review task</button>
                     </li>
                   ))}
                 </ul>
@@ -187,8 +229,6 @@ function AdvisorPage() {
                         </div>
                       </div>
                       <p className="mt-1.5 text-xs text-soft">{g.reason}</p>
-                      {g.sourceUrl ? <a href={g.sourceUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs text-accent underline">View supporting source</a> : null}
-                      <p className="mt-1 text-[11px] text-muted">Research lead only · Not a confirmed booking · Capacity, availability and contacts require separate verification</p>
                       <div className="mt-2 flex items-center justify-between">
                         <span className="text-[11px] text-muted">
                           {longDate(g.date)} · {Math.round(g.conf * 100)}%
@@ -219,7 +259,6 @@ function AdvisorPage() {
                         <div className="text-xs text-muted">
                           {p.role} · {p.city}
                         </div>
-                        {p.sourceUrl ? <a href={p.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-accent underline">View supporting source</a> : null}
                       </div>
                       <Button
                         size="sm"
@@ -240,7 +279,7 @@ function AdvisorPage() {
           {busy ? (
             <div className="flex max-w-[88%] items-center gap-2 rounded-lg border border-line bg-surface-2 px-3.5 py-3 text-sm text-muted">
               <LoaderCircle className="size-4 animate-spin text-accent" />
-              Searching the live web…
+              Thinking through your question and checking sources when needed…
             </div>
           ) : null}
         </div>
@@ -270,7 +309,7 @@ function AdvisorPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about growth, rooms, bills, routing…"
-            className="h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-bg px-3 text-sm outline-none placeholder:text-muted focus:border-muted"
+            className="h-11 flex-1 rounded-md border border-line-strong bg-bg px-3 text-sm outline-none placeholder:text-muted focus:border-muted"
             autoComplete="off"
           />
           <Button

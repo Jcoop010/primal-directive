@@ -19,7 +19,12 @@ import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import pg from "pg";
-import { pendingMigrations } from "./migration-plan.mjs";
+import { pendingMigrations, shouldRunDeployMigrations } from "./migration-plan.mjs";
+
+if (!shouldRunDeployMigrations()) {
+  console.log("[migrate] Vercel Preview deployment — skipping shared database migrations.");
+  process.exit(0);
+}
 
 const databaseUrl =
   process.env.DATABASE_URL ??
@@ -75,6 +80,14 @@ async function main() {
     await client.query(
       "CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())",
     );
+    // Migration history is server-only. Supabase grants public-schema access
+    // to API roles by default; they must never alter which migrations run.
+    await client.query("ALTER TABLE _migrations ENABLE ROW LEVEL SECURITY");
+    await client.query("REVOKE ALL ON TABLE _migrations FROM PUBLIC");
+    for (const role of ["anon", "authenticated"]) {
+      const exists = await client.query("SELECT 1 FROM pg_roles WHERE rolname = $1", [role]);
+      if (exists.rowCount) await client.query(`REVOKE ALL ON TABLE _migrations FROM ${role}`);
+    }
     const applied = (await client.query("SELECT name FROM _migrations")).rows.map(
       (r) => r.name,
     );
