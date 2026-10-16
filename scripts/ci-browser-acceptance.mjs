@@ -23,7 +23,12 @@ async function auth(path, payload) {
   assert.equal(response.status(), 200, "Authentication endpoint failed: " + path);
 }
 async function ready(path) {
-  await page.goto(origin + path, { waitUntil: "domcontentloaded" });
+  try { await page.goto(origin + path, { waitUntil: "domcontentloaded" }); } catch(error) {
+    // Hydration may replace the in-flight document; retry only this navigation cancellation once.
+    if (!String(error.message).includes("net::ERR_ABORTED")) throw error;
+    await page.waitForLoadState("domcontentloaded");
+    await page.goto(origin + path, {waitUntil:"domcontentloaded"});
+  }
   await page.locator("main").waitFor();
   await page.waitForFunction(() =>
     !document.body.innerText.includes("Preparing your artist workspace") &&
