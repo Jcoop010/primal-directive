@@ -115,13 +115,15 @@ function AdvisorPage() {
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-soft">Your AI booking agent for venue discovery, personalized pitches, follow-ups, and smarter routing. Work from your real artist profile and pipeline; verify venue details before outreach.</p>
           </div>
           <div className="flex flex-col gap-2 text-[11px] font-semibold text-soft">
-            <span className="flex items-center gap-2 rounded-full border border-live/25 bg-live/10 px-3 py-2"><span className="size-2 rounded-full bg-live" /> ADVISOR WORKSPACE</span>
+            <span className="flex items-center gap-2 rounded-full border border-live/25 bg-live/10 px-3 py-2"><span className="size-2 rounded-full bg-live" /> BOOKING WORKSPACE</span>
             <span className="flex items-center gap-2 px-3"><ShieldCheck className="size-4 text-info" /> Sources require verification</span>
           </div>
         </div>
         <div className="relative mt-6 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
           <span className="mr-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"><Compass className="size-4" /> Start booking</span>
-          {SUGGESTIONS.map((s) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line-strong bg-bg/75 px-3 text-xs font-semibold text-soft transition-colors hover:border-accent hover:text-fg disabled:opacity-50">{s.label}<ArrowUpRight className="size-3" /></button>)}
+          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Booking agent quick actions">
+            {SUGGESTIONS.map((s, i) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className={cn("group flex min-h-14 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors disabled:opacity-50", i === 1 ? "border-accent/50 bg-accent/10 text-fg hover:bg-accent/15" : "border-line-strong bg-bg/75 text-soft hover:border-accent/60 hover:text-fg")}><span className="flex items-center gap-3"><span className="text-[10px] font-bold tabular text-muted">{String(i + 1).padStart(2, "0")}</span>{s.label}</span><ArrowUpRight className="size-4 shrink-0 text-accent transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></button>)}
+          </div>
         </div>
       </section>
 
