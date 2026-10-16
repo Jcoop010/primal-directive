@@ -102,7 +102,7 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal(result.gigs[0].date, "");
       assert.equal(result.gigs[0].status, "lead");
       assert.match(result.answer, /source-cited venue lead/);
-      assert.equal(result.gigs[0].venue, "Test Room");
+      assert.equal(result.gigs[0].name, "Test Room");
       assert.match(result.source, /LIVE WEB SEARCH/);
     });
     await t.test("current Gemini model and full search timeout are preserved", async(st)=>{const timeout=AbortSignal.timeout;const budgets=[];st.mock.method(AbortSignal,"timeout",ms=>{budgets.push(ms);return timeout(ms)});st.mock.method(globalThis,"fetch",async url=>{assert.match(String(url),/gemini-3[.]8-flash:generateContent$/);return gemini()});assert.equal((await askGrowthAdvisor({data:researchData})).gigs.length,1);assert.equal(budgets[0],75000)});
