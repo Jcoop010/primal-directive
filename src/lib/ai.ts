@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { authMiddleware } from "@/lib/auth/middleware";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
 import { GIG_STATUSES, PERSON_ROLES } from "@/lib/types";
@@ -174,6 +175,7 @@ async function complete(args: {
 }
 
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
     const xaiKey = process.env.XAI_API_KEY;
@@ -248,11 +250,28 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     }
 
 
-    const body = (await res.json()) as Record<string, unknown>;
+    let body: Record<string, unknown>;
+    try {
+      const payload: unknown = await res.json();
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        throw new Error("Invalid provider envelope");
+      }
+      body = payload as Record<string, unknown>;
+    } catch {
+      const local = fallback();
+      return {
+        ...local,
+        source: "AI RESPONSE INVALID — OFFLINE GUIDANCE; EXTERNAL FACTS NOT VERIFIED",
+        gigs: [],
+        people: [],
+        moves: [],
+      };
+    }
     const choices = body.choices as
       | Array<{ message?: { content?: string } }>
       | undefined;
-    const raw = choices?.[0]?.message?.content ?? "";
+    const content = choices?.[0]?.message?.content;
+    const raw = typeof content === "string" ? content : "";
     const parsed = extractJson(raw);
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
