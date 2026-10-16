@@ -64,7 +64,7 @@ const commands = [
   ["wait", "--fn", "document.body.innerText.includes('Financial activity') && !document.body.innerText.includes('Loading your workspace')"],
   ["find", "text", "Add entry", "click"],
   ["wait", "500"],
-  ["find", "label", "Amount", "fill", "125"],
+  ["find", "label", "Amount", "fill", "125.50"],
   ["find", "label", "Label", "fill", "Fictional QA show income"],
   ["scrollintoview", "[role=dialog] button[type=submit]"],
   ["click", "[role=dialog] button[type=submit]"],
