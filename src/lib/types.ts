@@ -22,6 +22,7 @@ export const GIG_STATUS_LABEL: Record<GigStatus, string> = {
 
 export const PERSON_ROLES = [
   "band",
+  "member",
   "booker",
   "promoter",
   "venue",
@@ -33,7 +34,8 @@ export const PERSON_ROLES = [
 export type PersonRole = (typeof PERSON_ROLES)[number];
 
 export const PERSON_ROLE_LABEL: Record<PersonRole, string> = {
-  band: "Band",
+  band: "Band / act",
+  member: "Band Member",
   booker: "Booker",
   promoter: "Promoter",
   venue: "Venue",
@@ -42,13 +44,14 @@ export const PERSON_ROLE_LABEL: Record<PersonRole, string> = {
   other: "Other",
 };
 
-export const MONEY_TYPES = ["collected", "outstanding", "cost"] as const;
+export const MONEY_TYPES = ["collected", "outstanding", "cost", "payout"] as const;
 export type MoneyType = (typeof MONEY_TYPES)[number];
 
 export const MONEY_TYPE_LABEL: Record<MoneyType, string> = {
   collected: "Collected",
   outstanding: "Outstanding",
   cost: "Cost",
+  payout: "Member payout",
 };
 
 export type Gig = {
@@ -61,6 +64,7 @@ export type Gig = {
   conf: number;
   status: GigStatus;
   notes: string;
+  booking?: import('./booking-intelligence').BookingDetails;
 };
 
 export type Person = {
@@ -81,6 +85,8 @@ export type MoneyEntry = {
   date: string;
   gigId?: string;
   sourceOrderId?: string;
+  sourceSaleId?: string;
+  memberId?: string;
 };
 
 export type OperationalTaskStatus = "open" | "done";

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BookingWorkspace } from "@/components/booking-workspace";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
@@ -23,6 +24,7 @@ function GigsPage() {
 
   return (
     <div>
+      <BookingWorkspace />
       <div className="mb-2 flex items-end justify-between gap-3 px-1">
         <Eyebrow>Gig pipeline</Eyebrow>
         <button

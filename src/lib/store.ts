@@ -2,8 +2,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
 import { uid } from "@/lib/utils";
-import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
+import { bookingSchema, scheduleBookingFollowUp, type BookingDetails } from "@/lib/booking-intelligence";
+import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, isSourceManagedMoneyEntry, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
+import { changesPayoutIdentity, hasGigLinkedFinancialHistory, hasRecordedPayouts } from "@/lib/contact-integrity";
+import { prepareAdvisorTask, type AdvisorTaskDraft } from "@/lib/advisor-tasks";
+import { emptyPlanning, saveGoal, saveMemory, draftWeeklyPlan, acceptPlanAction, type PlanningState, type GoalDraft, type PlanAction } from "@/lib/artist-planning";
 import type {
   ArtistProfile,
   ChatMessage,
@@ -41,21 +45,23 @@ type State = {
   merchInventoryAdjustments: MerchInventoryAdjustment[];
   merchRefunds: MerchRefund[];
   tasks: OperationalTask[];
+  planning: PlanningState;
   chat: ChatMessage[];
   profile: ArtistProfile;
   composer: Composer;
 };
 
 type Actions = {
+  saveBookingDetails: (id: string, details: BookingDetails) => void;
   addGig: (gig: Omit<Gig, "id">) => string;
   updateGig: (id: string, patch: Partial<Gig>) => void;
-  removeGig: (id: string) => void;
+  removeGig: (id: string) => boolean;
   addPerson: (person: Omit<Person, "id">) => string;
-  updatePerson: (id: string, patch: Partial<Person>) => void;
-  removePerson: (id: string) => void;
+  updatePerson: (id: string, patch: Partial<Person>) => boolean;
+  removePerson: (id: string) => boolean;
   addMoney: (entry: Omit<MoneyEntry, "id">) => string;
-  updateMoney: (id: string, patch: Partial<MoneyEntry>) => void;
-  removeMoney: (id: string) => void;
+  updateMoney: (id: string, patch: Partial<MoneyEntry>) => boolean;
+  removeMoney: (id: string) => boolean;
   addMerchProduct: (product: Omit<MerchProduct, "id">) => string;
   updateMerchProduct: (id: string, patch: Partial<MerchProduct>) => void;
   restockMerchProduct: (id: string, quantity: number) => void;
@@ -64,6 +70,16 @@ type Actions = {
   recordMerchOrder: (order: Omit<MerchOrder, "id" | "status" | "createdAt" | "subtotal" | "total" | "refundedAmount">) => string;
   refundMerchOrder: (id: string, restock: boolean, note: string) => void;
   generateShowTasks: () => number;
+  addAdvisorTask: (draft: AdvisorTaskDraft) => { id: string; created: boolean };
+  saveGoal: (draft: GoalDraft, id?: string) => void;
+  deleteGoal: (id: string) => void;
+  saveMemory: (text: string, id?: string) => void;
+  deleteMemory: (id: string) => void;
+  setWeeklyCapacity: (minutes: number) => void;
+  draftWeeklyPlan: (day: string) => void;
+  deleteWeeklyPlan: (id: string) => void;
+  acceptPlanAction: (planId: string, actionId: string, draft: PlanAction) => void;
+  editTask: (id: string, draft: AdvisorTaskDraft) => void;
   updateOperationalTask: (id: string, patch: Partial<Pick<OperationalTask, "status" | "dueDate">>) => void;
   updateProfile: (patch: Partial<ArtistProfile>) => void;
   addUserMessage: (text: string) => void;
@@ -108,6 +124,7 @@ function fresh(): Omit<State, "composer"> & { composer: Composer } {
     merchInventoryAdjustments: [],
     merchRefunds: [],
     tasks: [],
+    planning: emptyPlanning(),
     chat: welcomeChat(),
     composer: { ...emptyComposer },
   };
@@ -117,6 +134,13 @@ export const useMusician = create<State & Actions>()(
   persist(
     (set) => ({
       ...fresh(),
+      saveBookingDetails: (id, input) => set(s => {
+        const details = bookingSchema.parse(input);
+        const gig = s.gigs.find(g => g.id === id);
+        if (!gig) throw Error('Opportunity no longer exists.');
+        if (details.contactId && !s.people.some(p => p.id === details.contactId)) throw Error('Choose an existing contact.');
+        return { gigs: s.gigs.map(g => g.id === id ? { ...g, booking: details } : g), tasks: scheduleBookingFollowUp(s.tasks, gig, details, uid(), new Date().toISOString()) };
+      }),
       addGig: (gig) => {
         const id = uid();
         set((s) => {
@@ -147,47 +171,77 @@ export const useMusician = create<State & Actions>()(
             : [];
           return { gigs, tasks: [...tasks, ...existingTasks] };
         }),
-      removeGig: (id) =>
-        set((s) => ({
-          gigs: s.gigs.filter((g) => g.id !== id),
-          // Preserve financial and merch history, but detach it from a deleted show.
-          // Show-prep tasks are operational work tied to that show and should not linger orphaned.
-          money: s.money.map((entry) =>
-            entry.gigId === id ? { ...entry, gigId: undefined } : entry,
-          ),
-          merchSales: s.merchSales.map((sale) =>
-            sale.gigId === id ? { ...sale, gigId: undefined } : sale,
-          ),
-          merchOrders: s.merchOrders.map((order) =>
-            order.gigId === id ? { ...order, gigId: undefined } : order,
-          ),
-          merchInventoryAdjustments: s.merchInventoryAdjustments.map((adjustment) =>
-            adjustment.gigId === id ? { ...adjustment, gigId: undefined } : adjustment,
-          ),
-          tasks: s.tasks.filter((task) => task.gigId !== id),
-        })),
+      removeGig: (id) => {
+        let blocked = false;
+        set((s) => {
+          if (hasGigLinkedFinancialHistory(id, s.money, s.merchSales, s.merchOrders, s.merchInventoryAdjustments)) {
+            blocked = true;
+            return s;
+          }
+          return {
+            gigs: s.gigs.filter((g) => g.id !== id),
+            tasks: s.tasks.filter((task) => task.gigId !== id),
+          };
+        });
+        return !blocked;
+      },
       addPerson: (person) => {
         const id = uid();
         set((s) => ({ people: [{ ...person, id }, ...s.people] }));
         return id;
       },
-      updatePerson: (id, patch) =>
-        set((s) => ({
-          people: s.people.map((p) => (p.id === id ? { ...p, ...patch } : p)),
-        })),
-      removePerson: (id) =>
-        set((s) => ({ people: s.people.filter((p) => p.id !== id) })),
+      updatePerson: (id, patch) => {
+        let blocked = false;
+        set((s) => {
+          const current = s.people.find((person) => person.id === id);
+          if (current && changesPayoutIdentity(id, current, patch, s.money)) {
+            blocked = true;
+            return s;
+          }
+          return { people: s.people.map((person) => (person.id === id ? { ...person, ...patch } : person)) };
+        });
+        return !blocked;
+      },
+      removePerson: (id) => {
+        let blocked = false;
+        set((s) => {
+          if (hasRecordedPayouts(id, s.money)) {
+            blocked = true;
+            return s;
+          }
+          return { people: s.people.filter((person) => person.id !== id) };
+        });
+        return !blocked;
+      },
       addMoney: (entry) => {
         const id = uid();
         set((s) => ({ money: [{ ...entry, id }, ...s.money] }));
         return id;
       },
-      updateMoney: (id, patch) =>
-        set((s) => ({
-          money: s.money.map((m) => (m.id === id ? { ...m, ...patch } : m)),
-        })),
-      removeMoney: (id) =>
-        set((s) => ({ money: s.money.filter((m) => m.id !== id) })),
+      updateMoney: (id, patch) => {
+        let blocked = false;
+        set((s) => {
+          const current = s.money.find((entry) => entry.id === id);
+          if (current && isSourceManagedMoneyEntry(current)) {
+            blocked = true;
+            return s;
+          }
+          return { money: s.money.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)) };
+        });
+        return !blocked;
+      },
+      removeMoney: (id) => {
+        let blocked = false;
+        set((s) => {
+          const current = s.money.find((entry) => entry.id === id);
+          if (current && isSourceManagedMoneyEntry(current)) {
+            blocked = true;
+            return s;
+          }
+          return { money: s.money.filter((entry) => entry.id !== id) };
+        });
+        return !blocked;
+      },
       addMerchProduct: (product) => {
         const id = uid();
         set((s) => ({
@@ -217,7 +271,7 @@ export const useMusician = create<State & Actions>()(
       recordMerchSale: (sale) => {
         const id = uid();
         set((s) => {
-          const result = applyMerchSale(s.merchProducts, s.merchSales, sale, id);
+          const result = applyMerchSale(s.merchProducts, s.merchSales, sale, id, uid());
           const product = s.merchProducts.find((item) => item.id === sale.productId);
           if (!product) throw new Error("Product not found while recording sale.");
           // Keep the sale, inventory movement, and cash ledger entry in one state update.
@@ -225,10 +279,12 @@ export const useMusician = create<State & Actions>()(
           const ledgerEntries = buildMerchLedgerEntries(sale, product.name, {
             revenueId: uid(),
             costId: uid(),
+            sourceSaleId: id,
           });
           return {
             merchProducts: result.products,
             merchSales: result.sales,
+            merchInventoryAdjustments: [...result.adjustments, ...s.merchInventoryAdjustments],
             // Record revenue and its inventory cost together so show-level net
             // reflects merch margin rather than treating all merch receipts as profit.
             money: [...ledgerEntries, ...s.money],
@@ -296,6 +352,36 @@ export const useMusician = create<State & Actions>()(
             ? { ...task, ...patch, ...(patch.dueDate !== undefined ? { dueDateOverridden: true } : {}) }
             : task),
         })),
+      addAdvisorTask: (draft) => {
+        let result = { id: "", created: false };
+        set(state => {
+          const prepared = prepareAdvisorTask(draft, state.tasks, state.gigs, uid());
+          result = { id: prepared.task.id, created: prepared.created };
+          return prepared.created ? { tasks: [prepared.task, ...state.tasks] } : state;
+        });
+        return result;
+      },
+      saveGoal: (draft, id) => set(state => ({ planning: saveGoal(state.planning, draft, state, id ?? uid()) })),
+      deleteGoal: id => set(state => ({ planning: { ...state.planning, goals: state.planning.goals.filter(goal => goal.id !== id), plans: state.planning.plans.map(plan => ({ ...plan, actions: plan.actions.map(action => action.goalId === id ? { ...action, goalId: '' } : action) })) } })),
+      saveMemory: (text, id) => set(state => ({ planning: saveMemory(state.planning, text, id ?? uid()) })),
+      deleteMemory: id => set(state => ({ planning: { ...state.planning, memories: state.planning.memories.filter(memory => memory.id !== id) } })),
+      setWeeklyCapacity: minutes => {
+        if (!Number.isInteger(minutes) || minutes < 15 || minutes > 2400) throw Error('Weekly capacity must be 15–2,400 minutes.');
+        set(state => ({ planning: { ...state.planning, capacityMinutes: minutes } }));
+      },
+      draftWeeklyPlan: day => set(state => ({ planning: draftWeeklyPlan(state.planning, state, day, uid()) })),
+      deleteWeeklyPlan: id => set(state => ({ planning: { ...state.planning, plans: state.planning.plans.filter(plan => plan.id !== id) } })),
+      acceptPlanAction: (planId, actionId, draft) => set(state => {
+        const result = acceptPlanAction(state.planning, state.tasks, state.gigs, planId, actionId, draft, uid());
+        return { planning: result.planning, tasks: result.tasks };
+      }),
+      editTask: (id, draft) => set(state => {
+        const existing = state.tasks.find(task => task.id === id);
+        if (!existing) throw Error('This task no longer exists.');
+        const result = prepareAdvisorTask(draft, state.tasks.filter(task => task.id !== id), state.gigs, id, existing.createdAt);
+        if (!result.created) throw Error('Another task already has this title and show link, including completed tasks.');
+        return { tasks: state.tasks.map(task => task.id === id ? { ...result.task, sourceKey: existing.sourceKey, status: existing.status, dueDateOverridden: true } : task) };
+      }),
       updateProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
       addUserMessage: (text) =>
@@ -324,11 +410,12 @@ export const useMusician = create<State & Actions>()(
                 name: g.name,
                 venue: g.venue,
                 city: g.city,
-                date: g.date,
-                fee: g.fee,
-                conf: g.conf,
                 status: "lead",
-                notes: [g.reason, g.sourceUrl ? `Research source: ${g.sourceUrl}` : "", "Unconfirmed research lead; verify booking terms before outreach."].filter(Boolean).join("\n"),
+                date: "",
+                fee: 0,
+                conf: 0,
+                notes: [g.reason, g.sourceUrl ? `Research source: ${g.sourceUrl}` : '', 'Unconfirmed research lead; verify booking terms before outreach.'].filter(Boolean).join('\n'),
+                booking: { ...bookingSchema.parse({}), sourceUrl: g.sourceUrl ?? '' },
               },
               ...s.gigs,
             ],
@@ -398,6 +485,7 @@ export const useMusician = create<State & Actions>()(
           merchInventoryAdjustments: [],
           merchRefunds: [],
           tasks: [],
+          planning: emptyPlanning(),
           chat: welcomeChat(),
           composer: { ...emptyComposer },
         }),
@@ -414,6 +502,7 @@ export const useMusician = create<State & Actions>()(
         merchInventoryAdjustments: s.merchInventoryAdjustments,
         merchRefunds: s.merchRefunds,
         tasks: s.tasks,
+        planning: s.planning,
         chat: s.chat,
         profile: s.profile,
       }),
@@ -450,6 +539,7 @@ export function buildAdvisorContext() {
   const collected = sumMoney(s.money, "collected");
   const outstanding = sumMoney(s.money, "outstanding");
   const costs = sumMoney(s.money, "cost");
+  const payouts = sumMoney(s.money, "payout");
   const profit = collected - costs;
   const merchSummary = summarizeMerch(s.merchProducts, s.merchSales, s.merchOrders, s.merchRefunds);
   const merchRevenue = merchSummary.netSales;
@@ -459,7 +549,7 @@ export function buildAdvisorContext() {
   const merchLines = s.merchProducts
     .slice(0, 15)
     .map((product) => `- ${product.name} [${product.sku || "no SKU"}] | stock ${product.stockOnHand} | price ${product.price} | cost ${product.unitCost}${product.active && product.stockOnHand <= product.reorderAt ? " | REORDER" : ""}`)
-    .join("\\n");
+    .join("\n");
   const gigLines = s.gigs
     .slice(0, 12)
     .map(
@@ -469,16 +559,59 @@ export function buildAdvisorContext() {
     .join("\n");
   const peopleLines = s.people
     .slice(0, 12)
-    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
+    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | payout share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
     .join("\n");
-  return `ARTIST: ${s.profile.artistName}
+  const today = new Date().toISOString().slice(0, 10);
+  const bookedLines = s.gigs
+    .filter((gig) => gig.status === "booked" && gig.date && gig.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 8)
+    .map((gig) => `- ${gig.date} | ${gig.name} @ ${gig.venue}, ${gig.city} | fee ${gig.fee} | ${gig.notes}`)
+    .join("\n");
+  const openTasks = s.tasks
+    .filter((task) => task.status === "open")
+    .sort((a, b) => (a.dueDate || "9999-12-31").localeCompare(b.dueDate || "9999-12-31"))
+    .slice(0, 10)
+    .map((task) => {
+      const gig = s.gigs.find((item) => item.id === task.gigId);
+      const title = task.title.replace(/[|\n\r]/g, " ").slice(0, 100);
+      const description = task.description.replace(/[|\n\r]/g, " ").slice(0, 120);
+      return `- due:${task.dueDate || "unscheduled"} | ${task.status} | ${task.category} | ${title} | gig:${gig?.name || "general"} | ${description}`;
+    })
+    .join("\n");
+  const activePipeline = pipelineGigs(s.gigs);
+  const activePipelineValue = activePipeline.reduce((sum, gig) => sum + (Number(gig.fee) || 0), 0);
+  const activeWeightedValue = activePipeline.reduce((sum, gig) => sum + (Number(gig.fee) || 0) * Math.max(0, Math.min(1, Number(gig.conf) || 0)), 0);
+  const gigNames = new Map(s.gigs.map((gig) => [gig.id, gig.name]));
+  const moneyLedgerLines = [...s.money]
+    .sort((a, b) => Number(Boolean(b.gigId)) - Number(Boolean(a.gigId)))
+    .slice(0, 18)
+    .map((entry) => {
+      const linkedGig = entry.gigId ? gigNames.get(entry.gigId) : undefined;
+      const safeDate = (entry.date || "undated").replace(/[|\n\r]/g, " ").slice(0, 32);
+      const safeGigName = (linkedGig || (entry.gigId ? "unknown" : "unlinked")).replace(/[|\n\r]/g, " ").slice(0, 80);
+      const safeLabel = entry.label.replace(/[|\n\r]/g, " ").slice(0, 80);
+      const member = entry.memberId ? s.people.find((person) => person.id === entry.memberId)?.name || "unknown" : "none";
+      return `- date:${safeDate} | type:${entry.type} | amount:${Number(entry.amount)} | gigId:${entry.gigId || "none"} | gig:${safeGigName} | member:${member} | label:${safeLabel}`;
+    })
+    .join("\n");
+  const context = `ARTIST: ${s.profile.artistName}
 HOME: ${s.profile.city}
 GENRE: ${s.profile.genre}
 TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
 NOTES: ${s.profile.notes}
 
-MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}
+PIPELINE SUMMARY: ${activePipeline.length} active records, unweighted listed fees ${activePipelineValue}, confidence-weighted listed value ${activeWeightedValue}. These are pipeline estimates, not booked or collected revenue.
+UPCOMING BOOKED SHOWS:
+${bookedLines || "(none recorded)"}
+
+OPEN OPERATIONAL TASKS (earliest due dates first; list may be incomplete):
+${openTasks || "(none recorded)"}
+
+MONEY: collected ${collected}, outstanding ${outstanding}, operating costs ${costs}, operating difference ${profit}, member payouts ${payouts} (tracked separately from operating costs)
+MONEY LEDGER (up to 18 app records; linked gigs prioritized; may be incomplete; not bank-verified):
+${moneyLedgerLines || "(empty)"}
 MERCH: recorded sales ${merchRevenue}, gross profit ${merchGrossProfit}, units sold ${merchUnitsSold}, low-stock items ${lowStock.length}
 
 MERCH INVENTORY:
@@ -489,4 +622,7 @@ ${gigLines || "(empty)"}
 
 PEOPLE:
 ${peopleLines || "(empty)"}`;
+  if (context.length <= 15000) return context;
+  const trimmed = context.slice(0, 14800).replace(/\n[^\n]*$/, "");
+  return `${trimmed}\n[Some lower-priority workspace context was omitted to fit the Advisor request limit.]`;
 }

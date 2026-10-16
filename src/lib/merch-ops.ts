@@ -4,7 +4,7 @@ import type { MerchInventoryAdjustment, MerchOrder, MerchProduct, MerchRefund, M
 export function buildMerchLedgerEntries(
   sale: Omit<MerchSale, "id">,
   productName: string,
-  ids: { revenueId: string; costId: string },
+  ids: { revenueId: string; costId: string; sourceSaleId?: string },
 ): MoneyEntry[] {
   if (!productName.trim()) throw new Error("Product name is required for merch ledger entries.");
   if (!ids.revenueId.trim() || !ids.costId.trim() || ids.revenueId === ids.costId) {
@@ -29,6 +29,7 @@ export function buildMerchLedgerEntries(
       label: `Merch sale: ${productName} × ${sale.quantity}`,
       date: sale.date,
       gigId: sale.gigId,
+      sourceSaleId: ids.sourceSaleId,
     },
     {
       id: ids.costId,
@@ -37,15 +38,10 @@ export function buildMerchLedgerEntries(
       label: `Merch cost of goods: ${productName} × ${sale.quantity}`,
       date: sale.date,
       gigId: sale.gigId,
+      sourceSaleId: ids.sourceSaleId,
     },
-    ...((sale.taxAmount ?? 0) > 0 ? [{
-      id: `${ids.costId}:tax`,
-      type: "cost" as const,
-      amount: sale.taxAmount!,
-      label: `Merch sales tax payable: ${productName}`,
-      date: sale.date,
-      gigId: sale.gigId,
-    }] : []),
+    // Sales tax collected is a liability, not revenue or an operating expense.
+    // It remains visible in merch reporting and is intentionally excluded from the money ledger's profit calculation.
     ...((sale.processingFee ?? 0) > 0 ? [{
       id: `${ids.costId}:fee`,
       type: "cost" as const,
@@ -53,8 +49,15 @@ export function buildMerchLedgerEntries(
       label: `Merch processing fee: ${productName}`,
       date: sale.date,
       gigId: sale.gigId,
+      sourceSaleId: ids.sourceSaleId,
     }] : []),
   ];
+}
+
+
+/** True for ledger rows generated from a merch sale/order and therefore not safe to edit independently. */
+export function isSourceManagedMoneyEntry(entry: Pick<MoneyEntry, "sourceOrderId" | "sourceSaleId">): boolean {
+  return Boolean(entry.sourceOrderId || entry.sourceSaleId);
 }
 
 export type MerchSummary = {
@@ -82,7 +85,8 @@ export function recordMerchSale(
   sales: readonly MerchSale[],
   input: Omit<MerchSale, "id">,
   id: string,
-): { products: MerchProduct[]; sales: MerchSale[] } {
+  inventoryAdjustmentId = `${id}:inventory`,
+): { products: MerchProduct[]; sales: MerchSale[]; adjustments: MerchInventoryAdjustment[] } {
   if (!id.trim()) throw new Error("Sale ID is required.");
   if (sales.some((sale) => sale.id === id)) throw new Error("Sale ID already exists.");
   if (!input.productId.trim()) throw new Error("Choose a merch product.");
@@ -97,11 +101,22 @@ export function recordMerchSale(
     throw new Error(`Not enough stock: ${product.stockOnHand} available, ${input.quantity} requested.`);
   }
   const sale: MerchSale = { ...input, id };
+  if (!inventoryAdjustmentId.trim()) throw new Error("Inventory adjustment ID is required.");
   return {
     products: products.map((item) =>
       item.id === product.id ? { ...item, stockOnHand: item.stockOnHand - input.quantity } : item,
     ),
     sales: [sale, ...sales],
+    // Every manual sale must have a matching stock movement for inventory auditability.
+    adjustments: [{
+      id: inventoryAdjustmentId,
+      productId: product.id,
+      quantityDelta: -input.quantity,
+      reason: "sale",
+      date: input.date,
+      gigId: input.gigId,
+      note: `Manual sale ${id}`,
+    }],
   };
 }
 
@@ -178,6 +193,7 @@ export function recordMerchOrder(
   const ledgerEntries = nextSales.flatMap((sale, index) => buildMerchLedgerEntries(sale, products.find((product) => product.id === sale.productId)!.name, {
     revenueId: ids.ledgerIds[index * 2]!,
     costId: ids.ledgerIds[index * 2 + 1]!,
+    sourceSaleId: sale.id,
   }).map((entry) => ({ ...entry, sourceOrderId: ids.orderId })));
   return { products: nextProducts, orders: [order, ...orders], sales: [...nextSales, ...sales], ledgerEntries };
 }
@@ -197,8 +213,8 @@ export function refundMerchOrder(
   const ledgerEntries: MoneyEntry[] = [
     { id: input.ledgerIds[0]!, type: "collected", amount: -roundCents(order.subtotal - order.discountAmount), label: `Merch refund ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id },
   ];
-  if (order.taxAmount > 0) ledgerEntries.push({ id: input.ledgerIds[1]!, type: "cost", amount: -order.taxAmount, label: `Reverse merch tax ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id });
-  if (input.restock && cogs > 0) ledgerEntries.push({ id: input.ledgerIds[2]!, type: "cost", amount: -roundCents(cogs), label: `Reverse merch cost of goods ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id });
+  // Sales tax is tracked as tax collected, not as an operating expense; never reverse it through costs.
+  if (input.restock && cogs > 0) ledgerEntries.push({ id: input.ledgerIds[1]!, type: "cost", amount: -roundCents(cogs), label: `Reverse merch cost of goods ${order.id}`, date: input.date, gigId: order.gigId, sourceOrderId: order.id });
   const nextProducts = products.map((product) => {
     if (!input.restock) return product;
     const quantity = order.lines.filter((line) => line.productId === product.id).reduce((sum, line) => sum + line.quantity, 0);

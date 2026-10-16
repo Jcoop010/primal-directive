@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
+import { validDay } from "@/lib/workspace-intelligence";
+import { parseLedgerAmount } from "@/lib/money-ledger";
+import { isSourceManagedMoneyEntry } from "@/lib/merch-ops";
 import { useMusician } from "@/lib/store";
 import {
   GIG_STATUS_LABEL,
@@ -42,6 +45,8 @@ export function GigDrawer() {
           key={editing?.id ?? "new"}
           initial={editing}
           onSave={(data) => {
+            if ((data.status === 'booked' || data.status === 'completed') && !validDay(data.date)) { toast.error('A confirmed show requires a real date.'); return; }
+            if (data.status === 'booked' && editing?.status !== 'booked' && !window.confirm('Confirm this show is booked with the entered date and agreed terms? This generates a preparation checklist.')) return;
             if (editing) {
               updateGig(editing.id, data);
               toast("Gig updated");
@@ -54,8 +59,11 @@ export function GigDrawer() {
           onDelete={
             editing
               ? () => {
-                  removeGig(editing.id);
-                  toast("Gig removed");
+                  if (!removeGig(editing.id)) {
+                    toast.error("This show has linked financial or merch history. Keep it to preserve reconciliation, or remove/reassign its linked records first.");
+                    return;
+                  }
+                  toast.success("Gig removed");
                   setComposer({ gigOpen: false, editingGigId: undefined });
                 }
               : undefined
@@ -198,7 +206,11 @@ export function PersonDrawer() {
           initial={editing}
           onSave={(data) => {
             if (editing) {
-              updatePerson(editing.id, data);
+              const saved = updatePerson(editing.id, data);
+              if (!saved) {
+                toast.error("This contact has recorded payouts. Its role and payout share cannot be changed without rewriting prior closeouts. Correct or remove those payout records first.");
+                return;
+              }
               toast("Contact updated");
             } else {
               addPerson(data);
@@ -209,7 +221,11 @@ export function PersonDrawer() {
           onDelete={
             editing
               ? () => {
-                  removePerson(editing.id);
+                  const removed = removePerson(editing.id);
+                  if (!removed) {
+                    toast.error("This contact has payout history. Remove or correct its payout records before deleting the contact.");
+                    return;
+                  }
                   toast("Contact removed");
                   setComposer({ personOpen: false, editingPersonId: undefined });
                 }
@@ -235,6 +251,9 @@ function PersonForm({
   const [city, setCity] = useState(initial?.city ?? "");
   const [contact, setContact] = useState(initial?.contact ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [sharePercent, setSharePercent] = useState(
+    initial?.settlementSharePercent === undefined ? "" : String(initial.settlementSharePercent),
+  );
 
   return (
     <form
@@ -242,17 +261,23 @@ function PersonForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!name.trim()) return;
+        const parsedShare = sharePercent.trim() === "" ? undefined : Number(sharePercent);
+        if (parsedShare !== undefined && (!Number.isFinite(parsedShare) || parsedShare < 0 || parsedShare > 100)) {
+          toast.error("Payout share must be between 0 and 100.");
+          return;
+        }
         onSave({
           name: name.trim(),
           role,
           city: city.trim(),
           contact: contact.trim(),
           notes: notes.trim(),
+          settlementSharePercent: role === "member" || (role === "band" && initial?.settlementSharePercent !== undefined) ? parsedShare : undefined,
         });
       }}
     >
       <Field label="Name">
-        <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Band or person" />
+        <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Band, musician, or contact" />
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Role">
@@ -271,6 +296,11 @@ function PersonForm({
           <Input value={city} onChange={(e) => setCity(e.target.value)} />
         </Field>
       </div>
+      {role === "member" || (role === "band" && initial?.settlementSharePercent !== undefined) ? (
+        <Field label="Show payout share (%)">
+          <Input type="number" min="0" max="100" step="0.01" value={sharePercent} onChange={(e) => setSharePercent(e.target.value)} placeholder="e.g. 25" />
+        </Field>
+      ) : null}
       <Field label="Contact">
         <Input
           value={contact}
@@ -300,6 +330,7 @@ export function MoneyDrawer() {
     useMusician();
   const editing = money.find((m) => m.id === composer.editingMoneyId);
   const open = composer.moneyOpen;
+  const sourceManaged = Boolean(editing && isSourceManagedMoneyEntry(editing));
   return (
     <Drawer
       open={open}
@@ -311,14 +342,27 @@ export function MoneyDrawer() {
       }
       title={editing ? "Edit entry" : "Add money"}
     >
-      {open ? (
+      {open ? sourceManaged ? (
+        <div className="space-y-3 rounded-xl border border-line bg-surface-2 p-4">
+          <p className="text-sm font-semibold">This entry is linked to a merch sale or order.</p>
+          <p className="text-sm leading-relaxed text-muted">
+            To keep inventory, refunds, and financial totals consistent, this generated ledger entry cannot be edited or deleted on its own. Manage the source sale or order in Merch instead.
+          </p>
+          <Button type="button" className="w-full" onClick={() => setComposer({ moneyOpen: false, editingMoneyId: undefined })}>
+            Close
+          </Button>
+        </div>
+      ) : (
         <MoneyForm
           key={editing?.id ?? "new"}
           initial={editing}
           gigs={gigs}
           onSave={(data) => {
             if (editing) {
-              updateMoney(editing.id, data);
+              if (!updateMoney(editing.id, data)) {
+                toast.error("This ledger entry is managed by its linked merch record.");
+                return;
+              }
               toast("Entry updated");
             } else {
               addMoney(data);
@@ -329,7 +373,10 @@ export function MoneyDrawer() {
           onDelete={
             editing
               ? () => {
-                  removeMoney(editing.id);
+                  if (!removeMoney(editing.id)) {
+                    toast.error("This ledger entry is managed by its linked merch record.");
+                    return;
+                  }
                   toast("Entry removed");
                   setComposer({ moneyOpen: false, editingMoneyId: undefined });
                 }
@@ -357,6 +404,7 @@ function MoneyForm({
   const [label, setLabel] = useState(initial?.label ?? "");
   const [date, setDate] = useState(initial?.date ?? todayIso());
   const [gigId, setGigId] = useState(initial?.gigId ?? "");
+  const selectableMoneyTypes = MONEY_TYPES.filter((item) => item !== "payout" || initial?.type === "payout");
 
   return (
     <form
@@ -364,9 +412,18 @@ function MoneyForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!label.trim()) return;
+        const parsedAmount = parseLedgerAmount(amount);
+        if (parsedAmount === null) {
+          toast.error("Enter a non-zero amount. Use a negative value for a refund or reversal.");
+          return;
+        }
+        if (type === "payout" && parsedAmount < 0) {
+          toast.error("Member payouts must be positive. Correct or remove the original payout instead.");
+          return;
+        }
         onSave({
           type,
-          amount: Number(amount) || 0,
+          amount: parsedAmount,
           label: label.trim(),
           date,
           gigId: gigId || undefined,
@@ -379,7 +436,7 @@ function MoneyForm({
             value={type}
             onChange={(e) => setType(e.target.value as MoneyType)}
           >
-            {MONEY_TYPES.map((t) => (
+            {selectableMoneyTypes.map((t) => (
               <option key={t} value={t}>
                 {MONEY_TYPE_LABEL[t]}
               </option>
@@ -389,12 +446,12 @@ function MoneyForm({
         <Field label="Amount">
           <Input
             type="number"
-            min={0}
-            step="1"
+            step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required
           />
+          <p className="mt-1 text-[11px] leading-relaxed text-muted">Cents are supported. Use a negative amount for a refund or reversal; record member payouts in Gig Closeout.</p>
         </Field>
       </div>
       <Field label="Label">
@@ -435,21 +492,15 @@ function MoneyForm({
 }
 
 export function ProfileDrawer() {
-  const { composer, profile, setComposer, updateProfile, resetSample, clearAll } =
-    useMusician();
-  const [draft, setDraft] = useState(profile);
-  const open = composer.profileOpen;
+  const composer = useMusician(state => state.composer);
+  const setComposer = useMusician(state => state.setComposer);
+  return <Drawer open={composer.profileOpen} onOpenChange={open => setComposer({ profileOpen: open })} title="Artist profile">{composer.profileOpen ? <ProfileForm /> : null}</Drawer>;
+}
 
+function ProfileForm() {
+  const { profile, setComposer, updateProfile, resetSample, clearAll } = useMusician();
+  const [draft, setDraft] = useState(() => profile);
   return (
-    <Drawer
-      open={open}
-      onOpenChange={(v) => {
-        if (v) setDraft(useMusician.getState().profile);
-        setComposer({ profileOpen: v });
-      }}
-      title="Artist profile"
-    >
-      {open ? (
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -512,6 +563,7 @@ export function ProfileDrawer() {
               variant="ghost"
               className="flex-1"
               onClick={() => {
+                if (!window.confirm('Replace workspace records, goals, saved notes, plans and chat with fictional sample data?')) return;
                 resetSample();
                 toast("Sample scene loaded");
                 setComposer({ profileOpen: false });
@@ -524,6 +576,7 @@ export function ProfileDrawer() {
               variant="ghost"
               className="flex-1"
               onClick={() => {
+                if (!window.confirm('Clear workspace records, goals, saved notes, plans and chat? Your artist profile stays.')) return;
                 clearAll();
                 toast("Cleared local data");
                 setComposer({ profileOpen: false });
@@ -533,8 +586,6 @@ export function ProfileDrawer() {
             </Button>
           </div>
         </form>
-      ) : null}
-    </Drawer>
   );
 }
 

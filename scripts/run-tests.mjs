@@ -1,8 +1,9 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
-const root = new URL(".", import.meta.url).pathname;
+const root = fileURLToPath(new URL(".", import.meta.url));
 const testFiles = readdirSync(root)
   .filter((name) => name.endsWith(".test.mjs"))
   .filter((name) => name !== "grok-pwa-plugin.test.mjs")

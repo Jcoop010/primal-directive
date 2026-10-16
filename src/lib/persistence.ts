@@ -1,10 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { planningSchema } from "@/lib/artist-planning-schema";
+import { emptyPlanning } from "@/lib/artist-planning";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
+import { bookingSchema } from "@/lib/booking-intelligence";
 import { GIG_STATUSES, MERCH_CATEGORIES, MERCH_PAYMENT_METHODS, MONEY_TYPES, PERSON_ROLES } from "@/lib/types";
 
 const suggestedGigSchema = z.object({
+  sourceUrl: z.string().url().optional(),
   name: z.string(),
   venue: z.string(),
   city: z.string(),
@@ -16,6 +20,7 @@ const suggestedGigSchema = z.object({
 });
 
 const suggestedPersonSchema = z.object({
+  sourceUrl: z.string().url().optional(),
   name: z.string(),
   role: z.enum(PERSON_ROLES),
   city: z.string(),
@@ -24,6 +29,7 @@ const suggestedPersonSchema = z.object({
 });
 
 const gigSchema = z.object({
+  booking: bookingSchema.optional(),
   id: z.string(),
   name: z.string(),
   venue: z.string(),
@@ -53,6 +59,8 @@ const moneySchema = z.object({
   date: z.string(),
   gigId: z.string().optional(),
   sourceOrderId: z.string().optional(),
+  sourceSaleId: z.string().optional(),
+  memberId: z.string().optional(),
 });
 
 const merchProductSchema = z.object({
@@ -172,6 +180,7 @@ const stateSchema = z.object({
   merchInventoryAdjustments: z.array(merchInventoryAdjustmentSchema).max(50000).default([]),
   merchRefunds: z.array(merchRefundSchema).max(20000).default([]),
   tasks: z.array(operationalTaskSchema).max(20000).default([]),
+  planning: planningSchema.optional(),
   chat: z.array(chatSchema).max(2000),
   profile: profileSchema,
 });
@@ -204,7 +213,7 @@ export const saveAppState = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const sql = await getSql();
     const serialized = JSON.stringify(data.state);
-    if (serialized.length > 2_000_000) {
+    if (new TextEncoder().encode(serialized).length > 2_000_000) {
       throw new Error("App state exceeds the 2 MB safety limit");
     }
 
@@ -219,12 +228,13 @@ export const saveAppState = createServerFn({ method: "POST" })
         )
       : await sql.query<{ version: number }>(
           `update app_state
-           set state = $2::jsonb,
+           set state = $2::jsonb || case when $4::boolean then '{}'::jsonb
+             else jsonb_build_object('planning', coalesce(state->'planning', $5::jsonb)) end,
                version = version + 1,
                updated_at = current_timestamp
            where user_id = $1 and version = $3
            returning version`,
-          [context.userId, serialized, data.expectedVersion],
+          [context.userId, serialized, data.expectedVersion, data.state.planning !== undefined, JSON.stringify(emptyPlanning())],
         );
 
     if (!rows.length) {

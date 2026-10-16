@@ -13,6 +13,17 @@
  */
 
 /**
+ * Preview deployments may share the production database connection. Never let a
+ * non-production Vercel build apply schema changes to that shared database.
+ * Local development and production deployments retain the existing behavior.
+ * @param {NodeJS.ProcessEnv} [env]
+ * @returns {boolean}
+ */
+export function shouldRunDeployMigrations(env = process.env) {
+  return env.VERCEL_ENV !== "preview";
+}
+
+/**
  * The `_migrations` key for a migration path (or bare filename).
  * @param {string} path
  * @returns {string}
