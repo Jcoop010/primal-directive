@@ -2,7 +2,8 @@
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 
-const origin = "http://127.0.0.1:8080";
+const origin = process.env.AUTH_SMOKE_ORIGIN ?? "http://127.0.0.1:8080";
+assert.ok(["http://127.0.0.1:8080", "https://primal-directive-loose-ends-co.vercel.app"].includes(origin), "Auth smoke target must be the local test server or the existing production app");
 const base = origin + "/api/auth";
 const suffix = randomBytes(12).toString("hex");
 const password = "Ci-" + randomBytes(24).toString("base64url") + "!";
