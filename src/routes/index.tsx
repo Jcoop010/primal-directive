@@ -14,6 +14,10 @@ export const Route = createFileRoute("/")({ component: AdvisorPage });
 
 const SUGGESTIONS = [
   {
+    label: "Audit my pipeline",
+    q: "Audit my saved gig pipeline. Rank the three most urgent open opportunities using only recorded evidence, explain what is missing, and give me a concrete next action for each. Do not invent contacts, dates, guarantees, or venue availability.",
+  },
+  {
     label: "Grow local draw",
     q: "How do we grow our local draw in the next 90 days given our current pipeline and home city?",
   },
@@ -117,7 +121,7 @@ function AdvisorPage() {
         </div>
         <div className="relative mt-6 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
           <span className="mr-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"><Compass className="size-4" /> Start with a mission</span>
-          {SUGGESTIONS.slice(0, 3).map((s) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line-strong bg-bg/75 px-3 text-xs font-semibold text-soft transition-colors hover:border-accent hover:text-fg disabled:opacity-50">{s.label}<ArrowUpRight className="size-3" /></button>)}
+          {SUGGESTIONS.map((s) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line-strong bg-bg/75 px-3 text-xs font-semibold text-soft transition-colors hover:border-accent hover:text-fg disabled:opacity-50">{s.label}<ArrowUpRight className="size-3" /></button>)}
         </div>
       </section>
 
