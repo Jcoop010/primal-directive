@@ -27,28 +27,46 @@ const Input = z.object({
 
 const GigOut = z.object({
   ...venueEvidenceShape,
-  name: z.string(),
-  venue: z.string().default(""),
-  city: z.string().default(""),
-  conf: z.number().min(0).max(1).default(0.4),
-  reason: z.string().default(""),
+  name: z.string().trim().min(1),
+  venue: z.string().default("").catch(""),
+  city: z.string().default("").catch(""),
+  conf: z.number().min(0).max(1).default(0.4).catch(0.4),
+  reason: z.string().default("").catch(""),
   sourceUrl: z.string().url().optional(),
 });
 
 const PersonOut = z.object({
-  name: z.string(),
+  name: z.string().trim().min(1),
   role: z.enum(PERSON_ROLES).default("other"),
-  city: z.string().default(""),
-  detail: z.string().default(""),
-  reason: z.string().default(""),
+  city: z.string().default("").catch(""),
+  detail: z.string().default("").catch(""),
+  reason: z.string().default("").catch(""),
   sourceUrl: z.string().url().optional(),
 });
 
 const AiJson = z.object({
   answer: z.string(),
-  gigs: z.array(GigOut).optional(),
-  people: z.array(PersonOut).optional(),
-  moves: z.array(z.string()).optional(),
+  gigs: z
+    .array(z.unknown())
+    .optional()
+    .catch([])
+    .transform((items) =>
+      (items ?? []).flatMap((value) => {
+        const parsed = GigOut.safeParse(value);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
+  people: z
+    .array(z.unknown())
+    .optional()
+    .catch([])
+    .transform((items) =>
+      (items ?? []).flatMap((value) => {
+        const parsed = PersonOut.safeParse(value);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
+  moves: z.array(z.string()).optional().catch([]),
 });
 
 const SYSTEM = `You are Primal Directive: a rigorous, commercially minded advisor and operating analyst for independent artists.
@@ -235,7 +253,7 @@ async function complete(args: {
     const text = (candidate?.content?.parts ?? [])
       .filter((part) => !part.thought && typeof part.text === "string")
       .map((part) => part.text)
-      .join("\n");
+      .join("");
     const urls = (candidate?.groundingMetadata?.groundingChunks ?? [])
       .map((chunk) => chunk.web?.uri)
       .filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
@@ -274,7 +292,7 @@ async function complete(args: {
     const text = content
       .filter((b) => b.type === "text")
       .map((b) => b.text ?? "")
-      .join("\n");
+      .join("");
     const citations = content
       .flatMap((b) => b.citations ?? [])
       .map((cite) => cite.url)
@@ -335,7 +353,7 @@ async function complete(args: {
         .filter((url): url is string => typeof url === "string"),
     ];
     return Response.json({
-      choices: [{ message: { content: parts.map((part) => part.text ?? "").join("\n") } }],
+      choices: [{ message: { content: parts.map((part) => part.text ?? "").join("") } }],
       citations,
     });
   }
@@ -420,7 +438,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let attemptedProvider = "none";
     const researchRequested =
       data.mode === "research" || researchNeeded(data.message, data.history);
-    const policy = createProviderPolicy({ timeoutMs: researchRequested ? 180_000 : 55_000, attemptMs: researchRequested ? 75_000 : 20_000 });
+    const policy = createProviderPolicy({
+      timeoutMs: researchRequested ? 180_000 : 55_000,
+      attemptMs: researchRequested ? 75_000 : 20_000,
+    });
     const failures: string[] = [];
     for (const { provider, apiKey } of providers) {
       const blocked = policy.blocked(provider);
@@ -473,6 +494,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
               extractJson(choices[0].message.content),
           ).success
         ) {
+          console.warn("[advisor] invalid structured response", {
+            provider,
+            characters: choices[0].message.content.length,
+            hasJson: Boolean(extractJson(choices[0].message.content)),
+          });
           failures.push(provider + ": invalid structured response");
           continue;
         }

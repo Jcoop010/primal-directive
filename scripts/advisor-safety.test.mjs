@@ -151,6 +151,21 @@ test("advisor registers authentication before handling requests", () => {
   assert.deepEqual(registeredMiddleware, ["verified-session-middleware"]);
 });
 
+test('Anthropic citation text fragments preserve JSON and unknown optional claims do not discard sourced leads',async t=>{
+ const keys=['ANTHROPIC_API_KEY','GEMINI_API_KEY','XAI_API_KEY'];const previous=keys.map(k=>process.env[k]);
+ process.env.ANTHROPIC_API_KEY='fictional-test-key';delete process.env.GEMINI_API_KEY;delete process.env.XAI_API_KEY;
+ try {
+  const url='https://example.invalid/official-booking';
+  const value=JSON.stringify({answer:'River Fold should review this official source before outreach.',gigs:[{name:'Fictional QA venue',sourceUrl:url,venueCapacity:'110',capacitySourceUrl:url,bookingRoute:null,bookingContactName:null,bookingContactSourceUrl:null,conf:null},{name:null,sourceUrl:url}],people:null,moves:null});
+  const split=value.indexOf('review');
+  t.mock.method(globalThis,'fetch',async()=>Response.json({content:[{type:'text',text:value.slice(0,split),citations:[{url}]},{type:'text',text:value.slice(split),citations:[{url}]}]}));
+  const result=await askGrowthAdvisor({data:{...data,message:'Research official booking sources for River Fold'}});
+  assert.match(result.source,/ANTHROPIC LIVE WEB SEARCH/);assert.equal(result.gigs.length,1);
+  assert.equal(result.gigs[0].venueCapacity,110);assert.equal(result.gigs[0].bookingRoute,undefined);assert.equal(result.gigs[0].bookingContactName,undefined);
+  assert.deepEqual(result.people,[]);assert.equal(result.gigs[0].date,'');assert.equal(result.gigs[0].fee,0);
+ } finally {keys.forEach((key,i)=>previous[i]===undefined?delete process.env[key]:process.env[key]=previous[i]);}
+});
+
 test("advisor handles provider failures without fabricating verified leads", async (t) => {
   const previous = { xai: process.env.XAI_API_KEY, anthropic: process.env.ANTHROPIC_API_KEY, gemini: process.env.GEMINI_API_KEY, grounding: process.env.GEMINI_SEARCH_GROUNDING_ENABLED };
   delete process.env.ANTHROPIC_API_KEY;

@@ -4,12 +4,18 @@ const link = z
   .url()
   .max(2000)
   .refine((v) => v.startsWith("https://"), "Use HTTPS sources.")
-  .optional();
+  .optional()
+  .catch(undefined);
 export const venueEvidenceShape = {
-  venueCapacity: z.number().int().positive().max(1000000).optional(),
+  venueCapacity: z
+    .preprocess(
+      (v) => (typeof v === "string" && /^\d+$/.test(v.trim()) ? Number(v) : v),
+      z.number().int().positive().max(1000000).optional(),
+    )
+    .catch(undefined),
   capacitySourceUrl: link,
   bookingRoute: link,
-  bookingContactName: z.string().max(200).optional(),
+  bookingContactName: z.string().max(200).optional().catch(undefined),
   bookingContactSourceUrl: link,
 };
 export type VenueEvidence = z.infer<z.ZodObject<typeof venueEvidenceShape>>;
@@ -53,10 +59,8 @@ export function citedVenueEvidence(input: VenueEvidence, citations: string[]): V
       ? {
           bookingContactName: input.bookingContactName,
           bookingContactSourceUrl: input.bookingContactSourceUrl,
-          bookingRoute: citationMatches(input.bookingRoute, citations)
-            ? input.bookingRoute
-            : undefined,
         }
       : {}),
+    ...(citationMatches(input.bookingRoute, citations) ? { bookingRoute: input.bookingRoute } : {}),
   };
 }
