@@ -163,6 +163,28 @@ function AdvisorPage() {
     toast("Contact date recorded. No email was sent.");
   }
 
+  function composeFollowUpEmail(gigId: string) {
+    const gig = useMusician.getState().gigs.find((item) => item.id === gigId);
+    if (!gig) return;
+    const email = gig.outreachEmail?.trim() || "";
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      toast("Enter and review a booking email address first.");
+      return;
+    }
+    const profile = useMusician.getState().profile;
+    const subject = `Booking follow-up: ${profile.artistName || "[Artist]"} at ${gig.venue || gig.name}`;
+    const body = `Hello,
+
+Following up about possible booking opportunities for ${profile.artistName || "[Artist]"} at ${gig.venue || gig.name}.
+
+Music / live video: [add links]
+EPK: [add link]
+Your name: [add name]`;
+    const url = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = url;
+    toast("Email draft opened; sending requires your approval in your email app.");
+  }
+
   async function copyFollowUp(gigId: string) {
     const gig = useMusician.getState().gigs.find((item) => item.id === gigId);
     if (!gig) return;
@@ -352,11 +374,20 @@ Thanks,
                   <option value="interested">Interested</option>
                   <option value="declined">Declined</option>
                 </select>
+                <input
+                  type="email"
+                  aria-label={`Booking email for ${gig.venue || gig.name}`}
+                  placeholder="Verified booking email"
+                  className="min-h-9 w-44 rounded-md border border-line bg-bg px-2 text-xs"
+                  value={gig.outreachEmail || ""}
+                  onChange={(event) => useMusician.getState().updateGig(gig.id, { outreachEmail: event.target.value })}
+                />
+                <Button size="sm" variant="ghost" onClick={() => composeFollowUpEmail(gig.id)}>Open email draft</Button>
                 <Button size="sm" variant="ghost" onClick={() => void copyFollowUp(gig.id)}>Copy follow-up</Button>
                 <Button size="sm" variant="ghost" onClick={() => recordContact(gig.id)}>Mark contacted</Button>
               </div>
             ))}
-            <p className="text-[11px] text-muted">Reply status, dates, and contact activity are manually recorded. Email is not connected; no messages are sent automatically.</p>
+            <p className="text-[11px] text-muted">Reply status, dates, and contact activity are manually recorded. Opens your installed email app with a draft; does not send or sync replies.</p>
           </div>
         </details>
       ) : null}
