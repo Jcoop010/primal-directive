@@ -102,10 +102,12 @@ OUTPUT CONTRACT:
 Return one valid JSON object and no markdown fences:
 {
   "answer": "Plain text with short paragraphs. Clearly separate verified facts, estimates, and recommendations where relevant.",
-  "gigs": [{ "name", "venue", "city", "date", "fee", "conf", "reason", "status", "sourceUrl" }],
-  "people": [{ "name", "role", "city", "detail", "reason", "sourceUrl" }],
+  "gigs": [],
+  "people": [],
   "moves": ["short, concrete next action"]
 }
+
+For a sourced venue, add a gig object with name (string), venue (string), city (string), conf (number from 0 to 1), reason (string), and sourceUrl (exact retrieved HTTPS URL). Optional claim fields are venueCapacity (positive integer), capacitySourceUrl (HTTPS URL), bookingRoute (HTTPS URL), bookingContactName (string), and bookingContactSourceUrl (HTTPS URL). Each claim needs its own supporting citation. Omit unknown fields rather than using null or an invented value. Research leads always enter the app with no date, no agreed fee, and lead status. For a sourced person, use name, role, city, detail, reason and sourceUrl. Escape line breaks inside JSON strings; do not place text outside the JSON object.
 
 Return 0–5 source-supported gigs and 0–5 source-supported people; otherwise use empty arrays. The role must be one of band, booker, promoter, venue, manager, press, other. Status must be one of lead, outreach, negotiating, hold, booked, completed, passed. A proposed/unconfirmed lead must never be marked booked or negotiating unless the saved pipeline or source explicitly supports that status. Confidence is a calibrated estimate of evidence quality, not enthusiasm. Return 0–3 short moves.
 VENUE RESEARCH FORMAT:
