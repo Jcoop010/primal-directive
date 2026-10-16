@@ -61,8 +61,11 @@ test("booking research retains grounding through failover and rate limits", asyn
     process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
     await t.test("Anthropic search-result sources survive JSON without inline citations", async (st) => {
       process.env.ANTHROPIC_API_KEY = "fictional-anthropic";
-      st.mock.method(globalThis, "fetch", async (url) => {
+      st.mock.method(globalThis, "fetch", async (url, options) => {
         assert.match(String(url), /api.anthropic.com/);
+        const request = JSON.parse(options.body);
+        assert.deepEqual(request.tool_choice, { type: "tool", name: "web_search" });
+        assert.equal(request.tools[0].max_uses, 2);
         return Response.json({ content: [
           { type: "web_search_tool_result", content: [{ type: "web_search_result", url: answer.gigs[0].sourceUrl }] },
           { type: "text", text: JSON.stringify(answer) },
