@@ -414,3 +414,9 @@ test("browser-smoke file I/O only touches guarded paths", () => {
   const stats = [...src.matchAll(/statSync\(\s*([A-Za-z_$][\w$.]*)/g)].map((m) => m[1]);
   assert.deepEqual(stats, ["baselinePath"]);
 });
+
+test("exitCodeFor rejects blank pages and mobile horizontal overflow", () => {
+  assert.equal(exitCodeFor(verdict({ bodyTextLen: 0 }).viewports), 3);
+  assert.equal(exitCodeFor(verdict({}, { horizontalOverflow: true }).viewports), 3);
+  assert.equal(exitCodeFor(verdict({ hasCanvas: true, bodyTextLen: 0 }).viewports), 0);
+});

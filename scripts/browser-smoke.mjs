@@ -109,7 +109,10 @@ try {
     // networkidle never settles and would burn the whole timeout.
     const resp = await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
     const status = resp?.status() ?? 0;
-    await page.waitForTimeout(1000);
+    await page.waitForFunction(() => {
+      const text = document.body.innerText.trim();
+      return text.length > 20 && !text.includes("Preparing your artist workspace");
+    }, undefined, { timeout: timeoutMs });
 
     const title = await page.title();
     const hasCanvas = (await page.locator("canvas").count()) > 0;

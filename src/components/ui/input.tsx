@@ -50,12 +50,16 @@ export function Field({
   label: string;
   children: React.ReactNode;
 }) {
+  const labelId = React.useId();
+  const control = React.isValidElement<{ "aria-labelledby"?: string }>(children)
+    ? React.cloneElement(children, { "aria-labelledby": children.props["aria-labelledby"] ?? labelId })
+    : children;
   return (
     <label className="block space-y-1.5">
-      <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+      <span id={labelId} className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
         {label}
       </span>
-      {children}
+      {control}
     </label>
   );
 }

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { authMiddleware } from "@/lib/auth/middleware";
 import { localGrowthAdvice } from "@/lib/local-advisor";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
 import { GIG_STATUSES, PERSON_ROLES } from "@/lib/types";
@@ -130,13 +131,38 @@ async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
   search: boolean;
-  provider: "xai" | "anthropic";
+  provider: "xai" | "anthropic" | "gemini";
 }) {
+  if (args.provider === "gemini") {
+    const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": args.apiKey },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: args.messages.filter((message) => message.role === "system").map((message) => message.content).join("\n\n") }] },
+        contents: args.messages.filter((message) => message.role !== "system").map((message) => ({ role: message.role === "assistant" ? "model" : "user", parts: [{ text: message.content }] })),
+        generationConfig: { maxOutputTokens: 2400 },
+        ...(args.search ? { tools: [{ google_search: {} }] } : {}),
+      }),
+      signal: AbortSignal.timeout(45_000),
+    });
+    if (!response.ok) return response;
+    const payload = await response.json() as {
+      candidates?: Array<{
+        content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+        groundingMetadata?: { groundingChunks?: Array<{ web?: { uri?: string } }> };
+      }>;
+    };
+    const candidate = payload.candidates?.[0];
+    const text = (candidate?.content?.parts ?? []).filter((part) => !part.thought && typeof part.text === "string").map((part) => part.text).join("\n");
+    const citations = (candidate?.groundingMetadata?.groundingChunks ?? []).map((chunk) => chunk.web?.uri).filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+    return Response.json({ choices: [{ message: { content: text } }], citations });
+  }
   if (args.provider === "anthropic") {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": args.apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1800, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 2 }] } : {}), }),
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1800, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] } : {}), }),
       signal: AbortSignal.timeout(45_000),
     });
     if (!response.ok) return response;
@@ -174,12 +200,14 @@ async function complete(args: {
 }
 
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
     const xaiKey = process.env.XAI_API_KEY;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    const provider: "anthropic" | "xai" | null = anthropicKey ? "anthropic" : xaiKey ? "xai" : null;
-    const apiKey = provider === "anthropic" ? anthropicKey : xaiKey;
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const provider: "anthropic" | "gemini" | "xai" | null = anthropicKey ? "anthropic" : geminiKey ? "gemini" : xaiKey ? "xai" : null;
+    const apiKey = provider === "anthropic" ? anthropicKey : provider === "gemini" ? geminiKey : xaiKey;
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
@@ -198,7 +226,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       return {
         ...local,
         source: "OFFLINE MODE — AI PROVIDER NOT CONFIGURED",
-        answer: `No AI provider is configured. Set ANTHROPIC_API_KEY or XAI_API_KEY in Vercel and redeploy. Offline guidance uses saved artist data only; current external facts are not verified.\n\n${local.answer}`,
+        answer: `AI advice is unavailable for this workspace right now. Offline guidance uses saved artist data only; current external facts are not verified.\n\n${local.answer}`,
         gigs: [],
         people: [],
         moves: [],
@@ -221,8 +249,13 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let res: Response | null = null;
 
     try {
-      res = await complete({ apiKey, messages, search: provider === "xai" || provider === "anthropic", provider });
-      if (!res.ok && (provider === "xai" || provider === "anthropic")) {
+      const search = provider === "gemini"
+        ? process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true"
+        : provider === "anthropic"
+          ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED !== "false"
+          : true;
+      res = await complete({ apiKey, messages, search, provider });
+      if (!res.ok && res.status === 400 && search) {
         res = await complete({ apiKey, messages, search: false, provider });
       }
     } catch {
@@ -243,16 +276,33 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         gigs: [],
         people: [],
         moves: [],
-        answer: `Live research is temporarily unavailable (provider: ${provider}, status: ${res?.status ?? "connection failure"}). No current venue, contact, or booking details have been verified.\n\n${local.answer}`,
+        answer: `Live research is temporarily unavailable. No current venue, contact, or booking details have been verified.\n\n${local.answer}`,
       };
     }
 
 
-    const body = (await res.json()) as Record<string, unknown>;
+    let body: Record<string, unknown>;
+    try {
+      const payload: unknown = await res.json();
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        throw new Error("Invalid provider envelope");
+      }
+      body = payload as Record<string, unknown>;
+    } catch {
+      const local = fallback();
+      return {
+        ...local,
+        source: "AI RESPONSE INVALID — OFFLINE GUIDANCE; EXTERNAL FACTS NOT VERIFIED",
+        gigs: [],
+        people: [],
+        moves: [],
+      };
+    }
     const choices = body.choices as
       | Array<{ message?: { content?: string } }>
       | undefined;
-    const raw = choices?.[0]?.message?.content ?? "";
+    const content = choices?.[0]?.message?.content;
+    const raw = typeof content === "string" ? content : "";
     const parsed = extractJson(raw);
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 

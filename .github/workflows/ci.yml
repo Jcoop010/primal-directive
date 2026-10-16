@@ -86,4 +86,50 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Install Chromium for desktop and mobile smoke checks
+        run: npx playwright install chromium
+
+      - name: Browser smoke checks on dev, built output and current production
+        run: |
+          sudo mkdir -p /workspace/screenshots
+          sudo chown "$USER" /workspace/screenshots
+          npm run dev > /tmp/primal-browser-dev.log 2>&1 &
+          BROWSER_DEV_PID=$!
+          trap 'kill "$BROWSER_DEV_PID" 2>/dev/null || true; npm run preview:stop' EXIT
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:8080/__app-env > /dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/ /workspace/screenshots/production.png
+          BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/demo /workspace/screenshots/production-demo.png
+          node scripts/browser-smoke.mjs http://127.0.0.1:8080/ /workspace/screenshots/dev.png
+          npm run preview:restart
+          node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/built.png --baseline /workspace/screenshots/dev.json || { cat .grok/preview.log; exit 1; }
+          node scripts/ci-browser-acceptance.mjs
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-auth-smoke.mjs
+            AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-browser-acceptance.mjs
+          fi
+
+      - name: Expose public and fictional QA screenshots for connector review
+        if: always()
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            for (const name of ["production-demo.png", "production-demo-mobile.png", "authenticated-money.png", "authenticated-mobile.png", "acceptance-failure.png", ...fs.readdirSync("/workspace/screenshots").filter((name) => /^qa-.*[.]jpg$/.test(name))]) {
+              const path = "/workspace/screenshots/" + name;
+              if (fs.existsSync(path)) console.log("QA_PNG_JSON=" + JSON.stringify({ name, base64: fs.readFileSync(path).toString("base64") }));
+            }
+          '
+
+      - name: Upload public browser screenshots and verdicts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke
+          path: /workspace/screenshots/
+          retention-days: 3
+
       # Keep main deployable only after the full production verification passes.

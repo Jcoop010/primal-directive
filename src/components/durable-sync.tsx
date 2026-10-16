@@ -7,6 +7,7 @@ import { useMusician } from "@/lib/store";
 /** Bridges the existing Zustand UX to the authenticated server source of truth. */
 export function DurableSync() {
   const { user, isPending } = useCurrentUserState();
+  const userId = !isPending && user ? user.id : null;
   const readyFor = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loading = useRef(false);
@@ -17,18 +18,17 @@ export function DurableSync() {
   const [syncStatus, setSyncStatus] = useState<"loading" | "ready" | "error">("loading");
 
   // Keep queued work from a previous account from starting after an account switch.
-  activeUserId.current = !isPending && user ? user.id : null;
+  activeUserId.current = userId;
 
   useEffect(() => {
-    if (isPending || !user) {
+    if (!userId) {
       readyFor.current = null;
       version.current = 0;
       setSyncStatus("loading");
       return;
     }
-    if (readyFor.current === user.id || loading.current) return;
+    if (readyFor.current === userId || loading.current) return;
 
-    const userId = user.id;
     const requestId = ++loadRequest.current;
     loading.current = true;
     setSyncStatus("loading");
@@ -95,11 +95,10 @@ export function DurableSync() {
         loading.current = false;
       }
     };
-  }, [user, isPending]);
+  }, [userId]);
 
   useEffect(() => {
-    if (!user || isPending) return;
-    const userId = user.id;
+    if (!userId) return;
     const unsubscribe = useMusician.subscribe(() => {
       if (readyFor.current !== userId || activeUserId.current !== userId || loading.current) return;
       if (timer.current) clearTimeout(timer.current);
@@ -130,7 +129,9 @@ export function DurableSync() {
             const result = await saveAppState({
               data: { state, expectedVersion: version.current },
             });
-            version.current = result.version;
+            if (activeUserId.current === userId && readyFor.current === userId) {
+              version.current = result.version;
+            }
           })
           .catch((error) => {
             console.error("[primal-directive] durable save failed", error);
@@ -155,7 +156,7 @@ export function DurableSync() {
       if (timer.current) clearTimeout(timer.current);
       timer.current = null;
     };
-  }, [user, isPending]);
+  }, [userId]);
 
   if (syncStatus === "ready") return null;
 
