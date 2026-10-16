@@ -30,8 +30,9 @@ test("advisor registers authentication before handling requests", () => {
 });
 
 test("advisor handles provider failures without fabricating verified leads", async (t) => {
-  const previous = { xai: process.env.XAI_API_KEY, anthropic: process.env.ANTHROPIC_API_KEY };
+  const previous = { xai: process.env.XAI_API_KEY, anthropic: process.env.ANTHROPIC_API_KEY, gemini: process.env.GEMINI_API_KEY, grounding: process.env.GEMINI_SEARCH_GROUNDING_ENABLED };
   delete process.env.ANTHROPIC_API_KEY;
+  delete process.env.GEMINI_API_KEY;
   process.env.XAI_API_KEY = "fictional-test-key";
   try {
     for (const [name, reply] of [
@@ -67,6 +68,39 @@ test("advisor handles provider failures without fabricating verified leads", asy
       assert.deepEqual(result.gigs, []);
       assert.deepEqual(result.people, []);
     });
+    await t.test("Gemini uses configured grounding and provider-returned sources", async (subtest) => {
+      process.env.GEMINI_API_KEY = "fictional-gemini-key";
+      process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+      const mocked = subtest.mock.method(globalThis, "fetch", async (url, options) => {
+        assert.match(String(url), /generativelanguage.googleapis.com/);
+        const request = JSON.parse(options.body);
+        assert.deepEqual(request.tools, [{ google_search: {} }]);
+        assert.equal(request.contents.at(-1).parts[0].text, data.message);
+        return Response.json({
+          candidates: [{
+            content: { parts: [{ text: JSON.stringify({ answer: "Fictional QA research example.", gigs: [{ name: "Fictional QA venue", sourceUrl: "https://example.invalid/source" }] }) }] },
+            groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.invalid/source" } }] },
+          }],
+        });
+      });
+      const result = await askGrowthAdvisor({ data });
+      assert.equal(result.ok, true);
+      assert.deepEqual(result.citations, ["https://example.invalid/source"]);
+      assert.equal(result.gigs[0].status, "lead");
+      assert.equal(result.gigs[0].date, "");
+      assert.equal(result.gigs[0].fee, 0);
+      assert.equal(mocked.mock.callCount(), 1);
+      delete process.env.GEMINI_API_KEY;
+    });
+    await t.test("Gemini HTTP failure returns offline guidance without retrying paid calls", async (subtest) => {
+      process.env.GEMINI_API_KEY = "fictional-gemini-key";
+      const mocked = subtest.mock.method(globalThis, "fetch", async () => new Response("", { status: 503 }));
+      const result = await askGrowthAdvisor({ data });
+      assert.match(result.source, /UNAVAILABLE/);
+      assert.deepEqual(result.gigs, []);
+      assert.equal(mocked.mock.callCount(), 1);
+      delete process.env.GEMINI_API_KEY;
+    });
     await t.test("missing keys never call a provider", async (subtest) => {
       delete process.env.XAI_API_KEY;
       const mocked = subtest.mock.method(globalThis, "fetch", () => { throw new Error("must not call"); });
@@ -75,6 +109,10 @@ test("advisor handles provider failures without fabricating verified leads", asy
       assert.equal(mocked.mock.callCount(), 0);
     });
   } finally {
+    if (previous.gemini === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = previous.gemini;
+    if (previous.grounding === undefined) delete process.env.GEMINI_SEARCH_GROUNDING_ENABLED;
+    else process.env.GEMINI_SEARCH_GROUNDING_ENABLED = previous.grounding;
     if (previous.xai === undefined) delete process.env.XAI_API_KEY;
     else process.env.XAI_API_KEY = previous.xai;
     if (previous.anthropic === undefined) delete process.env.ANTHROPIC_API_KEY;
