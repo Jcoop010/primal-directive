@@ -43,7 +43,7 @@ async function submitDialog() {
   const button = page.locator("[role=dialog] button[type=submit]");
   // Playwright's click already scrolls and retries when a React rerender
   // detaches the button; a separate scroll can race with that rerender.
-  await button.click();
+  await button.click({ force: true });
   await page.locator("[role=dialog] form").waitFor({ state: "hidden" });
 }
 async function state() {
