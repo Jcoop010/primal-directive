@@ -1,8 +1,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
+import { syncBookingReminder, validBookingDay } from "@/lib/booking-workflow";
 import { uid } from "@/lib/utils";
-import { adjustMerchInventory as applyInventoryAdjustment, buildMerchLedgerEntries, recordMerchOrder as applyMerchOrder, recordMerchSale as applyMerchSale, refundMerchOrder as applyMerchRefund, restockMerch, summarizeMerch } from "@/lib/merch-ops";
+import {
+  adjustMerchInventory as applyInventoryAdjustment,
+  buildMerchLedgerEntries,
+  recordMerchOrder as applyMerchOrder,
+  recordMerchSale as applyMerchSale,
+  refundMerchOrder as applyMerchRefund,
+  restockMerch,
+  summarizeMerch,
+} from "@/lib/merch-ops";
 import { generateShowTaskPacks, rescheduleOpenShowTasks } from "@/lib/show-workflows";
 import type {
   ArtistProfile,
@@ -59,12 +68,25 @@ type Actions = {
   addMerchProduct: (product: Omit<MerchProduct, "id">) => string;
   updateMerchProduct: (id: string, patch: Partial<MerchProduct>) => void;
   restockMerchProduct: (id: string, quantity: number) => void;
-  adjustMerchProduct: (id: string, quantityDelta: number, reason: "restock" | "comp" | "damage" | "correction", note: string) => void;
+  adjustMerchProduct: (
+    id: string,
+    quantityDelta: number,
+    reason: "restock" | "comp" | "damage" | "correction",
+    note: string,
+  ) => void;
   recordMerchSale: (sale: Omit<MerchSale, "id">) => string;
-  recordMerchOrder: (order: Omit<MerchOrder, "id" | "status" | "createdAt" | "subtotal" | "total" | "refundedAmount">) => string;
+  recordMerchOrder: (
+    order: Omit<
+      MerchOrder,
+      "id" | "status" | "createdAt" | "subtotal" | "total" | "refundedAmount"
+    >,
+  ) => string;
   refundMerchOrder: (id: string, restock: boolean, note: string) => void;
   generateShowTasks: () => number;
-  updateOperationalTask: (id: string, patch: Partial<Pick<OperationalTask, "status" | "dueDate">>) => void;
+  updateOperationalTask: (
+    id: string,
+    patch: Partial<Pick<OperationalTask, "status" | "dueDate">>,
+  ) => void;
   updateProfile: (patch: Partial<ArtistProfile>) => void;
   addUserMessage: (text: string) => void;
   addAiMessage: (msg: Omit<ChatMessage, "id" | "role">) => void;
@@ -118,17 +140,26 @@ export const useMusician = create<State & Actions>()(
     (set) => ({
       ...fresh(),
       addGig: (gig) => {
+        if (gig.date && !validBookingDay(gig.date)) throw Error("Enter a real show date.");
+        if (gig.status === "booked" && !validBookingDay(gig.date))
+          throw Error("A confirmed booking requires a show date.");
         const id = uid();
         set((s) => {
           const savedGig = { ...gig, id };
           // Booking is the workflow trigger: a confirmed, dated show immediately
           // receives its operational checklist instead of relying on a manual step.
-          const tasks = savedGig.status === "booked"
-            ? generateShowTaskPacks([savedGig], s.tasks).map((task) => ({ ...task, id: uid() }))
-            : [];
+          const tasks =
+            savedGig.status === "booked"
+              ? generateShowTaskPacks([savedGig], s.tasks).map((task) => ({ ...task, id: uid() }))
+              : [];
           return {
             gigs: [savedGig, ...s.gigs],
-            tasks: [...tasks, ...s.tasks],
+            tasks: syncBookingReminder(
+              savedGig,
+              [...tasks, ...s.tasks],
+              uid(),
+              new Date().toISOString(),
+            ),
           };
         });
         return id;
@@ -138,14 +169,29 @@ export const useMusician = create<State & Actions>()(
           const previous = s.gigs.find((gig) => gig.id === id);
           const gigs = s.gigs.map((gig) => (gig.id === id ? { ...gig, ...patch } : gig));
           const updated = gigs.find((gig) => gig.id === id);
+          if (updated?.date && !validBookingDay(updated.date))
+            throw Error("Enter a real show date.");
+          if (updated?.status === "booked" && !validBookingDay(updated.date))
+            throw Error("A confirmed booking requires a show date.");
           const newlyBooked = previous?.status !== "booked" && updated?.status === "booked";
-          const existingTasks = updated && previous?.date !== updated.date
-            ? rescheduleOpenShowTasks(updated, s.tasks)
-            : s.tasks;
-          const tasks = newlyBooked && updated
-            ? generateShowTaskPacks([updated], existingTasks).map((task) => ({ ...task, id: uid() }))
-            : [];
-          return { gigs, tasks: [...tasks, ...existingTasks] };
+          const existingTasks =
+            updated && previous?.date !== updated.date
+              ? rescheduleOpenShowTasks(updated, s.tasks)
+              : s.tasks;
+          const tasks =
+            newlyBooked && updated
+              ? generateShowTaskPacks([updated], existingTasks).map((task) => ({
+                  ...task,
+                  id: uid(),
+                }))
+              : [];
+          const combined = [...tasks, ...existingTasks];
+          return {
+            gigs,
+            tasks: updated
+              ? syncBookingReminder(updated, combined, uid(), new Date().toISOString())
+              : combined,
+          };
         }),
       removeGig: (id) =>
         set((s) => ({
@@ -175,8 +221,7 @@ export const useMusician = create<State & Actions>()(
         set((s) => ({
           people: s.people.map((p) => (p.id === id ? { ...p, ...patch } : p)),
         })),
-      removePerson: (id) =>
-        set((s) => ({ people: s.people.filter((p) => p.id !== id) })),
+      removePerson: (id) => set((s) => ({ people: s.people.filter((p) => p.id !== id) })),
       addMoney: (entry) => {
         const id = uid();
         set((s) => ({ money: [{ ...entry, id }, ...s.money] }));
@@ -186,13 +231,25 @@ export const useMusician = create<State & Actions>()(
         set((s) => ({
           money: s.money.map((m) => (m.id === id ? { ...m, ...patch } : m)),
         })),
-      removeMoney: (id) =>
-        set((s) => ({ money: s.money.filter((m) => m.id !== id) })),
+      removeMoney: (id) => set((s) => ({ money: s.money.filter((m) => m.id !== id) })),
       addMerchProduct: (product) => {
         const id = uid();
         set((s) => ({
           merchProducts: [{ ...product, id }, ...s.merchProducts],
-          merchInventoryAdjustments: product.stockOnHand > 0 ? [{ id: uid(), productId: id, quantityDelta: product.stockOnHand, reason: "opening", date: new Date().toISOString().slice(0, 10), note: "Opening stock" }, ...s.merchInventoryAdjustments] : s.merchInventoryAdjustments,
+          merchInventoryAdjustments:
+            product.stockOnHand > 0
+              ? [
+                  {
+                    id: uid(),
+                    productId: id,
+                    quantityDelta: product.stockOnHand,
+                    reason: "opening",
+                    date: new Date().toISOString().slice(0, 10),
+                    note: "Opening stock",
+                  },
+                  ...s.merchInventoryAdjustments,
+                ]
+              : s.merchInventoryAdjustments,
         }));
         return id;
       },
@@ -207,13 +264,34 @@ export const useMusician = create<State & Actions>()(
           const products = restockMerch(s.merchProducts, id, quantity);
           return {
             merchProducts: products,
-            merchInventoryAdjustments: [{ id: uid(), productId: id, quantityDelta: quantity, reason: "restock", date: new Date().toISOString().slice(0, 10), note: "Restocked" }, ...s.merchInventoryAdjustments],
+            merchInventoryAdjustments: [
+              {
+                id: uid(),
+                productId: id,
+                quantityDelta: quantity,
+                reason: "restock",
+                date: new Date().toISOString().slice(0, 10),
+                note: "Restocked",
+              },
+              ...s.merchInventoryAdjustments,
+            ],
           };
         }),
-      adjustMerchProduct: (id, quantityDelta, reason, note) => set((s) => ({
-        merchProducts: applyInventoryAdjustment(s.merchProducts, id, quantityDelta, reason),
-        merchInventoryAdjustments: [{ id: uid(), productId: id, quantityDelta, reason, date: new Date().toISOString().slice(0, 10), note }, ...s.merchInventoryAdjustments],
-      })),
+      adjustMerchProduct: (id, quantityDelta, reason, note) =>
+        set((s) => ({
+          merchProducts: applyInventoryAdjustment(s.merchProducts, id, quantityDelta, reason),
+          merchInventoryAdjustments: [
+            {
+              id: uid(),
+              productId: id,
+              quantityDelta,
+              reason,
+              date: new Date().toISOString().slice(0, 10),
+              note,
+            },
+            ...s.merchInventoryAdjustments,
+          ],
+        })),
       recordMerchSale: (sale) => {
         const id = uid();
         set((s) => {
@@ -249,7 +327,16 @@ export const useMusician = create<State & Actions>()(
             merchOrders: result.orders,
             merchSales: result.sales,
             merchInventoryAdjustments: [
-              ...order.lines.map((line) => ({ id: uid(), productId: line.productId, quantityDelta: -line.quantity, reason: "sale" as const, date: order.date, gigId: order.gigId, note: `Sale from order ${id}`, sourceOrderId: id })),
+              ...order.lines.map((line) => ({
+                id: uid(),
+                productId: line.productId,
+                quantityDelta: -line.quantity,
+                reason: "sale" as const,
+                date: order.date,
+                gigId: order.gigId,
+                note: `Sale from order ${id}`,
+                sourceOrderId: id,
+              })),
               ...s.merchInventoryAdjustments,
             ],
             money: [...result.ledgerEntries, ...s.money],
@@ -257,24 +344,26 @@ export const useMusician = create<State & Actions>()(
         });
         return id;
       },
-      refundMerchOrder: (orderId, restock, note) => set((s) => {
-        const result = applyMerchRefund(s.merchProducts, s.merchOrders, s.merchRefunds, {
-          orderId,
-          refundId: uid(),
-          date: new Date().toISOString().slice(0, 10),
-          restock,
-          note,
-          ledgerIds: [uid(), uid(), uid()],
-          adjustmentIds: s.merchOrders.find((order) => order.id === orderId)?.lines.map(() => uid()) ?? [],
-        });
-        return {
-          merchProducts: result.products,
-          merchOrders: result.orders,
-          merchRefunds: result.refunds,
-          merchInventoryAdjustments: [...result.adjustments, ...s.merchInventoryAdjustments],
-          money: [...result.ledgerEntries, ...s.money],
-        };
-      }),
+      refundMerchOrder: (orderId, restock, note) =>
+        set((s) => {
+          const result = applyMerchRefund(s.merchProducts, s.merchOrders, s.merchRefunds, {
+            orderId,
+            refundId: uid(),
+            date: new Date().toISOString().slice(0, 10),
+            restock,
+            note,
+            ledgerIds: [uid(), uid(), uid()],
+            adjustmentIds:
+              s.merchOrders.find((order) => order.id === orderId)?.lines.map(() => uid()) ?? [],
+          });
+          return {
+            merchProducts: result.products,
+            merchOrders: result.orders,
+            merchRefunds: result.refunds,
+            merchInventoryAdjustments: [...result.adjustments, ...s.merchInventoryAdjustments],
+            money: [...result.ledgerEntries, ...s.money],
+          };
+        }),
       generateShowTasks: () => {
         let added = 0;
         set((s) => {
@@ -282,22 +371,24 @@ export const useMusician = create<State & Actions>()(
           added = generated.length;
           if (generated.length === 0) return s;
           return {
-            tasks: [
-              ...generated.map((task) => ({ ...task, id: uid() })),
-              ...s.tasks,
-            ],
+            tasks: [...generated.map((task) => ({ ...task, id: uid() })), ...s.tasks],
           };
         });
         return added;
       },
       updateOperationalTask: (id, patch) =>
         set((s) => ({
-          tasks: s.tasks.map((task) => task.id === id
-            ? { ...task, ...patch, ...(patch.dueDate !== undefined ? { dueDateOverridden: true } : {}) }
-            : task),
+          tasks: s.tasks.map((task) =>
+            task.id === id
+              ? {
+                  ...task,
+                  ...patch,
+                  ...(patch.dueDate !== undefined ? { dueDateOverridden: true } : {}),
+                }
+              : task,
+          ),
         })),
-      updateProfile: (patch) =>
-        set((s) => ({ profile: { ...s.profile, ...patch } })),
+      updateProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
       addUserMessage: (text) =>
         set((s) => ({
           chat: [...s.chat, { id: uid(), role: "user", text }],
@@ -330,7 +421,20 @@ export const useMusician = create<State & Actions>()(
                 conf: g.conf,
                 status: "lead",
                 researchSourceUrl: g.sourceUrl,
-                notes: [g.reason, g.sourceUrl ? `Research source: ${g.sourceUrl}` : "", "Unconfirmed research lead; verify booking terms before outreach."].filter(Boolean).join("\n"),
+                venueCapacity: g.venueCapacity,
+                capacitySourceUrl: g.capacitySourceUrl,
+                bookingRoute: g.bookingRoute,
+                bookingContactName: g.bookingContactName,
+                bookingContactSourceUrl: g.bookingContactSourceUrl,
+                outreachContact: [g.bookingContactName, g.bookingRoute].filter(Boolean).join(" — "),
+
+                notes: [
+                  g.reason,
+                  g.sourceUrl ? `Research source: ${g.sourceUrl}` : "",
+                  "Unconfirmed research lead; verify booking terms before outreach.",
+                ]
+                  .filter(Boolean)
+                  .join("\n"),
               },
               ...s.gigs,
             ],
@@ -359,8 +463,7 @@ export const useMusician = create<State & Actions>()(
             ],
           };
         }),
-      setComposer: (patch) =>
-        set((s) => ({ composer: { ...s.composer, ...patch } })),
+      setComposer: (patch) => set((s) => ({ composer: { ...s.composer, ...patch } })),
       openGig: (id) =>
         set((s) => ({
           composer: {
@@ -423,13 +526,8 @@ export const useMusician = create<State & Actions>()(
   ),
 );
 
-export function sumMoney(
-  entries: MoneyEntry[],
-  type: MoneyEntry["type"],
-) {
-  return entries
-    .filter((x) => x.type === type)
-    .reduce((a, x) => a + (Number(x.amount) || 0), 0);
+export function sumMoney(entries: MoneyEntry[], type: MoneyEntry["type"]) {
+  return entries.filter((x) => x.type === type).reduce((a, x) => a + (Number(x.amount) || 0), 0);
 }
 
 export function pipelineGigs(gigs: Gig[]) {
@@ -441,10 +539,7 @@ export function pipelineValue(gigs: Gig[]) {
 }
 
 export function weightedValue(gigs: Gig[]) {
-  return pipelineGigs(gigs).reduce(
-    (a, g) => a + (Number(g.fee) || 0) * (Number(g.conf) || 0),
-    0,
-  );
+  return pipelineGigs(gigs).reduce((a, g) => a + (Number(g.fee) || 0) * (Number(g.conf) || 0), 0);
 }
 
 export function buildAdvisorContext() {
@@ -457,14 +552,20 @@ export function buildAdvisorContext() {
   const merchRevenue = merchSummary.netSales;
   const merchGrossProfit = merchSummary.grossProfit;
   const merchUnitsSold = merchSummary.unitsSold;
-  const lowStock = s.merchProducts.filter((product) => product.active && product.stockOnHand <= product.reorderAt);
+  const lowStock = s.merchProducts.filter(
+    (product) => product.active && product.stockOnHand <= product.reorderAt,
+  );
   const merchLines = s.merchProducts
     .slice(0, 15)
-    .map((product) => `- ${product.name} [${product.sku || "no SKU"}] | stock ${product.stockOnHand} | price ${product.price} | cost ${product.unitCost}${product.active && product.stockOnHand <= product.reorderAt ? " | REORDER" : ""}`)
+    .map(
+      (product) =>
+        `- ${product.name} [${product.sku || "no SKU"}] | stock ${product.stockOnHand} | price ${product.price} | cost ${product.unitCost}${product.active && product.stockOnHand <= product.reorderAt ? " | REORDER" : ""}`,
+    )
     .join("\\n");
   const gigLines = [...s.gigs]
     .sort((a, b) => {
-      const priority = (gig: Gig) => ["completed", "passed"].includes(gig.status) ? "9999" : gig.outreachNextFollowUp || "9998";
+      const priority = (gig: Gig) =>
+        ["completed", "passed"].includes(gig.status) ? "9999" : gig.outreachNextFollowUp || "9998";
       return priority(a).localeCompare(priority(b));
     })
     .slice(0, 12)
@@ -475,7 +576,10 @@ export function buildAdvisorContext() {
     .join("\n");
   const peopleLines = s.people
     .slice(0, 12)
-    .map((p) => `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`)
+    .map(
+      (p) =>
+        `- ${p.name} (${p.role}) ${p.city}${p.settlementSharePercent !== undefined ? ` | settlement share ${p.settlementSharePercent}%` : ""} | ${p.notes}`,
+    )
     .join("\n");
   return `ARTIST: ${s.profile.artistName}
 HOME: ${s.profile.city}

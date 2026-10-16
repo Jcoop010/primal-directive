@@ -51,7 +51,7 @@ export const MONEY_TYPE_LABEL: Record<MoneyType, string> = {
   cost: "Cost",
 };
 
-export type Gig = {
+export type Gig = import("./venue-evidence").VenueEvidence & {
   id: string;
   name: string;
   venue: string;
@@ -107,7 +107,7 @@ export type OperationalTask = {
 
 export type ChatRole = "user" | "ai";
 
-export type SuggestedGig = {
+export type SuggestedGig = import("./venue-evidence").VenueEvidence & {
   sourceUrl?: string;
   name: string;
   venue: string;

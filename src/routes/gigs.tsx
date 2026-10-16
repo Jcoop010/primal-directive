@@ -111,7 +111,7 @@ function GigsPage() {
         <section aria-label="Booking pipeline board" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {GIG_STATUSES.map((status) => {
             const items = shown.filter((gig) => gig.status === status);
-            return <div key={status} className="command-surface min-w-0 rounded-2xl p-3">
+            return <div key={status} className={cn("command-surface min-w-0 rounded-2xl p-3", items.length === 0 && (shown.length > 0 || status !== (filter === 'all' ? 'lead' : filter)) && "hidden md:block")}>
               <div className="mb-3 flex items-center justify-between gap-2 border-b border-line pb-3"><h2 className="text-xs font-bold uppercase tracking-wider text-soft">{GIG_STATUS_LABEL[status]}</h2><span className="rounded-full bg-surface-2 px-2 py-1 text-[11px] font-bold tabular text-muted">{items.length}</span></div>
               <div className="space-y-2">
                 {items.map((gig) => <button key={gig.id} type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">

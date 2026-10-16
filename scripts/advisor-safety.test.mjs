@@ -4,12 +4,18 @@ import { stripTypeScriptTypes } from "node:module";
 import { test } from "node:test";
 
 const moduleUrl = (code) => "data:text/javascript;base64," + Buffer.from(code).toString("base64");
+const policyUrl = new URL('../src/lib/provider-policy.ts', import.meta.url).href;
 // Execute the real advisor handler with a minimal server-function registration
 // harness. Provider HTTP is mocked; these tests never use quota or credentials.
 const types = moduleUrl(stripTypeScriptTypes(await readFile(new URL("../src/lib/types.ts", import.meta.url), "utf8")));
 const local = moduleUrl(stripTypeScriptTypes(await readFile(new URL("../src/lib/local-advisor.ts", import.meta.url), "utf8")));
 let source = stripTypeScriptTypes(await readFile(new URL("../src/lib/ai.ts", import.meta.url), "utf8"));
 source = source
+  .replace('from "@/lib/venue-evidence"', "from " + JSON.stringify(new URL("../src/lib/venue-evidence.ts", import.meta.url).href))
+  .replace('from "@/lib/advisor-answer"', "from " + JSON.stringify(new URL("../src/lib/advisor-answer.ts", import.meta.url).href))
+  .replace('from "@/lib/provider-policy"', "from " + JSON.stringify(policyUrl))
+  .replace("createProviderPolicy()", "createProviderPolicy({blocks:new Map()})")
+
   .replace('import { createServerFn } from "@tanstack/react-start";', `
     export const registeredMiddleware = [];
     const createServerFn = () => ({
@@ -26,7 +32,7 @@ const { askGrowthAdvisor, registeredMiddleware } = await import(moduleUrl(source
 const data = { message: "Help River Fold plan next week", context: "River Fold is a fictional test band.", history: [] };
 
 test("booking research retains grounding through failover and rate limits", async (t) => {
-  const { askGrowthAdvisor } = await import(moduleUrl(source + "\n// Isolated cooldown state for rate-limit regression tests."));
+  const { askGrowthAdvisor } = await import(moduleUrl("const regressionBlocks = new Map();\n" + source.replace("blocks:new Map()", "blocks:regressionBlocks")));
   const keys = ["ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY", "GEMINI_SEARCH_GROUNDING_ENABLED", "GEMINI_MODEL"];
   const previous = keys.map((key) => process.env[key]);
   const researchData = { ...data, message: "Find venues in my home market" };
@@ -97,17 +103,7 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.match(result.answer, /Test Room/);
       assert.match(result.source, /LIVE WEB SEARCH/);
     });
-    await t.test("current Gemini model and a full search timeout are used", async (st) => {
-      const timeout = AbortSignal.timeout;
-      const budgets = [];
-      st.mock.method(AbortSignal, "timeout", (ms) => { budgets.push(ms); return timeout(ms); });
-      st.mock.method(globalThis, "fetch", async (url) => {
-        assert.match(String(url), /models\/gemini-3\.8-flash:generateContent$/);
-        return gemini();
-      });
-      assert.equal((await askGrowthAdvisor({ data: researchData })).gigs.length, 1);
-      assert.equal(budgets[0], 45_000);
-    });
+    await t.test("current Gemini model and full search timeout are preserved", async(st)=>{const timeout=AbortSignal.timeout;const budgets=[];st.mock.method(AbortSignal,"timeout",ms=>{budgets.push(ms);return timeout(ms)});st.mock.method(globalThis,"fetch",async url=>{assert.match(String(url),/gemini-3[.]8-flash:generateContent$/);return gemini()});assert.equal((await askGrowthAdvisor({data:researchData})).gigs.length,1);assert.equal(budgets[0],45000)});
     await t.test("Google grounding redirects match the destination without fetching it", async (st) => {
       const urls = [];
       st.mock.method(globalThis, "fetch", async (url, options) => {
@@ -170,11 +166,11 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal((await askGrowthAdvisor({ data: researchData })).gigs.length, 1);
       assert.equal((await askGrowthAdvisor({ data: researchData })).gigs.length, 1);
       assert.equal(geminiCalls, 1);
-      now += 31_000;
+      now += 61_000;
       assert.equal((await askGrowthAdvisor({ data: researchData })).gigs.length, 1);
       assert.equal(geminiCalls, 2);
       // Expire the cooldown before other tests run.
-      now += 31_000;
+      now += 61_000;
     });
   } finally {
     keys.forEach((key, index) => { if (previous[index] === undefined) delete process.env[key]; else process.env[key] = previous[index]; });

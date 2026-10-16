@@ -1,0 +1,36 @@
+name: Real River Fold booking journey
+on:
+  push:
+    branches: ['verify/river-fold-20261016']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  booking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify actual production booking research and follow-up persistence
+        env:
+          AUTH_SMOKE_ORIGIN: https://primal-directive-loose-ends-co.vercel.app
+        run: |
+          sudo mkdir -p /workspace/screenshots
+          sudo chown "$USER" /workspace/screenshots
+          node scripts/verify-river-fold-booking.mjs
+      - name: Expose fictional QA screenshots for review
+        if: always()
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; for (const name of fs.readdirSync("/workspace/screenshots")) { console.log("QA_PNG_JSON="+JSON.stringify({name,base64:fs.readFileSync("/workspace/screenshots/"+name).toString("base64")})); }'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: river-fold-booking
+          path: /workspace/screenshots/
+          retention-days: 3
