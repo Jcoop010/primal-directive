@@ -291,6 +291,18 @@ async function complete(args: {
       content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }>; content?: Array<{type?:string;url?:string}> | {error_code?:string} }>;
     };
     const content = payload.content ?? [];
+    // Anthropic may return HTTP 200 with an embedded web-search tool error.
+    // Preserve the specific failure for diagnosis without inventing sources.
+    const searchErrors = content
+      .filter((block) => block.type === "web_search_tool_result" && block.content && !Array.isArray(block.content))
+      .map((block) => {
+        const result = block.content as { type?: string; error_code?: string };
+        return result.type === "web_search_tool_result_error" ? result.error_code || "unknown" : "";
+      })
+      .filter(Boolean);
+    if (args.search && searchErrors.length) {
+      console.warn("[advisor] anthropic search tool failure", { codes: searchErrors });
+    }
     const text = content
       .filter((b) => b.type === "text")
       .map((b) => b.text ?? "")
