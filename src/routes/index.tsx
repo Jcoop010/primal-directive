@@ -168,6 +168,7 @@ function AdvisorPage() {
           {chat.map((m) => (
             <div
               key={m.id}
+              data-advisor-message={m.role}
               className={cn(
                 "max-w-[88%] rounded-lg px-3.5 py-3 text-sm leading-relaxed whitespace-pre-wrap",
                 m.role === "user"

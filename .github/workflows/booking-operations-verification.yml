@@ -36,7 +36,7 @@ jobs:
           trap 'kill "$DEV_PID" "$PROXY_PID" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 60); do
             if curl --silent --fail http://127.0.0.1:8080/__app-env > /dev/null; then
-              node scripts/verify-booking-operations-browser.mjs
+              node scripts/verify-booking-operations-browser.mjs || { cat /tmp/primal-dev.log; cat /tmp/primal-proxy.log; exit 1; }
               exit $?
             fi
             sleep 2

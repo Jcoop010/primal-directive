@@ -1,4 +1,4 @@
-import { safeCsvCell } from './workspace-export';
+import { safeCsvCell } from './workspace-export.ts';
 
 export function parseDay(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
