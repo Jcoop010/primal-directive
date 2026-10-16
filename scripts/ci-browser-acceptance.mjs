@@ -62,6 +62,7 @@ try {
   await recover("/");
   assert.equal((await state()).profile.artistName, "River Fold (fictional QA)");
   await page.locator("aside button").first().click();
+  await page.getByLabel("Artist / band", { exact: true }).waitFor({ state: "visible" });
   assert.equal(await page.getByLabel("Artist / band", { exact: true }).inputValue(), "River Fold (fictional QA)");
   await submitDialog();
 
