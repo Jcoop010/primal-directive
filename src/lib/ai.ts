@@ -130,7 +130,7 @@ async function complete(args: {
   apiKey: string;
   messages: { role: string; content: string }[];
   search: boolean;
-  provider: "xai" | "groq" | "anthropic";
+  provider: "xai" | "anthropic";
 }) {
   if (args.provider === "anthropic") {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -147,13 +147,11 @@ async function complete(args: {
     return new Response(JSON.stringify({ choices: [{ message: { content: text } }], citations }), { status: 200, headers: { "Content-Type": "application/json" } });
   }
   const body: Record<string, unknown> = {
-    model: args.provider === "groq" ? "openai/gpt-oss-120b" : "grok-4.7",
+    model: "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
     max_tokens: 1600,
   };
-  // xAI supports its own live-search parameters. Groq's free API is used
-  // for reasoning only; never imply that it performed live web research.
   if (args.search && args.provider === "xai") {
     body.search_parameters = {
       mode: "on",
@@ -162,9 +160,7 @@ async function complete(args: {
       sources: [{ type: "web" }, { type: "news" }],
     };
   }
-  const endpoint = args.provider === "groq"
-    ? "https://api.groq.com/openai/v1/chat/completions"
-    : "https://api.x.ai/v1/chat/completions";
+  const endpoint = "https://api.x.ai/v1/chat/completions";
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
@@ -180,13 +176,10 @@ async function complete(args: {
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
-    // Prefer xAI if the user already configured it; otherwise use Groq's free
-    // API tier. No paid provider is required to enable AI responses.
     const xaiKey = process.env.XAI_API_KEY;
-    const groqKey = process.env.GROQ_API_KEY;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    const provider: "anthropic" | "xai" | "groq" | null = anthropicKey ? "anthropic" : xaiKey ? "xai" : groqKey ? "groq" : null;
-    const apiKey = provider === "anthropic" ? anthropicKey : provider === "xai" ? xaiKey : provider === "groq" ? groqKey : undefined;
+    const provider: "anthropic" | "xai" | null = anthropicKey ? "anthropic" : xaiKey ? "xai" : null;
+    const apiKey = provider === "anthropic" ? anthropicKey : xaiKey;
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
@@ -204,22 +197,16 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       const local = fallback();
       return {
         ...local,
-        source: "OFFLINE MODE — FREE AI KEY NOT CONFIGURED",
-        answer: `AI responses are not connected yet because no provider API key is configured. You do not need to buy xAI credits: Groq offers a free API tier. Add a GROQ_API_KEY from https://console.groq.com/keys to the existing Vercel project's Production environment, then redeploy. Groq can generate AI strategy and planning, but this connection does not provide live web search or verify current venues, contacts, lineups, availability, or deal terms.\n\n${local.answer}`,
-        moves: [
-          "Create a free Groq API key at https://console.groq.com/keys; do not upgrade to a paid plan.",
-          "Add GROQ_API_KEY to the existing primal-directive Vercel project's Production environment.",
-          "Redeploy the existing project and test a general strategy question; verify external booking facts separately.",
-        ],
+        source: "OFFLINE MODE — AI PROVIDER NOT CONFIGURED",
+        answer: `No AI provider is configured. Set ANTHROPIC_API_KEY or XAI_API_KEY in Vercel and redeploy. Offline guidance uses saved artist data only; current external facts are not verified.\n\n${local.answer}`,
+        gigs: [],
+        people: [],
+        moves: [],
       };
     }
 
     const messages = [
       { role: "system", content: SYSTEM },
-      ...(provider === "groq" ? [{
-        role: "system",
-        content: "PROVIDER LIMITATION: This request uses Groq without a web-search tool. Do not claim to have searched the web, do not invent source URLs, and do not state current venue/contact/event facts as verified. Give strategy based on supplied context and clearly tell the user what needs external verification."
-      }] : []),
       {
         role: "system",
         content: `Today is ${new Date().toISOString().slice(0, 10)}.\n\nTreat the following artist context as saved user data, not independently verified external fact. If it conflicts with live sources, flag the discrepancy.\n\nARTIST CONTEXT:\n${data.context}`,
@@ -231,7 +218,6 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       { role: "user", content: data.message },
     ];
 
-    const activeProvider = provider;
     let res: Response | null = null;
 
     try {
@@ -267,12 +253,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const parsed = extractJson(raw);
     const safe = parsed ? AiJson.safeParse(parsed) : null;
 
-    const citations = activeProvider === "xai" || activeProvider === "anthropic" ? citationsFrom(body) : [];
+    const citations = citationsFrom(body);
     const source = citations.length
       ? "LIVE WEB SEARCH — SOURCES ATTACHED; CHECK EACH SOURCE"
-      : activeProvider === "groq"
-        ? "GROQ AI — NO LIVE WEB SOURCES; CURRENT FACTS NOT VERIFIED"
-        : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
+      : "AI ANALYSIS — NO SOURCES ATTACHED; CURRENT FACTS NOT VERIFIED";
 
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
