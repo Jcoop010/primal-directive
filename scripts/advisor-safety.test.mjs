@@ -98,11 +98,13 @@ test("advisor handles provider failures without fabricating verified leads", asy
       const result = await askGrowthAdvisor({ data });
       assert.match(result.source, /UNAVAILABLE/);
       assert.deepEqual(result.gigs, []);
-      assert.equal(mocked.mock.callCount(), 1);
+      assert.equal(mocked.mock.callCount(), 2); // Gemini failure then configured xAI fallback.
       delete process.env.GEMINI_API_KEY;
     });
     await t.test("missing keys never call a provider", async (subtest) => {
       delete process.env.XAI_API_KEY;
+      delete process.env.GEMINI_API_KEY;
+      delete process.env.ANTHROPIC_API_KEY;
       const mocked = subtest.mock.method(globalThis, "fetch", () => { throw new Error("must not call"); });
       const result = await askGrowthAdvisor({ data });
       assert.match(result.source, /NOT CONFIGURED/);
