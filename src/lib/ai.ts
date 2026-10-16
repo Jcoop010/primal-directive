@@ -82,7 +82,13 @@ Return one valid JSON object and no markdown fences:
   "moves": ["short, concrete next action"]
 }
 
-Return 0–4 source-supported gigs and 0–4 source-supported people; otherwise use empty arrays. The role must be one of band, booker, promoter, venue, manager, press, other. Status must be one of lead, outreach, negotiating, hold, booked, completed, passed. A proposed/unconfirmed lead must never be marked booked or negotiating unless the saved pipeline or source explicitly supports that status. Confidence is a calibrated estimate of evidence quality, not enthusiasm. Return 0–3 short moves.`;
+Return 0–5 source-supported gigs and 0–5 source-supported people; otherwise use empty arrays. The role must be one of band, booker, promoter, venue, manager, press, other. Status must be one of lead, outreach, negotiating, hold, booked, completed, passed. A proposed/unconfirmed lead must never be marked booked or negotiating unless the saved pipeline or source explicitly supports that status. Confidence is a calibrated estimate of evidence quality, not enthusiasm. Return 0–3 short moves.
+VENUE RESEARCH FORMAT:
+- Make every venue shortlist self-contained. Never say 'see above' or substitute instructions to do another search for the requested results.
+- Number each venue, with city, fit, official URL when supported, capacity with a verified/unverified label, and actual booking route with its verification status.
+- Cite the supporting URL next to the venue. A homepage alone does not prove a booker, capacity, or availability.
+- If only two of five requested venues are verified, show those two clearly and label the other three Research leads — unverified, stating what remains unknown.
+- End with a specific next booking action. Preserve newlines for readability.`;
 
 type ChatOk = {
   ok: true;
@@ -141,7 +147,7 @@ async function complete(args: {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: args.messages.filter((message) => message.role === "system").map((message) => message.content).join("\n\n") }] },
         contents: args.messages.filter((message) => message.role !== "system").map((message) => ({ role: message.role === "assistant" ? "model" : "user", parts: [{ text: message.content }] })),
-        generationConfig: { maxOutputTokens: 2400 },
+        generationConfig: { maxOutputTokens: 3600 },
         ...(args.search ? { tools: [{ google_search: {} }] } : {}),
       }),
       signal: AbortSignal.timeout(45_000),
@@ -162,7 +168,7 @@ async function complete(args: {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": args.apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1800, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] } : {}), }),
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3200, temperature: 0.2, system: args.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n"), messages: args.messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: m.content })), ...(args.search ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }] } : {}), }),
       signal: AbortSignal.timeout(45_000),
     });
     if (!response.ok) return response;
@@ -176,7 +182,7 @@ async function complete(args: {
     model: "grok-4.7",
     messages: args.messages,
     temperature: 0.2,
-    max_tokens: 1600,
+    max_tokens: 3200,
   };
   if (args.search && args.provider === "xai") {
     body.search_parameters = {
@@ -329,7 +335,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     if (safe?.success) {
       // Structured leads are actionable real-world claims. Without returned citations,
       // keep them out of the UI even if the model emitted plausible-looking entries.
-      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).filter((g) => g.sourceUrl && citations.includes(g.sourceUrl)).slice(0, 4).map((g) => ({
+      const gigs: SuggestedGig[] = (citations.length ? safe.data.gigs ?? [] : []).filter((g) => g.sourceUrl && citations.includes(g.sourceUrl)).slice(0, 5).map((g) => ({
         name: g.name,
         venue: g.venue,
         city: g.city,
@@ -343,7 +349,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       }));
       const people: SuggestedPerson[] = (citations.length ? safe.data.people ?? [] : [])
         .filter((p) => p.sourceUrl && citations.includes(p.sourceUrl))
-        .slice(0, 4)
+        .slice(0, 5)
         .map((p) => ({
           name: p.name,
           role: p.role,
