@@ -21,6 +21,7 @@ const commands = [
   ["find", "label", "Home city", "fill", "Test City (fictional)"],
   ["find", "label", "Genre", "fill", "Indie folk"],
   ["find", "text", "Save profile", "click"],
+  ["eval", "if (!document.body.innerText.includes('River Fold (fictional QA)')) throw new Error('Profile was not applied by the form'); true"],
   ["wait", "2000"],
   ["eval", "localStorage.removeItem('musician-os-v1'); true"],
   ["open", origin],
@@ -47,8 +48,8 @@ const commands = [
   ["find", "text", "Save gig", "click"],
   ["wait", "2000"],
   ["open", origin + "/tasks"],
-  ["wait", "--fn", "document.querySelector('button[aria-label=\\"Mark task complete\\"]') && !document.body.innerText.includes('Loading your workspace')"],
-  ["click", "button[aria-label='Mark task complete']:first-of-type"],
+  ["wait", "--fn", `document.querySelector("button[aria-label='Mark task complete']") && !document.body.innerText.includes("Loading your workspace")`],
+  ["click", "button[aria-label='Mark task complete'] >> nth=0"],
   ["wait", "2000"],
   ["open", origin + "/money"],
   ["wait", "--fn", "document.body.innerText.includes('Financial activity') && !document.body.innerText.includes('Loading your workspace')"],
@@ -63,7 +64,7 @@ const commands = [
   ["screenshot", "/workspace/screenshots/authenticated-money.png"],
   ["open", origin + "/merch"],
   ["wait", "--fn", "document.querySelector('main') && !document.body.innerText.includes('Loading your workspace')"],
-  ["find", "text", "Add product", "click"],
+  ["find", "text", "Add first item", "click"],
   ["find", "label", "Product name", "fill", "Fictional River Fold QA tee"],
   ["find", "label", "Opening stock", "fill", "10"],
   ["find", "text", "Save product", "click"],
@@ -109,7 +110,7 @@ process.stderr.write(result.stderr ?? "");
 if (result.error) throw new Error("Interactive browser runner failed: " + result.error.message);
 if (result.status !== 0) {
   const diagnostic = spawnSync("npx", ["--yes", "agent-browser", "batch", "--bail"], {
-    input: JSON.stringify([["eval", "document.body.innerText"], ["errors"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
+    input: JSON.stringify([["eval", "JSON.stringify({ body: document.body.innerText, profile: JSON.parse(localStorage.getItem('musician-os-v1') || 'null')?.state?.profile })"], ["errors"], ["console"], ["screenshot", "/workspace/screenshots/acceptance-failure.png"]]),
     encoding: "utf8", timeout: 30_000,
   });
   process.stdout.write(diagnostic.stdout ?? "");
