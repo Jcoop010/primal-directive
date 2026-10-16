@@ -206,8 +206,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const xaiKey = process.env.XAI_API_KEY;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;
-    const provider: "anthropic" | "gemini" | "xai" | null = anthropicKey ? "anthropic" : geminiKey ? "gemini" : xaiKey ? "xai" : null;
-    const apiKey = provider === "anthropic" ? anthropicKey : provider === "gemini" ? geminiKey : xaiKey;
+    const providers: Array<{ provider: "anthropic" | "gemini" | "xai"; apiKey: string }> = [
+      ...(anthropicKey ? [{ provider: "anthropic" as const, apiKey: anthropicKey }] : []),
+      ...(geminiKey ? [{ provider: "gemini" as const, apiKey: geminiKey }] : []),
+      ...(xaiKey ? [{ provider: "xai" as const, apiKey: xaiKey }] : []),
+    ];
     const fallback = () => {
       const local = localGrowthAdvice(data.message, data.context);
       return {
@@ -221,7 +224,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
       };
     };
 
-    if (!apiKey || !provider) {
+    if (!providers.length) {
       const local = fallback();
       return {
         ...local,
@@ -247,26 +250,35 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     ];
 
     let res: Response | null = null;
-
-    try {
-      const search = provider === "gemini"
-        ? process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true"
-        : provider === "anthropic"
-          ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED !== "false"
-          : true;
-      res = await complete({ apiKey, messages, search, provider });
-      if (!res.ok && res.status === 400 && search) {
-        res = await complete({ apiKey, messages, search: false, provider });
+    let attemptedProvider = providers[0]?.provider ?? "none";
+    // Fail over to another configured provider on availability errors. Keep
+    // each provider's search settings intact and never claim unreturned citations.
+    for (const { provider, apiKey } of providers) {
+      attemptedProvider = provider;
+      try {
+        const search = provider === "gemini"
+          ? process.env.GEMINI_SEARCH_GROUNDING_ENABLED === "true"
+          : provider === "anthropic"
+            ? process.env.ANTHROPIC_WEB_SEARCH_ENABLED !== "false"
+            : true;
+        res = await complete({ apiKey, messages, search, provider });
+        if (!res.ok && res.status === 400 && search) {
+          res = await complete({ apiKey, messages, search: false, provider });
+        }
+        if (res.ok) break;
+        // Auth failures should be surfaced rather than repeatedly billed or
+        // retried across providers; other provider failures permit failover.
+        if (res.status === 401 || res.status === 403) break;
+      } catch {
+        res = null;
       }
-    } catch {
-      // A provider/network exception should use the clearly labeled offline fallback.
     }
 
     // Do not silently substitute an ungrounded provider for live research.
     // Report only the upstream HTTP status; never log tokens or response bodies.
     if (!res?.ok) {
       console.error("[advisor] primary provider unavailable", {
-        provider,
+        provider: attemptedProvider,
         status: res?.status ?? "network-error",
       });
       const local = fallback();

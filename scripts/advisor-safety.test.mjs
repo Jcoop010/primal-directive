@@ -98,11 +98,13 @@ test("advisor handles provider failures without fabricating verified leads", asy
       const result = await askGrowthAdvisor({ data });
       assert.match(result.source, /UNAVAILABLE/);
       assert.deepEqual(result.gigs, []);
-      assert.equal(mocked.mock.callCount(), 1);
+      assert.equal(mocked.mock.callCount(), 2); // Gemini failure then configured xAI fallback.
       delete process.env.GEMINI_API_KEY;
     });
     await t.test("missing keys never call a provider", async (subtest) => {
       delete process.env.XAI_API_KEY;
+      delete process.env.GEMINI_API_KEY;
+      delete process.env.ANTHROPIC_API_KEY;
       const mocked = subtest.mock.method(globalThis, "fetch", () => { throw new Error("must not call"); });
       const result = await askGrowthAdvisor({ data });
       assert.match(result.source, /NOT CONFIGURED/);
@@ -117,5 +119,34 @@ test("advisor handles provider failures without fabricating verified leads", asy
     else process.env.XAI_API_KEY = previous.xai;
     if (previous.anthropic === undefined) delete process.env.ANTHROPIC_API_KEY;
     else process.env.ANTHROPIC_API_KEY = previous.anthropic;
+  }
+});
+
+test("Advisor fails over from an unavailable Anthropic provider to Gemini without inventing sources", async (t) => {
+  const old = { anthropic: process.env.ANTHROPIC_API_KEY, gemini: process.env.GEMINI_API_KEY, xai: process.env.XAI_API_KEY, grounding: process.env.GEMINI_SEARCH_GROUNDING_ENABLED };
+  process.env.ANTHROPIC_API_KEY = "fictional-anthropic-key";
+  process.env.GEMINI_API_KEY = "fictional-gemini-key";
+  process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "false";
+  delete process.env.XAI_API_KEY;
+  try {
+    const urls = [];
+    t.mock.method(globalThis, "fetch", async (url) => {
+      urls.push(String(url));
+      if (urls.length === 1) return new Response("", { status: 503 });
+      return Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify({ answer: "Fallback provider is responding.", gigs: [{ name: "Unverified gig" }] }) }] } }] });
+    });
+    const result = await askGrowthAdvisor({ data });
+    assert.equal(result.ok, true);
+    assert.match(result.answer, /Fallback provider is responding/);
+    assert.match(result.source, /NO SOURCES/);
+    assert.deepEqual(result.gigs, []);
+    assert.equal(urls.length, 2);
+    assert.match(urls[0], /api.anthropic.com/);
+    assert.match(urls[1], /generativelanguage.googleapis.com/);
+  } finally {
+    for (const [key, value] of Object.entries({ ANTHROPIC_API_KEY: old.anthropic, GEMINI_API_KEY: old.gemini, XAI_API_KEY: old.xai, GEMINI_SEARCH_GROUNDING_ENABLED: old.grounding })) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
   }
 });
