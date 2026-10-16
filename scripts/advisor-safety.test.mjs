@@ -65,7 +65,8 @@ test("booking research retains grounding through failover and rate limits", asyn
         assert.match(String(url), /api.anthropic.com/);
         const request = JSON.parse(options.body);
         assert.deepEqual(request.tool_choice, { type: "tool", name: "web_search" });
-        assert.equal(request.tools[0].max_uses, 2);
+        assert.equal(request.tools[0].max_uses, 1);
+        assert.equal(request.max_tokens, 4096);
         return Response.json({ content: [
           { type: "web_search_tool_result", content: [{ type: "web_search_result", url: answer.gigs[0].sourceUrl }] },
           { type: "text", text: JSON.stringify(answer) },

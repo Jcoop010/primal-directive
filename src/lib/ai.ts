@@ -272,7 +272,7 @@ async function complete(args: {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: args.search ? 2200 : args.mode === "detailed" ? 1200 : 700,
+        max_tokens: args.search ? 4096 : args.mode === "detailed" ? 1200 : 700,
         temperature: 0.2,
         system: args.messages
           .filter((m) => m.role === "system")
@@ -282,7 +282,7 @@ async function complete(args: {
           .filter((m) => m.role !== "system")
           .map((m) => ({ role: m.role, content: m.content })),
         ...(args.search
-          ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 2 }], tool_choice: { type: "tool", name: "web_search" } }
+          ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 1 }], tool_choice: { type: "tool", name: "web_search" } }
           : {}),
       }),
     });
@@ -432,6 +432,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         content:
           "For each venue, optionally include venueCapacity with capacitySourceUrl, bookingRoute, bookingContactName and bookingContactSourceUrl. Every claim must have its own exact retrieved supporting HTTPS URL. If unsupported, omit the field. Label source-cited facts separately from artist fit estimates; do not call a citation independent verification.\n" +
           SYSTEM +
+          "\nOutput exactly one valid JSON object after web search. Never respond in plain prose or Markdown outside JSON, even when research is incomplete. Use answer, gigs, people, moves keys; use [] for unverified leads. Keep answer under 75 words when gig cards exist.\n" +
           (data.mode === "quick"
             ? "\nDefault to 40–75 words for ordinary questions, maximum two short paragraphs. Give the answer and ONE best next action. For research, give at most a two-sentence overview; put factual venue details in structured gig cards and keep source URLs attached. Do not repeat the cards in prose or add lengthy strategy explanations."
             : "\nProvide detailed practical reasoning with clear uncertainty."),
