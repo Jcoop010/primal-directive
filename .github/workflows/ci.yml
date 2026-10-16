@@ -106,6 +106,10 @@ jobs:
           BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/demo /workspace/screenshots/production-demo.png
           node scripts/browser-smoke.mjs http://127.0.0.1:8080/ /workspace/screenshots/dev.png
           node scripts/ci-browser-acceptance.mjs
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-auth-smoke.mjs
+            AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-browser-acceptance.mjs
+          fi
           npm run preview:restart
           node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/built.png --baseline /workspace/screenshots/dev.json || { cat .grok/preview.log; exit 1; }
 
@@ -114,7 +118,7 @@ jobs:
         run: |
           node --input-type=module -e '
             import fs from "node:fs";
-            for (const name of ["production-demo.png", "production-demo-mobile.png", "authenticated-money.png", "acceptance-failure.png"]) {
+            for (const name of ["production-demo.png", "production-demo-mobile.png", "authenticated-money.png", "authenticated-mobile.png", "acceptance-failure.png"]) {
               const path = "/workspace/screenshots/" + name;
               if (fs.existsSync(path)) console.log("QA_PNG_JSON=" + JSON.stringify({ name, base64: fs.readFileSync(path).toString("base64") }));
             }
