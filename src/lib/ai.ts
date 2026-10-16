@@ -88,7 +88,11 @@ VENUE RESEARCH FORMAT:
 - Number each venue, with city, fit, official URL when supported, capacity with a verified/unverified label, and actual booking route with its verification status.
 - Cite the supporting URL next to the venue. A homepage alone does not prove a booker, capacity, or availability.
 - If only two of five requested venues are verified, show those two clearly and label the other three Research leads — unverified, stating what remains unknown.
-- End with a specific next booking action. Preserve newlines for readability.`;
+- End with a specific next booking action. Preserve newlines for readability.
+- Never ask the user to say continue or to execute a second search pass. Complete as much as possible in the present response; provide a factual limitation when source coverage is insufficient.
+- Treat booking-contact verification and venue existence as separate claims. If you cannot validate the official booking submission route, say explicitly NOT VERIFIED and do not suggest outreach to an unverified person.
+- Do not describe distant Northeast and Southeast dates as a sensible tour cluster without dates, driving estimates, and travel cost.
+- For source-backed venues, fill gigs with one lead per venue and a citation-matched sourceUrl. Give the real venue name, city, booking-fit rationale, and source URL. Never return a placeholder answer referring only to gig cards.`;
 
 type ChatOk = {
   ok: true;
@@ -130,7 +134,7 @@ function citationsFrom(body: Record<string, unknown>): string[] {
       if (typeof u === "string") urls.push(u);
     }
   }
-  return [...new Set(urls)].slice(0, 6);
+  return [...new Set(urls)].slice(0, 16);
 }
 
 // Match the same evidence URL despite harmless query strings, fragments or
