@@ -256,6 +256,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     ];
 
     let res: Response | null = null;
+    let ungroundedResponse: Response | null = null;
     let attemptedProvider = providers[0]?.provider ?? "none";
     // Fail over to another configured provider on availability errors. Keep
     // each provider's search settings intact and never claim unreturned citations.
@@ -274,7 +275,25 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         if (!res.ok && [400, 404, 422].includes(res.status) && search) {
           res = await complete({ apiKey, messages, search: false, provider });
         }
-        if (res.ok) break;
+        if (res.ok) {
+          if (search) {
+            // An HTTP 200 without grounding is not successful live research.
+            // Try another configured provider before presenting an unsourced answer.
+            try {
+              const payload = await res.clone().json() as Record<string, unknown>;
+              if (citationsFrom(payload).length === 0) {
+                console.warn("[advisor] research returned no grounded sources", { provider });
+                ungroundedResponse = res;
+                continue;
+              }
+            } catch {
+              console.warn("[advisor] research response could not be checked", { provider });
+              ungroundedResponse = res;
+              continue;
+            }
+          }
+          break;
+        }
         // A failed Claude request must remain visible even when Gemini also fails.
         // Do not log API keys, response bodies, or artist context.
         console.warn("[advisor] provider attempt failed", { provider, status: res.status });
@@ -289,6 +308,9 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         res = null;
       }
     }
+
+    // If all providers lack grounded research, preserve a useful AI answer but label it unverified.
+    if (!res?.ok && ungroundedResponse) res = ungroundedResponse;
 
     // Do not silently substitute an ungrounded provider for live research.
     // Report only the upstream HTTP status; never log tokens or response bodies.
