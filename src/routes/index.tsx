@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowUp, LoaderCircle } from "lucide-react";
+import { ArrowUp, LoaderCircle, Sparkles, ShieldCheck, Compass, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, Eyebrow } from "@/components/ui/card";
@@ -100,12 +100,30 @@ function AdvisorPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2"><Eyebrow>Intelligence / Growth advisor</Eyebrow><span className="rounded-full border border-live/25 bg-live/10 px-3 py-1 text-[10px] font-bold tracking-widest text-live">ADVISOR WORKSPACE</span></div>
+    <div className="flex min-h-0 flex-1 flex-col gap-5">
+      <section className="command-surface relative isolate overflow-hidden rounded-2xl px-5 py-6 sm:px-8 sm:py-8" aria-label="AI Advisor introduction">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" />
+        <div className="relative flex flex-wrap items-start justify-between gap-5">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 text-accent command-kicker"><Sparkles className="size-4" /> INTELLIGENCE / YOUR NEXT MOVE</div>
+            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">The right move. <span className="text-accent">Before the next show.</span></h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-soft">Turn your real bookings, finances, and artist goals into a sharper plan. Research opportunities, pressure-test decisions, and move with purpose.</p>
+          </div>
+          <div className="flex flex-col gap-2 text-[11px] font-semibold text-soft">
+            <span className="flex items-center gap-2 rounded-full border border-live/25 bg-live/10 px-3 py-2"><span className="size-2 rounded-full bg-live" /> ADVISOR WORKSPACE</span>
+            <span className="flex items-center gap-2 px-3"><ShieldCheck className="size-4 text-info" /> Sources require verification</span>
+          </div>
+        </div>
+        <div className="relative mt-6 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
+          <span className="mr-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"><Compass className="size-4" /> Start with a mission</span>
+          {SUGGESTIONS.slice(0, 3).map((s) => <button key={s.label} type="button" disabled={busy} onClick={() => void send(s.q)} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line-strong bg-bg/75 px-3 text-xs font-semibold text-soft transition-colors hover:border-accent hover:text-fg disabled:opacity-50">{s.label}<ArrowUpRight className="size-3" /></button>)}
+        </div>
+      </section>
 
-      <Card className="flex min-h-[min(65dvh,40rem)] flex-1 flex-col overflow-hidden p-0">
-        <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <strong className="text-sm">Primal Directive AI</strong>
+      <Card className="command-surface flex min-h-[min(62dvh,38rem)] flex-1 flex-col overflow-hidden rounded-2xl p-0">
+        <div className="flex items-center justify-between border-b border-line bg-surface/80 px-4 py-3">
+          <strong className="flex items-center gap-2 text-sm"><span className="grid size-8 place-items-center rounded-lg bg-accent/15 text-accent"><Sparkles className="size-4" /></span> Primal Directive AI</strong>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -260,7 +278,7 @@ function AdvisorPage() {
         </div>
 
         <form
-          className="flex gap-2 border-t border-line bg-bg p-3"
+          className="flex gap-2 border-t border-line bg-surface/80 p-3 sm:p-4"
           onSubmit={(e) => {
             e.preventDefault();
             void send(input);
