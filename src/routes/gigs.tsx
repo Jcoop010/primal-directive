@@ -17,6 +17,7 @@ export const Route = createFileRoute("/gigs")({ component: GigsPage });
 function GigsPage() {
   const gigs = useMusician((s) => s.gigs);
   const openGig = useMusician((s) => s.openGig);
+  const updateGig = useMusician((s) => s.updateGig);
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
   const shown =
     filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
@@ -75,8 +76,8 @@ function GigsPage() {
           />
         ) : (
           shown.map((g, i) => (
+            <div key={g.id} className="border-b border-line">
             <button
-              key={g.id}
               type="button"
               onClick={() => openGig(g.id)}
               className={cn(
@@ -104,6 +105,20 @@ function GigsPage() {
                 </div>
               </div>
             </button>
+            <details className="px-5 pb-4 text-xs">
+              <summary className="cursor-pointer text-accent">Research & outreach</summary>
+              <p className="my-2 text-muted">{g.researchVerifiedAt ? "Source reviewed on " + g.researchVerifiedAt : "Research not independently verified. Do not assume contact, availability or booking terms are confirmed."}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label>Contact<input aria-label="Booking contact" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachContact || ""} onChange={(e) => updateGig(g.id, {outreachContact:e.target.value})}/></label>
+                <label>Follow-up date<input aria-label="Follow-up date" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNextFollowUp || ""} onChange={(e) => updateGig(g.id, {outreachNextFollowUp:e.target.value})}/></label>
+                <label>Last contacted<input aria-label="Last contacted" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachLastContactedAt || ""} onChange={(e) => updateGig(g.id, {outreachLastContactedAt:e.target.value})}/></label>
+                <label>Research URL<input aria-label="Research URL" type="url" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.researchSourceUrl || ""} onChange={(e) => updateGig(g.id, {researchSourceUrl:e.target.value,researchVerifiedAt:""})}/></label>
+                <label className="sm:col-span-2">Outreach notes<textarea aria-label="Outreach notes" rows={2} className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNotes || ""} onChange={(e) => updateGig(g.id, {outreachNotes:e.target.value})}/></label>
+                <button type="button" disabled={!g.researchSourceUrl} className="rounded border border-line px-3 py-2 disabled:opacity-40" onClick={() => updateGig(g.id, {researchVerifiedAt:new Date().toISOString().slice(0,10)})}>Mark source reviewed</button>
+              </div>
+              <p className="mt-2 text-muted">Manual record only; no messages are sent automatically.</p>
+            </details>
+            </div>
           ))
         )}
       </Card>
