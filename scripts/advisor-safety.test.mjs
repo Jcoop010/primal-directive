@@ -32,7 +32,7 @@ const { askGrowthAdvisor, registeredMiddleware } = await import(moduleUrl(source
 const data = { message: "Help River Fold plan next week", context: "River Fold is a fictional test band.", history: [] };
 
 test("booking research retains grounding through failover and rate limits", async (t) => {
-  const { askGrowthAdvisor } = await import(moduleUrl("const regressionBlocks = new Map();\n" + source.replace("blocks:new Map()", "blocks:regressionBlocks")));
+  const { askGrowthAdvisor, regressionBlocks } = await import(moduleUrl("export const regressionBlocks = new Map();\n" + source.replace("blocks:new Map()", "blocks:regressionBlocks")));
   const keys = ["ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY", "GEMINI_SEARCH_GROUNDING_ENABLED", "GEMINI_MODEL"];
   const previous = keys.map((key) => process.env[key]);
   const researchData = { ...data, message: "Find venues in my home market" };
@@ -59,6 +59,37 @@ test("booking research retains grounding through failover and rate limits", asyn
       assert.equal(result.gigs[0].fee, 0);
     });
     process.env.GEMINI_SEARCH_GROUNDING_ENABLED = "true";
+    await t.test("Anthropic search-result sources survive JSON without inline citations", async (st) => {
+      process.env.ANTHROPIC_API_KEY = "fictional-anthropic";
+      st.mock.method(globalThis, "fetch", async (url) => {
+        assert.match(String(url), /api.anthropic.com/);
+        return Response.json({ content: [
+          { type: "web_search_tool_result", content: [{ type: "web_search_result", url: answer.gigs[0].sourceUrl }] },
+          { type: "text", text: JSON.stringify(answer) },
+        ] });
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.equal(result.gigs.length, 1);
+      assert.deepEqual(result.citations, [answer.gigs[0].sourceUrl]);
+      assert.match(result.source, /LIVE WEB SEARCH/);
+      delete process.env.ANTHROPIC_API_KEY;
+    });
+    await t.test("research without returned evidence cannot claim live verification", async (st) => {
+      process.env.ANTHROPIC_API_KEY = "fictional-anthropic";
+      st.mock.method(globalThis, "fetch", async (url) => {
+        if (String(url).includes("anthropic")) return Response.json({ content: [
+          { type: "web_search_tool_result", content: { type: "web_search_tool_result_error", error_code: "unavailable" } },
+          { type: "text", text: JSON.stringify({ ...answer, answer: "Live search confirmed!" }) },
+        ] });
+        return new Response("", { status: 503 });
+      });
+      const result = await askGrowthAdvisor({ data: researchData });
+      assert.match(result.source, /UNAVAILABLE/);
+      assert.doesNotMatch(result.answer, /Live search confirmed/);
+      assert.deepEqual(result.gigs, []);
+      delete process.env.ANTHROPIC_API_KEY;
+      regressionBlocks.clear();
+    });
     await t.test("an unknown fee cannot discard an otherwise grounded booking lead", async (st) => {
       st.mock.method(globalThis, "fetch", async () => {
         const response = await gemini().json();
@@ -149,6 +180,21 @@ test("booking research retains grounding through failover and rate limits", asyn
 
 test("advisor registers authentication before handling requests", () => {
   assert.deepEqual(registeredMiddleware, ["verified-session-middleware"]);
+});
+
+test('Anthropic citation text fragments preserve JSON and unknown optional claims do not discard sourced leads',async t=>{
+ const keys=['ANTHROPIC_API_KEY','GEMINI_API_KEY','XAI_API_KEY'];const previous=keys.map(k=>process.env[k]);
+ process.env.ANTHROPIC_API_KEY='fictional-test-key';delete process.env.GEMINI_API_KEY;delete process.env.XAI_API_KEY;
+ try {
+  const url='https://example.invalid/official-booking';
+  const value=JSON.stringify({answer:'River Fold should review this official source before outreach.',gigs:[{name:'Fictional QA venue',sourceUrl:url,venueCapacity:'110',capacitySourceUrl:url,bookingRoute:null,bookingContactName:null,bookingContactSourceUrl:null,conf:null},{name:null,sourceUrl:url}],people:null,moves:null});
+  const split=value.indexOf('review');
+  t.mock.method(globalThis,'fetch',async()=>Response.json({content:[{type:'text',text:value.slice(0,split),citations:[{url}]},{type:'text',text:value.slice(split),citations:[{url}]}]}));
+  const result=await askGrowthAdvisor({data:{...data,message:'Research official booking sources for River Fold'}});
+  assert.match(result.source,/ANTHROPIC LIVE WEB SEARCH/);assert.equal(result.gigs.length,1);
+  assert.equal(result.gigs[0].venueCapacity,110);assert.equal(result.gigs[0].bookingRoute,undefined);assert.equal(result.gigs[0].bookingContactName,undefined);
+  assert.deepEqual(result.people,[]);assert.equal(result.gigs[0].date,'');assert.equal(result.gigs[0].fee,0);
+ } finally {keys.forEach((key,i)=>previous[i]===undefined?delete process.env[key]:process.env[key]=previous[i]);}
 });
 
 test("advisor handles provider failures without fabricating verified leads", async (t) => {

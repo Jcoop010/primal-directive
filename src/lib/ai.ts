@@ -27,28 +27,46 @@ const Input = z.object({
 
 const GigOut = z.object({
   ...venueEvidenceShape,
-  name: z.string(),
-  venue: z.string().default(""),
-  city: z.string().default(""),
-  conf: z.number().min(0).max(1).default(0.4),
-  reason: z.string().default(""),
+  name: z.string().trim().min(1),
+  venue: z.string().default("").catch(""),
+  city: z.string().default("").catch(""),
+  conf: z.number().min(0).max(1).default(0.4).catch(0.4),
+  reason: z.string().default("").catch(""),
   sourceUrl: z.string().url().optional(),
 });
 
 const PersonOut = z.object({
-  name: z.string(),
+  name: z.string().trim().min(1),
   role: z.enum(PERSON_ROLES).default("other"),
-  city: z.string().default(""),
-  detail: z.string().default(""),
-  reason: z.string().default(""),
+  city: z.string().default("").catch(""),
+  detail: z.string().default("").catch(""),
+  reason: z.string().default("").catch(""),
   sourceUrl: z.string().url().optional(),
 });
 
 const AiJson = z.object({
   answer: z.string(),
-  gigs: z.array(GigOut).optional(),
-  people: z.array(PersonOut).optional(),
-  moves: z.array(z.string()).optional(),
+  gigs: z
+    .array(z.unknown())
+    .optional()
+    .catch([])
+    .transform((items) =>
+      (items ?? []).flatMap((value) => {
+        const parsed = GigOut.safeParse(value);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
+  people: z
+    .array(z.unknown())
+    .optional()
+    .catch([])
+    .transform((items) =>
+      (items ?? []).flatMap((value) => {
+        const parsed = PersonOut.safeParse(value);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
+  moves: z.array(z.string()).optional().catch([]),
 });
 
 const SYSTEM = `You are Primal Directive: a rigorous, commercially minded advisor and operating analyst for independent artists.
@@ -84,10 +102,12 @@ OUTPUT CONTRACT:
 Return one valid JSON object and no markdown fences:
 {
   "answer": "Plain text with short paragraphs. Clearly separate verified facts, estimates, and recommendations where relevant.",
-  "gigs": [{ "name", "venue", "city", "date", "fee", "conf", "reason", "status", "sourceUrl" }],
-  "people": [{ "name", "role", "city", "detail", "reason", "sourceUrl" }],
+  "gigs": [],
+  "people": [],
   "moves": ["short, concrete next action"]
 }
+
+For a sourced venue, add a gig object with name (string), venue (string), city (string), conf (number from 0 to 1), reason (string), and sourceUrl (exact retrieved HTTPS URL). Optional claim fields are venueCapacity (positive integer), capacitySourceUrl (HTTPS URL), bookingRoute (HTTPS URL), bookingContactName (string), and bookingContactSourceUrl (HTTPS URL). Each claim needs its own supporting citation. Omit unknown fields rather than using null or an invented value. Research leads always enter the app with no date, no agreed fee, and lead status. For a sourced person, use name, role, city, detail, reason and sourceUrl. Escape line breaks inside JSON strings; do not place text outside the JSON object.
 
 Return 0–5 source-supported gigs and 0–5 source-supported people; otherwise use empty arrays. The role must be one of band, booker, promoter, venue, manager, press, other. Status must be one of lead, outreach, negotiating, hold, booked, completed, passed. A proposed/unconfirmed lead must never be marked booked or negotiating unless the saved pipeline or source explicitly supports that status. Confidence is a calibrated estimate of evidence quality, not enthusiasm. Return 0–3 short moves.
 VENUE RESEARCH FORMAT:
@@ -235,7 +255,7 @@ async function complete(args: {
     const text = (candidate?.content?.parts ?? [])
       .filter((part) => !part.thought && typeof part.text === "string")
       .map((part) => part.text)
-      .join("\n");
+      .join("");
     const urls = (candidate?.groundingMetadata?.groundingChunks ?? [])
       .map((chunk) => chunk.web?.uri)
       .filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
@@ -268,17 +288,16 @@ async function complete(args: {
     });
     if (!response.ok) return response;
     const payload = (await response.json()) as {
-      content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }> }>;
+      content?: Array<{ type?: string; text?: string; citations?: Array<{ url?: string }>; content?: Array<{type?:string;url?:string}> | {error_code?:string} }>;
     };
     const content = payload.content ?? [];
     const text = content
       .filter((b) => b.type === "text")
       .map((b) => b.text ?? "")
-      .join("\n");
-    const citations = content
-      .flatMap((b) => b.citations ?? [])
-      .map((cite) => cite.url)
-      .filter((url): url is string => typeof url === "string" && url.startsWith("https://"));
+      .join("");
+    const results=content.filter(block=>block.type==="web_search_tool_result").flatMap(block=>Array.isArray(block.content)?block.content.filter(item=>item.type==="web_search_result"):[]);
+    const citations=[...content.flatMap(block=>block.citations??[]),...results].map(cite=>cite.url).filter((url):url is string=>typeof url==="string" && url.startsWith("https://"));
+    if(args.search) console.info("[advisor] search evidence",{provider:"anthropic",results:results.length,citations:citations.length});
     return new Response(JSON.stringify({ choices: [{ message: { content: text } }], citations }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -335,7 +354,7 @@ async function complete(args: {
         .filter((url): url is string => typeof url === "string"),
     ];
     return Response.json({
-      choices: [{ message: { content: parts.map((part) => part.text ?? "").join("\n") } }],
+      choices: [{ message: { content: parts.map((part) => part.text ?? "").join("") } }],
       citations,
     });
   }
@@ -420,7 +439,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     let attemptedProvider = "none";
     const researchRequested =
       data.mode === "research" || researchNeeded(data.message, data.history);
-    const policy = createProviderPolicy({ timeoutMs: researchRequested ? 180_000 : 55_000, attemptMs: researchRequested ? 75_000 : 20_000 });
+    const policy = createProviderPolicy({
+      timeoutMs: researchRequested ? 180_000 : 55_000,
+      attemptMs: researchRequested ? 75_000 : 20_000,
+    });
     const failures: string[] = [];
     for (const { provider, apiKey } of providers) {
       const blocked = policy.blocked(provider);
@@ -473,6 +495,11 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
               extractJson(choices[0].message.content),
           ).success
         ) {
+          console.warn("[advisor] invalid structured response", {
+            provider,
+            characters: choices[0].message.content.length,
+            hasJson: Boolean(extractJson(choices[0].message.content)),
+          });
           failures.push(provider + ": invalid structured response");
           continue;
         }
