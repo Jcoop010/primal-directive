@@ -145,9 +145,11 @@ function AdvisorPage() {
 
   const followUps = pipelineGigs
     .filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status))
-    .filter((gig) => gig.outreachNextFollowUp || gig.outreachLastContactedAt)
-    .sort((a, b) => (a.outreachNextFollowUp || "9999").localeCompare(b.outreachNextFollowUp || "9999"))
-    .slice(0, 5);
+    .sort((a, b) => {
+      const rank = (gig: typeof a) => gig.outreachNextFollowUp || (gig.outreachLastContactedAt ? "9998" : "9997");
+      return rank(a).localeCompare(rank(b));
+    })
+    .slice(0, 8);
 
   function recordContact(gigId: string) {
     const gig = useMusician.getState().gigs.find((item) => item.id === gigId);
@@ -320,7 +322,7 @@ Thanks,
                 <span className="mr-auto min-w-36 text-xs font-medium">
                   {gig.venue || gig.name} · {gig.city}
                   <span className="block text-[11px] text-muted">
-                    {gig.outreachNextFollowUp ? `Next: ${gig.outreachNextFollowUp}` : "Follow-up not scheduled"}
+                    {gig.outreachNextFollowUp ? `Next: ${gig.outreachNextFollowUp}${gig.outreachNextFollowUp < new Date().toISOString().slice(0, 10) ? " · overdue" : ""}` : "Follow-up not scheduled"}
                   </span>
                 </span>
                 <input
