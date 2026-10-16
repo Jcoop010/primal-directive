@@ -86,7 +86,7 @@ function GigsPage() {
       </Card>
       {view === "board" ? (
         <section aria-label="Booking pipeline board" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {GIG_STATUSES.filter((status) => status !== "cancelled").map((status) => {
+          {GIG_STATUSES.map((status) => {
             const items = shown.filter((gig) => gig.status === status);
             return <div key={status} className="command-surface min-w-0 rounded-2xl p-3">
               <div className="mb-3 flex items-center justify-between gap-2 border-b border-line pb-3"><h2 className="text-xs font-bold uppercase tracking-wider text-soft">{GIG_STATUS_LABEL[status]}</h2><span className="rounded-full bg-surface-2 px-2 py-1 text-[11px] font-bold tabular text-muted">{items.length}</span></div>
