@@ -16,7 +16,7 @@ export function addDays(from: Date, days: number) {
   return next;
 }
 
-export function money(n: number, digits = 0) {
+export function money(n: number, digits = Number.isInteger(n) ? 0 : 2) {
   return n.toLocaleString(undefined, {
     style: "currency",
     currency: "USD",
