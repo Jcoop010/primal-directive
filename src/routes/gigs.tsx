@@ -86,10 +86,10 @@ function GigsPage() {
   const due = active.filter((g) => g.outreachNextFollowUp && g.outreachNextFollowUp <= today);
   const sourced = active.filter((g) => Boolean(g.researchSourceUrl));
   const unsourced = active.filter((g) => !g.researchSourceUrl);
-  const missingContact = active.filter((g) => !g.outreachContact?.trim());
+  const missingContact = active.filter((g) => !g.outreachContact?.trim() && !(g.bookingContactName && g.bookingContactSourceUrl));
   const [attentionFilter, setAttentionFilter] = useState<"all" | "unsourced" | "contact">("all");
   const filtered = filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
-  const shown = filtered.filter((g) => (!followUpOnly || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && (attentionFilter === "all" || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && (attentionFilter === "unsourced" ? !g.researchSourceUrl : !g.outreachContact?.trim()))) && [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const shown = filtered.filter((g) => (!followUpOnly || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && (attentionFilter === "all" || (["lead", "outreach", "negotiating", "hold"].includes(g.status) && (attentionFilter === "unsourced" ? !g.researchSourceUrl : (!g.outreachContact?.trim() && !(g.bookingContactName && g.bookingContactSourceUrl))))) && [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <div>
@@ -131,7 +131,7 @@ function GigsPage() {
         <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Source recorded</div><div className="mt-2 font-display text-3xl font-extrabold tabular">{sourced.length}<span className="text-sm text-muted"> / {active.length}</span></div><p className="mt-1 text-xs text-muted">Source recorded ≠ verified</p></div>
         <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Open pipeline</div><div className="mt-2 font-display text-2xl font-extrabold tabular text-live">{money(pipelineValue(gigs))}</div><p className="mt-1 text-xs text-muted">Unconfirmed opportunity value</p></div>
       </section>
-      <section aria-label="Booking action queue" className="mb-5 rounded-2xl border border-line-strong bg-surface p-4 sm:p-5">
+      <section aria-label="Booking action queue" className="mb-5 hidden rounded-2xl border border-line-strong bg-surface p-4 sm:p-5 md:block">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="font-display text-base font-bold">Action queue</div><p className="mt-1 text-xs text-muted">Review gaps before outreach. Venue facts require supporting sources. Review evidence before outreach.</p></div><button type="button" className="text-xs font-semibold text-accent hover:underline" onClick={() => { setAttentionFilter("all"); setFollowUpOnly(false); setFilter("all"); setQuery(""); }}>Clear filters</button></div>
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <button type="button" aria-pressed={followUpOnly} onClick={() => {setFollowUpOnly(true);setAttentionFilter("all");setFilter("all");}} className="rounded-xl border border-line bg-bg/70 p-3 text-left hover:border-accent/50"><div className="text-2xl font-bold tabular text-accent">{due.length}</div><div className="mt-1 text-xs font-semibold">Follow-ups due</div><div className="mt-1 text-[11px] text-muted">Due today or overdue</div></button>
@@ -156,7 +156,7 @@ function GigsPage() {
           />
         ))}
       </div>
-      <Card className="command-surface mb-5 p-5 sm:p-6">
+      {gigs.some((g) => g.outreachNextFollowUp && ["lead","outreach","negotiating","hold"].includes(g.status)) && <Card className="command-surface mb-5 p-5 sm:p-6">
         <div className="flex items-center gap-2 font-display text-lg font-bold"><CalendarClock className="size-5 text-accent" /> Upcoming booking follow-ups</div>
         <p className="mt-1 text-xs text-muted">Scheduled reminders only; no emails or messages are sent automatically.</p>
         {gigs.filter((g) => g.outreachNextFollowUp && ["lead","outreach","negotiating","hold"].includes(g.status)).sort((a,b) => (a.outreachNextFollowUp || "").localeCompare(b.outreachNextFollowUp || "")).slice(0,6).map((g) => (
@@ -164,10 +164,10 @@ function GigsPage() {
             <span>{g.venue || g.name}</span><span>{g.outreachNextFollowUp}</span>
           </button>
         ))}
-      </Card>
+      </Card>}
       {autoResearchStatus && <p role="status" className="mb-3 px-1 text-xs text-muted">{autoResearchStatus}</p>}
       {view === "board" ? (
-        <section aria-label="Booking pipeline board" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <section aria-label="Booking pipeline board" className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {GIG_STATUSES.map((status) => {
             const items = shown.filter((gig) => gig.status === status);
             return <div key={status} className={cn("command-surface min-w-0 rounded-2xl p-3", items.length === 0 && (shown.length > 0 || status !== (filter === 'all' ? 'lead' : filter)) && "hidden md:block")}>
@@ -180,7 +180,7 @@ function GigsPage() {
                   {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
                   <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-line pt-2 text-[11px]">
                     <div><span className="text-muted">Capacity</span><div className="font-semibold">{gig.venueCapacity && gig.capacitySourceUrl ? gig.venueCapacity.toLocaleString() : "Not verified"}</div></div>
-                    <div><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? "Saved contact · unverified" : "Not verified"}</div></div>
+                    <div className="col-span-2"><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? "Saved contact · unverified" : "Not verified"}</div></div>
                     <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Official submission page" : "Not verified"}</div></div>
                     {gig.outreachReplyStatus && <div className="col-span-2 text-info">Reply: {gig.outreachReplyStatus}</div>}
                   </div>
@@ -190,7 +190,7 @@ function GigsPage() {
                   <button type="button" disabled={researchId !== null || !ownerId} onClick={() => void researchVenue(gig)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : gig.venueResearchedAt ? "Retry research" : "Find & fill details"}</button>
                   {gig.venueResearchError && <p role="alert" className="mt-2 text-xs text-warn">{gig.venueResearchError}</p>}
                   {gig.venueCapacity && /thunderbird/i.test(gig.venue || gig.name) && <p className="mt-2 text-xs text-muted">Music Hall capacity; confirm the room and layout.</p>}
-                  {venueEvidenceSources(gig).length > 0 && <details className="mt-2 text-xs"><summary className="min-h-11 cursor-pointer py-3 text-accent">View source evidence</summary>{venueEvidenceSources(gig).map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all py-2 text-accent underline">{url}</a>)}</details>}
+                  {venueEvidenceSources(gig).length > 0 && <details className="mt-2 text-xs"><summary className="min-h-11 cursor-pointer py-3 text-accent">View source evidence</summary>{venueEvidenceSources(gig).map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" title={url} className="block break-all py-2 text-accent underline">{new URL(url).hostname.replace(/^www\./, "")}</a>)}</details>}
                   {researchResult?.id === gig.id && <div className="mt-3 space-y-2 text-xs">
                     <p className="whitespace-pre-wrap text-muted">{researchResult.answer}</p>
                     {researchResult.citations.length ? researchResult.citations.slice(0, 8).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>) : <p className="text-warn">No cited live sources. Research remains unverified.</p>}

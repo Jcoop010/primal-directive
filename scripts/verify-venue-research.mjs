@@ -9,7 +9,18 @@ const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
 const context=await browser.newContext({viewport:{width:1280,height:800}}),page=await context.newPage();
 const errors=[];page.on("pageerror",e=>errors.push(e.message));
 page.setDefaultTimeout(30000);
-async function auth(path,data){const r=await context.request.post(origin+"/api/auth/"+path,{headers:{origin},data});assert.equal(r.status(),200,path);}
+async function auth(path,data){
+ for(let attempt=0;attempt<3;attempt++){
+  const r=await context.request.post(origin+"/api/auth/"+path,{headers:{origin},data});
+  if(r.status()===429 && attempt<2){
+   const raw=r.headers()["retry-after"];
+   const seconds=raw && Number.isFinite(Number(raw)) ? Number(raw) : raw ? Math.ceil((Date.parse(raw)-Date.now())/1000) : 15;
+   assert.ok(Number.isFinite(seconds) && seconds<=60,"Auth rate-limit cooldown exceeds this test's bounded retry budget");
+   await page.waitForTimeout(Math.max(1000,seconds*1000));continue;
+  }
+  assert.equal(r.status(),200,path);return;
+ }
+}
 async function ready(){await page.goto(origin+"/gigs",{waitUntil:"domcontentloaded"});await page.locator("main").waitFor();await page.getByText("Loading your workspace",{exact:true}).waitFor({state:"hidden"});}
 async function state(){return page.evaluate(()=>JSON.parse(localStorage.getItem("musician-os-v1")||"null")?.state);}
 try {
