@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { askGrowthAdvisor } from "@/lib/ai";
 import { LayoutGrid, List, ArrowUpRight, Search, CalendarClock } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, Eyebrow } from "@/components/ui/card";
@@ -22,6 +23,29 @@ function GigsPage() {
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
   const [view, setView] = useState<"board" | "list">("board");
   const [query, setQuery] = useState("");
+  const [researchId, setResearchId] = useState<string | null>(null);
+  const [researchResult, setResearchResult] = useState<{ id: string; answer: string; citations: string[]; source: string; leadUrl?: string } | null>(null);
+  const [researchError, setResearchError] = useState("");
+  async function researchVenue(g: { id: string; venue: string; name: string; city: string }) {
+    setResearchId(g.id);
+    setResearchResult(null);
+    setResearchError("");
+    try {
+      const venue = g.venue || g.name;
+      const response = await askGrowthAdvisor({ data: {
+        message: "Research this specific music venue for booking: " + venue + (g.city ? ", " + g.city : "") + ". Find its official website, current booking submission route, and capacity only if individually supported by live sources. State every unverified detail explicitly. Do not invent contacts, available dates, fees, or booking offers.",
+        mode: "research", history: [], context: "Existing saved pipeline venue: " + venue + ". Research only; do not create duplicate gigs or change booking status.",
+      } });
+      if (!response.ok) throw new Error(response.error);
+      const lead = response.gigs.find((item) => item.venue.toLowerCase() === venue.toLowerCase() || item.name.toLowerCase() === venue.toLowerCase());
+      setResearchResult({ id: g.id, answer: response.answer, citations: response.citations, source: response.source, leadUrl: lead?.sourceUrl });
+    } catch (error) {
+      setResearchError(error instanceof Error ? error.message : "Research failed. No source was verified.");
+    } finally {
+      setResearchId(null);
+    }
+  }
+
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
   const active = gigs.filter((g) => ["lead", "outreach", "negotiating", "hold"].includes(g.status));
@@ -171,7 +195,15 @@ function GigsPage() {
                 <label>Contact<input aria-label="Booking contact" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachContact || ""} onChange={(e) => updateGig(g.id, {outreachContact:e.target.value})}/></label>
                 <label>Follow-up date<input aria-label="Follow-up date" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNextFollowUp || ""} onChange={(e) => updateGig(g.id, {outreachNextFollowUp:e.target.value})}/></label>
                 <label>Last contacted<input aria-label="Last contacted" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachLastContactedAt || ""} onChange={(e) => updateGig(g.id, {outreachLastContactedAt:e.target.value})}/></label>
+                <button type="button" disabled={researchId !== null} className="rounded border border-accent/40 bg-accent/10 px-3 py-2 font-semibold text-accent disabled:opacity-50" onClick={() => void researchVenue(g)}>{researchId === g.id ? "Researching official sources…" : "Research venue with AI"}</button>
                 <button type="button" className="rounded border border-accent/40 bg-accent/10 px-3 py-2 text-accent hover:bg-accent/20" onClick={() => { const search = [g.venue || g.name, g.city, "official venue booking contact"].filter(Boolean).join(" "); window.open("https://www.google.com/search?q=" + encodeURIComponent(search), "_blank", "noopener,noreferrer"); }}>Find official venue source ↗</button>
+                {researchResult?.id === g.id && <div className="sm:col-span-2 rounded-lg border border-line bg-surface-2 p-3">
+                  <div className="font-semibold">Research findings · {researchResult.source}</div>
+                  <p className="mt-2 whitespace-pre-wrap text-muted">{researchResult.answer}</p>
+                  {researchResult.citations.length ? <div className="mt-3 space-y-1"><div className="font-semibold">Retrieved sources (review before use)</div>{researchResult.citations.slice(0, 8).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>)}</div> : <p className="mt-2 text-warn">No cited live sources returned. Research remains unverified.</p>}
+                  {researchResult.leadUrl && <button type="button" className="mt-3 rounded border border-accent/40 px-3 py-2 text-accent" onClick={() => updateGig(g.id, { researchSourceUrl: researchResult.leadUrl, researchVerifiedAt: "" })}>Save cited source for manual review</button>}
+                </div>}
+                {researchError && !researchId && <p role="alert" className="sm:col-span-2 text-warn">{researchError}</p>}
                 <label>Research URL<input aria-label="Research URL" type="url" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.researchSourceUrl || ""} onChange={(e) => updateGig(g.id, {researchSourceUrl:e.target.value,researchVerifiedAt:""})}/></label>
                 <label className="sm:col-span-2">Outreach notes<textarea aria-label="Outreach notes" rows={2} className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNotes || ""} onChange={(e) => updateGig(g.id, {outreachNotes:e.target.value})}/></label>
                 <a href={g.researchSourceUrl || undefined} target="_blank" rel="noopener noreferrer" aria-disabled={!g.researchSourceUrl} onClick={(event) => { if (!g.researchSourceUrl) event.preventDefault(); }} className={cn("rounded border border-line px-3 py-2 text-center", !g.researchSourceUrl && "pointer-events-none opacity-40")}>Open research source ↗</a>
