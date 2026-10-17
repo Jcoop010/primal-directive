@@ -14,7 +14,7 @@ export const researchSavedVenue = createServerFn({method:"POST"})
       : sameVenue(data.venue,"Mr. Smalls Theatre") && /(?:pittsburgh|millvale)/i.test(data.city)
         ? ["https://mrsmalls.com/booking/", "https://mrsmalls.com/contact/"]
       : sameVenue(data.venue,"Johnny Brenda's") && /philadelphia/i.test(data.city)
-        ? ["https://johnnybrendas.com/menu-2-2/", "https://johnnybrendas.com/menu-2/", "https://www.songkick.com/venues/254-johnny-brendas", "https://www.jambase.com/venue/johnny-brendas"] : [];
+        ? ["https://johnnybrendas.com/menu-2-2/", "https://johnnybrendas.com/menu-2/", "https://www.songkick.com/venues/254-johnny-brendas", "https://www.jambase.com/venue/johnny-brendas", "https://www.visitphilly.com/things-to-do/food-drink/johnny-brendas/"] : [];
     const pages: SourcePage[] = [];
     await Promise.all(urls.map(async url => {
       try {
