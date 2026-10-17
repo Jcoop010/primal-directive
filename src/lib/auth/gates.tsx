@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Navigate } from "@tanstack/react-router";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn, signOut } from "./client";
 import { hasGateSessionMarker } from "./gate-session-marker";
@@ -99,6 +99,7 @@ function EmailAuthForm() {
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
+            aria-label="Artist / band name"
             placeholder="Artist / band name"
             autoComplete="name"
             className="h-11 w-full rounded-md border border-line-strong bg-bg px-3 text-sm outline-none focus:border-muted"
@@ -108,6 +109,7 @@ function EmailAuthForm() {
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          aria-label="Email"
           placeholder="Email"
           autoComplete="email"
           className="h-11 w-full rounded-md border border-line-strong bg-bg px-3 text-sm outline-none focus:border-muted"
@@ -116,6 +118,7 @@ function EmailAuthForm() {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          aria-label="Password"
           placeholder="Password (8+ characters)"
           autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
           className="h-11 w-full rounded-md border border-line-strong bg-bg px-3 text-sm outline-none focus:border-muted"
@@ -134,18 +137,38 @@ function EmailAuthForm() {
 }
 
 export function SignInButtons() {
+  const pending = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("error");
+    if (code && ["state_mismatch", "state_security_mismatch", "state_not_found", "state_invalid"].includes(code))
+      setError("Google sign-in expired or another attempt replaced it. Please retry once in this tab with cookies enabled.");
+    else if (code) setError("Google sign-in could not finish. Retry or use your existing email account.");
+  }, []);
+  async function start(providerId: string) {
+    if (pending.current) return;
+    pending.current = true;
+    setBusy(true);
+    setError("");
+    try { await signIn(providerId, { callbackURL: "/" }); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Sign-in failed. Please try again."); }
+    finally { pending.current = false; setBusy(false); }
+  }
   return (
     <div className="flex w-full max-w-sm flex-col gap-2">
       {GROK_PROVIDERS.map((p) => (
         <button
           key={p.providerId}
           type="button"
-          onClick={() => void signIn(p.providerId, { callbackURL: "/" })}
-          className="w-full cursor-pointer rounded-md border border-neutral-300 px-4 py-2 hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
+          disabled={busy}
+          onClick={() => void start(p.providerId)}
+          className="min-h-11 w-full rounded-md border border-line-strong bg-surface px-4 py-2 text-fg hover:bg-surface-2 disabled:opacity-50"
         >
           Continue with {p.label}
         </button>
       ))}
+      {error && <p role="alert" className="text-sm text-warn">{error}</p>}
       {authEnabled ? <EmailAuthForm /> : null}
     </div>
   );

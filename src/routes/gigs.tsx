@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { askGrowthAdvisor } from "@/lib/ai";
-import { citedVenueEvidence } from "@/lib/venue-evidence";
+import { researchSavedVenue } from "@/lib/venue-research-api";
+import { researchStatus, venueEvidenceSources } from "@/lib/venue-research";
+import type { Gig } from "@/lib/types";
 import { LayoutGrid, List, ArrowUpRight, Search, CalendarClock } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, Eyebrow } from "@/components/ui/card";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/gigs")({ component: GigsPage });
 
 function GigsPage() {
   const gigs = useMusician((s) => s.gigs);
+  const ownerId = useMusician((s) => s.workspaceOwnerId);
   const openGig = useMusician((s) => s.openGig);
   const updateGig = useMusician((s) => s.updateGig);
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
@@ -28,77 +30,55 @@ function GigsPage() {
   const [researchResult, setResearchResult] = useState<{ id: string; answer: string; citations: string[]; source: string; leadUrl?: string; evidence?: { venueCapacity?: number; capacitySourceUrl?: string; bookingRoute?: string; bookingContactName?: string; bookingContactSourceUrl?: string } } | null>(null);
   const [researchError, setResearchError] = useState("");
   const [autoResearchStatus, setAutoResearchStatus] = useState("");
-  const autoResearchStarted = useRef(false);
-  async function researchVenue(g: { id: string; venue: string; name: string; city: string }) {
+  const attempted = useRef(new Set<string>());
+  const inFlight = useRef(false);
+  async function researchVenue(g: Gig) {
+    const owner = useMusician.getState().workspaceOwnerId;
+    if (!owner || inFlight.current) return;
+    inFlight.current = true;
     setResearchId(g.id);
     setResearchResult(null);
     setResearchError("");
+    updateGig(g.id, {venueResearchStatus:"Researching", venueResearchError:""});
+    const isCurrent = () => {
+      const state = useMusician.getState();
+      const saved = state.gigs.find(item => item.id === g.id);
+      return state.workspaceOwnerId === owner && saved && saved.venue === g.venue && saved.name === g.name && saved.city === g.city;
+    };
     try {
-      const venue = g.venue || g.name;
-      const response = await askGrowthAdvisor({ data: {
-        message: "Research this specific music venue for booking: " + venue + (g.city ? ", " + g.city : "") + ". Return one structured gigs entry for this exact venue with sourceUrl matching a cited official page. Find its official website, current booking submission route, and capacity only if individually supported by live sources. State every unverified detail explicitly. Do not invent contacts, available dates, fees, or booking offers.",
-        mode: "research", history: [], context: "Existing saved pipeline venue: " + venue + ". Research only; do not create duplicate gigs or change booking status.",
-      } });
-      if (!response.ok) throw new Error(response.error);
-      const lead = response.gigs.find((item) => item.venue.toLowerCase() === venue.toLowerCase() || item.name.toLowerCase() === venue.toLowerCase());
-      if (lead) {
-        const verified = citedVenueEvidence(lead, response.citations);
-        if (Object.keys(verified).length > 0) updateGig(g.id, verified);
-      }
-      setResearchResult({ id: g.id, answer: response.answer, citations: response.citations, source: response.source, leadUrl: lead?.sourceUrl, evidence: lead ? citedVenueEvidence(lead, response.citations) : undefined });
-    } catch (error) {
-      setResearchError(error instanceof Error ? error.message : "Research failed. No source was verified.");
+      const response = await researchSavedVenue({data:{venue:g.venue || g.name,city:g.city}});
+      if (!isCurrent()) return;
+      const evidence = response.evidence;
+      const saved = useMusician.getState().gigs.find(item => item.id === g.id)!;
+      const merged = {...saved,...evidence};
+      const status = researchStatus(merged,true);
+      const error = status === "Research unavailable" ? "No venue facts passed source validation. Retry after the provider cooldown, or record an official source for review." : "";
+      updateGig(g.id, {...evidence,venueResearchStatus:status,venueResearchError:error,venueResearchedAt:new Date().toISOString(),
+        ...(venueEvidenceSources(evidence)[0] ? {researchSourceUrl:venueEvidenceSources(evidence)[0]} : {})});
+      setResearchResult({id:g.id,answer:response.message,citations:response.citations,source:"Source-supported research",evidence});
+    } catch(error) {
+      if (!isCurrent()) return;
+      const message = error instanceof Error ? error.message : "Research failed. Check your connection and retry.";
+      setResearchError(message);
+      updateGig(g.id,{venueResearchStatus:researchStatus(g,true),venueResearchError:message.slice(0,2000)});
     } finally {
+      inFlight.current = false;
       setResearchId(null);
     }
   }
 
-  // Research at most three missing venue profiles per visit, sequentially, to respect provider quotas.
-  // Only individually cited structured evidence is persisted. Never change booking status.
+  // Wait for the authenticated database snapshot, never the browser's previous account cache.
+  // One automatic attempt per venue per visit; explicit retry is always available.
   useEffect(() => {
-    if (autoResearchStarted.current || !gigs.length) return;
-    autoResearchStarted.current = true;
-    const pending = gigs.filter((g) =>
-      (g.venue || g.name) &&
-      (!g.venueCapacity || !g.capacitySourceUrl || (!g.bookingRoute && !g.bookingContactName))
-    ).slice(0, 3);
-    if (!pending.length) return;
-    void (async () => {
-      let filled = 0;
-      for (const gig of pending) {
-        const key = "primal-venue-research-v1:" + gig.id;
-        try {
-          if (window.sessionStorage.getItem(key)) continue;
-          setAutoResearchStatus("Finding cited venue details: " + (gig.venue || gig.name));
-          const venue = gig.venue || gig.name;
-          const response = await askGrowthAdvisor({ data: {
-            message: "Research the existing music venue " + venue + (gig.city ? ", " + gig.city : "") + ". Return exactly one structured gigs entry for this SAME venue, including its venue/name and sourceUrl matching a cited official page, with source-cited venueCapacity, capacitySourceUrl, bookingContactName, bookingContactSourceUrl, and bookingRoute when verifiable. Include exact cited source URLs. Leave unsupported fields empty; do not suggest or create a booking.",
-            mode: "research", history: [], context: "Enrich saved venue profile only. Do not create new gig, claim booking availability, or change status.",
-          } });
-          if (!response.ok) { setAutoResearchStatus("Automatic research unavailable. Use Find & fill details to retry."); break; }
-          const match = response.gigs.find((item) =>
-            (item.venue || item.name).trim().toLowerCase() === venue.trim().toLowerCase()
-          );
-          if (match) {
-            const verified = citedVenueEvidence(match, response.citations);
-            if (Object.keys(verified).length) {
-              updateGig(gig.id, verified);
-              filled++;
-              window.sessionStorage.setItem(key, "verified");
-            }
-          }
-        } catch {
-          setAutoResearchStatus("Automatic research paused. Use Find & fill details to retry.");
-          break;
-        }
-      }
-      if (filled) setAutoResearchStatus("Updated " + filled + " venue profile" + (filled === 1 ? "" : "s") + " from cited sources.");
-      else setAutoResearchStatus((current) => current || "No new venue facts could be verified.");
-    })();
-    // The request is intentionally not cancelled on effect cleanup: React StrictMode
-    // can replay mount effects while the first request is still in flight.
-  // Retry initialization after persisted gigs hydrate; guard prevents duplicate batches.
-  }, [gigs.length, updateGig]);
+    if (!ownerId || inFlight.current || attempted.current.size >= 3) return;
+    const gig = gigs.find(g => (g.venue || g.name) && researchStatus(g) !== "Verified" && !attempted.current.has(ownerId + ":" + g.id));
+    if (!gig) return;
+    attempted.current.add(ownerId + ":" + gig.id);
+    setAutoResearchStatus("Finding cited details for " + (gig.venue || gig.name));
+    void researchVenue(gig).finally(() => setAutoResearchStatus("Automatic research finished. Review the venue details or retry any missing facts."));
+    // Changes caused by saving evidence advance the bounded queue; inFlight prevents overlaps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ownerId, gigs, researchId]);
 
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
@@ -152,7 +132,7 @@ function GigsPage() {
         <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Open pipeline</div><div className="mt-2 font-display text-2xl font-extrabold tabular text-live">{money(pipelineValue(gigs))}</div><p className="mt-1 text-xs text-muted">Unconfirmed opportunity value</p></div>
       </section>
       <section aria-label="Booking action queue" className="mb-5 rounded-2xl border border-line-strong bg-surface p-4 sm:p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="font-display text-base font-bold">Action queue</div><p className="mt-1 text-xs text-muted">Review gaps before outreach. Research sources and contacts are manually recorded, not automatically verified.</p></div><button type="button" className="text-xs font-semibold text-accent hover:underline" onClick={() => { setAttentionFilter("all"); setFollowUpOnly(false); setFilter("all"); setQuery(""); }}>Clear filters</button></div>
+        <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="font-display text-base font-bold">Action queue</div><p className="mt-1 text-xs text-muted">Review gaps before outreach. Venue facts require supporting sources. Review evidence before outreach.</p></div><button type="button" className="text-xs font-semibold text-accent hover:underline" onClick={() => { setAttentionFilter("all"); setFollowUpOnly(false); setFilter("all"); setQuery(""); }}>Clear filters</button></div>
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <button type="button" aria-pressed={followUpOnly} onClick={() => {setFollowUpOnly(true);setAttentionFilter("all");setFilter("all");}} className="rounded-xl border border-line bg-bg/70 p-3 text-left hover:border-accent/50"><div className="text-2xl font-bold tabular text-accent">{due.length}</div><div className="mt-1 text-xs font-semibold">Follow-ups due</div><div className="mt-1 text-[11px] text-muted">Due today or overdue</div></button>
           <button type="button" aria-pressed={attentionFilter === "unsourced"} onClick={() => {setAttentionFilter("unsourced");setFollowUpOnly(false);setFilter("all");}} className="rounded-xl border border-line bg-bg/70 p-3 text-left hover:border-accent/50"><div className="text-2xl font-bold tabular text-warn">{unsourced.length}</div><div className="mt-1 text-xs font-semibold">Source missing</div><div className="mt-1 text-[11px] text-muted">Active leads without a research URL</div></button>
@@ -196,18 +176,21 @@ function GigsPage() {
                 {items.map((gig) => <div key={gig.id} className="overflow-hidden rounded-xl border border-line bg-bg/80"><button type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                   <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location not entered"}</div></div><ArrowUpRight className="size-4 shrink-0 text-muted" /></div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
-                  <div className="mt-2 border-t border-line pt-2 text-[10px] font-semibold">{gig.researchVerifiedAt ? <span className="text-live">Source reviewed · not booking confirmation</span> : <span className="text-warn">{gig.researchSourceUrl ? "Source recorded · review needed" : "Venue research not documented"}</span>}</div>
+                  <div className="mt-2 border-t border-line pt-2 text-[10px] font-semibold">{<span className={researchStatus(gig) === "Verified" ? "text-live" : "text-warn"}>{researchId === gig.id ? "Researching" : researchStatus(gig, gig.venueResearchStatus === "Research unavailable")} · venue facts only</span>}</div>
                   {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
                   <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-line pt-2 text-[11px]">
                     <div><span className="text-muted">Capacity</span><div className="font-semibold">{gig.venueCapacity && gig.capacitySourceUrl ? gig.venueCapacity.toLocaleString() : "Not verified"}</div></div>
                     <div><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? "Saved contact · unverified" : "Not verified"}</div></div>
-                    <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Source recorded · review needed" : "Not verified"}</div></div>
+                    <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Official submission page" : "Not verified"}</div></div>
                     {gig.outreachReplyStatus && <div className="col-span-2 text-info">Reply: {gig.outreachReplyStatus}</div>}
                   </div>
 
                 </button>
                 <div className="px-3 pb-3">
-                  <button type="button" disabled={researchId !== null} onClick={() => void researchVenue(gig)} className="min-h-9 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : "Find & fill details"}</button>
+                  <button type="button" disabled={researchId !== null || !ownerId} onClick={() => void researchVenue(gig)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : gig.venueResearchedAt ? "Retry research" : "Find & fill details"}</button>
+                  {gig.venueResearchError && <p role="alert" className="mt-2 text-xs text-warn">{gig.venueResearchError}</p>}
+                  {gig.venueCapacity && /thunderbird/i.test(gig.venue || gig.name) && <p className="mt-2 text-xs text-muted">Music Hall capacity; confirm the room and layout.</p>}
+                  {venueEvidenceSources(gig).length > 0 && <details className="mt-2 text-xs"><summary className="min-h-11 cursor-pointer py-3 text-accent">View source evidence</summary>{venueEvidenceSources(gig).map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all py-2 text-accent underline">{url}</a>)}</details>}
                   {researchResult?.id === gig.id && <div className="mt-3 space-y-2 text-xs">
                     <p className="whitespace-pre-wrap text-muted">{researchResult.answer}</p>
                     {researchResult.citations.length ? researchResult.citations.slice(0, 8).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>) : <p className="text-warn">No cited live sources. Research remains unverified.</p>}

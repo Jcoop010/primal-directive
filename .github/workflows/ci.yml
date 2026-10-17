@@ -112,8 +112,11 @@ jobs:
           node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/built.png --baseline /workspace/screenshots/dev.json || { cat .grok/preview.log; exit 1; }
           # Run authenticated acceptance against the built preview, not Vite dev HMR.
           AUTH_SMOKE_ORIGIN=http://127.0.0.1:8081 node scripts/ci-browser-acceptance.mjs
+          AUTH_SMOKE_ORIGIN=http://127.0.0.1:8081 node scripts/verify-venue-research.mjs
           if [ "$GITHUB_REF" = "refs/heads/main" ]; then
             AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-auth-smoke.mjs
+            AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/oauth-state-smoke.mjs
+            AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/verify-venue-research.mjs
             AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-browser-acceptance.mjs
           fi
 
