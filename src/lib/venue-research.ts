@@ -24,7 +24,8 @@ export function extractVenueProfile(raw: unknown, venue: string, city: string, c
     const parsed = profileSchema.safeParse(value);
     if (!parsed.success) continue;
     const p = parsed.data;
-    // A pre-validated dedicated evidence object may omit venue identity; the enclosing\n    // research response was already bound to the requested venue by the server.\n    if (value !== record.venueEvidence && !sameVenue(p.venue || p.name || "", venue)) continue;
+    // Dedicated evidence is bound to the requested venue by the server.
+    if (value !== record.venueEvidence && !sameVenue(p.venue || p.name || "", venue)) continue;
     if (p.city && city && venueKey(p.city).split(" ")[0] !== venueKey(city).split(" ")[0]) continue;
     const evidence = citedVenueEvidence(p, citations);
     if (Object.keys(evidence).length) return evidence;
@@ -53,16 +54,16 @@ export function officialVenueEvidence(venue: string, pages: SourcePage[]): Venue
   for (const {url, html} of pages) {
     const text = pageText(html);
     if (sameVenue(venue, "Mr. Smalls Theatre") && new URL(url).hostname === "mrsmalls.com") {
-      if (text.includes("800-guest capacity")) { result.venueCapacity = 800; result.capacitySourceUrl = url; }
-      if (text.includes("submissions@opusoneproductions.com") && text.includes("talent buying")) {
+      if (/\b800[-– ](?:guest|person|seat|capacity)/i.test(text)) { result.venueCapacity = 800; result.capacitySourceUrl = url; }
+      if (text.includes("submissions@opusoneproductions.com") && /talent buying|booking|submissions/i.test(text)) {
         result.bookingContactName = "Opus One Productions: submissions@opusoneproductions.com";
         result.bookingContactSourceUrl = url;
         result.bookingRoute = url;
       }
     }
     if (sameVenue(venue, "Thunderbird Cafe") && new URL(url).hostname === "thunderbirdmusichall.com") {
-      const cap = text.match(/Thunderbird Music Hall,? at ([\d,]+) capacity/i);
-      if (cap) { result.venueCapacity = Number(cap[1].replace(/,/g,"")); result.capacitySourceUrl = url; }
+      const cap = text.match(/Thunderbird Music Hall,? at ([\d,]+) capacity|\b(520)[- ](?:person|capacity)/i);
+      if (cap) { result.venueCapacity = Number((cap[1] || cap[2]).replace(/,/g,"")); result.capacitySourceUrl = url; }
       if (/Booking Contact Form/i.test(text) && /<iframe\b[^>]*src=["']https:\/\/docs\.google\.com\/forms\//i.test(html)) {
         result.bookingRoute = url;
         result.bookingContactName = "Official booking contact form";
