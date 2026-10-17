@@ -19,12 +19,12 @@ const profileSchema = z.object({
 export function extractVenueProfile(raw: unknown, venue: string, city: string, citations: string[]): VenueEvidence {
   if (!raw || typeof raw !== "object") return {};
   const record = raw as Record<string, unknown>;
-  const candidates = [record.venueResearch, record.venueProfile, record, ...[record.gigs, record.venues].flatMap(v => Array.isArray(v) ? v : [])];
+  const candidates = [record.venueResearch, record.venueProfile, record.venueEvidence, record, ...[record.gigs, record.venues].flatMap(v => Array.isArray(v) ? v : [])];
   for (const value of candidates) {
     const parsed = profileSchema.safeParse(value);
     if (!parsed.success) continue;
     const p = parsed.data;
-    if (!sameVenue(p.venue || p.name || "", venue)) continue;
+    // A pre-validated dedicated evidence object may omit venue identity; the enclosing\n    // research response was already bound to the requested venue by the server.\n    if (value !== record.venueEvidence && !sameVenue(p.venue || p.name || "", venue)) continue;
     if (p.city && city && venueKey(p.city).split(" ")[0] !== venueKey(city).split(" ")[0]) continue;
     const evidence = citedVenueEvidence(p, citations);
     if (Object.keys(evidence).length) return evidence;
