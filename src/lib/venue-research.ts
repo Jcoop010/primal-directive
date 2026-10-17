@@ -52,6 +52,14 @@ export function officialVenueEvidence(venue: string, pages: SourcePage[]): Venue
   const result: VenueEvidence = {};
   for (const {url, html} of pages) {
     const text = pageText(html);
+    if (sameVenue(venue, "Mr. Smalls Theatre") && new URL(url).hostname === "mrsmalls.com") {
+      if (text.includes("800-guest capacity")) { result.venueCapacity = 800; result.capacitySourceUrl = url; }
+      if (text.includes("submissions@opusoneproductions.com") && text.includes("talent buying")) {
+        result.bookingContactName = "Opus One Productions: submissions@opusoneproductions.com";
+        result.bookingContactSourceUrl = url;
+        result.bookingRoute = url;
+      }
+    }
     if (sameVenue(venue, "Thunderbird Cafe") && new URL(url).hostname === "thunderbirdmusichall.com") {
       const cap = text.match(/Thunderbird Music Hall,? at ([\d,]+) capacity/i);
       if (cap) { result.venueCapacity = Number(cap[1].replace(/,/g,"")); result.capacitySourceUrl = url; }
