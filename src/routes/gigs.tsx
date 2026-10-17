@@ -75,7 +75,7 @@ function GigsPage() {
     if (!gig) return;
     attempted.current.add(ownerId + ":" + gig.id);
     setAutoResearchStatus("Finding cited details for " + (gig.venue || gig.name));
-    void researchVenue(gig).finally(() => setAutoResearchStatus("Automatic research finished. Review the venue details or retry any missing facts."));
+    void researchVenue(gig).finally(() => { const latest = useMusician.getState().gigs.find(item => item.id === gig.id); const status = latest ? researchStatus(latest) : "Not researched"; setAutoResearchStatus(status === "Verified" ? "Verified venue details saved for " + (gig.venue || gig.name) + "." : status === "Partially verified" ? "Some venue facts verified for " + (gig.venue || gig.name) + ". Review missing details." : "No source-verified facts were saved for " + (gig.venue || gig.name) + ". Select Find & fill details to retry."); });
     // Changes caused by saving evidence advance the bounded queue; inFlight prevents overlaps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ownerId, gigs, researchId]);
