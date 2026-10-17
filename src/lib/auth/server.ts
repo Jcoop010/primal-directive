@@ -173,6 +173,9 @@ export const auth = betterAuth({
     useSecureCookies: false,
     defaultCookieAttributes: { secure: true, sameSite: "lax", path: "/" },
     cookies: {
+      // Host-only namespace prevents legacy/path-scoped state cookies from shadowing OAuth.
+      // Signature, expiry, and state/nonce validation remain enabled.
+      state: { name: "__Host-primal-directive.oauth_state" },
       session_token: { name: SESSION_TOKEN_COOKIE },
       session_data: { name: "__Host-grok-auth.session_data" },
       account_data: { name: "__Host-grok-auth.account_data" },

@@ -62,6 +62,9 @@ export type Gig = import("./venue-evidence").VenueEvidence & {
   status: GigStatus;
   notes: string;
   /** Research is not proof that the booking contact or opportunity is verified. */
+  venueResearchStatus?: "Not researched" | "Researching" | "Partially verified" | "Verified" | "Research unavailable";
+  venueResearchError?: string;
+  venueResearchedAt?: string;
   researchSourceUrl?: string;
   researchVerifiedAt?: string;
   outreachContact?: string;

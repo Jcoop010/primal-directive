@@ -41,6 +41,7 @@ type Composer = {
 };
 
 type State = {
+  workspaceOwnerId: string | null;
   gigs: Gig[];
   people: Person[];
   money: MoneyEntry[];
@@ -124,6 +125,7 @@ function fresh(): Omit<State, "composer"> & { composer: Composer } {
   const seed = createSeed();
   return {
     ...seed,
+    workspaceOwnerId: null,
     merchProducts: [],
     merchSales: [],
     merchOrders: [],

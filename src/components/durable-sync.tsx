@@ -21,6 +21,7 @@ export function DurableSync() {
   activeUserId.current = userId;
 
   useEffect(() => {
+    useMusician.setState({ workspaceOwnerId: null });
     if (!userId) {
       readyFor.current = null;
       version.current = 0;
@@ -77,6 +78,7 @@ export function DurableSync() {
           }));
         }
         readyFor.current = userId;
+        useMusician.setState({ workspaceOwnerId: userId });
         setSyncStatus("ready");
       })
       .catch((error) => {

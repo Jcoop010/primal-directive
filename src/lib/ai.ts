@@ -1,3 +1,4 @@
+import { extractVenueProfile } from "@/lib/venue-research";
 import { readableAdvisorAnswer } from "@/lib/advisor-answer";
 import {
   venueEvidenceShape,
@@ -23,6 +24,8 @@ const Input = z.object({
   mode: z.enum(["quick", "detailed", "research"]).default("quick"),
   history: z.array(HistoryItem).max(10),
   context: z.string().max(4500),
+  targetVenue: z.string().max(200).optional(),
+  targetCity: z.string().max(200).optional(),
 });
 
 const GigOut = z.object({
@@ -129,6 +132,7 @@ type ChatOk = {
   gigs: SuggestedGig[];
   people: SuggestedPerson[];
   moves: string[];
+  venueEvidence?: import("./venue-evidence").VenueEvidence;
 };
 
 type ChatErr = { ok: false; error: string };
@@ -574,7 +578,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
     const raw = typeof content === "string" ? content : "";
     const decoded = readableAdvisorAnswer(raw);
     const parsed = decoded.object ?? extractJson(raw);
-    const safe = parsed ? AiJson.safeParse(parsed) : null;
+    const safe = parsed ? AiJson.safeParse(data.targetVenue && typeof parsed === "object" && !Array.isArray(parsed) ? {answer:"Review the cited venue details.", ...parsed} : parsed) : null;
 
     const citations = researchRequested ? citationsFrom(body) : [];
     const source = citations.length
@@ -631,6 +635,7 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
         answer,
         source,
         citations,
+        venueEvidence: data.targetVenue ? extractVenueProfile(parsed, data.targetVenue, data.targetCity ?? "", citations) : undefined,
         gigs,
         people,
         moves: (safe.data.moves ?? [])

@@ -11,6 +11,7 @@ const types = moduleUrl(stripTypeScriptTypes(await readFile(new URL("../src/lib/
 const local = moduleUrl(stripTypeScriptTypes(await readFile(new URL("../src/lib/local-advisor.ts", import.meta.url), "utf8")));
 let source = stripTypeScriptTypes(await readFile(new URL("../src/lib/ai.ts", import.meta.url), "utf8"));
 source = source
+  .replace('from "@/lib/venue-research"', "from " + JSON.stringify(new URL("../src/lib/venue-research.ts", import.meta.url).href))
   .replace('from "@/lib/venue-evidence"', "from " + JSON.stringify(new URL("../src/lib/venue-evidence.ts", import.meta.url).href))
   .replace('from "@/lib/advisor-answer"', "from " + JSON.stringify(new URL("../src/lib/advisor-answer.ts", import.meta.url).href))
   .replace('from "@/lib/provider-policy"', "from " + JSON.stringify(policyUrl))
