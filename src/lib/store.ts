@@ -377,17 +377,15 @@ export const useMusician = create<State & Actions>()(
         return added;
       },
       updateOperationalTask: (id, patch) =>
-        set((s) => ({
-          tasks: s.tasks.map((task) =>
-            task.id === id
-              ? {
-                  ...task,
-                  ...patch,
-                  ...(patch.dueDate !== undefined ? { dueDateOverridden: true } : {}),
-                }
-              : task,
-          ),
-        })),
+        set((s) => {
+          const previous=s.tasks.find(task=>task.id===id);
+          if(!previous)return s;
+          const task={...previous,...patch,...(patch.dueDate!==undefined?{dueDateOverridden:true}:{})};
+          const booking=s.gigs.find(gig=>gig.id===task.gigId && task.sourceKey==="booking:"+gig.id+":followup");
+          const tasks=s.tasks.map(item=>item.id===id?task:booking && task.status==="open" && item.sourceKey===task.sourceKey && item.status==="open"?{...item,status:"done" as const}:item);
+          const gigs=booking?s.gigs.map(gig=>gig.id!==booking.id?gig:task.status==="open"?{...gig,outreachNextFollowUp:task.dueDate}:gig.outreachNextFollowUp===previous.dueDate?{...gig,outreachNextFollowUp:""}:gig):s.gigs;
+          return {tasks,gigs};
+        }),
       updateProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
       addUserMessage: (text) =>
         set((s) => ({
