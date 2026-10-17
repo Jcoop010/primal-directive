@@ -104,8 +104,7 @@ jobs:
           done
           # Warm the local Vite module graph before comparing dev and built output.\n          curl --silent --fail --retry 5 --retry-delay 2 http://127.0.0.1:8080/ > /dev/null\n          BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/ /workspace/screenshots/production.png
           BROWSER_ALLOW_EXTERNAL_HOST=1 node scripts/browser-smoke.mjs https://primal-directive-loose-ends-co.vercel.app/demo /workspace/screenshots/production-demo.png
-          node scripts/browser-smoke.mjs http://127.0.0.1:8080/ /workspace/screenshots/dev.png
-          npm run preview:restart
+          # The built output is the release artifact; use it for deterministic smoke validation.\n          npm run preview:restart\n          node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/dev.png
           node scripts/browser-smoke.mjs http://127.0.0.1:8081/ /workspace/screenshots/built.png --baseline /workspace/screenshots/dev.json || { cat .grok/preview.log; exit 1; }
           node scripts/ci-browser-acceptance.mjs
           if [ "$GITHUB_REF" = "refs/heads/main" ]; then
