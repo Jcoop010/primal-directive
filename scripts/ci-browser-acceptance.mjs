@@ -3,7 +3,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { chromium } from "playwright";
 
 const origin = process.env.AUTH_SMOKE_ORIGIN ?? "http://127.0.0.1:8080";
-assert.ok(["http://127.0.0.1:8080", "https://primal-directive-loose-ends-co.vercel.app"].includes(origin));
+assert.ok(["http://127.0.0.1:8080", "http://127.0.0.1:8081", "https://primal-directive-loose-ends-co.vercel.app"].includes(origin));
 const suffix = randomUUID();
 const password = randomBytes(32).toString("base64url");
 const emailA = "river-fold-a-" + suffix + "@example.invalid";
@@ -20,7 +20,7 @@ async function auth(path, payload) {
   const response = await context.request.post(origin + "/api/auth/" + path, {
     headers: { origin }, data: payload,
   });
-  assert.equal(response.status(), 200, "Authentication endpoint failed: " + path);
+  assert.equal(response.status(), 200, "Authentication endpoint failed: " + path + " (HTTP " + response.status() + ")");
 }
 async function ready(path) {
   try { await page.goto(origin + path, { waitUntil: "domcontentloaded" }); } catch(error) {
