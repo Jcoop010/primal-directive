@@ -138,12 +138,21 @@ function GigsPage() {
             return <div key={status} className={cn("command-surface min-w-0 rounded-2xl p-3", items.length === 0 && (shown.length > 0 || status !== (filter === 'all' ? 'lead' : filter)) && "hidden md:block")}>
               <div className="mb-3 flex items-center justify-between gap-2 border-b border-line pb-3"><h2 className="text-xs font-bold uppercase tracking-wider text-soft">{GIG_STATUS_LABEL[status]}</h2><span className="rounded-full bg-surface-2 px-2 py-1 text-[11px] font-bold tabular text-muted">{items.length}</span></div>
               <div className="space-y-2">
-                {items.map((gig) => <button key={gig.id} type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                {items.map((gig) => <div key={gig.id} className="overflow-hidden rounded-xl border border-line bg-bg/80"><button type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                   <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location not entered"}</div></div><ArrowUpRight className="size-4 shrink-0 text-muted" /></div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
                   <div className="mt-2 border-t border-line pt-2 text-[10px] font-semibold">{gig.researchVerifiedAt ? <span className="text-live">Source reviewed · not booking confirmation</span> : <span className="text-warn">{gig.researchSourceUrl ? "Source recorded · review needed" : "Venue research not documented"}</span>}</div>
                   {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
-                </button>)}
+                </button>
+                <div className="px-3 pb-3">
+                  <button type="button" disabled={researchId !== null} onClick={() => void researchVenue(gig)} className="min-h-11 w-full rounded-lg bg-accent px-3 py-2 text-xs font-bold text-bg disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : "Research with AI"}</button>
+                  {researchResult?.id === gig.id && <div className="mt-3 space-y-2 text-xs">
+                    <p className="whitespace-pre-wrap text-muted">{researchResult.answer}</p>
+                    {researchResult.citations.length ? researchResult.citations.slice(0, 8).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>) : <p className="text-warn">No cited live sources. Research remains unverified.</p>}
+                    {researchResult.leadUrl && <button type="button" onClick={() => updateGig(gig.id, {researchSourceUrl: researchResult.leadUrl, researchVerifiedAt: ""})} className="min-h-11 w-full rounded-lg border border-accent px-3 py-2 font-semibold text-accent">Save cited source for review</button>}
+                  </div>}
+                  {researchError && !researchId && <p role="alert" className="mt-2 text-xs text-warn">{researchError}</p>}
+                </div></div>)}
                 {items.length === 0 ? <div className="rounded-xl border border-dashed border-line px-3 py-6 text-center text-xs text-muted">No opportunities</div> : null}
               </div>
             </div>;
