@@ -259,6 +259,15 @@ function GigsPage() {
             <details className="px-5 pb-4 text-xs">
               <summary className="cursor-pointer text-accent">Research & outreach</summary>
               <p className="my-2 text-muted">{g.researchVerifiedAt ? "Source reviewed on " + g.researchVerifiedAt : "Research not independently verified. Do not assume contact, availability or booking terms are confirmed."}</p>
+              <div className="my-3 grid grid-cols-2 gap-2 rounded-lg border border-line p-3 sm:grid-cols-3">
+                <div><span className="text-muted">Stage</span><div className="font-semibold">{GIG_STATUS_LABEL[g.status]}</div></div>
+                <div><span className="text-muted">Capacity</span><div className="font-semibold">{g.venueCapacity && g.capacitySourceUrl ? g.venueCapacity.toLocaleString() : "Not verified"}</div></div>
+                <div><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{g.bookingContactName && g.bookingContactSourceUrl ? g.bookingContactName : "Not verified"}</div></div>
+                <div><span className="text-muted">Booking route</span><div className="font-semibold">{g.bookingRoute ? "Source-supported" : "Not verified"}</div></div>
+                <div><span className="text-muted">Last contacted</span><div className="font-semibold">{g.outreachLastContactedAt || "Not recorded"}</div></div>
+                <div><span className="text-muted">Next follow-up</span><div className="font-semibold">{g.outreachNextFollowUp || "Not scheduled"}</div></div>
+                {venueEvidenceSources(g).length > 0 && <div className="col-span-2 sm:col-span-3"><span className="text-muted">Evidence</span>{venueEvidenceSources(g).map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>)}</div>}
+              </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label>Contact<input aria-label="Booking contact" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachContact || ""} onChange={(e) => updateGig(g.id, {outreachContact:e.target.value})}/></label>
                 <label>Follow-up date<input aria-label="Follow-up date" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNextFollowUp || ""} onChange={(e) => updateGig(g.id, {outreachNextFollowUp:e.target.value})}/></label>
