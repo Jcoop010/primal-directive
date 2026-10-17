@@ -68,9 +68,9 @@ function GigsPage() {
   }
 
   // Wait for the authenticated database snapshot, never the browser's previous account cache.
-  // One automatic attempt per venue per visit; explicit retry is always available.
+  // One automatic attempt per saved venue per visit (up to 100), sequentially to avoid provider bursts; explicit retry remains available.
   useEffect(() => {
-    if (!ownerId || inFlight.current || attempted.current.size >= 3) return;
+    if (!ownerId || inFlight.current || attempted.current.size >= 100) return;
     const gig = gigs.find(g => (g.venue || g.name) && researchStatus(g) !== "Verified" && !attempted.current.has(ownerId + ":" + g.id));
     if (!gig) return;
     attempted.current.add(ownerId + ":" + gig.id);
@@ -181,7 +181,7 @@ function GigsPage() {
                   <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-line pt-2 text-[11px]">
                     <div><span className="text-muted">Capacity</span><div className="font-semibold">{gig.venueCapacity && gig.capacitySourceUrl ? gig.venueCapacity.toLocaleString() : "Not verified"}</div></div>
                     <div className="col-span-2"><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? "Saved contact · unverified" : "Not verified"}</div></div>
-                    <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Official submission page" : "Not verified"}</div></div>
+                    <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Source-supported booking route" : "Not verified"}</div></div>
                     {gig.outreachReplyStatus && <div className="col-span-2 text-info">Reply: {gig.outreachReplyStatus}</div>}
                   </div>
 
