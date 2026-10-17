@@ -187,8 +187,7 @@ function GigsPage() {
 
                 </button>
                 <div className="px-3 pb-3">
-                  <button type="button" disabled={researchId !== null || !ownerId} onClick={() => void researchVenue(gig)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : gig.venueResearchedAt ? "Retry research" : "Find & fill details"}</button>
-                  {gig.venueResearchError && <p role="alert" className="mt-2 text-xs text-warn">{gig.venueResearchError}</p>}
+                  <details className="mt-2 text-xs"><summary className="min-h-10 cursor-pointer py-2 font-semibold text-accent">More details ↓</summary>\n                    <div className="space-y-2 border-t border-line pt-2">\n                    <button type="button" disabled={researchId !== null || !ownerId} onClick={() => void researchVenue(gig)} className="min-h-9 rounded-lg border border-accent/50 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : "Refresh venue research"}</button>\n                    {gig.bookingRoute && <a href={gig.bookingRoute} target="_blank" rel="noopener noreferrer" className="block break-words text-accent underline">Open verified booking route ↗</a>}\n                  {gig.venueResearchError && <p role="alert" className="mt-2 text-xs text-warn">{gig.venueResearchError}</p>}
                   {gig.venueCapacity && /thunderbird/i.test(gig.venue || gig.name) && <p className="mt-2 text-xs text-muted">Music Hall capacity; confirm the room and layout.</p>}
                   {venueEvidenceSources(gig).length > 0 && <details className="mt-2 text-xs"><summary className="min-h-11 cursor-pointer py-3 text-accent">View source evidence</summary>{venueEvidenceSources(gig).map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" title={url} className="block break-all py-2 text-accent underline">{new URL(url).hostname.replace(/^www\./, "")}</a>)}</details>}
                   {researchResult?.id === gig.id && <div className="mt-3 space-y-2 text-xs">
@@ -204,8 +203,7 @@ function GigsPage() {
                     </div>}
                     {researchResult.leadUrl && <button type="button" onClick={() => updateGig(gig.id, {researchSourceUrl: researchResult.leadUrl, researchVerifiedAt: ""})} className="min-h-11 w-full rounded-lg border border-accent px-3 py-2 font-semibold text-accent">Save cited source for review</button>}
                   </div>}
-                  {researchError && !researchId && <p role="alert" className="mt-2 text-xs text-warn">{researchError}</p>}
-                </div></div>)}
+                  {researchError && !researchId && <p role="alert" className="mt-2 text-xs text-warn">{researchError}</p>}\n                    </div></details>\n                </div></div>)}
                 {items.length === 0 ? <div className="rounded-xl border border-dashed border-line px-3 py-6 text-center text-xs text-muted">No opportunities</div> : null}
               </div>
             </div>;
