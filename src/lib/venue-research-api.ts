@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { askGrowthAdvisor } from "@/lib/ai";
-import { extractVenueProfile, officialVenueEvidence, sameVenue, venueEvidenceSources, type SourcePage } from "./venue-research";
+import { extractVenueProfile, officialVenueEvidence, sameVenue, venueEvidenceSources, researchStatus, type SourcePage } from "./venue-research";
 
 export const researchSavedVenue = createServerFn({method:"POST"})
   .middleware([authMiddleware])
@@ -27,11 +27,30 @@ export const researchSavedVenue = createServerFn({method:"POST"})
       } catch { /* Provider research below can still resolve unavailable official pages. */ }
     }));
     const official = officialVenueEvidence(data.venue,pages);
-    if (venueEvidenceSources(official).length) return {evidence:official,citations:venueEvidenceSources(official),message:official.venueCapacity ? (sameVenue(data.venue,"Thunderbird Cafe") ? "Official pages document Music Hall capacity and a booking form. Confirm room configuration before outreach." : "Booking details come from the official venue page; capacity is documented by the linked music listing. Confirm configuration before outreach.") : "Booking details extracted from the official venue page. Capacity remains unverified."};
-    const response = await askGrowthAdvisor({data:{
-      message:`Research this exact saved music venue: ${data.venue}, ${data.city}. Return a venueResearch object with venue, city, venueCapacity, capacitySourceUrl, bookingContactName, bookingContactSourceUrl and bookingRoute. Cite each fact's exact live supporting HTTPS URL. Omit unsupported fields. Do not invent dates, fees or contacts.`,
-      targetVenue:data.venue,targetCity:data.city,mode:"research",history:[],context:"Enrich an existing saved venue only. No new gigs or communications."
-    }});
-    if (!response.ok) throw new Error(response.error);
-    return {evidence:response.venueEvidence ?? extractVenueProfile(response,data.venue,data.city,response.citations),citations:response.citations,message:response.answer};
+    // Partial official evidence must not prevent the AI from finding the remaining fields.
+    // Never overwrite a source-verified official fact with model output.
+    if (researchStatus(official) === "Verified") {
+      return {evidence:official,citations:venueEvidenceSources(official),message:"Venue details verified from fetched official sources."};
+    }
+    try {
+      const response = await askGrowthAdvisor({data:{
+        message:`Research this exact saved music venue: ${data.venue}, ${data.city}. Return a venueResearch object with venue, city, venueCapacity, capacitySourceUrl, bookingContactName, bookingContactSourceUrl and bookingRoute. Cite each fact's exact live supporting HTTPS URL. Omit unsupported fields. Do not invent dates, fees or contacts.`,
+        targetVenue:data.venue,targetCity:data.city,mode:"research",history:[],context:"Enrich an existing saved venue only. No new gigs or communications."
+      }});
+      if (!response.ok) throw new Error(response.error);
+      // Normalize and independently validate every AI field against citations.
+      // The backend's pre-extracted venueEvidence is a fallback, not a reason to skip validation.
+      const aiEvidence = extractVenueProfile(response,data.venue,data.city,response.citations);
+      const evidence = {...aiEvidence,...official};
+      return {evidence,citations:[...new Set([...response.citations,...venueEvidenceSources(official)])],
+        message:venueEvidenceSources(evidence).length
+          ? "Source-supported venue details found. Review remaining unverified fields."
+          : "No source-supported venue details found. Retry later or check the official venue website."};
+    } catch (error) {
+      if (venueEvidenceSources(official).length) {
+        return {evidence:official,citations:venueEvidenceSources(official),
+          message:"Some official venue details were verified; additional research is temporarily unavailable."};
+      }
+      throw error;
+    }
   });
