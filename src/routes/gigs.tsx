@@ -173,7 +173,8 @@ function GigsPage() {
                 <label>Last contacted<input aria-label="Last contacted" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachLastContactedAt || ""} onChange={(e) => updateGig(g.id, {outreachLastContactedAt:e.target.value})}/></label>
                 <label>Research URL<input aria-label="Research URL" type="url" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.researchSourceUrl || ""} onChange={(e) => updateGig(g.id, {researchSourceUrl:e.target.value,researchVerifiedAt:""})}/></label>
                 <label className="sm:col-span-2">Outreach notes<textarea aria-label="Outreach notes" rows={2} className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNotes || ""} onChange={(e) => updateGig(g.id, {outreachNotes:e.target.value})}/></label>
-                <button type="button" disabled={!g.researchSourceUrl} className="rounded border border-line px-3 py-2 disabled:opacity-40" onClick={() => updateGig(g.id, {researchVerifiedAt:new Date().toISOString().slice(0,10)})}>Mark source reviewed</button>
+                <a href={g.researchSourceUrl || undefined} target="_blank" rel="noopener noreferrer" aria-disabled={!g.researchSourceUrl} onClick={(event) => { if (!g.researchSourceUrl) event.preventDefault(); }} className={cn("rounded border border-line px-3 py-2 text-center", !g.researchSourceUrl && "pointer-events-none opacity-40")}>Open research source ↗</a>
+                <button type="button" disabled={!g.researchSourceUrl} className="rounded border border-line px-3 py-2 disabled:opacity-40" onClick={() => updateGig(g.id, {researchVerifiedAt:new Date().toISOString().slice(0,10)})}>I reviewed this source</button>
               </div>
               <div className="mt-4 rounded-xl border border-line bg-surface-2 p-3">
                 <div className="font-semibold text-fg">Booking outreach assistant</div>
