@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { askGrowthAdvisor } from "@/lib/ai";
 import { citedVenueEvidence } from "@/lib/venue-evidence";
 import { LayoutGrid, List, ArrowUpRight, Search, CalendarClock } from "lucide-react";
@@ -27,6 +27,8 @@ function GigsPage() {
   const [researchId, setResearchId] = useState<string | null>(null);
   const [researchResult, setResearchResult] = useState<{ id: string; answer: string; citations: string[]; source: string; leadUrl?: string; evidence?: { venueCapacity?: number; capacitySourceUrl?: string; bookingRoute?: string; bookingContactName?: string; bookingContactSourceUrl?: string } } | null>(null);
   const [researchError, setResearchError] = useState("");
+  const [autoResearchStatus, setAutoResearchStatus] = useState("");
+  const autoResearchStarted = useRef(false);
   async function researchVenue(g: { id: string; venue: string; name: string; city: string }) {
     setResearchId(g.id);
     setResearchResult(null);
@@ -50,6 +52,55 @@ function GigsPage() {
       setResearchId(null);
     }
   }
+
+  // Research at most three missing venue profiles per visit, sequentially, to respect provider quotas.
+  // Only individually cited structured evidence is persisted. Never change booking status.
+  useEffect(() => {
+    if (autoResearchStarted.current || !gigs.length) return;
+    autoResearchStarted.current = true;
+    const pending = gigs.filter((g) =>
+      (g.venue || g.name) &&
+      (!g.venueCapacity || !g.capacitySourceUrl || (!g.bookingRoute && !g.bookingContactName))
+    ).slice(0, 3);
+    if (!pending.length) return;
+    let cancelled = false;
+    void (async () => {
+      let filled = 0;
+      for (const gig of pending) {
+        if (cancelled) break;
+        const key = "primal-venue-research-v1:" + gig.id;
+        try {
+          if (window.sessionStorage.getItem(key)) continue;
+          window.sessionStorage.setItem(key, "attempted");
+          setAutoResearchStatus("Finding cited venue details: " + (gig.venue || gig.name));
+          const venue = gig.venue || gig.name;
+          const response = await askGrowthAdvisor({ data: {
+            message: "Research the existing music venue " + venue + (gig.city ? ", " + gig.city : "") + ". Return a structured gigs entry for this SAME venue with source-cited venueCapacity, capacitySourceUrl, bookingContactName, bookingContactSourceUrl, and bookingRoute when verifiable. Include exact cited source URLs. Leave unsupported fields empty; do not suggest or create a booking.",
+            mode: "research", history: [], context: "Enrich saved venue profile only. Do not create new gig, claim booking availability, or change status.",
+          } });
+          if (!response.ok) { setAutoResearchStatus("Automatic research unavailable. Use Find & fill details to retry."); break; }
+          const match = response.gigs.find((item) =>
+            (item.venue || item.name).trim().toLowerCase() === venue.trim().toLowerCase()
+          );
+          if (match && !cancelled) {
+            const verified = citedVenueEvidence(match, response.citations);
+            if (Object.keys(verified).length) {
+              updateGig(gig.id, verified);
+              filled++;
+            }
+          }
+        } catch {
+          if (!cancelled) setAutoResearchStatus("Automatic research paused. Use Find & fill details to retry.");
+          break;
+        }
+      }
+      if (!cancelled && filled) setAutoResearchStatus("Updated " + filled + " venue profile" + (filled === 1 ? "" : "s") + " from cited sources.");
+      else if (!cancelled) setAutoResearchStatus((current) => current || "No new venue facts could be verified.");
+    })();
+    return () => { cancelled = true; };
+  // Only run once on initial page mount; manual research remains available for retries.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
@@ -136,6 +187,7 @@ function GigsPage() {
           </button>
         ))}
       </Card>
+      {autoResearchStatus && <p role="status" className="mb-3 px-1 text-xs text-muted">{autoResearchStatus}</p>}
       {view === "board" ? (
         <section aria-label="Booking pipeline board" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {GIG_STATUSES.map((status) => {
