@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { askGrowthAdvisor } from "@/lib/ai";
+import { citedVenueEvidence } from "@/lib/venue-evidence";
 import { LayoutGrid, List, ArrowUpRight, Search, CalendarClock } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, Eyebrow } from "@/components/ui/card";
@@ -38,7 +39,11 @@ function GigsPage() {
       } });
       if (!response.ok) throw new Error(response.error);
       const lead = response.gigs.find((item) => item.venue.toLowerCase() === venue.toLowerCase() || item.name.toLowerCase() === venue.toLowerCase());
-      setResearchResult({ id: g.id, answer: response.answer, citations: response.citations, source: response.source, leadUrl: lead?.sourceUrl, evidence: lead ? { venueCapacity: lead.venueCapacity, capacitySourceUrl: lead.capacitySourceUrl, bookingRoute: lead.bookingRoute, bookingContactName: lead.bookingContactName, bookingContactSourceUrl: lead.bookingContactSourceUrl } : undefined });
+      if (lead) {
+        const verified = citedVenueEvidence(lead, response.citations);
+        if (Object.keys(verified).length > 0) updateGig(g.id, verified);
+      }
+      setResearchResult({ id: g.id, answer: response.answer, citations: response.citations, source: response.source, leadUrl: lead?.sourceUrl, evidence: lead ? citedVenueEvidence(lead, response.citations) : undefined });
     } catch (error) {
       setResearchError(error instanceof Error ? error.message : "Research failed. No source was verified.");
     } finally {
@@ -152,7 +157,7 @@ function GigsPage() {
 
                 </button>
                 <div className="px-3 pb-3">
-                  <button type="button" disabled={researchId !== null} onClick={() => void researchVenue(gig)} className="min-h-9 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : "Research with AI"}</button>
+                  <button type="button" disabled={researchId !== null} onClick={() => void researchVenue(gig)} className="min-h-9 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : "Find & fill details"}</button>
                   {researchResult?.id === gig.id && <div className="mt-3 space-y-2 text-xs">
                     <p className="whitespace-pre-wrap text-muted">{researchResult.answer}</p>
                     {researchResult.citations.length ? researchResult.citations.slice(0, 8).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>) : <p className="text-warn">No cited live sources. Research remains unverified.</p>}
