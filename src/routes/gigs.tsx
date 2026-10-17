@@ -69,7 +69,6 @@ function GigsPage() {
         const key = "primal-venue-research-v1:" + gig.id;
         try {
           if (window.sessionStorage.getItem(key)) continue;
-          window.sessionStorage.setItem(key, "attempted");
           setAutoResearchStatus("Finding cited venue details: " + (gig.venue || gig.name));
           const venue = gig.venue || gig.name;
           const response = await askGrowthAdvisor({ data: {
@@ -85,6 +84,7 @@ function GigsPage() {
             if (Object.keys(verified).length) {
               updateGig(gig.id, verified);
               filled++;
+              window.sessionStorage.setItem(key, "verified");
             }
           }
         } catch {
@@ -97,9 +97,8 @@ function GigsPage() {
     })();
     // The request is intentionally not cancelled on effect cleanup: React StrictMode
     // can replay mount effects while the first request is still in flight.
-  // Only run once on initial page mount; manual research remains available for retries.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Retry initialization after persisted gigs hydrate; guard prevents duplicate batches.
+  }, [gigs.length, updateGig]);
 
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
