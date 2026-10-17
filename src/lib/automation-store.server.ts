@@ -26,7 +26,7 @@ export function postgresAutomationRunStore(): AutomationRunStore {
     async claim(run) {
       const sql = await getSql();
       // Compare-and-swap ensures at most one worker starts this attempt.
-      const previous = run.status === "running" && run.attempt === 1 ? "queued" : "retry_scheduled";
+      const previous = run.attempt === 1 ? "queued" : "retry_scheduled";
       const rows = await sql.query<{ id: string }>(
         "update automation_runs set status='running', attempt=$3, updated_at=$4, next_attempt_at=null where id=$1 and band_id=$2 and status=$5 and attempt=$6 returning id",
         [run.id, run.bandId, run.attempt, run.updatedAt, previous, run.attempt - 1],
