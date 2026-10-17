@@ -36,7 +36,7 @@ function GigsPage() {
     try {
       const venue = g.venue || g.name;
       const response = await askGrowthAdvisor({ data: {
-        message: "Research this specific music venue for booking: " + venue + (g.city ? ", " + g.city : "") + ". Find its official website, current booking submission route, and capacity only if individually supported by live sources. State every unverified detail explicitly. Do not invent contacts, available dates, fees, or booking offers.",
+        message: "Research this specific music venue for booking: " + venue + (g.city ? ", " + g.city : "") + ". Return one structured gigs entry for this exact venue with sourceUrl matching a cited official page. Find its official website, current booking submission route, and capacity only if individually supported by live sources. State every unverified detail explicitly. Do not invent contacts, available dates, fees, or booking offers.",
         mode: "research", history: [], context: "Existing saved pipeline venue: " + venue + ". Research only; do not create duplicate gigs or change booking status.",
       } });
       if (!response.ok) throw new Error(response.error);
@@ -63,11 +63,9 @@ function GigsPage() {
       (!g.venueCapacity || !g.capacitySourceUrl || (!g.bookingRoute && !g.bookingContactName))
     ).slice(0, 3);
     if (!pending.length) return;
-    let cancelled = false;
     void (async () => {
       let filled = 0;
       for (const gig of pending) {
-        if (cancelled) break;
         const key = "primal-venue-research-v1:" + gig.id;
         try {
           if (window.sessionStorage.getItem(key)) continue;
@@ -75,14 +73,14 @@ function GigsPage() {
           setAutoResearchStatus("Finding cited venue details: " + (gig.venue || gig.name));
           const venue = gig.venue || gig.name;
           const response = await askGrowthAdvisor({ data: {
-            message: "Research the existing music venue " + venue + (gig.city ? ", " + gig.city : "") + ". Return a structured gigs entry for this SAME venue with source-cited venueCapacity, capacitySourceUrl, bookingContactName, bookingContactSourceUrl, and bookingRoute when verifiable. Include exact cited source URLs. Leave unsupported fields empty; do not suggest or create a booking.",
+            message: "Research the existing music venue " + venue + (gig.city ? ", " + gig.city : "") + ". Return exactly one structured gigs entry for this SAME venue, including its venue/name and sourceUrl matching a cited official page, with source-cited venueCapacity, capacitySourceUrl, bookingContactName, bookingContactSourceUrl, and bookingRoute when verifiable. Include exact cited source URLs. Leave unsupported fields empty; do not suggest or create a booking.",
             mode: "research", history: [], context: "Enrich saved venue profile only. Do not create new gig, claim booking availability, or change status.",
           } });
           if (!response.ok) { setAutoResearchStatus("Automatic research unavailable. Use Find & fill details to retry."); break; }
           const match = response.gigs.find((item) =>
             (item.venue || item.name).trim().toLowerCase() === venue.trim().toLowerCase()
           );
-          if (match && !cancelled) {
+          if (match) {
             const verified = citedVenueEvidence(match, response.citations);
             if (Object.keys(verified).length) {
               updateGig(gig.id, verified);
@@ -90,14 +88,15 @@ function GigsPage() {
             }
           }
         } catch {
-          if (!cancelled) setAutoResearchStatus("Automatic research paused. Use Find & fill details to retry.");
+          setAutoResearchStatus("Automatic research paused. Use Find & fill details to retry.");
           break;
         }
       }
-      if (!cancelled && filled) setAutoResearchStatus("Updated " + filled + " venue profile" + (filled === 1 ? "" : "s") + " from cited sources.");
-      else if (!cancelled) setAutoResearchStatus((current) => current || "No new venue facts could be verified.");
+      if (filled) setAutoResearchStatus("Updated " + filled + " venue profile" + (filled === 1 ? "" : "s") + " from cited sources.");
+      else setAutoResearchStatus((current) => current || "No new venue facts could be verified.");
     })();
-    return () => { cancelled = true; };
+    // The request is intentionally not cancelled on effect cleanup: React StrictMode
+    // can replay mount effects while the first request is still in flight.
   // Only run once on initial page mount; manual research remains available for retries.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
