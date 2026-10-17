@@ -70,6 +70,10 @@ export function officialVenueEvidence(venue: string, pages: SourcePage[]): Venue
         result.bookingContactSourceUrl = url;
       }
     }
+    if (sameVenue(venue, "Johnny Brenda's") && new URL(url).hostname === "www.visitphilly.com") {
+      const cap = text.match(/\b(\d{2,4})[- ]person live music venue\b/i);
+      if (cap && /Johnny Brenda/i.test(text)) { result.venueCapacity = Number(cap[1]); result.capacitySourceUrl = url; }
+    }
     if (sameVenue(venue, "Johnny Brenda's") && ["https://www.songkick.com/venues/254-johnny-brendas", "https://www.jambase.com/venue/johnny-brendas"].includes(url) && /johnnybrendas\.com/i.test(html)) {
       const cap = text.match(/\bCapacity\s*:?\s*(\d{2,4})\b/i);
       if (cap && !result.venueCapacity) {result.venueCapacity=Number(cap[1]);result.capacitySourceUrl=url;}
