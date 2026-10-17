@@ -506,12 +506,10 @@ export const askGrowthAdvisor = createServerFn({ method: "POST" })
           failures.push(provider + ": invalid response");
           continue;
         }
-        if (
-          !AiJson.safeParse(
-            readableAdvisorAnswer(choices[0].message.content).object ??
-              extractJson(choices[0].message.content),
-          ).success
-        ) {
+        const providerObject = readableAdvisorAnswer(choices[0].message.content).object ?? extractJson(choices[0].message.content);
+        const providerEnvelope = data.targetVenue && providerObject && typeof providerObject === "object" && !Array.isArray(providerObject)
+          ? {answer:"Review the cited venue details.", ...providerObject} : providerObject;
+        if (!AiJson.safeParse(providerEnvelope).success) {
           console.warn("[advisor] invalid structured response", {
             provider,
             characters: choices[0].message.content.length,

@@ -359,3 +359,16 @@ test("Advisor fails over from an unavailable Anthropic provider to Gemini withou
     }
   }
 });
+
+test("saved venue research accepts a cited dedicated profile without gigs, sourceUrl or answer", async (t) => {
+  const keys=["ANTHROPIC_API_KEY","GEMINI_API_KEY","XAI_API_KEY"], previous=keys.map(k=>process.env[k]);
+  t.after(()=>keys.forEach((key,i)=>previous[i]===undefined?delete process.env[key]:process.env[key]=previous[i]));
+  process.env.ANTHROPIC_API_KEY="fictional-test-key";delete process.env.GEMINI_API_KEY;delete process.env.XAI_API_KEY;
+  const url="https://venue.example/official-booking";
+  t.mock.method(globalThis,"fetch", async()=>Response.json({content:[
+    {type:"web_search_tool_result",content:[{type:"web_search_result",url}]},
+    {type:"text",text:JSON.stringify({venueResearch:{venue:"Johnny Brenda’s",city:"Philadelphia",venueCapacity:250,capacitySourceUrl:url,bookingRoute:url}})}
+  ]}));
+  const result=await askGrowthAdvisor({data:{...data,mode:"research",targetVenue:"Johnny Brenda's",targetCity:"Philadelphia",message:"Research this saved venue"}});
+  assert.equal(result.ok,true);assert.equal(result.venueEvidence.venueCapacity,250);assert.equal(result.venueEvidence.bookingRoute,url);assert.deepEqual(result.gigs,[]);
+});

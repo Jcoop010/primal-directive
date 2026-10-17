@@ -1,4 +1,4 @@
-import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Navigate } from "@tanstack/react-router";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn, signOut } from "./client";
 import { hasGateSessionMarker } from "./gate-session-marker";
@@ -140,6 +140,12 @@ export function SignInButtons() {
   const pending = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("error");
+    if (code && ["state_mismatch", "state_security_mismatch", "state_not_found", "state_invalid"].includes(code))
+      setError("Google sign-in expired or another attempt replaced it. Please retry once in this tab with cookies enabled.");
+    else if (code) setError("Google sign-in could not finish. Retry or use your existing email account.");
+  }, []);
   async function start(providerId: string) {
     if (pending.current) return;
     pending.current = true;
