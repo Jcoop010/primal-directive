@@ -20,7 +20,7 @@ async function auth(path, payload) {
   const response = await context.request.post(origin + "/api/auth/" + path, {
     headers: { origin }, data: payload,
   });
-  assert.equal(response.status(), 200, "Authentication endpoint failed: " + path);
+  assert.equal(response.status(), 200, "Authentication endpoint failed: " + path + " (HTTP " + response.status() + ")");
 }
 async function ready(path) {
   try { await page.goto(origin + path, { waitUntil: "domcontentloaded" }); } catch(error) {
