@@ -16,6 +16,8 @@ import {
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+const hasResearchableVenue = (gig: Gig) => Boolean(gig.city?.trim() && (gig.venue || gig.name)?.trim() && !/^(test|testing|demo|sample|untitled|unknown|tbd|n\/a)$/i.test((gig.venue || gig.name).trim()));
+
 export const Route = createFileRoute("/gigs")({ component: GigsPage });
 
 function GigsPage() {
@@ -34,7 +36,7 @@ function GigsPage() {
   const inFlight = useRef(false);
   async function researchVenue(g: Gig) {
     const owner = useMusician.getState().workspaceOwnerId;
-    if (!owner || inFlight.current) return;
+    if (!owner || inFlight.current || !hasResearchableVenue(g)) return;
     inFlight.current = true;
     setResearchId(g.id);
     setResearchResult(null);
@@ -52,7 +54,7 @@ function GigsPage() {
       const saved = useMusician.getState().gigs.find(item => item.id === g.id)!;
       const merged = {...saved,...evidence};
       const status = researchStatus(merged,true);
-      const error = status === "Research unavailable" ? "No venue facts passed source validation. Retry after the provider cooldown, or record an official source for review." : "";
+      const error = status === "Research unavailable" ? "No verified source found. You can retry later." : "";
       updateGig(g.id, {...evidence,venueResearchStatus:status,venueResearchError:error,venueResearchedAt:new Date().toISOString(),
         ...(venueEvidenceSources(evidence)[0] ? {researchSourceUrl:venueEvidenceSources(evidence)[0]} : {})});
       setResearchResult({id:g.id,answer:response.message,citations:response.citations,source:"Source-supported research",evidence});
@@ -71,7 +73,7 @@ function GigsPage() {
   // One automatic attempt per saved venue per visit (up to 100), sequentially to avoid provider bursts; explicit retry remains available.
   useEffect(() => {
     if (!ownerId || inFlight.current || attempted.current.size >= 100) return;
-    const gig = gigs.find(g => (g.venue || g.name) && researchStatus(g) !== "Verified" && !attempted.current.has(ownerId + ":" + g.id));
+    const gig = gigs.find(g => hasResearchableVenue(g) && researchStatus(g) !== "Verified" && !attempted.current.has(ownerId + ":" + g.id));
     if (!gig) return;
     attempted.current.add(ownerId + ":" + gig.id);
     setAutoResearchStatus("Finding cited details for " + (gig.venue || gig.name));
@@ -193,8 +195,9 @@ function GigsPage() {
 
                 </button>
                 <div className="px-3 pb-3">
-                  <button type="button" disabled={researchId !== null || !ownerId} onClick={() => void researchVenue(gig)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : gig.venueResearchedAt ? "Retry research" : "Find & fill details"}</button>
-                  {gig.venueResearchError && <p role="alert" className="mt-2 text-xs text-warn">{gig.venueResearchError}</p>}
+                  {!hasResearchableVenue(gig) && <p className="mb-2 text-xs text-muted">Enter a real venue name and city to enable research.</p>}
+                  <button type="button" disabled={researchId !== null || !ownerId || !hasResearchableVenue(gig)} onClick={() => void researchVenue(gig)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : gig.venueResearchedAt ? "Retry research" : "Find & fill details"}</button>
+                  {gig.venueResearchError && <details className="mt-2 text-xs text-muted"><summary className="cursor-pointer">Research details</summary><p className="mt-2 break-words">{gig.venueResearchError}</p></details>}
                   {gig.venueCapacity && /thunderbird/i.test(gig.venue || gig.name) && <p className="mt-2 text-xs text-muted">Music Hall capacity; confirm the room and layout.</p>}
                   {venueEvidenceSources(gig).length > 0 && <details className="mt-2 text-xs"><summary className="min-h-11 cursor-pointer py-3 text-accent">View source evidence</summary>{venueEvidenceSources(gig).map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" title={url} className="block break-all py-2 text-accent underline">{new URL(url).hostname.replace(/^www\./, "")}</a>)}</details>}
                   {researchResult?.id === gig.id && <div className="mt-3 space-y-2 text-xs">
@@ -210,7 +213,7 @@ function GigsPage() {
                     </div>}
                     {researchResult.leadUrl && <button type="button" onClick={() => updateGig(gig.id, {researchSourceUrl: researchResult.leadUrl, researchVerifiedAt: ""})} className="min-h-11 w-full rounded-lg border border-accent px-3 py-2 font-semibold text-accent">Save cited source for review</button>}
                   </div>}
-                  {researchError && !researchId && <p role="alert" className="mt-2 text-xs text-warn">{researchError}</p>}
+                  {researchError && !researchId && researchResult?.id === gig.id && <p role="alert" className="mt-2 text-xs text-warn">{researchError}</p>}
                 </div></div>)}
                 {items.length === 0 ? <div className="rounded-xl border border-dashed border-line px-3 py-6 text-center text-xs text-muted">No opportunities</div> : null}
               </div>
