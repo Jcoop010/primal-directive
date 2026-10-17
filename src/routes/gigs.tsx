@@ -177,6 +177,12 @@ function GigsPage() {
                   <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location not entered"}</div></div><ArrowUpRight className="size-4 shrink-0 text-muted" /></div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
                   <div className="mt-2 border-t border-line pt-2 text-[10px] font-semibold">{<span className={researchStatus(gig) === "Verified" ? "text-live" : "text-warn"}>{researchId === gig.id ? "Researching" : researchStatus(gig, gig.venueResearchStatus === "Research unavailable")} · venue facts only</span>}</div>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                    <div><span className="text-muted">Pipeline stage</span><div className="font-semibold">{GIG_STATUS_LABEL[gig.status]}</div></div>
+                    <div><span className="text-muted">Next follow-up</span><div className="font-semibold">{gig.outreachNextFollowUp || "Not scheduled"}</div></div>
+                    <div><span className="text-muted">Outreach contact</span><div className="break-words font-semibold">{gig.outreachContact || "Not recorded"}</div></div>
+                    <div><span className="text-muted">Last contacted</span><div className="font-semibold">{gig.outreachLastContactedAt || "Not recorded"}</div></div>
+                  </div>
                   {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
                   <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-line pt-2 text-[11px]">
                     <div><span className="text-muted">Capacity</span><div className="font-semibold">{gig.venueCapacity && gig.capacitySourceUrl ? gig.venueCapacity.toLocaleString() : "Not verified"}</div></div>
@@ -253,6 +259,15 @@ function GigsPage() {
             <details className="px-5 pb-4 text-xs">
               <summary className="cursor-pointer text-accent">Research & outreach</summary>
               <p className="my-2 text-muted">{g.researchVerifiedAt ? "Source reviewed on " + g.researchVerifiedAt : "Research not independently verified. Do not assume contact, availability or booking terms are confirmed."}</p>
+              <div className="my-3 grid grid-cols-2 gap-2 rounded-lg border border-line p-3 sm:grid-cols-3">
+                <div><span className="text-muted">Stage</span><div className="font-semibold">{GIG_STATUS_LABEL[g.status]}</div></div>
+                <div><span className="text-muted">Capacity</span><div className="font-semibold">{g.venueCapacity && g.capacitySourceUrl ? g.venueCapacity.toLocaleString() : "Not verified"}</div></div>
+                <div><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{g.bookingContactName && g.bookingContactSourceUrl ? g.bookingContactName : "Not verified"}</div></div>
+                <div><span className="text-muted">Booking route</span><div className="font-semibold">{g.bookingRoute ? "Source-supported" : "Not verified"}</div></div>
+                <div><span className="text-muted">Last contacted</span><div className="font-semibold">{g.outreachLastContactedAt || "Not recorded"}</div></div>
+                <div><span className="text-muted">Next follow-up</span><div className="font-semibold">{g.outreachNextFollowUp || "Not scheduled"}</div></div>
+                {venueEvidenceSources(g).length > 0 && <div className="col-span-2 sm:col-span-3"><span className="text-muted">Evidence</span>{venueEvidenceSources(g).map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>)}</div>}
+              </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label>Contact<input aria-label="Booking contact" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachContact || ""} onChange={(e) => updateGig(g.id, {outreachContact:e.target.value})}/></label>
                 <label>Follow-up date<input aria-label="Follow-up date" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNextFollowUp || ""} onChange={(e) => updateGig(g.id, {outreachNextFollowUp:e.target.value})}/></label>
