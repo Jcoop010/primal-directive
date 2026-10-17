@@ -24,7 +24,7 @@ function GigsPage() {
   const [view, setView] = useState<"board" | "list">("board");
   const [query, setQuery] = useState("");
   const [researchId, setResearchId] = useState<string | null>(null);
-  const [researchResult, setResearchResult] = useState<{ id: string; answer: string; citations: string[]; source: string; leadUrl?: string } | null>(null);
+  const [researchResult, setResearchResult] = useState<{ id: string; answer: string; citations: string[]; source: string; leadUrl?: string; evidence?: { venueCapacity?: number; capacitySourceUrl?: string; bookingRoute?: string; bookingContactName?: string; bookingContactSourceUrl?: string } } | null>(null);
   const [researchError, setResearchError] = useState("");
   async function researchVenue(g: { id: string; venue: string; name: string; city: string }) {
     setResearchId(g.id);
@@ -38,7 +38,7 @@ function GigsPage() {
       } });
       if (!response.ok) throw new Error(response.error);
       const lead = response.gigs.find((item) => item.venue.toLowerCase() === venue.toLowerCase() || item.name.toLowerCase() === venue.toLowerCase());
-      setResearchResult({ id: g.id, answer: response.answer, citations: response.citations, source: response.source, leadUrl: lead?.sourceUrl });
+      setResearchResult({ id: g.id, answer: response.answer, citations: response.citations, source: response.source, leadUrl: lead?.sourceUrl, evidence: lead ? { venueCapacity: lead.venueCapacity, capacitySourceUrl: lead.capacitySourceUrl, bookingRoute: lead.bookingRoute, bookingContactName: lead.bookingContactName, bookingContactSourceUrl: lead.bookingContactSourceUrl } : undefined });
     } catch (error) {
       setResearchError(error instanceof Error ? error.message : "Research failed. No source was verified.");
     } finally {
@@ -143,12 +143,27 @@ function GigsPage() {
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
                   <div className="mt-2 border-t border-line pt-2 text-[10px] font-semibold">{gig.researchVerifiedAt ? <span className="text-live">Source reviewed · not booking confirmation</span> : <span className="text-warn">{gig.researchSourceUrl ? "Source recorded · review needed" : "Venue research not documented"}</span>}</div>
                   {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
+                  <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 border-t border-line pt-2 text-[11px]">
+                    <div><span className="text-muted">Capacity</span><div className="font-semibold">{gig.venueCapacity && gig.capacitySourceUrl ? gig.venueCapacity.toLocaleString() : "Not verified"}</div></div>
+                    <div><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? "Saved contact · unverified" : "Not verified"}</div></div>
+                    <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Source recorded · review needed" : "Not verified"}</div></div>
+                    {gig.outreachReplyStatus && <div className="col-span-2 text-info">Reply: {gig.outreachReplyStatus}</div>}
+                  </div>
+
                 </button>
                 <div className="px-3 pb-3">
-                  <button type="button" disabled={researchId !== null} onClick={() => void researchVenue(gig)} className="min-h-11 w-full rounded-lg bg-accent px-3 py-2 text-xs font-bold text-bg disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : "Research with AI"}</button>
+                  <button type="button" disabled={researchId !== null} onClick={() => void researchVenue(gig)} className="min-h-9 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : "Research with AI"}</button>
                   {researchResult?.id === gig.id && <div className="mt-3 space-y-2 text-xs">
                     <p className="whitespace-pre-wrap text-muted">{researchResult.answer}</p>
                     {researchResult.citations.length ? researchResult.citations.slice(0, 8).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-accent underline">{url}</a>) : <p className="text-warn">No cited live sources. Research remains unverified.</p>}
+                    {researchResult.evidence && <div className="rounded-lg border border-line p-3 text-xs">
+                      <div className="font-semibold">Source-supported venue details</div>
+                      <div className="mt-2">Capacity: {researchResult.evidence.venueCapacity ?? "Not verified"}</div>
+                      <div>Booking contact: {researchResult.evidence.bookingContactName ?? "Not verified"}</div>
+                      <div>Booking route: {researchResult.evidence.bookingRoute ? "Cited booking page available" : "Not verified"}</div>
+                      {researchResult.evidence.bookingRoute && <a className="mt-1 block break-all text-accent underline" href={researchResult.evidence.bookingRoute} target="_blank" rel="noopener noreferrer">Open cited booking route ↗</a>}
+                      <button type="button" className="mt-3 min-h-10 rounded-lg border border-accent px-3 py-2 font-semibold text-accent" onClick={() => updateGig(gig.id, { ...(researchResult.evidence?.venueCapacity && researchResult.evidence.capacitySourceUrl ? { venueCapacity: researchResult.evidence.venueCapacity, capacitySourceUrl: researchResult.evidence.capacitySourceUrl } : {}), ...(researchResult.evidence?.bookingContactName && researchResult.evidence.bookingContactSourceUrl ? { bookingContactName: researchResult.evidence.bookingContactName, bookingContactSourceUrl: researchResult.evidence.bookingContactSourceUrl } : {}), ...(researchResult.evidence?.bookingRoute ? { bookingRoute: researchResult.evidence.bookingRoute } : {}) })}>Save cited venue details</button>
+                    </div>}
                     {researchResult.leadUrl && <button type="button" onClick={() => updateGig(gig.id, {researchSourceUrl: researchResult.leadUrl, researchVerifiedAt: ""})} className="min-h-11 w-full rounded-lg border border-accent px-3 py-2 font-semibold text-accent">Save cited source for review</button>}
                   </div>}
                   {researchError && !researchId && <p role="alert" className="mt-2 text-xs text-warn">{researchError}</p>}
