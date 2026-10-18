@@ -178,22 +178,25 @@ function GigsPage() {
                 {items.map((gig) => <div key={gig.id} className="overflow-hidden rounded-xl border border-line bg-bg/80"><button type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                   <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location not entered"}</div></div><ArrowUpRight className="size-4 shrink-0 text-muted" /></div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
-                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line pt-3 text-[11px]">
-                    <div><span className="text-muted">Pipeline stage</span><div className="font-semibold">{GIG_STATUS_LABEL[gig.status]}</div></div>
-                    <div><span className="text-muted">Next follow-up</span><div className="font-semibold">{gig.outreachNextFollowUp || "Not scheduled"}</div></div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3 text-[11px]">
+                    <span className="rounded-md border border-line bg-surface-2 px-2 py-1 font-semibold text-fg">{GIG_STATUS_LABEL[gig.status]}</span>
+                    <span className={cn("rounded-md px-2 py-1 font-semibold", gig.outreachNextFollowUp && gig.outreachNextFollowUp <= today ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted")}>{gig.outreachNextFollowUp ? "Follow-up " + gig.outreachNextFollowUp : "No follow-up"}</span>
+                    {gig.venueCapacity && gig.capacitySourceUrl && <span className="rounded-md bg-surface-2 px-2 py-1 text-muted">{gig.venueCapacity.toLocaleString()} cap</span>}
+                  </div>
+                  <div className="mt-2 min-w-0 text-[11px] leading-relaxed">
+                    <span className="text-muted">Booking contact · </span>
+                    <span className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? gig.outreachContact + " (unverified)" : "Not verified"}</span>
+                  </div>
+                  {gig.outreachReplyStatus && <p className="mt-1 text-[11px] text-info">Reply: {gig.outreachReplyStatus}</p>}
+                  <div className="mt-1 text-[11px] text-muted">{gig.bookingRoute ? "Booking route sourced" : "Booking route not verified"}</div>
+                </button>
+                <details className="px-3 pb-3 text-xs"><summary className="cursor-pointer py-2 text-muted hover:text-accent">More details & venue evidence</summary>
+                  <div className="mb-3 grid grid-cols-2 gap-3 rounded-lg border border-line bg-surface-2/40 p-3 text-[11px]">
                     <div><span className="text-muted">Outreach contact</span><div className="break-words font-semibold">{gig.outreachContact || "Not recorded"}</div></div>
                     <div><span className="text-muted">Last contacted</span><div className="font-semibold">{gig.outreachLastContactedAt || "Not recorded"}</div></div>
-                  </div>
-                  {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
-                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line pt-3 text-[11px]">
                     <div><span className="text-muted">Capacity</span><div className="font-semibold">{gig.venueCapacity && gig.capacitySourceUrl ? gig.venueCapacity.toLocaleString() : "Not verified"}</div></div>
-                    <div className="col-span-2"><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? gig.outreachContact + " · unverified" : "Not verified"}</div></div>
-                    <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Source-supported booking route" : "Not verified"}</div></div>
-                    {gig.outreachReplyStatus && <div className="col-span-2 text-info">Reply: {gig.outreachReplyStatus}</div>}
+                    <div><span className="text-muted">Next follow-up</span><div className="font-semibold">{gig.outreachNextFollowUp || "Not scheduled"}</div></div>
                   </div>
-
-                </button>
-                <details className="px-3 pb-3 text-xs"><summary className="cursor-pointer py-2 text-muted hover:text-accent">Venue research & evidence</summary>
                   {!hasResearchableVenue(gig) && <p className="mb-2 text-xs text-muted">Add the venue name and city to enable research.</p>}
                   {!hasResearchableVenue(gig) ? <button type="button" onClick={() => openGig(gig.id)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent">Add venue details</button> : <button type="button" disabled={researchId !== null || !ownerId} onClick={() => void researchVenue(gig)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : gig.venueResearchedAt ? "Retry research" : "Find & fill details"}</button>}
                   {hasResearchableVenue(gig) && gig.venueResearchError && <details className="mt-2 text-xs text-muted"><summary className="cursor-pointer">Research details</summary><p className="mt-2 break-words">{gig.venueResearchError}</p></details>}
