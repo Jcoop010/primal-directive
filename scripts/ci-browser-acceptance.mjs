@@ -108,7 +108,10 @@ try {
   }
   assert.equal((await state()).gigs[0].stageHistory.length, 4);
   await page.getByRole("button", {name:"List",exact:true}).click();
-  for (const label of ["Booking contact", "Capacity", "Last communication", "Next follow-up", "Next action"]) assert.ok((await page.locator('main').innerText()).includes(label));
+  for (const label of ["Capacity", "Next follow-up", "Next action"]) assert.ok((await page.locator('main').innerText()).includes(label));
+  // Optional fields live in expanded details so the mobile summary remains concise.
+  await page.getByText("Research & outreach", {exact:true}).first().click();
+  for (const label of ["Booking contact", "Last contacted"]) assert.ok((await page.locator('main').innerText()).includes(label));
   await page.getByRole("button", {name:"Board",exact:true}).click();
   await recover("/tasks");
   const beforeTasks = await state();
