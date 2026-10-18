@@ -18,8 +18,8 @@ export function BookingSummary({ gig, today }: { gig: Gig; today: string }) {
     <dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line pt-3 text-muted">
       <Fact label={gig.status === "booked" || gig.status === "completed" ? "Confirmed date" : "Proposed date"} value={gig.date ? longDate(gig.date) : "Not entered"} />
       <Fact label="Capacity" value={gig.venueCapacity ? gig.venueCapacity.toLocaleString() + (gig.capacitySourceUrl ? " · source cited" : " · unverified") : "Unavailable"} />
-      <Fact label="Booking contact" value={gig.bookingContactName ? gig.bookingContactName + (gig.bookingContactSourceUrl ? " · source cited" : " · unverified") : gig.outreachContact ? gig.outreachContact + " · unverified" : "Unavailable"} />
-      <Fact label="Booking route" value={gig.bookingRoute ? "Source cited · see evidence" : "Not verified"} />
+      <Fact label="Booking contact" value={gig.bookingContactName ? gig.bookingContactName + (gig.bookingContactSourceUrl ? " · cited source" : " · unverified") : gig.outreachContact ? gig.outreachContact + " · manually recorded" : "Unavailable"} />
+      <Fact label="Booking route" value={gig.bookingRoute ? "Recorded route · review evidence" : "Not verified"} />
       <Fact label="Last communication" value={gig.outreachLastContactedAt || "Not recorded"} />
       <Fact label="Next follow-up" value={gig.outreachNextFollowUp || "Not scheduled"} />
     </dl>
