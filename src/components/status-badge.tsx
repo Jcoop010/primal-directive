@@ -6,6 +6,13 @@ const tone: Record<
   "muted" | "accent" | "live" | "warn" | "info" | "danger"
 > = {
   lead: "muted",
+  qualified: "info",
+  ready: "accent",
+  responded: "info",
+  declined: "danger",
+  lost: "muted",
+  canceled: "danger",
+  archived: "muted",
   outreach: "info",
   negotiating: "warn",
   hold: "accent",

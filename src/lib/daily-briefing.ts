@@ -1,3 +1,4 @@
+import { ACTIVE_BOOKING_STATUSES } from "./types.ts";
 import type { Gig, MoneyEntry, OperationalTask, MerchProduct } from "./types";
 
 export type BriefingItem = {
@@ -34,7 +35,7 @@ export function buildDailyBriefing(
       href: pending.length ? "/tasks" : "/calendar",
     });
   }
-  const followUps = data.gigs.filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status) && gig.outreachNextFollowUp && gig.outreachNextFollowUp <= today).sort((a, b) => (a.outreachNextFollowUp || "").localeCompare(b.outreachNextFollowUp || ""));
+  const followUps = data.gigs.filter((gig) => ACTIVE_BOOKING_STATUSES.includes(gig.status) && gig.outreachNextFollowUp && gig.outreachNextFollowUp <= today).sort((a, b) => (a.outreachNextFollowUp || "").localeCompare(b.outreachNextFollowUp || ""));
   if (followUps.length) {
     const overdueFollowUps = followUps.filter((gig) => (gig.outreachNextFollowUp || "") < today).length;
     items.push({
@@ -44,7 +45,13 @@ export function buildDailyBriefing(
       href: "/gigs",
     });
   }
-  const unsourcedLeads = data.gigs.filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status) && !gig.researchSourceUrl && !gig.researchVerifiedAt);
+  const replies = data.gigs.filter(gig => ACTIVE_BOOKING_STATUSES.includes(gig.status) && (gig.status === "responded" || gig.outreachReplyStatus === "interested"));
+  if (replies.length) items.push({ id: "booking-replies", priority: "important", title: `${replies.length} booking repl${replies.length === 1 ? "y" : "ies"} to review`, detail: `Start with ${replies[0].venue || replies[0].name}. Read the saved conversation and prepare a response for approval.`, href: "/gigs" });
+  const negotiations = data.gigs.filter(gig => gig.status === "negotiating");
+  if (negotiations.length) items.push({ id: "booking-negotiations", priority: "important", title: `${negotiations.length} negotiation${negotiations.length === 1 ? "" : "s"} awaiting a decision`, detail: `Review proposed terms for ${negotiations[0].venue || negotiations[0].name}. No date or financial commitment is accepted automatically.`, href: "/gigs" });
+  const holds = data.gigs.filter(gig => gig.status === "hold").sort((a,b) => (a.date || "9999").localeCompare(b.date || "9999"));
+  if (holds.length) items.push({ id: "booking-holds", priority: "important", title: `${holds.length} hold${holds.length === 1 ? "" : "s"} to confirm`, detail: `${holds[0].venue || holds[0].name} · ${holds[0].date || "Date missing"}. Confirm hold expiry and conditions directly with the venue.`, href: "/gigs" });
+  const unsourcedLeads = data.gigs.filter((gig) => ACTIVE_BOOKING_STATUSES.includes(gig.status) && !gig.researchSourceUrl && !gig.researchVerifiedAt);
   if (unsourcedLeads.length) items.push({
     id: "verify-research", priority: "opportunity",
     title: `${unsourcedLeads.length} booking lead${unsourcedLeads.length === 1 ? "" : "s"} need source review`,
@@ -56,7 +63,7 @@ export function buildDailyBriefing(
     id: "merch", priority: "important", title: `${lowStock.length} merch item${lowStock.length === 1 ? "" : "s"} low on stock`,
     detail: "Review inventory before the next show.", href: "/merch",
   });
-  const leads = data.gigs.filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status));
+  const leads = data.gigs.filter((gig) => ACTIVE_BOOKING_STATUSES.includes(gig.status));
   if (leads.length) items.push({
     id: "pipeline", priority: "opportunity", title: `${leads.length} booking opportunit${leads.length === 1 ? "y" : "ies"} in progress`,
     detail: "Review open conversations and prepare your next outreach.", href: "/gigs",

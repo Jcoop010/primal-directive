@@ -1,7 +1,8 @@
+import { ACTIVE_BOOKING_STATUSES, CLOSED_BOOKING_STATUSES } from "./types.ts";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createSeed, WELCOME_TEXT } from "@/lib/seed";
-import { syncBookingReminder, validBookingDay } from "@/lib/booking-workflow";
+import { syncBookingReminder, validBookingDay, isDuplicateVenue } from "@/lib/booking-workflow";
 import { uid } from "@/lib/utils";
 import {
   adjustMerchInventory as applyInventoryAdjustment,
@@ -169,7 +170,14 @@ export const useMusician = create<State & Actions>()(
       updateGig: (id, patch) =>
         set((s) => {
           const previous = s.gigs.find((gig) => gig.id === id);
-          const gigs = s.gigs.map((gig) => (gig.id === id ? { ...gig, ...patch } : gig));
+          const gigs = s.gigs.map((gig) => {
+            if (gig.id !== id) return gig;
+            const venueChanged = (patch.venue !== undefined && patch.venue !== gig.venue) || (patch.city !== undefined && patch.city !== gig.city);
+            const updated = { ...gig, ...patch };
+            if (venueChanged) Object.assign(updated, { venueCapacity: undefined, capacitySourceUrl: undefined, bookingContactName: undefined, bookingContactSourceUrl: undefined, bookingRoute: undefined, venueResearchStatus: "Not researched", venueResearchedAt: undefined, venueResearchError: "", researchVerifiedAt: "" });
+            if (patch.status && patch.status !== gig.status) updated.stageHistory = [...(gig.stageHistory || []), { from: gig.status, to: patch.status, at: new Date().toISOString() }].slice(-100);
+            return updated;
+          });
           const updated = gigs.find((gig) => gig.id === id);
           if (updated?.date && !validBookingDay(updated.date))
             throw Error("Enter a real show date.");
@@ -402,14 +410,7 @@ export const useMusician = create<State & Actions>()(
       clearChat: () => set({ chat: welcomeChat() }),
       ingestSuggestedGig: (g) =>
         set((s) => {
-          const duplicate = s.gigs.some(
-            (existing) =>
-              existing.name.trim().toLowerCase() === g.name.trim().toLowerCase() &&
-              (existing.venue || "").trim().toLowerCase() ===
-                (g.venue || "").trim().toLowerCase() &&
-              (existing.city || "").trim().toLowerCase() === (g.city || "").trim().toLowerCase() &&
-              !existing.date,
-          );
+          const duplicate = s.gigs.some((existing) => isDuplicateVenue(existing, g));
           if (duplicate) return s;
           return {
             gigs: [
@@ -493,7 +494,7 @@ export const useMusician = create<State & Actions>()(
             editingMoneyId: id,
           },
         })),
-      resetSample: () => set(fresh()),
+      resetSample: () => set((s) => s.workspaceOwnerId ? s : fresh()),
       clearAll: () =>
         set({
           gigs: [],
@@ -533,15 +534,15 @@ export function sumMoney(entries: MoneyEntry[], type: MoneyEntry["type"]) {
 }
 
 export function pipelineGigs(gigs: Gig[]) {
-  return gigs.filter((g) => g.status !== "completed" && g.status !== "passed");
+  return gigs.filter((g) => !CLOSED_BOOKING_STATUSES.includes(g.status));
 }
 
 export function pipelineValue(gigs: Gig[]) {
-  return pipelineGigs(gigs).reduce((a, g) => a + (Number(g.fee) || 0), 0);
+  return gigs.filter(g => ACTIVE_BOOKING_STATUSES.includes(g.status)).reduce((a, g) => a + (Number(g.fee) || 0), 0);
 }
 
 export function weightedValue(gigs: Gig[]) {
-  return pipelineGigs(gigs).reduce((a, g) => a + (Number(g.fee) || 0) * (Number(g.conf) || 0), 0);
+  return gigs.filter(g => ACTIVE_BOOKING_STATUSES.includes(g.status)).reduce((a, g) => a + (Number(g.fee) || 0) * (Number(g.conf) || 0), 0);
 }
 
 export function buildAdvisorContext() {
@@ -567,7 +568,7 @@ export function buildAdvisorContext() {
   const gigLines = [...s.gigs]
     .sort((a, b) => {
       const priority = (gig: Gig) =>
-        ["completed", "passed"].includes(gig.status) ? "9999" : gig.outreachNextFollowUp || "9998";
+        CLOSED_BOOKING_STATUSES.includes(gig.status) ? "9999" : gig.outreachNextFollowUp || "9998";
       return priority(a).localeCompare(priority(b));
     })
     .slice(0, 12)
@@ -588,6 +589,9 @@ HOME: ${s.profile.city}
 GENRE: ${s.profile.genre}
 TYPICAL DRAW: ${s.profile.draw}
 FEE TARGET: $${s.profile.feeTarget}
+EPK: ${s.profile.epkUrl || "not provided"}
+TOURING RADIUS: ${s.profile.touringRadiusMiles === undefined ? "not provided" : s.profile.touringRadiusMiles + " miles"}
+AUDIENCE: ${s.profile.audience || "not provided"}
 NOTES: ${s.profile.notes.slice(0, 500)}
 
 MONEY: collected ${collected}, outstanding ${outstanding}, costs ${costs}, profit ${profit}

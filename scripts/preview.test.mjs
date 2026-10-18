@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  isZombieStat,
   looksLikePreviewProcess,
   parseListenerInodes,
   parsePgid,
@@ -254,4 +255,11 @@ test("terminatePids on a free port signals nothing", async () => {
   const result = await terminatePids([], fake);
   assert.deepEqual(result, { signalled: [], killed: [], stubborn: [] });
   assert.deepEqual(fake.signals, []);
+});
+
+test("dead preview wrappers awaiting reaping cannot prevent a clean restart", () => {
+  assert.equal(isZombieStat("4321 (npm run preview) Z 1 4321 4321 0"), true);
+  assert.equal(isZombieStat("4321 (name ) with spaces) Z 1 4321 4321 0"), true);
+  assert.equal(isZombieStat("4321 (node) S 1 4321 4321 0"), false);
+  assert.equal(isZombieStat("garbage"), false);
 });

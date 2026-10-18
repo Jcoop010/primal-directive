@@ -231,11 +231,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
 
         <nav aria-label="Quick navigation" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur-xl md:hidden">
-          <div className="mx-auto grid max-w-md grid-cols-5 pb-[env(safe-area-inset-bottom)]">
+          <div className="mx-auto grid max-w-md grid-cols-6 pb-[env(safe-area-inset-bottom)]">
             {NAV.filter((item) => ["/", "/board", "/gigs", "/calendar", "/tasks"].includes(item.to)).map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
               return <Link key={item.to} to={item.to} aria-current={active ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold", active ? "text-accent" : "text-muted")}><item.icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />{item.label}</Link>;
             })}
+            <button type="button" aria-label="Add" onClick={onFab} className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-accent"><Plus className="size-5" /><span>Add</span></button>
           </div>
         </nav>
 
@@ -244,7 +245,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onClick={onFab}
           className={cn(
             "fixed right-4 bottom-[4.75rem] z-30 size-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-[0_10px_30px_#0009] md:right-8 md:bottom-8",
-            pathname === "/" ? "hidden md:flex" : "flex",
+            "hidden md:flex",
           )}
           aria-label="Add"
         >

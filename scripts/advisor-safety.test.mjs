@@ -8,7 +8,7 @@ const policyUrl = new URL('../src/lib/provider-policy.ts', import.meta.url).href
 // Execute the real advisor handler with a minimal server-function registration
 // harness. Provider HTTP is mocked; these tests never use quota or credentials.
 const types = moduleUrl(stripTypeScriptTypes(await readFile(new URL("../src/lib/types.ts", import.meta.url), "utf8")));
-const local = moduleUrl(stripTypeScriptTypes(await readFile(new URL("../src/lib/local-advisor.ts", import.meta.url), "utf8")));
+const local = moduleUrl(stripTypeScriptTypes(await readFile(new URL("../src/lib/local-advisor.ts", import.meta.url), "utf8")).replace('from "./types.ts"', "from " + JSON.stringify(types)));
 let source = stripTypeScriptTypes(await readFile(new URL("../src/lib/ai.ts", import.meta.url), "utf8"));
 source = source
   .replace('from "@/lib/venue-research"', "from " + JSON.stringify(new URL("../src/lib/venue-research.ts", import.meta.url).href))

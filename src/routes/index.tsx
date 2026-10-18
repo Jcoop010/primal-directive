@@ -1,3 +1,4 @@
+import { ACTIVE_BOOKING_STATUSES } from "@/lib/types";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { authClient } from "@/lib/auth/client";
 import { useEffect, useRef, useState } from "react";
@@ -179,7 +180,7 @@ function AdvisorPage() {
   }
 
   const followUps = pipelineGigs
-    .filter((gig) => ["lead", "outreach", "negotiating", "hold"].includes(gig.status))
+    .filter((gig) => ACTIVE_BOOKING_STATUSES.includes(gig.status))
     .sort((a, b) => {
       const rank = (gig: typeof a) => gig.outreachNextFollowUp || (gig.outreachLastContactedAt ? "9998" : "9997");
       return rank(a).localeCompare(rank(b));
@@ -412,8 +413,8 @@ Thanks,
                     useMusician.getState().updateGig(gig.id, {
                       outreachReplyStatus: status,
                       outreachReplyReceivedAt: status === "awaiting" ? "" : new Date().toISOString().slice(0, 10),
-                      ...(status === "interested" && gig.status === "lead" ? { status: "negotiating" as const } : {}),
-                      ...(status === "declined" ? { status: "passed" as const, outreachNextFollowUp: "" } : {}),
+                      ...(status === "interested" && gig.status === "lead" ? { status: "responded" as const } : {}),
+                      ...(status === "declined" ? { status: "declined" as const, outreachNextFollowUp: "" } : {}),
                     });
                     toast("Reply status updated manually");
                   }}

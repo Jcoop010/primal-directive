@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { citationMatches, citedVenueEvidence, evidencePage } from "../src/lib/venue-evidence.ts";
-import { syncBookingReminder, validBookingDay, bookingDraft } from "../src/lib/booking-workflow.ts";
+import { syncBookingReminder, validBookingDay, bookingDraft, nextBookingAction, suggestedFollowUp } from "../src/lib/booking-workflow.ts";
 import { readableAdvisorAnswer } from "../src/lib/advisor-answer.ts";
 
 test("source matching preserves page identity and rejects unsupported contact and capacity claims", () => {
@@ -95,4 +95,15 @@ test("advisor output unwraps nested JSON without exposing structured payloads", 
     "Readable booking advice.",
   );
   assert.equal(readableAdvisorAnswer('{"answer":').answer, "");
+});
+
+test("next actions respect closed, confirmed, replied and held deals", () => {
+  const gig = { city: "Test City", outreachNextFollowUp: "2020-01-01" };
+  assert.match(nextBookingAction({ ...gig, status: "completed" }, "2030-01-01"), /Reconcile/);
+  for (const status of ["passed", "declined", "lost", "canceled", "archived"]) assert.doesNotMatch(nextBookingAction({ ...gig, status }, "2030-01-01"), /Follow up/);
+  assert.match(nextBookingAction({ ...gig, status: "booked" }, "2030-01-01"), /advancing/);
+  assert.match(nextBookingAction({ ...gig, status: "responded" }, "2030-01-01"), /reply/);
+  assert.match(nextBookingAction({ ...gig, status: "hold" }, "2030-01-01"), /hold expiry/);
+  assert.equal(suggestedFollowUp({ status: "outreach", outreachLastContactedAt: "2030-01-28" }), "2030-02-04");
+  assert.equal(suggestedFollowUp({ status: "booked", outreachLastContactedAt: "2030-01-28" }), undefined);
 });

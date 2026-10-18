@@ -44,6 +44,7 @@ const gigSchema = z.object({
   conf: z.number(),
   status: z.enum(GIG_STATUSES),
   notes: z.string(),
+  stageHistory: z.array(z.object({ from: z.enum(GIG_STATUSES), to: z.enum(GIG_STATUSES), at: z.string() })).max(100).optional(),
   researchSourceUrl: z.string().optional(),
   researchVerifiedAt: z.string().optional(),
   venueResearchStatus: z.enum(["Not researched", "Researching", "Partially verified", "Verified", "Research unavailable"]).optional(),
@@ -189,6 +190,9 @@ const profileSchema = z.object({
   draw: z.string(),
   feeTarget: z.number(),
   notes: z.string(),
+  epkUrl: z.string().max(2000).optional(),
+  touringRadiusMiles: z.number().min(0).max(25000).optional(),
+  audience: z.string().max(2000).optional(),
   reservePercent: z.number().min(0).max(100).default(0),
 });
 

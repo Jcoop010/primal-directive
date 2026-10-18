@@ -39,3 +39,39 @@ test("booking leads remain unconfirmed and saved outreach reaches the advisor", 
   assert.ok(buildAdvisorContext().length <= 4500);
   assert.ok(buildAdvisorContext().includes("2030-02-01"));
 });
+
+test("booking lifecycle preserves records, stage history and task idempotency", async () => {
+  const { useMusician, pipelineGigs, buildAdvisorContext } = await import(await load("../src/lib/store.ts"));
+  useMusician.getState().clearAll();
+  const base = { name: "Fictional booking", venue: "A Fictional Hall", city: "Test City", date: "", fee: 0, conf: 0.5, status: "lead", notes: "", outreachNextFollowUp: "2030-02-01" };
+  const id = useMusician.getState().addGig(base);
+  for (const status of ["qualified", "ready", "outreach", "responded", "negotiating", "hold"]) useMusician.getState().updateGig(id, { status });
+  assert.equal(useMusician.getState().tasks.length, 1);
+  assert.throws(() => useMusician.getState().updateGig(id, { status: "booked" }), /show date/);
+  assert.equal(useMusician.getState().gigs[0].status, "hold");
+  useMusician.getState().updateGig(id, { status: "booked", date: "2030-03-20", fee: 125.50 });
+  const booked = useMusician.getState();
+  assert.equal(booked.gigs[0].stageHistory.length, 7);
+  assert.equal(booked.tasks.filter(t => t.sourceKey.startsWith("show:")).length, 6);
+  useMusician.getState().updateGig(id, { notes: "Confirmed by artist" });
+  assert.equal(useMusician.getState().gigs[0].stageHistory.length, 7);
+  assert.equal(useMusician.getState().tasks.length, booked.tasks.length);
+  useMusician.getState().ingestSuggestedGig({ ...base, name: "A different model title", date: "", reason: "", sourceUrl: "https://example.invalid/room" });
+  assert.equal(useMusician.getState().gigs.length, 1, "confirmed venues cannot become duplicate new leads");
+  for (const status of ["completed", "declined", "lost", "canceled", "archived", "passed"]) {
+    useMusician.getState().updateGig(id, { status });
+    assert.equal(pipelineGigs(useMusician.getState().gigs).length, 0);
+    assert.equal(useMusician.getState().tasks.filter(t => t.sourceKey.startsWith("booking:") && t.status === "open").length, 0);
+  }
+  useMusician.getState().updateGig(id, { venueCapacity: 200, capacitySourceUrl: "https://example.invalid/about", bookingRoute: "https://example.invalid/book" });
+  useMusician.getState().updateGig(id, { venue: "Different Fictional Venue" });
+  assert.equal(useMusician.getState().gigs[0].venueCapacity, undefined);
+  assert.equal(useMusician.getState().gigs[0].bookingRoute, undefined);
+  useMusician.getState().updateProfile({ epkUrl: "https://example.invalid/epk", touringRadiusMiles: 120, audience: "Self-reported indie listeners" });
+  assert.match(buildAdvisorContext(), /120 miles/);
+  assert.match(buildAdvisorContext(), /https:\/\/example.invalid\/epk/);
+  useMusician.setState({ workspaceOwnerId: "fictional-user" });
+  const saved = useMusician.getState().gigs;
+  useMusician.getState().resetSample();
+  assert.deepEqual(useMusician.getState().gigs, saved, "demo reset must not replace signed-in records");
+});

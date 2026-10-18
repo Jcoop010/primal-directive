@@ -1,3 +1,4 @@
+import { CLOSED_BOOKING_STATUSES } from "./types.ts";
 import { parseDay } from "@/lib/format";
 import { pipelineGigs, sumMoney } from "@/lib/store";
 import type { Gig, MoneyEntry, Person } from "@/lib/types";
@@ -20,7 +21,7 @@ export function deriveSignals(
   today.setHours(0, 0, 0, 0);
 
   const upcoming = gigs
-    .filter((g) => g.date && g.status !== "passed")
+    .filter((g) => g.date && !CLOSED_BOOKING_STATUSES.includes(g.status))
     .map((g) => ({ g, d: parseDay(g.date) }))
     .filter(({ d }) => {
       const diff = (d.getTime() - today.getTime()) / 86400000;
