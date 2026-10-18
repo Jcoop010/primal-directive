@@ -189,6 +189,14 @@ function GigsPage() {
                   </div>
                   {gig.outreachReplyStatus && <p className="mt-1 text-[11px] text-info">Reply: {gig.outreachReplyStatus}</p>}
                   <div className="mt-1 text-[11px] text-muted">{gig.bookingRoute ? "Booking route sourced" : "Booking route not verified"}</div>
+                  <div className="mt-3 rounded-lg border border-line bg-surface-2/50 p-3 text-[11px] leading-relaxed">
+                    <div className="font-bold uppercase tracking-wider text-soft">Next action</div>
+                    <div className="mt-1 font-semibold text-fg">{!gig.city?.trim() ? "Add venue location" : !gig.outreachNextFollowUp && ["lead","outreach","negotiating","hold"].includes(gig.status) ? "Schedule a follow-up" : gig.outreachNextFollowUp && gig.outreachNextFollowUp <= today ? "Follow up with booking contact" : !gig.bookingContactSourceUrl ? "Verify booking contact" : "Review deal and booking details"}</div>
+                    {gig.outreachNextFollowUp && <div className="mt-1 text-muted">Follow-up: {gig.outreachNextFollowUp}</div>}
+                    {gig.outreachNotes && <div className="mt-2 line-clamp-2 whitespace-pre-wrap text-muted">{gig.outreachNotes}</div>}
+                    {gig.notes && <div className="mt-2 line-clamp-2 whitespace-pre-wrap text-muted">{gig.notes}</div>}
+                    <div className="mt-2 font-semibold text-accent">Open complete booking workspace ↗</div>
+                  </div>
                 </button>
                 <details className="px-3 pb-3 text-xs"><summary className="cursor-pointer py-2 text-muted hover:text-accent">More details & venue evidence</summary>
                   <div className="mb-3 grid grid-cols-2 gap-3 rounded-lg border border-line bg-surface-2/40 p-3 text-[11px]">
