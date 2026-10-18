@@ -97,7 +97,7 @@ function GigsPage() {
 
   // Build the board groups from the same filtered records rendered in their cards.
   // Otherwise search and attention filters leave unrelated empty stage columns visible.
-  const visibleStages = GIG_STATUSES.filter(status => filter === status || (filter === "all" && shown.some(gig => gig.status === status)));
+  const visibleStages = GIG_STATUSES.filter(status => filter === status || (filter === "all" && (shown.some(gig => gig.status === status) || (gigs.length === 0 && status === "lead"))));
 
   return (
     <div>
@@ -177,6 +177,7 @@ function GigsPage() {
       {autoResearchStatus && <p role="status" className="mb-3 px-1 text-xs text-muted">{autoResearchStatus}</p>}
       {view === "board" ? (
         <section aria-label="Booking pipeline board" className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {visibleStages.length === 0 && <div className="command-surface rounded-2xl border border-dashed border-line p-6 text-center text-sm text-muted">No opportunities match the current filters.</div>}
           {visibleStages.map((status) => {
             const items = shown.filter((gig) => gig.status === status);
             return <div key={status} className={cn("command-surface min-w-0 rounded-2xl p-3", items.length === 0 && (shown.length > 0 || status !== (filter === 'all' ? 'lead' : filter)) && "hidden md:block")}>
