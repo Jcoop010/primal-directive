@@ -178,16 +178,16 @@ function GigsPage() {
                 {items.map((gig) => <div key={gig.id} className="overflow-hidden rounded-xl border border-line bg-bg/80"><button type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                   <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location not entered"}</div></div><ArrowUpRight className="size-4 shrink-0 text-muted" /></div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
-                  <div className="mt-2 hidden grid-cols-2 gap-2 text-[11px] sm:grid">
+                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line pt-3 text-[11px]">
                     <div><span className="text-muted">Pipeline stage</span><div className="font-semibold">{GIG_STATUS_LABEL[gig.status]}</div></div>
                     <div><span className="text-muted">Next follow-up</span><div className="font-semibold">{gig.outreachNextFollowUp || "Not scheduled"}</div></div>
                     <div><span className="text-muted">Outreach contact</span><div className="break-words font-semibold">{gig.outreachContact || "Not recorded"}</div></div>
                     <div><span className="text-muted">Last contacted</span><div className="font-semibold">{gig.outreachLastContactedAt || "Not recorded"}</div></div>
                   </div>
                   {gig.outreachNextFollowUp ? <div className="mt-1 text-[10px] text-info">Follow up: {gig.outreachNextFollowUp}</div> : null}
-                  <div className="mt-2 hidden grid-cols-2 gap-x-3 gap-y-1 border-t border-line pt-2 text-[11px] sm:grid">
+                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line pt-3 text-[11px]">
                     <div><span className="text-muted">Capacity</span><div className="font-semibold">{gig.venueCapacity && gig.capacitySourceUrl ? gig.venueCapacity.toLocaleString() : "Not verified"}</div></div>
-                    <div className="col-span-2"><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? "Saved contact · unverified" : "Not verified"}</div></div>
+                    <div className="col-span-2"><span className="text-muted">Booking contact</span><div className="break-words font-semibold">{gig.bookingContactName && gig.bookingContactSourceUrl ? gig.bookingContactName : gig.outreachContact ? gig.outreachContact + " · unverified" : "Not verified"}</div></div>
                     <div className="col-span-2"><span className="text-muted">Booking route</span><div className="font-semibold">{gig.bookingRoute ? "Source-supported booking route" : "Not verified"}</div></div>
                     {gig.outreachReplyStatus && <div className="col-span-2 text-info">Reply: {gig.outreachReplyStatus}</div>}
                   </div>
