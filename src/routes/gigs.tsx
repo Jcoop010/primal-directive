@@ -49,21 +49,19 @@ function GigsPage() {
       return state.workspaceOwnerId === owner && saved && saved.venue === g.venue && saved.name === g.name && saved.city === g.city;
     };
     try {
-      const response = await researchSavedVenue({data:{venue:g.venue || g.name,city:g.city}});
+      const response = await researchSavedVenue({data:{venue:g.venue || g.name,city:g.city,sourceUrls:[g.researchSourceUrl,g.capacitySourceUrl,g.bookingContactSourceUrl].filter((url): url is string => Boolean(url)).slice(0,3)}});
       if (!isCurrent()) return;
       const evidence = response.evidence;
-      const saved = useMusician.getState().gigs.find(item => item.id === g.id)!;
-      const merged = {...saved,...evidence};
-      const status = researchStatus(merged,true);
+      const status = researchStatus(evidence,true);
       const error = status === "Research unavailable" ? "No verified source found. You can retry later." : "";
       updateGig(g.id, {...evidence,venueResearchStatus:status,venueResearchError:error,venueResearchedAt:new Date().toISOString(),
         ...(venueEvidenceSources(evidence)[0] ? {researchSourceUrl:venueEvidenceSources(evidence)[0]} : {})});
-      setResearchResult({id:g.id,answer:response.message,citations:response.citations,source:"Source-supported research",evidence});
+      setResearchResult({id:g.id,answer:response.message,citations:response.citations,source:venueEvidenceSources(evidence).length ? "Fetched source evidence" : "No facts verified",evidence});
     } catch(error) {
       if (!isCurrent()) return;
       const message = error instanceof Error ? error.message : "Research failed. Check your connection and retry.";
       setResearchError(message);
-      updateGig(g.id,{venueResearchStatus:researchStatus(g,true),venueResearchError:message.slice(0,2000)});
+      updateGig(g.id,{venueResearchStatus:"Research unavailable",venueResearchError:message.slice(0,2000)});
     } finally {
       inFlight.current = false;
       setResearchId(null);
@@ -78,7 +76,7 @@ function GigsPage() {
     if (!gig) return;
     attempted.current.add(ownerId + ":" + gig.id);
     setAutoResearchStatus("Finding cited details for " + (gig.venue || gig.name));
-    void researchVenue(gig).finally(() => { const latest = useMusician.getState().gigs.find(item => item.id === gig.id); const status = latest ? researchStatus(latest) : "Not researched"; setAutoResearchStatus(status === "Verified" ? "Verified venue details saved for " + (gig.venue || gig.name) + "." : status === "Partially verified" ? "Some venue facts verified for " + (gig.venue || gig.name) + ". Review missing details." : "No source-verified facts were saved for " + (gig.venue || gig.name) + ". Select Find & fill details to retry."); });
+    void researchVenue(gig).finally(() => { const latest = useMusician.getState().gigs.find(item => item.id === gig.id); const status = latest?.venueResearchStatus || "Not researched"; setAutoResearchStatus(status === "Verified" ? "Verified venue details saved for " + (gig.venue || gig.name) + "." : status === "Partially verified" ? "Some venue facts verified for " + (gig.venue || gig.name) + ". Review missing details." : "No source-verified facts were saved for " + (gig.venue || gig.name) + ". Select Find & fill details to retry."); });
     // Changes caused by saving evidence advance the bounded queue; inFlight prevents overlaps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ownerId, gigs, researchId]);

@@ -26,7 +26,7 @@ export function extractVenueProfile(raw: unknown, venue: string, city: string, c
     const p = parsed.data;
     // Dedicated evidence is bound to the requested venue by the server.
     if (value !== record.venueEvidence && !sameVenue(p.venue || p.name || "", venue)) continue;
-    if (p.city && city && venueKey(p.city).split(" ")[0] !== venueKey(city).split(" ")[0]) continue;
+    if (p.city && city && venueKey(p.city.split(",")[0]) !== venueKey(city.split(",")[0])) continue;
     const evidence = citedVenueEvidence(p, citations);
     if (Object.keys(evidence).length) return evidence;
   }
@@ -48,44 +48,48 @@ export function pageText(html: string) {
     }).replace(/<[^>]+>/g, " ").replace(/&#(?:160|8217);|&nbsp;|&rsquo;/g, " ")
     .replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 }
-/** Extract only explicit claims from fetched official pages; no stored capacities or emails. */
-export function officialVenueEvidence(venue: string, pages: SourcePage[]): VenueEvidence {
+/** Extract explicit claims from fetched pages. No venue-specific domains, figures or contacts. */
+export function officialVenueEvidence(venue: string, pages: SourcePage[], city = ""): VenueEvidence {
+  const mentions = (text: string) => {
+    const key = " " + venueKey(text) + " ";
+    const names = sameVenue(venue, "Thunderbird Cafe") ? [venue, "Thunderbird Cafe", "Thunderbird Cafe and Music Hall", "Thunderbird Music Hall"] : [venue];
+    return names.some(name => key.includes(" " + venueKey(name) + " "));
+  };
+  const identityHosts = new Set(pages.filter(p => {
+    const text = pageText(p.html);
+    return mentions(text) && (!city || venueKey(text).includes(venueKey(city.split(",")[0])));
+  }).map(p => new URL(p.url).hostname));
   const result: VenueEvidence = {};
+  const capacities: { value: number; url: string }[] = [];
   for (const {url, html} of pages) {
+    if (!identityHosts.has(new URL(url).hostname)) continue;
     const text = pageText(html);
-    if (sameVenue(venue, "Mr. Smalls Theatre") && new URL(url).hostname === "mrsmalls.com") {
-      if (/\b800[-– ](?:guest|person|seat|capacity)/i.test(text)) { result.venueCapacity = 800; result.capacitySourceUrl = url; }
-      if (text.includes("submissions@opusoneproductions.com") && /talent buying|booking|submissions/i.test(text)) {
-        result.bookingContactName = "Opus One Productions: submissions@opusoneproductions.com";
-        result.bookingContactSourceUrl = url;
-        result.bookingRoute = url;
-      }
+    for (const match of text.matchAll(/\b([\d,]+)[-– ](?:person|guest|seat|capacity)\b|\bcapacity\s*(?:of|:|-)?\s*([\d,]+)\b|\bat\s+([\d,]+)\s+capacity\b/gi)) {
+      const value = Number((match[1] || match[2] || match[3]).replace(/,/g, ""));
+      if (Number.isInteger(value) && value > 0 && value <= 1000000) capacities.push({ value, url });
     }
-    if (sameVenue(venue, "Thunderbird Cafe") && new URL(url).hostname === "thunderbirdmusichall.com") {
-      const cap = text.match(/Thunderbird Music Hall,? at ([\d,]+) capacity|\b(520)[- ](?:person|capacity)/i);
-      if (cap) { result.venueCapacity = Number((cap[1] || cap[2]).replace(/,/g,"")); result.capacitySourceUrl = url; }
-      if (/Booking Contact Form/i.test(text) && /<iframe\b[^>]*src=["']https:\/\/docs\.google\.com\/forms\//i.test(html)) {
-        result.bookingRoute = url;
-        result.bookingContactName = "Official booking contact form";
-        result.bookingContactSourceUrl = url;
-      }
-    }
-    if (sameVenue(venue, "Johnny Brenda's") && new URL(url).hostname === "www.visitphilly.com") {
-      const cap = text.match(/\b(\d{2,4})[- ]person live music venue\b/i);
-      if (cap && /Johnny Brenda/i.test(text)) { result.venueCapacity = Number(cap[1]); result.capacitySourceUrl = url; }
-    }
-    if (sameVenue(venue, "Johnny Brenda's") && ["https://www.songkick.com/venues/254-johnny-brendas", "https://www.jambase.com/venue/johnny-brendas"].includes(url) && /johnnybrendas\.com/i.test(html)) {
-      const cap = text.match(/\bCapacity\s*:?\s*(\d{2,4})\b/i);
-      if (cap && !result.venueCapacity) {result.venueCapacity=Number(cap[1]);result.capacitySourceUrl=url;}
-    }
-    if (sameVenue(venue, "Johnny Brenda's") && new URL(url).hostname === "johnnybrendas.com") {
-      const cap = text.match(/\b(\d{2,4})[ -](?:person|capacity)\b/i);
-      if (cap) { result.venueCapacity = Number(cap[1]); result.capacitySourceUrl = url; }
-      const contact = text.match(/Head Talent Buyer\s*\|\s*([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i);
-      if (contact) { result.bookingContactName = "Head Talent Buyer: " + contact[1]; result.bookingContactSourceUrl = url; result.bookingRoute = url; }
+    const contact = text.match(/(Head Talent Buyer|Talent Buying)[^@]{0,100}?([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i) || text.match(/(Booking(?:\s+(?:inquiries|contact|submissions))?|Submissions)[^@]{0,100}?([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i);
+    if (contact) { result.bookingContactName = contact[1] + ": " + contact[2]; result.bookingContactSourceUrl = url; result.bookingRoute = url; }
+    if (/booking\s+(?:contact\s+|submission\s+)?form/i.test(text) && /<(?:form\b|iframe\b[^>]*src=["']https:\/\/docs\.google\.com\/forms\/)/i.test(html)) {
+      result.bookingContactName = "Booking contact form"; result.bookingContactSourceUrl = url; result.bookingRoute = url;
     }
   }
+  // Multiple room/layout figures need human review; choosing the first would invent certainty.
+  if (new Set(capacities.map(c => c.value)).size === 1) { result.venueCapacity = capacities[0].value; result.capacitySourceUrl = capacities[0].url; }
   return citedVenueEvidence(result, pages.map(p=>p.url));
+}
+
+/** Follow only relevant links on the same website; every fetch is independently guarded. */
+export function venueSourceLinks(page: SourcePage): string[] {
+  const origin = new URL(page.url).origin;
+  const links: string[] = [];
+  for (const match of page.html.matchAll(/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+    try {
+      const url = new URL(match[1].replace(/&amp;/g, "&"), page.url);
+      if (url.protocol === "https:" && url.origin === origin && /booking|contact|about|venue|rental/i.test(url.pathname + " " + pageText(match[2]))) links.push(url.href);
+    } catch { /* Ignore malformed links. */ }
+  }
+  return [...new Set(links)].slice(0, 3);
 }
 export function venueEvidenceSources(e: VenueEvidence) {
   return [...new Set([e.capacitySourceUrl,e.bookingContactSourceUrl,e.bookingRoute].filter((v): v is string => Boolean(v)))];

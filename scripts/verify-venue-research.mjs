@@ -25,9 +25,11 @@ async function ready(){await page.goto(origin+"/gigs",{waitUntil:"domcontentload
 async function state(){return page.evaluate(()=>JSON.parse(localStorage.getItem("musician-os-v1")||"null")?.state);}
 try {
  await auth("sign-up/email",{name:"Venue research QA (fictional)",email,password});await ready();
- for(const [venue,city] of [["Thunderbird Cafe","Pittsburgh, PA"],["Johnny Brenda's","Philadelphia, PA"]]){
+ for(const [venue,city,source,capacitySource] of [["Thunderbird Cafe","Pittsburgh, PA","https://thunderbirdmusichall.com/aboutus/",""],["Johnny Brenda's","Philadelphia, PA","https://johnnybrendas.com/menu-2-2/","https://www.visitphilly.com/things-to-do/food-drink/johnny-brendas/"]]){
   await page.getByRole("button",{name:"Add",exact:true}).click();
   await page.getByLabel("Opportunity",{exact:true}).fill(venue+" research QA");await page.getByLabel("Venue",{exact:true}).fill(venue);await page.getByLabel("City",{exact:true}).fill(city);
+  await page.getByLabel("Official research source",{exact:true}).fill(source);
+  if(capacitySource){await page.getByText("Edit venue facts and evidence",{exact:true}).click();await page.getByLabel("Capacity evidence URL",{exact:true}).fill(capacitySource);}
   await page.locator('[role=dialog] button[type=submit]').dispatchEvent("click");await page.locator('[role=dialog] form').waitFor({state:"hidden"});
  }
  await page.waitForFunction(()=>{const s=JSON.parse(localStorage.getItem("musician-os-v1")||"null")?.state;return s?.gigs.length===2 && s.gigs.every(g=>g.venueCapacity && g.capacitySourceUrl && g.bookingContactName && g.bookingContactSourceUrl && g.bookingRoute);},{},{timeout:150000});
