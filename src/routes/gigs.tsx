@@ -178,7 +178,6 @@ function GigsPage() {
                 {items.map((gig) => <div key={gig.id} className="overflow-hidden rounded-xl border border-line bg-bg/80"><button type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                   <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location not entered"}</div></div><ArrowUpRight className="size-4 shrink-0 text-muted" /></div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold tabular">{gig.fee > 0 ? money(gig.fee) : "Fee unconfirmed"}</span><span className="text-[10px] text-muted">{gig.date ? longDate(gig.date) : "Date unconfirmed"}</span></div>
-                  <div className="mt-2 border-t border-line pt-2 text-[10px] font-semibold">{<span className={researchStatus(gig) === "Verified" ? "text-live" : "text-warn"}>{!hasResearchableVenue(gig) ? "Venue details needed" : researchId === gig.id ? "Researching" : researchStatus(gig, gig.venueResearchStatus === "Research unavailable")} · venue facts only</span>}</div>
                   <div className="mt-2 hidden grid-cols-2 gap-2 text-[11px] sm:grid">
                     <div><span className="text-muted">Pipeline stage</span><div className="font-semibold">{GIG_STATUS_LABEL[gig.status]}</div></div>
                     <div><span className="text-muted">Next follow-up</span><div className="font-semibold">{gig.outreachNextFollowUp || "Not scheduled"}</div></div>
@@ -194,7 +193,7 @@ function GigsPage() {
                   </div>
 
                 </button>
-                <div className="px-3 pb-3">
+                <details className="px-3 pb-3 text-xs"><summary className="cursor-pointer py-2 text-muted hover:text-accent">Venue research & evidence</summary>
                   {!hasResearchableVenue(gig) && <p className="mb-2 text-xs text-muted">Add the venue name and city to enable research.</p>}
                   {!hasResearchableVenue(gig) ? <button type="button" onClick={() => openGig(gig.id)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent">Add venue details</button> : <button type="button" disabled={researchId !== null || !ownerId} onClick={() => void researchVenue(gig)} className="min-h-11 rounded-lg border border-accent/60 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent disabled:opacity-50">{researchId === gig.id ? "Researching venue…" : gig.venueResearchedAt ? "Retry research" : "Find & fill details"}</button>}
                   {hasResearchableVenue(gig) && gig.venueResearchError && <details className="mt-2 text-xs text-muted"><summary className="cursor-pointer">Research details</summary><p className="mt-2 break-words">{gig.venueResearchError}</p></details>}
