@@ -213,7 +213,7 @@ function GigsPage() {
                     {researchResult.leadUrl && <button type="button" onClick={() => updateGig(gig.id, {researchSourceUrl: researchResult.leadUrl, researchVerifiedAt: ""})} className="min-h-11 w-full rounded-lg border border-accent px-3 py-2 font-semibold text-accent">Save cited source for review</button>}
                   </div>}
                   {researchError && !researchId && researchResult?.id === gig.id && <p role="alert" className="mt-2 text-xs text-warn">{researchError}</p>}
-                </div></div>)}
+                </details></div>)}
                 {items.length === 0 ? <div className="rounded-xl border border-dashed border-line px-3 py-6 text-center text-xs text-muted">No opportunities</div> : null}
               </div>
             </div>;
