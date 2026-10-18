@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
-import { bookingDraft } from "@/lib/booking-workflow";
+import { suggestedFollowUp, bookingDraft } from "@/lib/booking-workflow";
 import { useMusician } from "@/lib/store";
 import {
   GIG_STATUS_LABEL,
@@ -83,6 +83,11 @@ function GigForm({
   const [conf, setConf] = useState(String(Math.round((initial?.conf ?? 0.5) * 100)));
   const [status, setStatus] = useState<GigStatus>(initial?.status ?? "lead");
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [venueCapacity, setVenueCapacity] = useState(String(initial?.venueCapacity ?? ""));
+  const [capacitySourceUrl, setCapacitySourceUrl] = useState(initial?.capacitySourceUrl || "");
+  const [bookingContactName, setBookingContactName] = useState(initial?.bookingContactName || "");
+  const [bookingContactSourceUrl, setBookingContactSourceUrl] = useState(initial?.bookingContactSourceUrl || "");
+  const [bookingRoute, setBookingRoute] = useState(initial?.bookingRoute || "");
   const [researchSourceUrl, setResearchSourceUrl] = useState(initial?.researchSourceUrl ?? "");
   const [outreachContact, setOutreachContact] = useState(initial?.outreachContact ?? "");
   const [outreachNextFollowUp, setOutreachNextFollowUp] = useState(
@@ -109,6 +114,11 @@ function GigForm({
             conf: Math.min(1, Math.max(0, (Number(conf) || 0) / 100)),
             status,
             notes: notes.trim(),
+            venueCapacity: venueCapacity ? Number(venueCapacity) : undefined,
+            capacitySourceUrl: capacitySourceUrl || undefined,
+            bookingContactName: bookingContactName || undefined,
+            bookingContactSourceUrl: bookingContactSourceUrl || undefined,
+            bookingRoute: bookingRoute || undefined,
             researchSourceUrl,
             outreachContact,
             outreachNextFollowUp,
@@ -151,6 +161,7 @@ function GigForm({
           <Input
             type="number"
             min={0}
+            step="0.01"
             value={fee}
             onChange={(e) => setFee(e.target.value)}
             placeholder="0"
@@ -177,6 +188,7 @@ function GigForm({
           />
         </Field>
       </div>
+      {initial?.stageHistory?.length ? <details className="rounded-lg border border-line p-3 text-xs"><summary className="min-h-11 cursor-pointer py-3 text-muted">Booking stage history</summary><ol className="space-y-2">{initial.stageHistory.map((entry, index) => <li key={index}>{GIG_STATUS_LABEL[entry.from]} → {GIG_STATUS_LABEL[entry.to]} · {entry.at.slice(0, 16).replace("T", " ")} UTC</li>)}</ol></details> : null}
       <Field label="Notes">
         <Textarea
           value={notes}
@@ -219,6 +231,17 @@ function GigForm({
           A recorded source is not booking confirmation. Review the recipient and claims before
           sending anything yourself.
         </p>
+        <details className="rounded-lg border border-line p-3 text-xs">
+          <summary className="min-h-11 cursor-pointer py-3 font-semibold text-muted">Edit venue facts and evidence</summary>
+          <div className="mt-2 space-y-3">
+            <Field label="Venue capacity"><Input type="number" min={1} max={1000000} step={1} value={venueCapacity} onChange={e => setVenueCapacity(e.target.value)} /></Field>
+            <Field label="Capacity evidence URL"><Input type="url" pattern="https://.*" placeholder="https://" value={capacitySourceUrl} onChange={e => setCapacitySourceUrl(e.target.value)} /></Field>
+            <Field label="Public booking contact"><Input value={bookingContactName} onChange={e => setBookingContactName(e.target.value)} /></Field>
+            <Field label="Booking contact evidence URL"><Input type="url" pattern="https://.*" placeholder="https://" value={bookingContactSourceUrl} onChange={e => setBookingContactSourceUrl(e.target.value)} /></Field>
+            <Field label="Booking submission URL"><Input type="url" pattern="https://.*" placeholder="https://" value={bookingRoute} onChange={e => setBookingRoute(e.target.value)} /></Field>
+            <p className="text-muted">Enter only details supported by the linked page. Adding a link records a citation; it does not independently verify the claim.</p>
+          </div>
+        </details>
         <Field label="Official research source">
           <Input
             type="url"
@@ -253,6 +276,7 @@ function GigForm({
         <p className="text-xs text-muted">
           Saving a follow-up date synchronizes one internal task. No email or message is sent.
         </p>
+        {status === "outreach" && !outreachNextFollowUp && suggestedFollowUp({ ...initial, status, outreachLastContactedAt } as Gig) && <Button type="button" variant="ghost" onClick={() => setOutreachNextFollowUp(suggestedFollowUp({ ...initial, status, outreachLastContactedAt } as Gig) || "")}>Schedule suggested follow-up (7 days after contact)</Button>}
         <Field label="Conversation and deal notes">
           <Textarea
             value={outreachNotes}
@@ -575,7 +599,7 @@ export function ProfileDrawer() {
 // A draft created with the shell can contain the demo seed or another account's
 // old values and must never replace the current artist profile.
 function ProfileForm() {
-  const { profile, setComposer, updateProfile, resetSample, clearAll } = useMusician();
+  const { profile, workspaceOwnerId, setComposer, updateProfile, resetSample, clearAll } = useMusician();
   const [draft, setDraft] = useState(profile);
   return (
     <form
@@ -623,16 +647,23 @@ function ProfileForm() {
           />
         </Field>
       </div>
+      <Field label="EPK URL"><Input type="url" value={draft.epkUrl || ""} placeholder="https://" onChange={(e) => setDraft({ ...draft, epkUrl: e.target.value })} /></Field>
+      <Field label="Touring radius (miles)"><Input type="number" min={0} max={25000} value={draft.touringRadiusMiles ?? ""} onChange={(e) => setDraft({ ...draft, touringRadiusMiles: e.target.value === "" ? undefined : Number(e.target.value) })} /></Field>
+      <Field label="Audience and markets"><Textarea value={draft.audience || ""} onChange={(e) => setDraft({ ...draft, audience: e.target.value })} placeholder="Describe your actual audience and strongest markets." /></Field>
       <Field label="Growth notes">
         <Textarea
           value={draft.notes}
           onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
         />
       </Field>
-      <Button type="submit" className="w-full">
-        Save profile
-      </Button>
-      <div className="flex gap-2 pt-2">
+      <Button type="submit" className="w-full">Save profile</Button>
+      {workspaceOwnerId && <Button type="button" variant="ghost" className="w-full" onClick={() => {
+        const state = useMusician.getState();
+        const { gigs, people, money, merchProducts, merchSales, merchOrders, merchInventoryAdjustments, merchRefunds, tasks, chat, profile } = state;
+        const blob = new Blob([JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), gigs, people, money, merchProducts, merchSales, merchOrders, merchInventoryAdjustments, merchRefunds, tasks, chat, profile }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = "primal-directive-workspace.json"; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }}>Export complete workspace</Button>}
+      {!workspaceOwnerId && <div className="flex gap-2 pt-2">
         <Button
           type="button"
           variant="ghost"
@@ -651,13 +682,13 @@ function ProfileForm() {
           className="flex-1"
           onClick={() => {
             clearAll();
-            toast("Cleared local data");
+            toast("Demo data cleared");
             setComposer({ profileOpen: false });
           }}
         >
-          Clear data
+          Clear demo data
         </Button>
-      </div>
+      </div>}
     </form>
   );
 }

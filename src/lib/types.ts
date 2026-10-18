@@ -1,24 +1,42 @@
 export const GIG_STATUSES = [
   "lead",
+  "qualified",
+  "ready",
   "outreach",
+  "responded",
   "negotiating",
   "hold",
   "booked",
   "completed",
+  "declined",
+  "lost",
+  "canceled",
+  "archived",
   "passed",
 ] as const;
 
 export type GigStatus = (typeof GIG_STATUSES)[number];
 
 export const GIG_STATUS_LABEL: Record<GigStatus, string> = {
-  lead: "Lead",
-  outreach: "Outreach",
+  lead: "Discovered",
+  qualified: "Qualified",
+  ready: "Ready for outreach",
+  responded: "Responded",
+  outreach: "Contacted",
   negotiating: "Negotiating",
   hold: "Hold",
-  booked: "Booked",
+  booked: "Confirmed",
   completed: "Completed",
-  passed: "Passed",
+  declined: "Declined",
+  lost: "Lost",
+  canceled: "Canceled",
+  archived: "Archived",
+  passed: "Passed (legacy)",
 };
+
+/** Persisted legacy values remain valid; labels expose the complete booking lifecycle. */
+export const ACTIVE_BOOKING_STATUSES: readonly string[] = ["lead", "qualified", "ready", "outreach", "responded", "negotiating", "hold"];
+export const CLOSED_BOOKING_STATUSES: readonly string[] = ["completed", "declined", "lost", "canceled", "archived", "passed"];
 
 export const PERSON_ROLES = [
   "band",
@@ -61,6 +79,7 @@ export type Gig = import("./venue-evidence").VenueEvidence & {
   conf: number;
   status: GigStatus;
   notes: string;
+  stageHistory?: { from: GigStatus; to: GigStatus; at: string }[];
   /** Research is not proof that the booking contact or opportunity is verified. */
   venueResearchStatus?: "Not researched" | "Researching" | "Partially verified" | "Verified" | "Research unavailable";
   venueResearchError?: string;
@@ -153,6 +172,9 @@ export type ArtistProfile = {
   feeTarget: number;
   notes: string;
   reservePercent?: number;
+  epkUrl?: string;
+  touringRadiusMiles?: number;
+  audience?: string;
 };
 
 export const MERCH_CATEGORIES = ["apparel", "music", "accessories", "stickers", "other"] as const;

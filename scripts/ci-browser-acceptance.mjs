@@ -63,9 +63,13 @@ try {
   await page.getByLabel("Artist / band", { exact: true }).fill("River Fold (fictional QA)");
   await page.getByLabel("Home city", { exact: true }).fill("Test City (fictional)");
   await page.getByLabel("Genre", { exact: true }).fill("Indie folk");
+  await page.getByLabel("EPK URL", { exact: true }).fill("https://example.invalid/river-fold-epk");
+  await page.getByLabel("Touring radius (miles)", { exact: true }).fill("120");
   await submitDialog();
   await recover("/");
   assert.equal((await state()).profile.artistName, "River Fold (fictional QA)");
+  assert.equal((await state()).profile.epkUrl, "https://example.invalid/river-fold-epk");
+  assert.equal((await state()).profile.touringRadiusMiles, 120);
   // The preceding recovered state assertion verifies the saved artist profile.
   // Avoid reopening the profile drawer during hydration, which is redundant
   // and races the route-level UI transition.
@@ -94,6 +98,18 @@ try {
   await page.getByRole("button", {name:"Prepare personalized pitch",exact:true}).click();
   assert.match(await page.getByLabel("Conversation and deal notes",{exact:true}).inputValue(), /River Fold/);
   await submitDialog();
+  await recover("/gigs");
+  for (const status of ["qualified", "responded", "hold", "booked"]) {
+    await page.locator('main button').filter({ hasText: "Fictional QA Hall" }).first().click();
+    await page.getByLabel("Status", {exact:true}).selectOption(status);
+    await submitDialog();
+    await recover("/gigs");
+    assert.equal((await state()).gigs[0].status, status, "Stage did not persist");
+  }
+  assert.equal((await state()).gigs[0].stageHistory.length, 4);
+  await page.getByRole("button", {name:"List",exact:true}).click();
+  for (const label of ["Booking contact", "Capacity", "Last communication", "Next follow-up", "Next action"]) assert.ok((await page.locator('main').innerText()).includes(label));
+  await page.getByRole("button", {name:"Board",exact:true}).click();
   await recover("/tasks");
   const beforeTasks = await state();
   assert.equal(beforeTasks.tasks.filter(t=>t.sourceKey?.startsWith("booking:")).length,1);
@@ -154,6 +170,21 @@ try {
       await page.screenshot({ path: "/workspace/screenshots/qa-" + viewport.width + "-" + (route.slice(1) || "advisor") + ".jpg", type: "jpeg", quality: 65, fullPage: true });
     }
   }
+  await ready("/gigs");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByLabel("Opportunity", {exact:true}).fill("Fictional mobile booking");
+  await page.getByLabel("Fee", {exact:true}).fill("125.50");
+  await page.getByLabel("Status", {exact:true}).selectOption("qualified");
+  await submitDialog();
+  await recover("/gigs");
+  assert.equal((await state()).gigs.find(gig => gig.name === "Fictional mobile booking").fee, 125.5);
+  await page.locator('main button').filter({hasText:"Fictional mobile booking"}).first().click();
+  await page.getByText("Edit venue facts and evidence", {exact:true}).click();
+  await page.getByLabel("Venue capacity", {exact:true}).fill("180");
+  await page.getByLabel("Capacity evidence URL", {exact:true}).fill("https://example.invalid/fictional-capacity");
+  await submitDialog();
+  await recover("/gigs");
+  assert.equal((await state()).gigs.find(gig => gig.name === "Fictional mobile booking").venueCapacity, 180);
   await page.screenshot({ path: "/workspace/screenshots/authenticated-mobile.png" });
   await auth("sign-out", {});
   await auth("sign-up/email", { name: "River Fold B (fictional QA)", email: emailB, password });

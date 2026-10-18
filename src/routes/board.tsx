@@ -1,3 +1,5 @@
+import { BookingSummary } from "@/components/booking-summary";
+import { ACTIVE_BOOKING_STATUSES } from "@/lib/types";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, CheckCircle2, CircleAlert, ListChecks, Target, TrendingUp, ArrowRight } from "lucide-react";
 import { Card, Eyebrow } from "@/components/ui/card";
@@ -30,8 +32,8 @@ function BoardPage() {
   const costs = sumMoney(moneyEntries, "cost");
   const profit = collected - costs;
   const open = pipelineGigs(gigs);
-  const bookingLeads = gigs.filter((gig) => gig.status === "lead" || gig.status === "outreach" || gig.status === "negotiating" || gig.status === "hold").map((gig) => {
-    const hasSource = gig.notes.includes("Research source: https://");
+  const bookingLeads = gigs.filter((gig) => ACTIVE_BOOKING_STATUSES.includes(gig.status)).map((gig) => {
+    const hasSource = Boolean(gig.researchSourceUrl);
     const researchOnly = gig.notes.includes("Unconfirmed research lead");
     const hasDate = gig.date.length === 10 && gig.date[4] === "-" && gig.date[7] === "-";
     const score = Math.min(100, Math.round((gig.conf || 0) * 35 + (hasSource ? 25 : 0) + (gig.fee > 0 && !researchOnly ? 20 : 0) + (hasDate && !researchOnly ? 10 : 0) + (gig.status !== "lead" ? 10 : 0)));
@@ -134,12 +136,11 @@ function BoardPage() {
         </div>
         {bookingLeads.length === 0 ? <p className="mt-4 rounded-xl border border-dashed border-line p-4 text-sm text-muted">No active booking opportunities yet. Research venues with the AI Advisor, verify the sources, and save qualified leads to begin prioritizing.</p> : (
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {bookingLeads.map(({ gig, score, hasSource, researchOnly }) => (
-              <div key={gig.id} className="rounded-xl border border-line bg-bg p-4">
-                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-bold">{gig.venue || gig.name}</div><div className="mt-1 text-xs text-muted">{gig.city || "Location unrecorded"} · {gig.status}</div></div><div className="shrink-0 text-right"><div className="text-lg font-bold tabular text-accent">{score}<span className="text-xs text-muted">/100</span></div><div className="text-[10px] text-muted">Readiness score</div></div></div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-accent" style={{ width: `${score}%` }} /></div>
-                <div className="mt-3 flex flex-wrap gap-2 text-[11px]"><span className={hasSource ? "text-live" : "text-warn"}>{hasSource ? "Source recorded" : "Source missing"}</span><span className="text-muted">·</span><span className="text-muted">{researchOnly ? "Unconfirmed research" : gig.fee > 0 ? "Fee entered" : "Fee unknown"}</span><span className="text-muted">·</span><span className="text-muted">{gig.date && !researchOnly ? "Date entered" : "Date unconfirmed"}</span></div>
-              </div>
+            {bookingLeads.map(({ gig, score }) => (
+              <button type="button" key={gig.id} onClick={() => useMusician.getState().openGig(gig.id)} className="rounded-xl border border-line bg-bg p-4 text-left transition-colors hover:border-accent/50">
+                <div className="mb-3 text-xs text-muted">Readiness estimate {score}/100 · review required</div>
+                <BookingSummary gig={gig} today={today} />
+              </button>
             ))}
           </div>
         )}

@@ -158,9 +158,17 @@ export function stopOutcome({ signalled, stubborn, after }) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+export function isZombieStat(stat) {
+  const end = String(stat).lastIndexOf(") ");
+  return end !== -1 && /^[ZX]\s/.test(String(stat).slice(end + 2));
+}
+
 function isAlive(pid) {
   try {
     process.kill(pid, 0);
+    // A dead wrapper can await reaping by container PID 1. It owns no sockets.
+    // Continue to check port ownership separately before declaring stop success.
+    try { if (isZombieStat(readFileSync(`/proc/${pid}/stat`, "utf8"))) return false; } catch { /* Recheck using the signal result. */ }
     return true;
   } catch (err) {
     return err?.code === "EPERM";

@@ -1,3 +1,4 @@
+import { ACTIVE_BOOKING_STATUSES } from "./types.ts";
 import type { SuggestedGig, SuggestedPerson } from "@/lib/types";
 
 export type LocalAdvice = {
@@ -15,12 +16,15 @@ type PipelineItem = {
   confidence: number;
 };
 
-const OPEN_STATUSES = new Set(["lead", "outreach", "negotiating", "hold"]);
+const OPEN_STATUSES = new Set(ACTIVE_BOOKING_STATUSES);
 const STATUS_PRIORITY: Record<string, number> = {
-  negotiating: 0,
-  outreach: 1,
-  lead: 2,
-  hold: 3,
+  responded: 0,
+  negotiating: 1,
+  hold: 2,
+  outreach: 3,
+  ready: 4,
+  qualified: 5,
+  lead: 6,
 };
 
 /**

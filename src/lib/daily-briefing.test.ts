@@ -23,3 +23,9 @@ test("undated opportunities do not appear as upcoming booked shows", () => {
   const result = buildDailyBriefing({ gigs: [{ ...gig, date: "" }], tasks: [], money: [], merchProducts: [] }, today);
   assert.deepEqual(result.map((item) => item.id), ["ready"]);
 });
+
+test("briefing surfaces replies, negotiations and holds without reopening closed deals", () => {
+  const result = buildDailyBriefing({ gigs: [{ ...gig, id: "reply", status: "responded" }, { ...gig, id: "negotiation", status: "negotiating" }, { ...gig, id: "hold", status: "hold" }, { ...gig, id: "canceled", status: "canceled", outreachNextFollowUp: "2020-01-01" }], tasks: [], money: [], merchProducts: [] }, today);
+  for (const id of ["booking-replies", "booking-negotiations", "booking-holds"]) assert.ok(result.some(item => item.id === id));
+  assert.equal(result.some(item => item.id === "booking-followups"), false);
+});

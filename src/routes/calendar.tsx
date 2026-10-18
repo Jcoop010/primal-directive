@@ -1,3 +1,4 @@
+import { CLOSED_BOOKING_STATUSES } from "@/lib/types";
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Route as RouteIcon, Calculator } from "lucide-react";
@@ -50,7 +51,7 @@ function CalendarPage() {
   });
   const selectedGigs = selected ? (byDay.get(selected) ?? []) : [];
   const upcoming = [...gigs]
-    .filter((g) => g.date && g.status !== "passed")
+    .filter((g) => g.date && !CLOSED_BOOKING_STATUSES.includes(g.status))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const planned = gigs
