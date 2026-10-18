@@ -91,9 +91,13 @@ function GigsPage() {
   const unsourced = active.filter((g) => !g.researchSourceUrl);
   const missingContact = active.filter((g) => !g.outreachContact?.trim() && !(g.bookingContactName && g.bookingContactSourceUrl));
   const [attentionFilter, setAttentionFilter] = useState<"all" | "unsourced" | "contact">("all");
-  const visibleStages = GIG_STATUSES.filter(status => filter === status || (filter === "all" && (gigs.some(gig => gig.status === status) || (gigs.length === 0 && status === "lead"))));
+
   const filtered = filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
   const shown = filtered.filter((g) => (!followUpOnly || (ACTIVE_BOOKING_STATUSES.includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && (attentionFilter === "all" || (ACTIVE_BOOKING_STATUSES.includes(g.status) && (attentionFilter === "unsourced" ? !g.researchSourceUrl : (!g.outreachContact?.trim() && !(g.bookingContactName && g.bookingContactSourceUrl))))) && [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+
+  // Build the board groups from the same filtered records rendered in their cards.
+  // Otherwise search and attention filters leave unrelated empty stage columns visible.
+  const visibleStages = GIG_STATUSES.filter(status => filter === status || (filter === "all" && shown.some(gig => gig.status === status)));
 
   return (
     <div>
