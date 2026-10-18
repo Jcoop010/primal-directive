@@ -31,11 +31,13 @@ try {
   await page.locator('[role=dialog] button[type=submit]').dispatchEvent("click");await page.locator('[role=dialog] form').waitFor({state:"hidden"});
  }
  await page.waitForFunction(()=>{const s=JSON.parse(localStorage.getItem("musician-os-v1")||"null")?.state;return s?.gigs.length===2 && s.gigs.every(g=>g.venueCapacity && g.capacitySourceUrl && g.bookingContactName && g.bookingContactSourceUrl && g.bookingRoute);},{},{timeout:150000});
+ await page.getByText("Venue research & evidence",{exact:true}).first().click();
  await page.getByRole("button",{name:"Retry research",exact:true}).first().click();
  await page.getByRole("button",{name:"Researching venue…",exact:true}).waitFor({state:"hidden",timeout:30000});
  const before=await state();assert.equal(before.gigs.find(g=>g.venue==="Thunderbird Cafe").venueCapacity,520);assert.equal(before.gigs.find(g=>g.venue==="Johnny Brenda's").venueCapacity,250);assert.ok(before.gigs.every(g=>g.status==="lead" && !g.date && g.fee===0));
  await page.waitForTimeout(2000);await page.evaluate(()=>localStorage.removeItem("musician-os-v1"));await ready();
  const restored=await state();assert.equal(restored.gigs.length,2);assert.ok(restored.gigs.every(g=>g.venueResearchStatus==="Verified"));
+ await page.getByText("Venue research & evidence",{exact:true}).first().click();
  await page.getByText("View source evidence",{exact:true}).first().click();assert.ok(await page.locator('a[href="https://johnnybrendas.com/menu-2-2/"]').count()>0);
  mkdirSync("/workspace/screenshots",{recursive:true});await page.screenshot({path:"/workspace/screenshots/venue-research-desktop.png",fullPage:true});
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth));await page.screenshot({path:"/workspace/screenshots/venue-research-mobile.png",fullPage:true});
