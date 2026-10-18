@@ -325,6 +325,7 @@ export function BoardPage() {
         </p>
         <Link
           to="/"
+          hash="advisor"
           className="mt-4 inline-flex h-11 items-center rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg"
         >
           Open advisor
