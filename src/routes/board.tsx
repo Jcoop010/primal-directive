@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/board")({ component: BoardPage });
 
-function BoardPage() {
+export function BoardPage() {
   const gigs = useMusician((s) => s.gigs);
   const moneyEntries = useMusician((s) => s.money);
   const people = useMusician((s) => s.people);
