@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Circle, ListChecks, RefreshCw } from "lucide-react";
+import { CheckCircle2, Circle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { Card, Eyebrow } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { MetricCard } from "@/components/metric-card";
 import { downloadCsv, longDate, toIsoDay } from "@/lib/format";
 import { useMusician } from "@/lib/store";
@@ -44,19 +44,6 @@ function TasksPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <Eyebrow>Operational control room</Eyebrow>
-          <h2 className="mt-2 text-xl font-extrabold tracking-tight">Tasks & show workflows</h2>
-          <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-            Booking a show now creates its operational checklist automatically, from deal terms through post-show reconciliation. Use the generator below to backfill missing tasks for existing bookings; tasks are saved and duplicate-protected.
-          </p>
-        </div>
-        <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface-2">
-          <ListChecks className="size-5 text-accent" />
-        </div>
-      </div>
-
       <div className="grid grid-cols-2 gap-2.5">
         <MetricCard label="Open tasks" value={String(openTasks.length)} hint="still to do" />
         <MetricCard label="Overdue" value={String(overdue.length)} hint="past due date" />
@@ -67,12 +54,12 @@ function TasksPage() {
       <Card>
         <h3 className="font-display text-base font-semibold">Generate show task packs</h3>
         <p className="mt-1 text-sm leading-relaxed text-muted">
-          Creates tasks for payment terms, venue advancing, approved promotion, merch packing, the run sheet, and post-show reconciliation. It will not send messages, publish posts, sign contracts, or move money.
+          Creates missing checklists for confirmed shows. No messages or payments are sent.
         </p>
         <button type="button" onClick={generatedCount} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg">
           <RefreshCw className="size-4" /> Generate missing tasks
         </button>
-        <p className="mt-2 text-xs text-muted">Saved, dated gigs marked Booked or Completed can receive missing task steps. Tasks are generated once per show and workflow step.</p>
+        
       </Card>
 
       <section aria-label="Task triage" className="rounded-2xl border border-line-strong bg-surface p-4 sm:p-5">
