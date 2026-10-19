@@ -1,4 +1,5 @@
 import { BookingSummary } from "@/components/booking-summary";
+import { bookingDraft } from "@/lib/booking-workflow";
 import { ACTIVE_BOOKING_STATUSES } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import { researchSavedVenue } from "@/lib/venue-research-api";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/gigs")({ component: GigsPage });
 
 function GigsPage() {
   const gigs = useMusician((s) => s.gigs);
+  const artistProfile = useMusician((s) => s.profile);
   const ownerId = useMusician((s) => s.workspaceOwnerId);
   const openGig = useMusician((s) => s.openGig);
   const updateGig = useMusician((s) => s.updateGig);
@@ -255,6 +257,17 @@ function GigsPage() {
                 <label>Contact<input aria-label="Booking contact" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachContact || ""} onChange={(e) => updateGig(g.id, {outreachContact:e.target.value})}/></label>
                 <label>Follow-up date<input aria-label="Follow-up date" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachNextFollowUp || ""} onChange={(e) => updateGig(g.id, {outreachNextFollowUp:e.target.value})}/></label>
                 <label>Last contacted<input aria-label="Last contacted" type="date" className="mt-1 w-full rounded border border-line bg-surface p-2" value={g.outreachLastContactedAt || ""} onChange={(e) => updateGig(g.id, {outreachLastContactedAt:e.target.value})}/></label>
+                <button type="button" className="rounded border border-accent/40 bg-accent/10 px-3 py-2 font-semibold text-accent hover:bg-accent/20" onClick={() => {
+                  const draft = bookingDraft(g, artistProfile);
+                  const address = (g.outreachEmail || "").trim();
+                  const subject = draft.split("\\n")[0].replace(/^Subject:\\s*/, "");
+                  const body = draft.slice(draft.indexOf("\\n") + 1).trim();
+                  if (address && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(address)) {
+                    window.location.href = "mailto:" + encodeURIComponent(address) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+                  } else {
+                    void navigator.clipboard.writeText(draft).then(() => window.alert("Booking draft copied. Verify the venue email before sending.")).catch(() => window.prompt("Copy your booking draft:", draft));
+                  }
+                }}>Prepare booking email (review before sending)</button>
                 <button type="button" disabled={researchId !== null} className="rounded border border-accent/40 bg-accent/10 px-3 py-2 font-semibold text-accent disabled:opacity-50" onClick={() => void researchVenue(g)}>{researchId === g.id ? "Researching official sources…" : "Research venue with AI"}</button>
                 <button type="button" className="rounded border border-accent/40 bg-accent/10 px-3 py-2 text-accent hover:bg-accent/20" onClick={() => { const search = [g.venue || g.name, g.city, "official venue booking contact"].filter(Boolean).join(" "); window.open("https://www.google.com/search?q=" + encodeURIComponent(search), "_blank", "noopener,noreferrer"); }}>Find official venue source ↗</button>
                 {researchResult?.id === g.id && <div className="sm:col-span-2 rounded-lg border border-line bg-surface-2 p-3">
