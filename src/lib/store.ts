@@ -84,6 +84,7 @@ type Actions = {
     >,
   ) => string;
   refundMerchOrder: (id: string, restock: boolean, note: string) => void;
+  addBookingFollowUpTask: (gigId: string) => boolean;
   generateShowTasks: () => number;
   updateOperationalTask: (
     id: string,
@@ -374,6 +375,30 @@ export const useMusician = create<State & Actions>()(
             money: [...result.ledgerEntries, ...s.money],
           };
         }),
+      addBookingFollowUpTask: (gigId) => {
+        const state = useMusician.getState();
+        const gig = state.gigs.find((item) => item.id === gigId);
+        if (!gig || !ACTIVE_BOOKING_STATUSES.includes(gig.status)) return false;
+        const sourceKey = `advisor:followup:${gigId}`;
+        if (state.tasks.some((task) => task.sourceKey === sourceKey && task.status === "open")) return false;
+        const now = new Date().toISOString();
+        const dueDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(gig.outreachNextFollowUp || "")
+          ? (gig.outreachNextFollowUp || now.slice(0, 10)) : now.slice(0, 10);
+        set((s) => ({
+          tasks: [{
+            id: uid(),
+            title: `Follow up: ${gig.venue || gig.name}`,
+            description: `Review the booking conversation for ${gig.venue || gig.name} in ${gig.city}. Verify contact details and approve outreach before sending.`,
+            category: "booking",
+            gigId,
+            dueDate,
+            status: "open",
+            sourceKey,
+            createdAt: now,
+          }, ...s.tasks],
+        }));
+        return true;
+      },
       generateShowTasks: () => {
         let added = 0;
         set((s) => {
