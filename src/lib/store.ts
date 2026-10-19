@@ -379,11 +379,17 @@ export const useMusician = create<State & Actions>()(
         const state = useMusician.getState();
         const gig = state.gigs.find((item) => item.id === gigId);
         if (!gig || !ACTIVE_BOOKING_STATUSES.includes(gig.status)) return false;
-        const sourceKey = `advisor:followup:${gigId}`;
-        if (state.tasks.some((task) => task.sourceKey === sourceKey && task.status === "open")) return false;
+        // Scheduled booking reminders and Advisor tasks represent the same work.
+        // Reuse either kind rather than creating duplicate open follow-ups.
+        if (state.tasks.some((task) =>
+          task.gigId === gigId && task.status === "open" &&
+          (task.sourceKey === `booking:${gigId}:followup` ||
+            task.sourceKey === `advisor:followup:${gigId}`)
+        )) return false;
         const now = new Date().toISOString();
-        const dueDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(gig.outreachNextFollowUp || "")
-          ? (gig.outreachNextFollowUp || now.slice(0, 10)) : now.slice(0, 10);
+        const dueDate = validBookingDay(gig.outreachNextFollowUp || "")
+          ? (gig.outreachNextFollowUp || now.slice(0, 10))
+          : now.slice(0, 10);
         set((s) => ({
           tasks: [{
             id: uid(),
@@ -393,7 +399,7 @@ export const useMusician = create<State & Actions>()(
             gigId,
             dueDate,
             status: "open",
-            sourceKey,
+            sourceKey: `advisor:followup:${gigId}`,
             createdAt: now,
           }, ...s.tasks],
         }));
