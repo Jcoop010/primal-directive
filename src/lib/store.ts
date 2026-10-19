@@ -383,7 +383,7 @@ export const useMusician = create<State & Actions>()(
         if (state.tasks.some((task) => task.sourceKey === sourceKey && task.status === "open")) return false;
         const now = new Date().toISOString();
         const dueDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(gig.outreachNextFollowUp || "")
-          ? gig.outreachNextFollowUp : now.slice(0, 10);
+          ? (gig.outreachNextFollowUp || now.slice(0, 10)) : now.slice(0, 10);
         set((s) => ({
           tasks: [{
             id: uid(),
