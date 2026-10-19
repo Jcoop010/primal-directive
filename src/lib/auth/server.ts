@@ -154,7 +154,15 @@ export const auth = betterAuth({
   database,
   trustedOrigins,
   socialProviders: {
-    ...(googleOAuthConfigured ? { google: { clientId: env("GOOGLE_CLIENT_ID")!, clientSecret: env("GOOGLE_CLIENT_SECRET")! } } : {}),
+    ...(googleOAuthConfigured ? { google: {
+      clientId: env("GOOGLE_CLIENT_ID")!,
+      clientSecret: env("GOOGLE_CLIENT_SECRET")!,
+      // Gmail access is opt-in, distinct from signing in with Google.
+      // Only request these permissions after the owner enables the integration.
+      ...(env("GMAIL_INTEGRATION_ENABLED") === "true"
+        ? { scope: ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"] }
+        : {}),
+    } } : {}),
   },
   account: {
     encryptOAuthTokens: true,
