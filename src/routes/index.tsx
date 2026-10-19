@@ -22,7 +22,7 @@ function CommandCenterPage() {
     <AdvisorPage />
    </section>
    <section id="overview" aria-label="Booking overview" className="min-w-0 2xl:col-span-7 2xl:order-1">
-    <BoardPage />
+    <BoardPage embedded />
    </section>
   </div>
  </div>;
