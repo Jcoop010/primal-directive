@@ -25,6 +25,12 @@ const databaseUrl =
  * Active backend: real Postgres when a connection URL is configured, otherwise
  * the local embedded PGLite fallback for previews/development.
  */
+// Never silently fall back to ephemeral, per-instance PGlite on a live Vercel
+// deployment: authentication and artist records must share persistent storage.
+if (typeof process !== "undefined" &&
+    process.env.VERCEL_ENV === "production" && !databaseUrl) {
+  throw new Error("Production database connection is missing; refusing ephemeral storage.");
+}
 export const dbSource: DbSource = databaseUrl ? "postgres" : "pglite";
 
 export interface Sql {
