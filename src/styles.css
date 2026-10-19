@@ -173,3 +173,49 @@
   .command-surface, .glass-panel { border: 1px solid CanvasText; }
   .command-link[aria-current="page"] { outline: 2px solid Highlight; outline-offset: -2px; }
 }
+
+
+/* Immersion layer: tactile interactions without altering the approved card layout. */
+@layer components {
+  .command-link[aria-current="page"] {
+    background-image: linear-gradient(90deg, rgba(255, 122, 24, .10), transparent 78%);
+  }
+  .command-link[aria-current="page"]::before {
+    box-shadow: 0 0 14px rgba(255, 122, 24, .3);
+  }
+  details > summary {
+    cursor: pointer;
+    border-radius: 6px;
+    outline-offset: 3px;
+  }
+  details[open] > summary {
+    color: var(--color-accent);
+  }
+  :where(input, textarea, select):not(:disabled) {
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+  :where(input, textarea, select):not(:disabled):focus-visible {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 122, 24, .12);
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .command-link:not([aria-current="page"]):hover {
+    background-image: linear-gradient(90deg, rgba(114, 167, 255, .065), transparent 82%);
+  }
+  details > summary {
+    transition: color 160ms ease, background-color 160ms ease;
+  }
+  details > summary:hover {
+    background-color: rgba(255, 255, 255, .025);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(input, textarea, select), details > summary {
+    transition: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .command-link[aria-current="page"] { background-image: none; }
+  details[open] > summary { color: Highlight; }
+}

@@ -30,8 +30,7 @@ import { useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/", label: "Advisor", icon: Sparkles },
-  { to: "/board", label: "Board", icon: LayoutGrid },
+  { to: "/", label: "Command Center", icon: Sparkles },
   { to: "/gigs", label: "Gigs", icon: Music2 },
   { to: "/people", label: "People", icon: Users },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
@@ -232,7 +231,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <nav aria-label="Quick navigation" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur-xl md:hidden">
           <div className="mx-auto grid max-w-md grid-cols-6 pb-[env(safe-area-inset-bottom)]">
-            {NAV.filter((item) => ["/", "/board", "/gigs", "/calendar", "/tasks"].includes(item.to)).map((item) => {
+            {NAV.filter((item) => ["/", "/gigs", "/calendar", "/tasks"].includes(item.to)).map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
               return <Link key={item.to} to={item.to} aria-current={active ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold", active ? "text-accent" : "text-muted")}><item.icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />{item.label}</Link>;
             })}

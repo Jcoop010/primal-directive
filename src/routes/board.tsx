@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/board")({ component: BoardPage });
 
-function BoardPage() {
+export function BoardPage() {
   const gigs = useMusician((s) => s.gigs);
   const moneyEntries = useMusician((s) => s.money);
   const people = useMusician((s) => s.people);
@@ -325,6 +325,7 @@ function BoardPage() {
         </p>
         <Link
           to="/"
+          hash="advisor"
           className="mt-4 inline-flex h-11 items-center rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg"
         >
           Open advisor
