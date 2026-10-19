@@ -1,5 +1,6 @@
 import { BookingSummary } from "@/components/booking-summary";
 import { bookingDraft } from "@/lib/booking-workflow";
+import { getGmailConnectionStatus } from "@/lib/gmail-status";
 import { ACTIVE_BOOKING_STATUSES } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import { researchSavedVenue } from "@/lib/venue-research-api";
@@ -29,6 +30,16 @@ function GigsPage() {
   const openGig = useMusician((s) => s.openGig);
   const updateGig = useMusician((s) => s.updateGig);
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
+  const [gmailStatus, setGmailStatus] = useState<"checking" | "google-only" | "consented" | "unlinked" | "error">("checking");
+  useEffect(() => {
+    if (!ownerId) return;
+    let active = true;
+    void getGmailConnectionStatus().then((status) => {
+      if (!active) return;
+      setGmailStatus(!status.googleLinked ? "unlinked" : status.gmailReadAuthorized && status.gmailSendAuthorized ? "consented" : "google-only");
+    }).catch(() => { if (active) setGmailStatus("error"); });
+    return () => { active = false; };
+  }, [ownerId]);
   const [view, setView] = useState<"board" | "list">("board");
   const [query, setQuery] = useState("");
   const [researchId, setResearchId] = useState<string | null>(null);
@@ -134,6 +145,14 @@ function GigsPage() {
           <button type="button" aria-pressed={view === "board"} onClick={() => setView("board")} className={cn("inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold", view === "board" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}><LayoutGrid className="size-4" /> Board</button>
           <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")} className={cn("inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold", view === "list" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}><List className="size-4" /> List</button>
         </div>
+      </div>
+      <div role="status" className="mb-3 rounded-xl border border-line bg-surface px-4 py-3 text-xs text-muted">
+        <span className="font-semibold text-fg">Gmail integration:</span>{" "}
+        {gmailStatus === "checking" ? "Checking account permissions…" :
+          gmailStatus === "unlinked" ? "No Google account linked to this sign-in." :
+          gmailStatus === "google-only" ? "Google sign-in linked; Gmail inbox and send permissions not confirmed." :
+          gmailStatus === "consented" ? "Gmail permissions granted; live API access and sending are not yet verified." :
+          "Unable to verify Gmail permissions. No messages will be sent."}
       </div>
       <section aria-label="Booking pipeline health" className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
         <div className="command-surface rounded-xl p-3 sm:p-4"><div className="command-kicker text-muted">Active leads</div><div className="mt-2 font-display text-3xl font-extrabold tabular text-info">{active.length}</div><p className="mt-1 text-xs text-muted">Not confirmed bookings</p></div>
