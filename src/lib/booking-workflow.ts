@@ -8,6 +8,17 @@ export const validBookingDay = (day: string) =>
 export function syncBookingReminder(gig: Gig, tasks: OperationalTask[], id: string, now: string) {
   const key = "booking:" + gig.id + ":followup";
   const existing = tasks.find((t) => t.sourceKey === key && t.status === "open");
+  // The Advisor may have created a follow-up before a date was scheduled.
+  // Never create a second open task for the same gig.
+  const advisorKey = "advisor:followup:" + gig.id;
+  const advisorTask = tasks.find((t) => t.sourceKey === advisorKey && t.status === "open");
+  if (advisorTask && !existing) {
+    if (!validBookingDay(gig.outreachNextFollowUp ?? "") ||
+        CLOSED_BOOKING_STATUSES.includes(gig.status)) return tasks;
+    return tasks.map((t) => t.id === advisorTask.id
+      ? { ...t, dueDate: gig.outreachNextFollowUp!, dueDateOverridden: true }
+      : t);
+  }
   if (
     !existing &&
     tasks.some(
