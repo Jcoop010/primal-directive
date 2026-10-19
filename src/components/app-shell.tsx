@@ -230,12 +230,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
 
         <nav aria-label="Quick navigation" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur-xl md:hidden">
-          <div className="mx-auto grid max-w-md grid-cols-6 pb-[env(safe-area-inset-bottom)]">
+          <div className="mx-auto grid w-full max-w-lg grid-cols-5 px-1 pb-[env(safe-area-inset-bottom)]">
             {NAV.filter((item) => ["/", "/gigs", "/calendar", "/tasks"].includes(item.to)).map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-              return <Link key={item.to} to={item.to} aria-current={active ? "page" : undefined} className={cn("flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold", active ? "text-accent" : "text-muted")}><item.icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />{item.label}</Link>;
+              return <Link key={item.to} to={item.to} aria-current={active ? "page" : undefined} className={cn("flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold", active ? "text-accent" : "text-muted")}><item.icon className="size-5" strokeWidth={active ? 2.4 : 1.8} /><span className="max-w-full truncate text-center">{item.to === "/" ? "Command" : item.label}</span></Link>;
             })}
-            <button type="button" aria-label="Add" onClick={onFab} className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold text-accent"><Plus className="size-5" /><span>Add</span></button>
+            <button type="button" aria-label="Add" onClick={onFab} className="flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 text-xs font-semibold text-accent"><Plus className="size-5" /><span>Add</span></button>
           </div>
         </nav>
 
