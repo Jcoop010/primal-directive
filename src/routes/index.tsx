@@ -16,17 +16,15 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({ component: CommandCenterPage });
 function CommandCenterPage() {
- const [section,setSection] = useState<"board"|"advisor">(() => typeof window !== "undefined" && window.location.hash === "#overview" ? "board" : "advisor");
- useEffect(() => { const sync = () => setSection(window.location.hash === "#overview" ? "board" : "advisor"); window.addEventListener("hashchange", sync); return () => window.removeEventListener("hashchange", sync); }, []);
  return <div className="space-y-4">
-  <div className="flex flex-wrap items-center justify-between gap-3">
-   <p className="text-xs font-semibold uppercase tracking-widest text-muted">Workspace</p>
-   <div role="group" aria-label="Command center view" className="inline-flex rounded-xl border border-line bg-surface p-1">
-    <button type="button" aria-pressed={section==="board"} onClick={()=>{setSection("board");window.history.replaceState(null,"",window.location.pathname+"#overview");}} className={cn("rounded-lg px-4 py-2 text-sm font-semibold",section==="board"?"bg-accent text-accent-fg":"text-muted hover:text-fg")}>Overview</button>
-    <button type="button" aria-pressed={section==="advisor"} onClick={()=>{setSection("advisor");window.history.replaceState(null,"",window.location.pathname+"#advisor");}} className={cn("rounded-lg px-4 py-2 text-sm font-semibold",section==="advisor"?"bg-accent text-accent-fg":"text-muted hover:text-fg")}>AI Advisor</button>
-   </div>
+  <div className="grid min-w-0 gap-5 2xl:grid-cols-12">
+   <section id="advisor" aria-label="AI booking advisor" className="min-w-0 2xl:col-span-5 2xl:order-2">
+    <AdvisorPage />
+   </section>
+   <section id="overview" aria-label="Booking overview" className="min-w-0 2xl:col-span-7 2xl:order-1">
+    <BoardPage />
+   </section>
   </div>
-  {section==="board"?<BoardPage/>:<AdvisorPage/>}
  </div>;
 }
 
@@ -339,7 +337,7 @@ Thanks,
           {showMissions ? (
             <div
               id="booking-missions"
-              className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3"
+              className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2"
               aria-label="Booking agent quick actions"
             >
               {SUGGESTIONS.map((s, i) => (
