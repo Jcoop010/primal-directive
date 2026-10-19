@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/board")({ component: BoardPage });
 
-export function BoardPage() {
+export function BoardPage({ embedded = false }: { embedded?: boolean } = {}) {
   const gigs = useMusician((s) => s.gigs);
   const moneyEntries = useMusician((s) => s.money);
   const people = useMusician((s) => s.people);
@@ -82,8 +82,8 @@ export function BoardPage() {
   const topPriority = briefing[0];
 
   return (
-    <div className="space-y-7">
-      <section aria-label="Career command overview" className="command-surface relative isolate overflow-hidden rounded-[24px] px-5 py-7 sm:px-8 sm:py-9">
+    <div className={embedded ? "min-w-0 space-y-4" : "space-y-7"}>
+      {!embedded ? <section aria-label="Career command overview" className="command-surface relative isolate overflow-hidden rounded-[24px] px-5 py-7 sm:px-8 sm:py-9">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" />
         <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,.6fr)] lg:items-center">
@@ -102,7 +102,7 @@ export function BoardPage() {
             <div className="col-span-2 rounded-2xl border border-line-strong bg-bg/65 p-4"><div className="flex items-end justify-between gap-3"><div><div className="command-kicker text-muted">Task completion</div><div className="mt-2 font-display text-3xl font-extrabold tabular">{taskProgress}%</div></div><TrendingUp className="size-5 text-accent" /></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${taskProgress}%` }} /></div><div className="mt-2 text-xs text-muted">{completedTasks} of {tasks.length} tracked tasks completed</div></div>
           </div>
         </div>
-      </section>
+      </section> : null}
       {topPriority ? <section aria-label="Top priority" className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/30 bg-accent/[.07] px-5 py-4 sm:px-6"><div className="min-w-0"><div className="command-kicker flex items-center gap-2 text-accent"><Target className="size-4" /> YOUR NEXT BEST MOVE</div><h3 className="mt-2 font-display text-lg font-bold">{topPriority.title}</h3><p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted">{topPriority.detail}</p></div><Link to={topPriority.href} className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 text-xs font-bold text-accent hover:bg-accent/20">Take action <ArrowRight className="size-4" /></Link></section> : null}
       <section aria-label="Mission Control daily briefing" className="command-surface relative isolate mb-8 overflow-hidden rounded-2xl p-5 sm:p-8">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" /><div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" /><div className="relative flex flex-wrap items-start justify-between gap-4">
@@ -317,8 +317,8 @@ export function BoardPage() {
         </div>
       </Card>
 
-      <Eyebrow>AI next move</Eyebrow>
-      <Card>
+      {!embedded ? <Eyebrow>AI next move</Eyebrow> : null}
+      {!embedded ? <Card>
         <h2 className="font-display text-lg font-semibold">Turn live web signals into a pursuit list</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
           Ask the advisor for rooms, bills, and routing that fit this draw — then push winners into the pipeline.
@@ -330,7 +330,7 @@ export function BoardPage() {
         >
           Open advisor
         </Link>
-      </Card>
+      </Card> : null}
 
       <Eyebrow>Pipeline snapshot</Eyebrow>
       <Card className="p-0">
