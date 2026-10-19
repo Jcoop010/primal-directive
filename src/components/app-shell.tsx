@@ -160,20 +160,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-          <header className="relative isolate overflow-hidden border-b border-line/60 bg-bg/75 px-4 pt-5 pb-5 backdrop-blur-xl md:px-8 md:pt-8 md:pb-8">
+          <header className="relative isolate overflow-hidden border-b border-line/60 bg-bg/75 px-4 py-3 backdrop-blur-xl md:px-8 md:py-5">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" /><div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" /><div className="relative mx-auto flex max-w-7xl items-end justify-between gap-4">
               <div>
-                <div className="text-[11px] font-bold tracking-[0.22em] md:hidden">PRIMAL DIRECTIVE</div>
-                <div className="mt-1 text-xs text-muted md:hidden">Artist Command Center</div>
-                <div className="mb-2 hidden items-center gap-2 md:flex"><span className="h-px w-6 bg-accent" /><span className="command-kicker text-accent">Artist operations / {pageTitle}</span></div><h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight md:mt-0 md:text-4xl">
+                
+                <div className="mb-1 hidden items-center gap-2 md:flex"><span className="h-px w-6 bg-accent" /><span className="command-kicker text-accent">Artist operations / {pageTitle}</span></div><h1 className="font-display text-2xl font-extrabold tracking-tight md:text-3xl">
                   {pathname === "/" ? "Command Center" : pageTitle}
                 </h1>
-                <div className="mt-1 text-xs text-muted">{todayLabel()}</div>
+                <div className="mt-1 hidden text-xs text-muted md:block">{todayLabel()}</div>
               </div>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => {setCommandQuery("");setCommandSearchOpen(true);}} aria-label="Search workspace navigation" className="flex min-h-11 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-xs font-semibold text-muted transition-colors hover:border-accent/40 hover:text-fg"><Search className="size-4" /><span className="hidden lg:inline">Jump to page</span><kbd className="hidden rounded border border-line px-1.5 py-0.5 text-[10px] lg:inline">⌘ K</kbd></button>
                 <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation" aria-expanded={mobileMenuOpen} className="flex size-11 items-center justify-center rounded-xl border border-line bg-surface md:hidden"><Menu className="size-5" /></button>
-                <div className="hidden items-center gap-2 rounded-full border border-line bg-bg px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-muted sm:flex">
+                <div className="hidden items-center gap-2 rounded-full border border-line bg-bg px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-muted xl:flex">
                   <span className="size-1.5 rounded-full bg-live shadow-[0_0_10px_var(--color-live)]" />
                   SCENE INTEL
                 </div>
@@ -191,7 +190,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <main
             className={cn(
-              "mx-auto w-full max-w-7xl flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-10",
+              "mx-auto w-full max-w-7xl flex-1 px-4 pt-4 pb-28 md:px-8 md:pt-6 md:pb-10",
               pathname === "/" && "flex flex-col pb-24 md:pb-8",
             )}
           >
