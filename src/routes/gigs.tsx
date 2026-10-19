@@ -30,13 +30,13 @@ function GigsPage() {
   const openGig = useMusician((s) => s.openGig);
   const updateGig = useMusician((s) => s.updateGig);
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
-  const [gmailStatus, setGmailStatus] = useState<"checking" | "google-only" | "consented" | "unlinked" | "error">("checking");
+  const [gmailStatus, setGmailStatus] = useState<"checking" | "google-only" | "consented" | "verified" | "unlinked" | "error">("checking");
   useEffect(() => {
     if (!ownerId) return;
     let active = true;
     void getGmailConnectionStatus().then((status) => {
       if (!active) return;
-      setGmailStatus(!status.googleLinked ? "unlinked" : status.gmailReadAuthorized && status.gmailSendAuthorized ? "consented" : "google-only");
+      setGmailStatus(!status.googleLinked ? "unlinked" : status.apiVerified ? "verified" : status.gmailReadAuthorized && status.gmailSendAuthorized ? "consented" : "google-only");
     }).catch(() => { if (active) setGmailStatus("error"); });
     return () => { active = false; };
   }, [ownerId]);
@@ -151,7 +151,8 @@ function GigsPage() {
         {gmailStatus === "checking" ? "Checking account permissions…" :
           gmailStatus === "unlinked" ? "No Google account linked to this sign-in." :
           gmailStatus === "google-only" ? "Google sign-in linked; Gmail inbox and send permissions not confirmed." :
-          gmailStatus === "consented" ? "Gmail permissions granted; live API access and sending are not yet verified." :
+          gmailStatus === "verified" ? "Gmail read access verified with Google; automatic sending is not enabled." :
+          gmailStatus === "consented" ? "Gmail permissions granted, but live API access could not be verified." :
           "Unable to verify Gmail permissions. No messages will be sent."}
       </div>
       <section aria-label="Booking pipeline health" className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
