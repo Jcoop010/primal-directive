@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Circle, ListChecks, RefreshCw } from "lucide-react";
+import { CheckCircle2, Circle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { MetricCard } from "@/components/metric-card";
@@ -44,19 +44,6 @@ function TasksPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <Eyebrow>Operational control room</Eyebrow>
-          <h2 className="mt-2 text-xl font-extrabold tracking-tight">Tasks & show workflows</h2>
-          <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-            Booking a show now creates its operational checklist automatically, from deal terms through post-show reconciliation. Use the generator below to backfill missing tasks for existing bookings; tasks are saved and duplicate-protected.
-          </p>
-        </div>
-        <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface-2">
-          <ListChecks className="size-5 text-accent" />
-        </div>
-      </div>
-
       <div className="grid grid-cols-2 gap-2.5">
         <MetricCard label="Open tasks" value={String(openTasks.length)} hint="still to do" />
         <MetricCard label="Overdue" value={String(overdue.length)} hint="past due date" />
@@ -64,9 +51,9 @@ function TasksPage() {
         <MetricCard label="Booked shows" value={String(gigs.filter((gig) => gig.status === "booked").length)} hint="eligible for task packs" />
       </div>
 
-      <Card>
+      <Card className="p-4">
         <h3 className="font-display text-base font-semibold">Generate show task packs</h3>
-        <p className="mt-1 text-sm leading-relaxed text-muted">
+        <p className="mt-1 text-xs leading-relaxed text-muted">
           Creates tasks for payment terms, venue advancing, approved promotion, merch packing, the run sheet, and post-show reconciliation. It will not send messages, publish posts, sign contracts, or move money.
         </p>
         <button type="button" onClick={generatedCount} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-accent-fg">
@@ -75,7 +62,7 @@ function TasksPage() {
         <p className="mt-2 text-xs text-muted">Saved, dated gigs marked Booked or Completed can receive missing task steps. Tasks are generated once per show and workflow step.</p>
       </Card>
 
-      <section aria-label="Task triage" className="rounded-2xl border border-line-strong bg-surface p-4 sm:p-5">
+      <section aria-label="Task triage" className="rounded-2xl border border-line-strong bg-surface p-3 sm:p-4">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-display text-base font-bold">Priority queue</h3><p className="mt-1 text-xs text-muted">Find work needing attention. No tasks are completed automatically.</p></div><button type="button" className="text-xs font-semibold text-accent hover:underline" onClick={() => {setUrgency("all");setCategory("all");setFilter("open");}}>Reset view</button></div>
         <div className="mt-4 grid grid-cols-3 gap-2">
           {([{key:"overdue",label:"Overdue",count:overdue.length},{key:"today",label:"Due today",count:dueToday.length},{key:"upcoming",label:"Upcoming",count:upcoming.length}] as const).map((item) => <button key={item.key} type="button" aria-pressed={urgency === item.key} onClick={() => {setUrgency(urgency === item.key ? "all" : item.key);setFilter("open");}} className={cn("rounded-xl border p-3 text-left transition-colors hover:border-accent/50",urgency === item.key ? "border-accent bg-accent/10" : "border-line bg-bg/60")}><div className="font-display text-2xl font-bold tabular">{item.count}</div><div className="mt-1 text-xs font-semibold text-muted">{item.label}</div></button>)}

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, MapPin, Route as RouteIcon, Wallet } from "lucide-react";
+import { ArrowUpRight, MapPin, Wallet } from "lucide-react";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { money, longDate } from "@/lib/format";
 import { summarizeTour } from "@/lib/tour-economics";
@@ -85,19 +85,6 @@ function TourPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <Eyebrow>Tour operations</Eyebrow>
-          <h2 className="mt-2 text-xl font-extrabold tracking-tight">Tour economics</h2>
-          <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-            Compare held, booked, and completed shows to see where the route's estimated economics are strongest.
-          </p>
-        </div>
-        <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface-2">
-          <RouteIcon className="size-5 text-accent" />
-        </div>
-      </div>
-
       <div className="grid grid-cols-2 gap-3">
         <Metric label="Baseline gross" value={money(tour.expectedGross)} detail="Guarantees only; other income is unentered" />
         <Metric label="Linked costs" value={money(tour.expectedCosts)} detail="Recorded net expenses only" />
@@ -107,7 +94,7 @@ function TourPage() {
         <Metric label="Merch gross profit" value={money(actualMerchProfit)} detail="Recorded sales less saved item costs" />
       </div>
 
-      <Card className="p-4">
+      <Card className="p-3 sm:p-4">
         <div className="flex items-start gap-3">
           <Wallet className="mt-0.5 size-4 shrink-0 text-accent" />
           <div>
