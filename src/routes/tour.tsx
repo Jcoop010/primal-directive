@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, MapPin, Route as RouteIcon, Wallet } from "lucide-react";
-import { Card, Eyebrow } from "@/components/ui/card";
+import { ArrowUpRight, MapPin, Wallet } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { money, longDate } from "@/lib/format";
 import { summarizeTour } from "@/lib/tour-economics";
 import { summarizeMerch } from "@/lib/merch-ops";
@@ -84,20 +84,7 @@ function TourPage() {
   });
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <Eyebrow>Tour operations</Eyebrow>
-          <h2 className="mt-2 text-xl font-extrabold tracking-tight">Tour economics</h2>
-          <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-            Compare held, booked, and completed shows to see where the route's estimated economics are strongest.
-          </p>
-        </div>
-        <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface-2">
-          <RouteIcon className="size-5 text-accent" />
-        </div>
-      </div>
-
+    <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <Metric label="Baseline gross" value={money(tour.expectedGross)} detail="Guarantees only; other income is unentered" />
         <Metric label="Linked costs" value={money(tour.expectedCosts)} detail="Recorded net expenses only" />
