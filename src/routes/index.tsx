@@ -446,6 +446,10 @@ Thanks,
                 />
                 <Button size="sm" variant="ghost" onClick={() => composeFollowUpEmail(gig.id)}>Open email draft</Button>
                 <Button size="sm" variant="ghost" onClick={() => void copyFollowUp(gig.id)}>Copy follow-up</Button>
+                <Button size="sm" variant="ghost" onClick={() => {
+                  const created = useMusician.getState().addBookingFollowUpTask(gig.id);
+                  toast(created ? "Follow-up task created. Review it in Tasks before outreach." : "An open follow-up task already exists for this booking.");
+                }}>Create follow-up task</Button>
                 <Button size="sm" variant="ghost" onClick={() => recordContact(gig.id)}>Mark contacted</Button>
               </div>
             ))}
