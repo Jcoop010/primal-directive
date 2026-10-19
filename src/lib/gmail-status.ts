@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
+import { auth } from "@/lib/auth/server";
+import { getRequest } from "@tanstack/react-start/server";
 
 const GMAIL_READ = "https://www.googleapis.com/auth/gmail.readonly";
 const GMAIL_SEND = "https://www.googleapis.com/auth/gmail.send";
@@ -15,10 +17,37 @@ export const getGmailConnectionStatus = createServerFn({ method: "GET" })
       [context.userId, "google"],
     );
     const scopes = new Set(rows.flatMap((row) => (row.scope ?? "").split(/\s+/).filter(Boolean)));
+    let apiVerified = false;
+    if (scopes.has(GMAIL_READ)) {
+      try {
+        const request = getRequest();
+        if (request) {
+          const token = await auth.api.getAccessToken({
+            body: { providerId: "google" },
+            headers: request.headers,
+          });
+          if (token?.accessToken) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+            try {
+              const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/profile", {
+                headers: { Authorization: `Bearer ${token.accessToken}` },
+                signal: controller.signal,
+              });
+              apiVerified = response.ok;
+            } finally {
+              clearTimeout(timeout);
+            }
+          }
+        }
+      } catch {
+        // Expired, revoked, or unavailable Gmail grants must never be reported as connected.
+      }
+    }
     return {
       googleLinked: rows.length > 0,
       gmailReadAuthorized: scopes.has(GMAIL_READ),
       gmailSendAuthorized: scopes.has(GMAIL_SEND),
-      apiVerified: false,
+      apiVerified,
     };
   });
