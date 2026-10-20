@@ -1,6 +1,7 @@
 import { BookingSummary } from "@/components/booking-summary";
 import { bookingDraft } from "@/lib/booking-workflow";
 import { getGmailConnectionStatus } from "@/lib/gmail-status";
+import { previewGmailInbox } from "@/lib/gmail-inbox";
 import { ACTIVE_BOOKING_STATUSES } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import { researchSavedVenue } from "@/lib/venue-research-api";
@@ -29,6 +30,8 @@ function GigsPage() {
   const ownerId = useMusician((s) => s.workspaceOwnerId);
   const openGig = useMusician((s) => s.openGig);
   const updateGig = useMusician((s) => s.updateGig);
+  const [inboxPreview, setInboxPreview] = useState<string>("");
+  const [inboxBusy, setInboxBusy] = useState(false);
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
   const [gmailStatus, setGmailStatus] = useState<"checking" | "google-only" | "consented" | "verified" | "unlinked" | "error">("checking");
   useEffect(() => {
@@ -154,6 +157,19 @@ function GigsPage() {
           gmailStatus === "verified" ? "Gmail read access verified with Google; automatic sending is not enabled." :
           gmailStatus === "consented" ? "Gmail permissions granted, but live API access could not be verified." :
           "Unable to verify Gmail permissions. No messages will be sent."}
+      </div>
+      <div className="mb-3 flex flex-wrap items-center gap-3 px-1">
+        <button type="button" disabled={inboxBusy || gmailStatus !== "verified"}
+          className="rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-fg disabled:opacity-50"
+          onClick={() => {
+            setInboxBusy(true);
+            void previewGmailInbox().then((result) => {
+              setInboxPreview(result.connected ? `Gmail inbox reachable: ${result.messages.length} recent message references. No messages have been sent or synced.` : "Gmail inbox access unavailable. Reauthorization may be required.");
+            }).catch(() => setInboxPreview("Unable to read Gmail inbox.")).finally(() => setInboxBusy(false));
+          }}>
+          {inboxBusy ? "Checking Gmail…" : "Check Gmail inbox (read only)"}
+        </button>
+        {inboxPreview && <span role="status" className="text-xs text-muted">{inboxPreview}</span>}
       </div>
       <section aria-label="Booking pipeline health" className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
         <div className="command-surface rounded-xl p-3 sm:p-4"><div className="command-kicker text-muted">Active leads</div><div className="mt-2 font-display text-3xl font-extrabold tabular text-info">{active.length}</div><p className="mt-1 text-xs text-muted">Not confirmed bookings</p></div>
