@@ -1,5 +1,5 @@
 import { getSql } from "./db";
-import type { SendAuditStatus } from "./outreach-audit";
+type SendAuditStatus = "reserved" | "sent" | "failed" | "unknown";
 
 /** Durable, account-scoped send ledger. Never auto-retry reserved/unknown delivery.
  * Transport must reserve before sending and record the provider receipt afterwards.
