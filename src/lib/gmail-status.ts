@@ -16,9 +16,11 @@ export const getGmailConnectionStatus = createServerFn({ method: "GET" })
       'select scope from account where "userId" = $1 and "providerId" = $2',
       [context.userId, "google"],
     );
-    const scopes = new Set(rows.flatMap((row) => (row.scope ?? "").split(/\s+/).filter(Boolean)));
+    const grants = rows.map((row) => new Set((row.scope ?? "").split(/\s+/).filter(Boolean)));
+    const gmailReadAuthorized = grants.some((scopes) => scopes.has(GMAIL_READ));
+    const gmailSendAuthorized = grants.some((scopes) => scopes.has(GMAIL_SEND));
     let apiVerified = false;
-    if (scopes.has(GMAIL_READ)) {
+    if (gmailReadAuthorized) {
       try {
         const request = getRequest();
         if (request) {
@@ -46,8 +48,8 @@ export const getGmailConnectionStatus = createServerFn({ method: "GET" })
     }
     return {
       googleLinked: rows.length > 0,
-      gmailReadAuthorized: scopes.has(GMAIL_READ),
-      gmailSendAuthorized: scopes.has(GMAIL_SEND),
+      gmailReadAuthorized,
+      gmailSendAuthorized,
       apiVerified,
     };
   });
