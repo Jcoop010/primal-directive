@@ -58,7 +58,7 @@ export const previewGmailReplyHeaders = createServerFn({ method: "GET" })
       'select scope from account where "userId" = $1 and "providerId" = $2',
       [context.userId, "google"],
     );
-    if (!accounts.some((account) => (account.scope ?? "").split(/\\s+/).includes(READ_SCOPE))) return empty;
+    if (!accounts.some((account) => (account.scope ?? "").split(/\s+/).includes(READ_SCOPE))) return empty;
     const request = getRequest();
     if (!request) return empty;
     try {
