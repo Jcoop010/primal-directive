@@ -71,7 +71,7 @@ export const previewGmailReplyHeaders = createServerFn({ method: "GET" })
         const listResponse = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=10&q=in%3Ainbox", { headers, signal: controller.signal });
         if (!listResponse.ok) return empty;
         const listing = await listResponse.json() as { messages?: { id?: string }[] };
-        const ids = (listing.messages ?? []).map((m) => m.id).filter((id): id is string => typeof id === "string").slice(0, 10);
+        const ids = (Array.isArray(listing.messages) ? listing.messages : []).filter((m): m is { id: string } => Boolean(m && typeof m.id === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(m.id))).map((m) => m.id).slice(0, 10);
         const replies = await Promise.all(ids.map(async (id) => {
           const response = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${encodeURIComponent(id)}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date&metadataHeaders=In-Reply-To`, { headers, signal: controller.signal });
           if (!response.ok) return null;
