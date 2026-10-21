@@ -35,6 +35,14 @@ function GigsPage() {
   const [inboxLoading, setInboxLoading] = useState(false);
   const [replyPreview, setReplyPreview] = useState<{ connected: boolean; replies: { id: string; threadId: string; from: string; subject: string; date: string }[] } | null>(null);
   const [replyLoading, setReplyLoading] = useState(false);
+  const replyCandidates = replyPreview?.replies.map((reply) => {
+    const sender = reply.from.toLowerCase();
+    const matches = gigs.filter((gig) => {
+      const contact = gig.outreachEmail?.trim().toLowerCase();
+      return Boolean(contact && sender.includes(contact));
+    });
+    return { ...reply, matches };
+  }) ?? [];
   const [gmailStatus, setGmailStatus] = useState<"checking" | "google-only" | "consented" | "verified" | "unlinked" | "error">("checking");
   useEffect(() => {
     if (!ownerId) return;
@@ -173,7 +181,7 @@ function GigsPage() {
           void previewGmailReplyHeaders().then(setReplyPreview).catch(() => setReplyPreview({ connected: false, replies: [] })).finally(() => setReplyLoading(false));
         }}>{replyLoading ? "Checking replies…" : "Review recent Gmail reply headers"}</button>
         {replyPreview && <div role="status" className="mt-2 text-xs text-muted">{replyPreview.connected ? `${replyPreview.replies.length} recent messages contain reply headers. Review manually; no gig status is changed.` : "Gmail reply metadata is unavailable."}
-          {replyPreview.connected && replyPreview.replies.map((reply) => <p key={reply.id} className="mt-1 break-words">{reply.from} — {reply.subject} ({reply.date})</p>)}
+          {replyPreview.connected && replyCandidates.map((reply) => <p key={reply.id} className="mt-1 break-words">{reply.from} — {reply.subject} ({reply.date}){reply.matches.length === 1 ? ` · Possible match: ${reply.matches[0].venue || reply.matches[0].name} (review before updating)` : reply.matches.length > 1 ? " · Multiple possible matches; manual review needed" : " · No matching saved booking contact"}</p>)}
         </div>}
       </div>
       <section aria-label="Booking pipeline health" className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
