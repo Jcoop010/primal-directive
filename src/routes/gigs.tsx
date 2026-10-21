@@ -1,7 +1,7 @@
 import { BookingSummary } from "@/components/booking-summary";
 import { bookingDraft } from "@/lib/booking-workflow";
 import { getGmailConnectionStatus } from "@/lib/gmail-status";
-import { previewGmailInbox } from "@/lib/gmail-inbox";
+import { previewGmailInbox, previewGmailReplyHeaders } from "@/lib/gmail-inbox";
 import { ACTIVE_BOOKING_STATUSES } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import { researchSavedVenue } from "@/lib/venue-research-api";
@@ -33,6 +33,8 @@ function GigsPage() {
   const [filter, setFilter] = useState<"all" | GigStatus>("all");
   const [inboxPreview, setInboxPreview] = useState<{ connected: boolean; messages: { id: string; threadId: string }[] } | null>(null);
   const [inboxLoading, setInboxLoading] = useState(false);
+  const [replyPreview, setReplyPreview] = useState<{ connected: boolean; replies: { id: string; threadId: string; from: string; subject: string; date: string }[] } | null>(null);
+  const [replyLoading, setReplyLoading] = useState(false);
   const [gmailStatus, setGmailStatus] = useState<"checking" | "google-only" | "consented" | "verified" | "unlinked" | "error">("checking");
   useEffect(() => {
     if (!ownerId) return;
@@ -164,6 +166,15 @@ function GigsPage() {
           void previewGmailInbox().then(setInboxPreview).catch(() => setInboxPreview({ connected: false, messages: [] })).finally(() => setInboxLoading(false));
         }}>{inboxLoading ? "Checking Gmail…" : "Check Gmail inbox connection"}</button>
         {inboxPreview && <p role="status" className="mt-2 text-xs text-muted">{inboxPreview.connected ? `Gmail inbox accessible · ${inboxPreview.messages.length} recent message references retrieved. Replies are not yet linked to gigs.` : "Gmail inbox access unavailable. Connect and authorize Gmail before checking."}</p>}
+      </div>
+      <div className="mb-3 px-1">
+        <button type="button" disabled={replyLoading} className="rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-fg disabled:opacity-50" onClick={() => {
+          setReplyLoading(true);
+          void previewGmailReplyHeaders().then(setReplyPreview).catch(() => setReplyPreview({ connected: false, replies: [] })).finally(() => setReplyLoading(false));
+        }}>{replyLoading ? "Checking replies…" : "Review recent Gmail reply headers"}</button>
+        {replyPreview && <div role="status" className="mt-2 text-xs text-muted">{replyPreview.connected ? `${replyPreview.replies.length} recent messages contain reply headers. Review manually; no gig status is changed.` : "Gmail reply metadata is unavailable."}
+          {replyPreview.connected && replyPreview.replies.map((reply) => <p key={reply.id} className="mt-1 break-words">{reply.from} — {reply.subject} ({reply.date})</p>)}
+        </div>}
       </div>
       <section aria-label="Booking pipeline health" className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
         <div className="command-surface rounded-xl p-3 sm:p-4"><div className="command-kicker text-muted">Active leads</div><div className="mt-2 font-display text-3xl font-extrabold tabular text-info">{active.length}</div><p className="mt-1 text-xs text-muted">Not confirmed bookings</p></div>
