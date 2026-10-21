@@ -39,7 +39,8 @@ function GigsPage() {
     const sender = reply.from.toLowerCase();
     const matches = gigs.filter((gig) => {
       const contact = gig.outreachEmail?.trim().toLowerCase();
-      return Boolean(contact && sender.includes(contact));
+      const senderAddress = sender.match(/<([^<>\\s]+@[^<>\\s]+)>/)?.[1] ?? sender.trim();
+      return Boolean(contact && senderAddress === contact);
     });
     return { ...reply, matches };
   }) ?? [];
