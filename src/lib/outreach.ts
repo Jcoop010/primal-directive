@@ -65,16 +65,18 @@ export const pauseOutreach = createServerFn({ method: "POST" })
   .validator(z.object({ paused: z.boolean() }))
   .handler(async ({ context, data }) => {
     const sql = await getSql();
-    await sql.query(
-      "insert into outreach_preferences(user_id,paused) values($1,$2) on conflict(user_id) do update set paused=$2,updated_at=now()",
-      [context.userId, data.paused],
-    );
-    // Emergency pause also revokes unsent approvals. Resuming requires a fresh review.
-    if (data.paused)
-      await sql.query(
-        "update outreach_approvals set revoked_at=now() where user_id=$1 and revoked_at is null",
-        [context.userId],
+    await sql.transaction(async (tx) => {
+      await tx.query(
+        "insert into outreach_preferences(user_id,paused) values($1,$2) on conflict(user_id) do update set paused=$2,updated_at=now()",
+        [context.userId, data.paused],
       );
+      // Pause and approval revocation must commit together.
+      if (data.paused)
+        await tx.query(
+          "update outreach_approvals set revoked_at=now() where user_id=$1 and revoked_at is null",
+          [context.userId],
+        );
+    });
     return { paused: data.paused };
   });
 export const suppressOutreachContact = createServerFn({ method: "POST" })
@@ -83,14 +85,16 @@ export const suppressOutreachContact = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const recipient = normalizeRecipient(data.recipient);
     const sql = await getSql();
-    await sql.query(
-      "insert into outreach_suppressions(user_id,recipient,reason) values($1,$2,$3) on conflict(user_id,recipient) do nothing",
-      [context.userId, recipient, data.reason],
-    );
-    await sql.query(
-      "update outreach_approvals set revoked_at=now() where user_id=$1 and recipient=$2 and revoked_at is null",
-      [context.userId, recipient],
-    );
+    await sql.transaction(async (tx) => {
+      await tx.query(
+        "insert into outreach_suppressions(user_id,recipient,reason) values($1,$2,$3) on conflict(user_id,recipient) do nothing",
+        [context.userId, recipient, data.reason],
+      );
+      await tx.query(
+        "update outreach_approvals set revoked_at=now() where user_id=$1 and recipient=$2 and revoked_at is null",
+        [context.userId, recipient],
+      );
+    });
     return { ok: true };
   });
 export const approveBookingMessage = createServerFn({ method: "POST" })
