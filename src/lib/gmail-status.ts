@@ -30,7 +30,7 @@ export const getGmailConnectionStatus = createServerFn({ method: "GET" })
       } catch (e) {
         error =
           e instanceof Error &&
-          /^(Authorization|Mailbox|Provider rate|The email provider)/.test(e.message)
+          /^(Authorization|Mailbox|Gmail |Provider rate|The email provider)/.test(e.message)
             ? e.message
             : "Gmail verification failed. Try again or reconnect.";
       }

@@ -6,7 +6,7 @@ import { getSql } from "./db";
 import {
   hasMailScope,
   parseMailScopes,
-  mailboxError,
+  mailboxFailure,
   graphHeaders,
   type MailProvider,
   type MailHeader,
@@ -63,7 +63,29 @@ export async function mailboxFetch(token: string, url: string, init: RequestInit
     signal: AbortSignal.timeout(8000),
     redirect: "error",
   });
-  if (!result.ok) throw new Error(mailboxError(result.status));
+  if (!result.ok) {
+    let payload: unknown = null;
+    try {
+      const raw = await result.text();
+      if (raw.length <= 50000) payload = JSON.parse(raw);
+    } catch {
+      /* Never expose untrusted provider content. */
+    }
+    const host = new URL(url).hostname;
+    const provider =
+      host === "gmail.googleapis.com"
+        ? "google"
+        : host === "graph.microsoft.com"
+          ? "microsoft"
+          : undefined;
+    const failure = mailboxFailure(result.status, provider, payload);
+    console.warn("mailbox-provider-error", {
+      provider: provider ?? "unknown",
+      status: result.status,
+      code: failure.code,
+    });
+    throw new Error(failure.message);
+  }
   const raw = await result.text();
   if (raw.length > 1_000_000) throw new Error("Mailbox response exceeded the safe preview limit.");
   return raw ? JSON.parse(raw) : null;

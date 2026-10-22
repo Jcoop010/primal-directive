@@ -321,6 +321,29 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
       /SECRET-TOKEN|encrypted-fixture/,
     );
     current = "b";
+    refreshFails = false;
+    globalThis.fetch = async () =>
+      Response.json(
+        {
+          error: {
+            message: "private-provider-details",
+            details: [
+              {
+                reason: "SERVICE_DISABLED",
+                metadata: { activationUrl: "https://attacker.invalid/private" },
+              },
+            ],
+          },
+        },
+        { status: 403 },
+      );
+    await assert.rejects(
+      () => api.syncMailbox({ data: { accountId: "bb" } }),
+      /Gmail API is disabled/,
+    );
+    const failedStatus = await api.mailboxStatus();
+    assert.match(failedStatus.accounts[0].last_error, /Google Cloud project/);
+    assert.doesNotMatch(JSON.stringify(failedStatus), /private-provider-details|attacker/);
     assert.equal((await api.mailboxStatus()).drafts.length, 0);
     assert.equal((await api.mailboxStatus()).messages.length, 0);
     await assert.rejects(() => api.exportOutlookDraft({ data: { id: draft.id } }), /unavailable/);
@@ -570,4 +593,39 @@ test("Microsoft renewal preserves mailbox consent by omitting login-only scope n
   } finally {
     globalThis.fetch = previous;
   }
+});
+
+test("Gmail failures distinguish disabled API, token scopes, domain policy and quotas without leaking provider details", () => {
+  const failure = (reason) =>
+    policy.mailboxFailure(403, "google", {
+      error: {
+        message: "private-token-and-email",
+        errors: [{ reason }],
+        details: [{ metadata: { activationUrl: "https://attacker.invalid/private-token" } }],
+      },
+    });
+  assert.equal(failure("accessNotConfigured").code, "gmail-api-disabled");
+  assert.equal(
+    policy.mailboxFailure(403, "google", { error: { details: [{ reason: "SERVICE_DISABLED" }] } })
+      .code,
+    "gmail-api-disabled",
+  );
+  assert.match(failure("insufficientPermissions").message, /current token/);
+  assert.equal(failure("domainPolicy").code, "gmail-domain-policy");
+  assert.equal(failure("userRateLimitExceeded").code, "gmail-quota");
+  assert.equal(failure("unknown-private-token").code, "gmail-forbidden-unclassified");
+  for (const reason of [
+    "accessNotConfigured",
+    "insufficientPermissions",
+    "domainPolicy",
+    "unknown-private-token",
+  ]) {
+    assert.doesNotMatch(JSON.stringify(failure(reason)), /private-token|attacker|activationUrl/);
+  }
+  assert.equal(
+    policy.mailboxFailure(403, "microsoft", {
+      error: { details: [{ reason: "SERVICE_DISABLED" }] },
+    }).code,
+    "permission-denied",
+  );
 });
