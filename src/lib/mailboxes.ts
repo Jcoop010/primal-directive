@@ -202,7 +202,7 @@ export const syncMailbox = createServerFn({ method: "POST" })
     } catch (e) {
       const message =
         e instanceof Error &&
-        /^(Authorization|Mailbox|Provider rate|The email provider)/.test(e.message)
+        /^(Authorization|Mailbox|Gmail |Provider rate|The email provider)/.test(e.message)
           ? e.message
           : "Inbox synchronization failed. Reconnect or try again later.";
       await sql.query(

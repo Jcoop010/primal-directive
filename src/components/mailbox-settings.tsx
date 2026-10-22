@@ -51,6 +51,9 @@ export function MailboxSettings() {
       setNotice(message);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Email action unavailable.");
+      // Failed API checks persist their safe error. Refresh that status too so
+      // the card cannot continue claiming a healthy permission-only connection.
+      await load().catch(() => {});
     } finally {
       setBusy(false);
     }
@@ -119,7 +122,11 @@ export function MailboxSettings() {
                 <h3 className="font-bold">{label}</h3>
                 <span className="text-xs text-muted">
                   {a?.enabled && a.read
-                    ? "Permission granted"
+                    ? a.last_error
+                      ? "API check failed"
+                      : a.last_sync_at
+                        ? "Inbox verified"
+                        : "Permissions saved"
                     : a && !a.enabled
                       ? "Disconnected"
                       : "Mailbox not connected"}
@@ -128,9 +135,13 @@ export function MailboxSettings() {
               <p className="text-sm text-muted">
                 {unavailable
                   ? "Microsoft application registration is required before login or mailbox consent can be tested."
-                  : a?.enabled && a.last_sync_at
-                    ? `Inbox API verified ${new Date(a.last_sync_at).toLocaleString()}. Recheck to verify current access.`
-                    : "Mailbox API access is not yet verified. Connect, then check inbox."}
+                  : a?.enabled && a.last_error
+                    ? "Inbox access could not be verified. Saved OAuth permissions are shown below."
+                    : a?.enabled && a.last_sync_at
+                      ? `Inbox API verified ${new Date(a.last_sync_at).toLocaleString()}. Recheck to verify current access.`
+                      : a?.enabled && a.read
+                        ? "Permissions saved. Check the inbox to verify API access."
+                        : "Connect inbox permissions to get started."}
               </p>
               {a?.enabled && (
                 <p className="text-xs text-muted">
@@ -141,7 +152,19 @@ export function MailboxSettings() {
                   · Renewal: {a.refreshable ? "available" : "reconnect needed"}
                 </p>
               )}
-              {a?.last_error && <p className="text-sm text-warn">{a.last_error}</p>}
+              {a?.last_error && a.last_error !== error && (
+                <p className="text-sm text-warn">{a.last_error}</p>
+              )}
+              {a?.last_error?.startsWith("Gmail API is disabled") && (
+                <a
+                  className="inline-flex min-h-11 items-center text-sm text-accent underline"
+                  href="https://console.cloud.google.com/apis/library/gmail.googleapis.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  App owner: open Gmail API settings
+                </a>
+              )}
               <div className="flex flex-wrap gap-2">
                 <Button
                   disabled={busy || !status || Boolean(unavailable)}
