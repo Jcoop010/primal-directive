@@ -82,8 +82,24 @@ test(
       assert.equal(tampered.rows[0].result, "approval-required");
       await pool.query("update outreach_delivery_audit set status='unknown' where user_id='one'");
       assert.equal(await reserve("one", "duplicate"), "duplicate");
+      await approve("daily", "daily-a");
+      await approve("daily", "daily-b");
+      await pool.query(`insert into outreach_delivery_audit(idempotency_key,user_id,gig_id,recipient,status,created_at)
+        select 'daily-seed-'||n,'daily','seed-'||n,'daily-seed@example.com','failed',now()-interval '2 hours' from generate_series(1,19) n`);
+      const daily = await Promise.all([reserve("daily", "daily-a"), reserve("daily", "daily-b")]);
+      assert.equal(daily.filter((r) => r === "reserved").length, 1);
+      assert.equal(daily.filter((r) => r === "quota-exceeded").length, 1);
+      for (const id of ["global-a", "global-b", "global-c", "global-d"]) await approve(id, id);
+      await pool.query(`insert into outreach_delivery_audit(idempotency_key,user_id,gig_id,recipient,status)
+        select 'global-seed-'||n,'global-seed','seed-'||n,'global@example.com','unknown'
+        from generate_series(1,(98-(select count(*) from outreach_delivery_audit where created_at>now()-interval '1 hour'))::integer) n`);
+      const global = await Promise.all(
+        ["global-a", "global-b", "global-c", "global-d"].map((id) => reserve(id, id)),
+      );
+      assert.equal(global.filter((r) => r === "reserved").length, 2);
+      assert.equal(global.filter((r) => r === "quota-exceeded").length, 2);
       await pool.query(
-        "create role pd_browser nologin; grant usage on schema public to pd_browser; grant select on outreach_approvals,outreach_delivery_audit to pd_browser",
+        "drop role if exists pd_browser; create role pd_browser nologin; grant usage on schema public to pd_browser; grant select on outreach_approvals,outreach_delivery_audit to pd_browser",
       );
       const browser = await pool.connect();
       try {
