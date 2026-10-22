@@ -12,6 +12,7 @@ function Account() {
   const [replies, setReplies] = useState<Awaited<ReturnType<typeof previewGmailReplyHeaders>>>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [gmailAttempted, setGmailAttempted] = useState(false);
   useEffect(() => {
     let active = true;
     Promise.all([billingStatus(), getGmailConnectionStatus()])
@@ -42,6 +43,7 @@ function Account() {
   }
   async function connect(scopes: string[]) {
     setBusy(true);
+    setGmailAttempted(true);
     setError("");
     try {
       const result = await authClient.linkSocial({
@@ -49,7 +51,13 @@ function Account() {
         scopes,
         callbackURL: window.location.origin + "/account",
       });
-      if (result.error) throw new Error("Gmail connection could not be started");
+      if (result.error) throw new Error(result.error.message ?? "Gmail connection could not be started");
+      // Some browsers return to this page without a fresh OAuth grant.
+      // Refresh status so this never looks like a successful connection.
+      const latest = await getGmailConnectionStatus();
+      setGmail(latest);
+      if (!latest.apiVerified)
+        setError("Google returned without verified Gmail read access. The OAuth consent flow may not have granted Gmail permissions.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Connection unavailable");
     } finally {
@@ -129,6 +137,11 @@ function Account() {
               Authorize sending
             </Button>
           </div>
+          {gmailAttempted && gmail && !gmail.apiVerified && (
+            <p role="status" className="text-sm text-muted">
+              Gmail read permission: {gmail.gmailReadAuthorized ? "granted" : "missing"} · send permission: {gmail.gmailSendAuthorized ? "granted" : "missing"}. If you returned without a Google permission screen, OAuth consent must be re-requested.
+            </p>
+          )}
           <p className="text-xs text-muted">
             Sending stays disabled until integration checks pass. Revoke Primal Directive in your
             Google account to withdraw access.
