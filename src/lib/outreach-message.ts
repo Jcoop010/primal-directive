@@ -83,3 +83,38 @@ export async function deliverGmail(
     return { status: "unknown", reason: "provider-timeout-or-network-error" };
   }
 }
+
+/** Graph sendMail returns 202 with no delivery receipt. Keep it unreconciled;
+ * never claim delivery or retry blindly, even on a nominally successful submission. */
+export async function deliverOutlook(
+  token: string,
+  message: { recipient: string; subject: string; body: string },
+  request: typeof fetch = fetch,
+): Promise<GmailDelivery> {
+  const recipient = normalizeRecipient(message.recipient);
+  encodeGmailMessage({ ...message, recipient, key: "validation" });
+  try {
+    const response = await request("https://graph.microsoft.com/v1.0/me/sendMail", {
+      method: "POST",
+      redirect: "error",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(10000),
+      body: JSON.stringify({
+        message: {
+          subject: message.subject,
+          body: { contentType: "Text", content: message.body },
+          toRecipients: [{ emailAddress: { address: recipient } }],
+        },
+        saveToSentItems: true,
+      }),
+    });
+    if (response.status === 202)
+      return { status: "unknown", reason: "provider-accepted-delivery-unverified" };
+    return {
+      status: response.status >= 500 || response.ok ? "unknown" : "failed",
+      reason: `provider-${response.status}`,
+    };
+  } catch {
+    return { status: "unknown", reason: "provider-timeout-or-network-error" };
+  }
+}

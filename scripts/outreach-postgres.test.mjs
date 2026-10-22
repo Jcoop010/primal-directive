@@ -23,6 +23,7 @@ test(
         "0004_automation_runs.sql",
         "0005_outreach_delivery.sql",
         "0006_billing.sql",
+        "0007_mailboxes.sql",
       ])
         await pool.query(readFileSync(new URL("../migrations/" + name, import.meta.url), "utf8"));
       const approve = async (user, id, gig = id, recipient = `${id}@example.com`) => {
@@ -98,6 +99,39 @@ test(
       );
       assert.equal(global.filter((r) => r === "reserved").length, 2);
       assert.equal(global.filter((r) => r === "quota-exceeded").length, 2);
+      // Bind a delivery to a real owned mailbox; a foreign or revoked connection
+      // must fail inside the same transaction as the send reservation.
+      await pool.query("delete from outreach_delivery_audit where user_id='global-seed'");
+      await pool.query(`insert into "user"(id,name,email,"emailVerified") values('mail-a','Mail A','mail-a@example.invalid',true),('mail-b','Mail B','mail-b@example.invalid',true);
+       insert into account(id,"userId","providerId","accountId",scope,"updatedAt") values('mail-aa','mail-a','microsoft','provider-aa','Mail.Read Mail.Send',now()),('mail-bb','mail-b','google','provider-bb','https://www.googleapis.com/auth/gmail.send',now());`);
+      await approve("mail-a", "mail-approval");
+      await pool.query(
+        "update outreach_approvals set mailbox_account_id='mail-bb' where id='mail-approval'",
+      );
+      await assert.rejects(
+        () => reserve("mail-a", "mail-approval"),
+        /Mailbox authorization unavailable/,
+      );
+      await pool.query(
+        "update outreach_approvals set mailbox_account_id='mail-aa' where id='mail-approval'",
+      );
+      await pool.query(
+        "insert into mailbox_connections(user_id,account_id,enabled) values('mail-a','mail-aa',false)",
+      );
+      await assert.rejects(
+        () => reserve("mail-a", "mail-approval"),
+        /Mailbox authorization unavailable/,
+      );
+      await pool.query("update mailbox_connections set enabled=true where user_id='mail-a'");
+      const mailReservations = await Promise.all([
+        reserve("mail-a", "mail-approval"),
+        reserve("mail-a", "mail-approval"),
+      ]);
+      assert.deepEqual(mailReservations.sort(), ["duplicate", "reserved"]);
+      const bound = await pool.query(
+        "select mailbox_account_id,mail_provider from outreach_delivery_audit where user_id='mail-a'",
+      );
+      assert.deepEqual(bound.rows, [{ mailbox_account_id: "mail-aa", mail_provider: "microsoft" }]);
       await pool.query(
         "drop role if exists pd_browser; create role pd_browser nologin; grant usage on schema public to pd_browser; grant select on outreach_approvals,outreach_delivery_audit to pd_browser",
       );
