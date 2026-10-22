@@ -45,3 +45,22 @@ export async function settleOutreachDelivery(input: {
   );
   return rows.length === 1;
 }
+
+/** Audit-backed, fail-closed sending quota. Counts reservations as sends because
+ * provider timeouts may have delivered the message. Includes all statuses.
+ */
+export async function getOutreachSendQuota(userId: string): Promise<{
+  hourlyCount: number; dailyCount: number; canSend: boolean;
+}> {
+  if (!userId) throw new Error("User identity required");
+  const sql = await getSql();
+  const rows = await sql.query<{ hourly_count: string | number; daily_count: string | number }>(
+    `SELECT COUNT(*) FILTER (WHERE created_at > now() - interval '1 hour') AS hourly_count,
+            COUNT(*) FILTER (WHERE created_at > now() - interval '24 hours') AS daily_count
+     FROM outreach_delivery_audit WHERE user_id = $1`, [userId],
+  );
+  const hourlyCount = Number(rows[0]?.hourly_count);
+  const dailyCount = Number(rows[0]?.daily_count);
+  if (!Number.isSafeInteger(hourlyCount) || !Number.isSafeInteger(dailyCount)) throw new Error("Invalid quota audit");
+  return { hourlyCount, dailyCount, canSend: hourlyCount < 5 && dailyCount < 20 };
+}
