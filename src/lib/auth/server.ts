@@ -160,7 +160,11 @@ export const auth = betterAuth({
       // Gmail access is opt-in, distinct from signing in with Google.
       // Only request these permissions after the owner enables the integration.
       ...(env("GMAIL_INTEGRATION_ENABLED") === "true"
-        ? { scope: ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"] }
+        ? {
+            scope: ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"],
+            prompt: "consent" as const,
+            accessType: "offline" as const,
+          }
         : {}),
     } } : {}),
   },
