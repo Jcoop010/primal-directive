@@ -132,7 +132,6 @@ jobs:
           if [ "$GITHUB_REF" = "refs/heads/main" ]; then
             AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/ci-auth-smoke.mjs
             AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/oauth-state-smoke.mjs
-            AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app node scripts/verify-venue-research.mjs
             # Do not create fictional accounts and mutable QA records in production.
             # Full authenticated acceptance runs above against the isolated built preview.
           fi
