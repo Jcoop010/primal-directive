@@ -170,12 +170,22 @@ try {
   await page.getByRole("button", {name:"Build draft from profile",exact:true}).click();
   await page.getByLabel("Recipient email", {exact:true}).fill("fictional-booker@example.invalid");
   await page.getByLabel("Official booking contact source (HTTPS)", {exact:true}).fill("https://example.invalid/booking-contact");
-  await page.getByRole("checkbox").check();
+  await page.getByRole("checkbox",{name:/I verified this recipient/}).check();
   await page.getByRole("button", {name:"Save explicit approval",exact:true}).click();
   await page.getByText("Approval saved. Nothing has been sent.", {exact:true}).waitFor();
   await ready("/outreach");
   await page.getByRole("button", {name:"Send approved email",exact:true}).waitFor();
   assert.equal(await page.getByRole("button", {name:"Send approved email",exact:true}).isEnabled(),false);
+  await page.getByRole("checkbox",{name:/I opt in to scheduled delivery/}).check();
+  await page.getByRole("button",{name:"Save scheduling opt-in",exact:true}).click();
+  await page.getByText("Scheduling preferences saved. Sending remains subject to release verification.",{exact:true}).waitFor();
+  await page.getByLabel("Approved message",{exact:true}).selectOption({index:1});
+  await page.getByLabel("Earliest delivery time (your local time)",{exact:true}).fill(new Date(Date.now()+2*86400000).toISOString().slice(0,16));
+  await page.getByRole("button",{name:"Approve scheduled delivery",exact:true}).click();
+  await page.getByText("Exact message scheduled. Nothing has been sent.",{exact:true}).waitFor();
+  await ready("/outreach");
+  await page.getByRole("button",{name:"Cancel scheduled message",exact:true}).click();
+  await page.getByText("Scheduled delivery cancelled.",{exact:true}).waitFor();
   await ready("/account");
   await page.getByText("Current access: FREE", {exact:true}).waitFor();
   for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {

@@ -59,8 +59,8 @@ function Pricing() {
               description: "For artists who want to prepare more of their booking operations.",
               features: [
                 "Everything in Pro",
-                "Studio entitlement reserved for autonomous outreach",
-                "Autonomous sending is not available at launch",
+                "Opt-in scheduling of approved emails after release verification",
+                "Reply-aware follow-up stop controls after release verification",
                 "Same account-level sending safety limits",
               ],
             },

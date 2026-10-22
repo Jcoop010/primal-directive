@@ -52,3 +52,9 @@ Do not set release-verification flags simply to make a button work. Do not put k
 Local TypeScript, lint (three pre-existing warnings), production build and the automated unit/regression suites passed during implementation. Local browser download failed and the environment prevented running a separate PostgreSQL process. GitHub CI supplies the real PostgreSQL concurrency/tenant test and browser acceptance. Exact final CI/deployment results belong in the release response; this document does not predict those results.
 
 Gmail mock transport tests verify no retry on 401/403/429/500, network timeout and malformed provider receipt; these are not real Gmail integration tests. Stripe SDK signature tests and fixture-based database reconciliation are not real payment tests.
+
+## Scheduling continuation
+
+The follow-on scheduling change adds opt-in rules and append-only consent history, bounded durable jobs, exact-message scheduling consent, maximum two follow-ups, closed-booking stops, Gmail thread reply/opt-out checks, conservative local reply classifications, and a daily Vercel cron entry point. Worker claims use compare-and-swap; provider errors and crashed/unknown jobs are never automatically retried. Account pause and scheduling opt-out revoke or cancel queued work. Real scheduled delivery remains gated by Gmail test-account verification and Studio entitlement. Rule-based text classification is not AI sentiment analysis; it never confirms gigs or changes deal terms.
+
+Scheduling processes at most five due jobs per daily run at 13:00 UTC. Configuring `CRON_SECRET` is required. The Gmail integration tests must include this worker before release flags can be enabled.

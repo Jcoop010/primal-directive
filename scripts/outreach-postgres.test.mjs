@@ -23,6 +23,7 @@ test(
         "0004_automation_runs.sql",
         "0005_outreach_delivery.sql",
         "0006_billing.sql",
+        "0007_outreach_scheduling.sql",
       ])
         await pool.query(readFileSync(new URL("../migrations/" + name, import.meta.url), "utf8"));
       const approve = async (user, id, gig = id, recipient = `${id}@example.com`) => {
@@ -82,6 +83,32 @@ test(
       assert.equal(tampered.rows[0].result, "approval-required");
       await pool.query("update outreach_delivery_audit set status='unknown' where user_id='one'");
       assert.equal(await reserve("one", "duplicate"), "duplicate");
+      for (let i = 0; i < 4; i++) await approve("configured", `configured${i}`);
+      await pool.query(
+        "insert into outreach_rules(user_id,enabled,hourly_limit,daily_limit,policy_version) values('configured',true,2,4,'2026-10-22-v1')",
+      );
+      const configured = await Promise.all(
+        [0, 1, 2, 3].map((i) => reserve("configured", `configured${i}`)),
+      );
+      assert.equal(configured.filter((r) => r === "reserved").length, 2);
+      await approve("queued", "queued");
+      await pool.query(
+        "insert into outreach_rules(user_id,enabled,policy_version) values('queued',true,'2026-10-22-v1');insert into outreach_jobs(id,user_id,approval_id,not_before) values('job','queued','queued',now())",
+      );
+      assert.equal(await reserve("queued", "queued"), "scheduling-consent-required");
+      const claims = await Promise.all(
+        [1, 2].map(() =>
+          pool.query(
+            "update outreach_jobs set status='processing' where id='job' and status='scheduled' returning id",
+          ),
+        ),
+      );
+      assert.equal(
+        claims.reduce((n, r) => n + r.rowCount, 0),
+        1,
+      );
+      await pool.query("update outreach_rules set enabled=false where user_id='queued'");
+      assert.equal(await reserve("queued", "queued"), "scheduling-consent-required");
       await approve("daily", "daily-a");
       await approve("daily", "daily-b");
       await pool.query(`insert into outreach_delivery_audit(idempotency_key,user_id,gig_id,recipient,status,created_at)

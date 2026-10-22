@@ -27,6 +27,7 @@ import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
+import { Route as ApiCronOutreachRouteImport } from './routes/api.cron.outreach'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api.stripe.webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -119,6 +120,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronOutreachRoute = ApiCronOutreachRouteImport.update({
+  id: '/api/cron/outreach',
+  path: '/api/cron/outreach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/outreach': typeof ApiCronOutreachRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/outreach': typeof ApiCronOutreachRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/outreach': typeof ApiCronOutreachRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/tour'
     | '/api/health'
     | '/api/auth/$'
+    | '/api/cron/outreach'
     | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/tour'
     | '/api/health'
     | '/api/auth/$'
+    | '/api/cron/outreach'
     | '/api/stripe/webhook'
   id:
     | '__root__'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/tour'
     | '/api/health'
     | '/api/auth/$'
+    | '/api/cron/outreach'
     | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   TourRoute: typeof TourRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCronOutreachRoute: typeof ApiCronOutreachRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
@@ -405,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/outreach': {
+      id: '/api/cron/outreach'
+      path: '/api/cron/outreach'
+      fullPath: '/api/cron/outreach'
+      preLoaderRoute: typeof ApiCronOutreachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -434,6 +454,7 @@ const rootRouteChildren: RootRouteChildren = {
   TourRoute: TourRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCronOutreachRoute: ApiCronOutreachRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
