@@ -10,11 +10,12 @@ export const Route = createFileRoute("/api/health")({
           const [state] = await sql.query<{
             outreach: string | null;
             billing: string | null;
+            app_state: string | null;
             approvals: string | null;
           }>(
-            "select to_regclass('public.outreach_delivery_audit')::text as outreach,to_regclass('public.pd_subscriptions')::text as billing,to_regclass('public.outreach_approvals')::text as approvals",
+            "select to_regclass('public.outreach_delivery_audit')::text as outreach,to_regclass('public.pd_subscriptions')::text as billing,to_regclass('public.outreach_approvals')::text as approvals,to_regclass('public.app_state')::text as app_state",
           );
-          if (!state?.outreach || !state.billing || !state.approvals)
+          if (!state?.outreach || !state.approvals || !state.app_state || (process.env.BILLING_ENABLED === "true" && !state.billing))
             return Response.json({ status: "not-ready" }, { status: 503, headers });
           return Response.json(
             {
