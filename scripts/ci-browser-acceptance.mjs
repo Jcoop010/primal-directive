@@ -164,9 +164,23 @@ try {
     await page.getByText("OFFLINE MODE — AI PROVIDER NOT CONFIGURED", { exact: true }).waitFor();
   }
 
+  await ready("/outreach");
+  await page.getByText("Sending disabled · test-account verification pending", {exact:true}).waitFor();
+  await page.getByLabel("Saved booking", {exact:true}).selectOption((await state()).gigs[0].id);
+  await page.getByRole("button", {name:"Build draft from profile",exact:true}).click();
+  await page.getByLabel("Recipient email", {exact:true}).fill("fictional-booker@example.invalid");
+  await page.getByLabel("Official booking contact source (HTTPS)", {exact:true}).fill("https://example.invalid/booking-contact");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", {name:"Save explicit approval",exact:true}).click();
+  await page.getByText("Approval saved. Nothing has been sent.", {exact:true}).waitFor();
+  await ready("/outreach");
+  await page.getByRole("button", {name:"Send approved email",exact:true}).waitFor();
+  assert.equal(await page.getByRole("button", {name:"Send approved email",exact:true}).isEnabled(),false);
+  await ready("/account");
+  await page.getByText("Current access: FREE", {exact:true}).waitFor();
   for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
-    for (const route of ["/", "/board", "/gigs", "/people", "/money", "/calendar", "/tour", "/merch", "/tasks"]) {
+    for (const route of ["/", "/board", "/gigs", "/people", "/money", "/calendar", "/tour", "/merch", "/tasks", "/account", "/outreach"]) {
       await ready(route);
       assert.ok((await page.locator("main").innerText()).trim().length > 20, "Empty route: " + route);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1), false, "Horizontal overflow: " + route);
@@ -198,6 +212,9 @@ try {
   assert.equal(bob.money.length, 0);
   assert.equal(bob.merchProducts.length, 0);
   assert.equal(bob.profile.artistName, "");
+  await ready("/outreach");
+  await page.getByText("No pending approvals.", {exact:true}).waitFor();
+  assert.equal(await page.getByRole("button",{name:"Send approved email",exact:true}).count(),0);
   await auth("sign-out", {});
   await auth("sign-in/email", { email: emailA, password });
   await ready("/people");

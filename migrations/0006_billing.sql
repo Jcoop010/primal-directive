@@ -3,6 +3,9 @@ create table if not exists pd_billing_customers (
   user_id text primary key references "user"(id) on delete cascade,
   customer_id text not null unique,
   livemode boolean not null,
+  checkout_request_key text,
+  checkout_plan text,
+  checkout_session_id text,
   created_at timestamptz not null default now()
 );
 create table if not exists pd_subscriptions (

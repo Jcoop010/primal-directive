@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { randomUUID } from "node:crypto";
 import { authMiddleware } from "./auth/middleware";
 import { getSql } from "./db";
 import {
@@ -56,23 +57,73 @@ export const startCheckout = createServerFn({ method: "POST" })
       price.livemode !== billingConfiguration().live
     )
       throw new Error("Subscription price validation failed");
-    // A stable window key prevents double clicks from creating parallel checkout sessions.
-    const session = await stripe.checkout.sessions.create(
-      {
-        mode: "subscription",
-        customer: rows[0].customer_id,
-        line_items: [{ price: price.id, quantity: 1 }],
-        success_url: `${APP_ORIGIN}/account?checkout=success`,
-        cancel_url: `${APP_ORIGIN}/pricing`,
-        integration_identifier: "primal_directive_abcdwxyz",
-      },
-      {
-        idempotencyKey: `pd-checkout-${context.userId}-${data.plan}-${Math.floor(Date.now() / 1800000)}`,
-      },
+    // Persist the request key before contacting Stripe so an ambiguous API timeout
+    // resumes the same provider operation, including across deploys and time windows.
+    await sql.query(
+      "update pd_billing_customers set checkout_request_key=$2,checkout_plan=$3 where user_id=$1 and checkout_request_key is null",
+      [context.userId, randomUUID(), data.plan],
     );
-    if (!session.url || new URL(session.url).hostname !== "checkout.stripe.com")
-      throw new Error("Invalid checkout URL");
-    return { url: session.url };
+    return sql.transaction(async (tx) => {
+      const [customer] = await tx.query<{
+        customer_id: string;
+        checkout_request_key: string;
+        checkout_plan: "pro" | "studio";
+        checkout_session_id: string | null;
+      }>(
+        "select customer_id,checkout_request_key,checkout_plan,checkout_session_id from pd_billing_customers where user_id=$1 and livemode=$2 for update",
+        [context.userId, billingConfiguration().live],
+      );
+      if (!customer) throw new Error("Billing account unavailable");
+      const existing = await stripe.subscriptions.list({
+        customer: customer.customer_id,
+        status: "all",
+        limit: 100,
+      });
+      if (existing.data.some((s) => !["canceled", "incomplete_expired"].includes(s.status)))
+        throw new Error("Manage your existing subscription in Billing instead");
+      if (customer.checkout_session_id) {
+        const pending = await stripe.checkout.sessions.retrieve(customer.checkout_session_id);
+        if (pending.status === "complete")
+          throw new Error("Payment is being confirmed. Refresh Account shortly.");
+        if (pending.status === "open" && pending.url) {
+          if (customer.checkout_plan !== data.plan)
+            throw new Error(
+              "A checkout for your other plan is already open. Complete it or wait for it to expire.",
+            );
+          if (new URL(pending.url).hostname !== "checkout.stripe.com")
+            throw new Error("Invalid checkout URL");
+          return { url: pending.url };
+        }
+        customer.checkout_request_key = randomUUID();
+        customer.checkout_plan = data.plan;
+        await tx.query(
+          "update pd_billing_customers set checkout_request_key=$2,checkout_plan=$3,checkout_session_id=null where user_id=$1",
+          [context.userId, customer.checkout_request_key, data.plan],
+        );
+      }
+      if (customer.checkout_plan !== data.plan)
+        throw new Error(
+          "A checkout request for another plan needs reconciliation before changing plans",
+        );
+      const session = await stripe.checkout.sessions.create(
+        {
+          mode: "subscription",
+          customer: customer.customer_id,
+          line_items: [{ price: price.id, quantity: 1 }],
+          success_url: `${APP_ORIGIN}/account?checkout=success`,
+          cancel_url: `${APP_ORIGIN}/pricing`,
+          integration_identifier: "primal_directive_abcdwxyz",
+        },
+        { idempotencyKey: `pd-checkout-${customer.checkout_request_key}` },
+      );
+      if (!session.url || new URL(session.url).hostname !== "checkout.stripe.com")
+        throw new Error("Invalid checkout URL");
+      await tx.query("update pd_billing_customers set checkout_session_id=$2 where user_id=$1", [
+        context.userId,
+        session.id,
+      ]);
+      return { url: session.url };
+    });
   });
 export const openBillingPortal = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
