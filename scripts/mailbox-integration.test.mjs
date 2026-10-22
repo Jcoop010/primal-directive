@@ -23,7 +23,7 @@ const oauthModule = read("src/lib/auth/microsoft.server.ts").replace(
 const { microsoftOAuthOptions, MICROSOFT_LINKING_POLICY } = await import(compile(oauthModule));
 
 const transportUrl = compile(read("src/lib/outreach-message.ts"));
-const { deliverOutlook } = await import(transportUrl);
+const { deliverOutlook, outreachInternetMessageId } = await import(transportUrl);
 test("mailbox grants preserve previous permissions and separate login, read, send, drafts", () => {
   assert.deepEqual(
     policy.mailboxConsentScopes("google", [policy.MAIL_SCOPES.google.read], "send"),
@@ -63,11 +63,17 @@ test("Graph one-shot submission never invents delivery confirmation or retries",
     let calls = 0;
     const result = await deliverOutlook(
       "fixture",
-      { recipient: "venue@example.invalid", subject: "Approved fixture", body: "Fictional QA" },
+      {
+        recipient: "venue@example.invalid",
+        subject: "Approved fixture",
+        body: "Fictional QA",
+        key: "fixture-key",
+      },
       async (url, init) => {
         calls++;
         assert.equal(url, "https://graph.microsoft.com/v1.0/me/sendMail");
-        assert.equal(JSON.parse(init.body).message.toRecipients.length, 1);
+        assert.equal(init.headers["Content-Type"], "text/plain");
+        assert.match(Buffer.from(init.body, "base64").toString(), /^To: venue@example.invalid\r\n/);
         return new Response(null, { status });
       },
     );
@@ -76,7 +82,7 @@ test("Graph one-shot submission never invents delivery confirmation or retries",
   }
   const result = await deliverOutlook(
     "fixture",
-    { recipient: "venue@example.invalid", subject: "Fixture", body: "Fixture" },
+    { recipient: "venue@example.invalid", subject: "Fixture", body: "Fixture", key: "fixture-key" },
     async () => {
       throw new Error("ambiguous timeout");
     },
@@ -176,7 +182,8 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
       'const getRequest=()=>new Request("http://localhost:8080");',
     )
     .replace('import { getSql } from "./db";', "const getSql=async()=>globalThis.__mailSql;")
-    .replace('from "./mailbox-policy"', `from "${policyUrl}"`);
+    .replace('from "./mailbox-policy"', `from "${policyUrl}"`)
+    .replace('from "./outreach-message"', `from "${transportUrl}"`);
   let refreshFails = false;
   globalThis.__mailAuth = {
     api: {
@@ -225,6 +232,16 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
     await api.selectMailbox({ data: { accountId: "aa" } });
     assert.equal((await api.mailboxStatus()).selected, "aa");
     globalThis.fetch = async (url) => {
+      if (String(url).includes("/sentitems/"))
+        return Response.json({
+          value: [
+            {
+              id: "actual-sent-receipt",
+              conversationId: "thread",
+              internetMessageId: outreachInternetMessageId("receipt"),
+            },
+          ],
+        });
       assert.ok(
         String(url).startsWith("https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?"),
       );
@@ -240,7 +257,7 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
         ],
       });
     };
-    await db.exec(`insert into outreach_delivery_audit(idempotency_key,user_id,gig_id,recipient,status,provider_message_id,provider_thread_id,mailbox_account_id,mail_provider) values('receipt','a','gig-a','venue@example.invalid','sent','sent-message','thread','aa','microsoft');
+    await db.exec(`insert into outreach_delivery_audit(idempotency_key,user_id,gig_id,recipient,status,provider_message_id,provider_thread_id,mailbox_account_id,mail_provider) values('receipt','a','gig-a','venue@example.invalid','unknown',null,null,'aa','microsoft');
     insert into outreach_approvals(id,user_id,gig_id,recipient,subject,body,message_fingerprint,contact_source_url,policy_version,mailbox_account_id) values('pending-reply','a','gig-a','venue@example.invalid','Fixture','Fixture','hash','https://example.invalid','2026-10-22-v1','aa');`);
     await api.syncMailbox({ data: { accountId: "aa" } });
     assert.equal(
@@ -252,6 +269,20 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
       true,
     );
     assert.equal((await api.mailboxStatus()).messages[0].reply_to, "<fixture>");
+    assert.deepEqual(
+      (
+        await db.query(
+          "select status,provider_message_id,provider_thread_id from outreach_delivery_audit where idempotency_key='receipt'",
+        )
+      ).rows,
+      [
+        {
+          status: "sent",
+          provider_message_id: "actual-sent-receipt",
+          provider_thread_id: "thread",
+        },
+      ],
+    );
     const draft = await api.saveMailboxDraft({
       data: {
         accountId: "aa",

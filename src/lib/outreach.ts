@@ -223,6 +223,7 @@ export const sendApprovedBooking = createServerFn({ method: "POST" })
             recipient: approval.recipient,
             subject: approval.subject,
             body: approval.body,
+            key,
           })
         : await deliverGmail(token, raw);
     const persisted = await settleOutreachDelivery({

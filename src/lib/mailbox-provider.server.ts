@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { outreachInternetMessageId } from "./outreach-message";
 import { auth } from "./auth/server";
 import { getRequest } from "@tanstack/react-start/server";
 import { getSql } from "./db";
@@ -134,4 +135,82 @@ export async function rateMailboxAction(userId: string, accountId: string, actio
       action,
     ]);
   });
+}
+
+/** Read-only reconciliation: Sent Items proves provider submission, never recipient
+ * delivery. Missing/ambiguous receipts retain unknown state and never cause a send. */
+export async function reconcileMailboxSubmissions(
+  userId: string,
+  account: OwnedMailbox,
+  token: string,
+) {
+  const sql = await getSql();
+  const attempts = await sql.query<{ idempotency_key: string }>(
+    "select idempotency_key from outreach_delivery_audit where user_id=$1 and mailbox_account_id=$2 and status in ('unknown','reserved') order by created_at desc limit 5",
+    [userId, account.id],
+  );
+  const receipts = await Promise.all(
+    attempts.map(async (attempt) => {
+      const internetId = outreachInternetMessageId(attempt.idempotency_key);
+      try {
+        if (account.providerId === "microsoft") {
+          const params = new URLSearchParams({
+            $filter: `internetMessageId eq '${internetId}'`,
+            $select: "id,conversationId,internetMessageId",
+            $top: "2",
+          });
+          const result = await mailboxFetch(
+            token,
+            `https://graph.microsoft.com/v1.0/me/mailFolders/sentitems/messages?${params}`,
+          );
+          if (!Array.isArray(result?.value) || result.value.length !== 1) return null;
+          const m = result.value[0];
+          if (
+            m.internetMessageId !== internetId ||
+            typeof m.id !== "string" ||
+            typeof m.conversationId !== "string"
+          )
+            return null;
+          return { key: attempt.idempotency_key, id: m.id, thread: m.conversationId };
+        }
+        const params = new URLSearchParams({
+          q: `in:sent rfc822msgid:${internetId}`,
+          maxResults: "2",
+        });
+        const list = await mailboxFetch(
+          token,
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages?${params}`,
+        );
+        if (
+          !Array.isArray(list?.messages) ||
+          list.messages.length !== 1 ||
+          !/^[A-Za-z0-9_-]{1,128}$/.test(list.messages[0]?.id ?? "")
+        )
+          return null;
+        const m = await mailboxFetch(
+          token,
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages/${list.messages[0].id}?format=metadata&metadataHeaders=Message-ID`,
+        );
+        if (
+          typeof m.id !== "string" ||
+          typeof m.threadId !== "string" ||
+          !Array.isArray(m.payload?.headers) ||
+          !m.payload.headers.some(
+            (h: { name?: string; value?: string }) =>
+              h.name?.toLowerCase() === "message-id" && h.value === internetId,
+          )
+        )
+          return null;
+        return { key: attempt.idempotency_key, id: m.id, thread: m.threadId };
+      } catch {
+        return null;
+      }
+    }),
+  );
+  for (const receipt of receipts)
+    if (receipt)
+      await sql.query(
+        "update outreach_delivery_audit set status='sent',provider_message_id=$4,provider_thread_id=$5,updated_at=now() where user_id=$1 and mailbox_account_id=$2 and idempotency_key=$3 and status in ('unknown','reserved')",
+        [userId, account.id, receipt.key, receipt.id, receipt.thread],
+      );
 }

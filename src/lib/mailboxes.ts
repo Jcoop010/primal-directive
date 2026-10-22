@@ -10,6 +10,7 @@ import {
   ownedMailbox,
   mailboxFetch,
   readMailboxHeaders,
+  reconcileMailboxSubmissions,
 } from "./mailbox-provider.server";
 import { normalizeRecipient, encodeGmailMessage } from "./outreach-message";
 const accountInput = z.object({ accountId: z.string().min(1).max(200) });
@@ -158,6 +159,7 @@ export const syncMailbox = createServerFn({ method: "POST" })
     const sql = await getSql();
     try {
       const { account, token } = await mailboxToken(context.userId, data.accountId, "read");
+      await reconcileMailboxSubmissions(context.userId, account, token);
       const messages = await readMailboxHeaders(token, account.providerId);
       await sql.transaction(async (tx) => {
         // A reply cancels unsent approvals; it never automatically confirms a booking.
