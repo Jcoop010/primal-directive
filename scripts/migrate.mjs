@@ -69,7 +69,7 @@ async function main() {
     return;
   }
 
-  const pool = new pg.Pool({ connectionString: postgresConnectionString(databaseUrl), max: 1 });
+  const pool = new pg.Pool({ connectionString: postgresConnectionString(databaseUrl), max: 1, connectionTimeoutMillis: 10000, statement_timeout: 30000 });
   const client = await pool.connect();
   try {
     await client.query("SELECT pg_advisory_lock(17926708)");

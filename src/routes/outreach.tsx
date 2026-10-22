@@ -128,6 +128,7 @@ function Outreach() {
         <label className="block space-y-2 text-sm">
           Saved booking
           <select
+            aria-label="Saved booking"
             className={inputClass}
             value={gigId}
             onChange={(e) => {

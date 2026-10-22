@@ -25,6 +25,7 @@ import { Route as PeopleRouteImport } from './routes/people'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TourRouteImport } from './routes/tour'
+import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api.stripe.webhook'
 
@@ -108,6 +109,11 @@ const TourRoute = TourRouteImport.update({
   path: '/tour',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/tasks'
     | '/tour'
+    | '/api/health'
     | '/api/auth/$'
     | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/tasks'
     | '/tour'
+    | '/api/health'
     | '/api/auth/$'
     | '/api/stripe/webhook'
   id:
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/tasks'
     | '/tour'
+    | '/api/health'
     | '/api/auth/$'
     | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
@@ -260,6 +272,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   TasksRoute: typeof TasksRoute
   TourRoute: typeof TourRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
@@ -378,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TourRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -412,6 +432,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   TasksRoute: TasksRoute,
   TourRoute: TourRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
