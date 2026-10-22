@@ -178,6 +178,10 @@ try {
   assert.equal(await page.getByRole("button", {name:"Send approved email",exact:true}).isEnabled(),false);
   await ready("/account");
   await page.getByText("Current access: FREE", {exact:true}).waitFor();
+  await page.getByRole("region", {name:"Email integrations"}).waitFor();
+  await page.getByText("No synchronized messages yet. Check a connected inbox to get started.", {exact:true}).waitFor();
+  assert.equal(await page.getByRole("button",{name:"Connect / reconnect Outlook",exact:true}).isEnabled(),false);
+  assert.equal(await page.getByRole("button",{name:"Save booking draft",exact:true}).isEnabled(),false);
   for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
     for (const route of ["/", "/board", "/gigs", "/people", "/money", "/calendar", "/tour", "/merch", "/tasks", "/account", "/outreach"]) {

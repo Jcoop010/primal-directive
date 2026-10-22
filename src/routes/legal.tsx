@@ -12,13 +12,18 @@ export const Route = createFileRoute("/legal")({
         protects access to these records. Payment details are collected by Stripe, not by this
         application.
       </p>
-      <h2 className="text-lg font-bold">Google and Gmail permissions</h2>
+      <h2 className="text-lg font-bold">Google, Microsoft & mailbox permissions</h2>
       <p>
-        Google sign-in identifies your account. Optional Gmail read access supports bounded inbox
-        previews and reply headers. Optional Gmail send access supports sending a message you
-        approve when sending is released. Google authorization alone is not approval to contact a
-        venue. Tokens are encrypted on the server. You can revoke access through your Google
-        account.
+        Google and Microsoft sign-in identify your account. Inbox access is separate consent. Gmail
+        read-only and Microsoft Mail.ReadBasic retrieve up to 10 inbox headers per manual check.
+        Sender, subject, date, reply headers and conversation identifiers are persisted to track
+        booking conversations; inbox bodies are not downloaded. Optional Microsoft Mail.ReadWrite
+        creates an Outlook draft only when you click to export it. Local booking drafts retain the
+        content you save. Separate send permission never approves a message by itself. OAuth access
+        and refresh tokens are encrypted on the server. Disconnect deletes local tokens, pauses
+        outreach and revokes unsent approvals while preserving sign-in. It does not withdraw the
+        provider-side grant: revoke that in Google connections or Microsoft account permissions
+        (your organization may require administrator involvement).
       </p>
       <h2 className="text-lg font-bold">AI and outreach</h2>
       <p>

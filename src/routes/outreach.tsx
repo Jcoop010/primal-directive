@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { reviewMailboxDraft } from "@/lib/mailboxes";
 import { useMusician } from "@/lib/store";
 import {
   approveBookingMessage,
@@ -10,8 +11,16 @@ import {
   sendApprovedBooking,
   suppressOutreachContact,
 } from "@/lib/outreach";
-export const Route = createFileRoute("/outreach")({ component: Outreach });
+export const Route = createFileRoute("/outreach")({
+  validateSearch: (search: Record<string, unknown>): { draft?: string } => ({
+    draft: typeof search.draft === "string" ? search.draft : undefined,
+  }),
+  component: Outreach,
+});
 function Outreach() {
+  const { draft: reviewDraftId } = Route.useSearch();
+  const [draftMailboxId, setDraftMailboxId] = useState<string>();
+  const [draftProvider, setDraftProvider] = useState<string>();
   const gigs = useMusician((s) => s.gigs),
     profile = useMusician((s) => s.profile);
   const [status, setStatus] = useState<Awaited<ReturnType<typeof outreachStatus>>>();
@@ -24,6 +33,27 @@ function Outreach() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  useEffect(() => {
+    if (!reviewDraftId) return;
+    let active = true;
+    reviewMailboxDraft({ data: { id: reviewDraftId } })
+      .then((d) => {
+        if (!active) return;
+        setGigId(d.gig_id);
+        setRecipient(d.recipient);
+        setSubject(d.subject);
+        setBody(d.body);
+        setDraftMailboxId(d.account_id);
+        setDraftProvider(d.provider);
+        setConsent(false);
+      })
+      .catch(() => {
+        if (active) setError("Draft unavailable or mailbox disconnected. Reconnect from Account.");
+      });
+    return () => {
+      active = false;
+    };
+  }, [reviewDraftId]);
   const inputClass = "min-h-11 w-full rounded-lg border border-line bg-bg p-3 text-sm";
   const refresh = async () => {
     setStatus(await outreachStatus());
@@ -57,6 +87,8 @@ function Outreach() {
     }
   }
   function draft() {
+    setDraftMailboxId(undefined);
+    setDraftProvider(undefined);
     const gig = gigs.find((g) => g.id === gigId);
     if (!gig || !profile.artistName) {
       setError("Choose a saved gig and complete your artist profile first");
@@ -72,6 +104,12 @@ function Outreach() {
   }
   return (
     <div className="space-y-6">
+      {draftProvider && (
+        <p role="status" className="text-sm text-muted">
+          Reviewing saved {draftProvider === "microsoft" ? "Outlook" : "Gmail"} draft. This approval
+          stays bound to that mailbox.
+        </p>
+      )}
       <section className="rounded-2xl border border-line bg-surface p-6">
         <p className="text-xs font-bold tracking-widest text-accent">BOOKING OUTREACH</p>
         <h2 className="mt-2 font-display text-2xl font-bold">Every message, accounted for.</h2>
@@ -100,7 +138,7 @@ function Outreach() {
             to="/account"
             className="inline-flex min-h-11 items-center px-3 text-sm text-accent"
           >
-            Gmail connection →
+            Email connections →
           </Link>
         </div>
         <p className="mt-3 text-xs text-muted">
@@ -213,6 +251,7 @@ function Outreach() {
                 approveBookingMessage({
                   data: {
                     gigId,
+                    mailboxAccountId: draftMailboxId,
                     recipient,
                     subject,
                     body,
@@ -237,6 +276,9 @@ function Outreach() {
           <article key={a.id} className="space-y-3 rounded-xl border border-line p-4">
             <p className="break-all text-sm font-bold">{a.recipient}</p>
             <p className="text-sm">{a.subject}</p>
+            <p className="text-xs text-muted">
+              Approved mailbox: {a.mail_provider === "microsoft" ? "Outlook" : "Gmail"}
+            </p>
             <details className="text-sm">
               <summary className="min-h-11 cursor-pointer py-3">Read approved message</summary>
               <p className="whitespace-pre-wrap break-words">{a.body}</p>
@@ -248,8 +290,10 @@ function Outreach() {
                   run(async () => {
                     const delivery = await sendApprovedBooking({ data: { id: a.id } });
                     if (delivery.status !== "sent")
-                      throw new Error(`${delivery.status}: inspect Gmail before any retry.`);
-                  }, "Gmail confirmed delivery acceptance; receipt recorded.")
+                      throw new Error(
+                        `${delivery.status}: inspect the sending mailbox before any retry.`,
+                      );
+                  }, "Provider confirmed submission; message receipt recorded.")
                 }
               >
                 Send approved email
@@ -319,7 +363,7 @@ function Outreach() {
             <p className="text-xs text-muted">
               {new Date(a.created_at).toLocaleString()}
               {a.provider_message_id
-                ? ` · Gmail ${a.provider_message_id}`
+                ? ` · ${a.mail_provider === "microsoft" ? "Outlook" : "Gmail"} ${a.provider_message_id}`
                 : " · no confirmed provider receipt"}
             </p>
             <Button

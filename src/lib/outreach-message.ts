@@ -15,6 +15,9 @@ export function messageFingerprint(recipient: string, subject: string, body: str
     .update(JSON.stringify([normalizeRecipient(recipient), subject, body]))
     .digest("hex");
 }
+export function outreachInternetMessageId(key: string): string {
+  return `<${createHash("sha256").update(key).digest("hex")}@primal-directive-loose-ends-co.vercel.app>`;
+}
 export function encodeGmailMessage(input: {
   recipient: string;
   subject: string;
@@ -36,12 +39,12 @@ export function encodeGmailMessage(input: {
       .toString("base64")
       .match(/.{1,76}/g)
       ?.join("\r\n") ?? "";
-  const id = createHash("sha256").update(input.key).digest("hex");
+  const id = outreachInternetMessageId(input.key);
   return Buffer.from(
     [
       `To: ${recipient}`,
       `Subject: =?UTF-8?B?${subject}?=`,
-      `Message-ID: <${id}@primal-directive-loose-ends-co.vercel.app>`,
+      `Message-ID: ${id}`,
       "MIME-Version: 1.0",
       'Content-Type: text/plain; charset="UTF-8"',
       "Content-Transfer-Encoding: base64",
@@ -78,6 +81,33 @@ export async function deliverGmail(
       status: "sent",
       messageId: data.id,
       ...(typeof data.threadId === "string" ? { threadId: data.threadId } : {}),
+    };
+  } catch {
+    return { status: "unknown", reason: "provider-timeout-or-network-error" };
+  }
+}
+
+/** Graph sendMail returns 202 with no delivery receipt. Keep it unreconciled;
+ * never claim delivery or retry blindly, even on a nominally successful submission. */
+export async function deliverOutlook(
+  token: string,
+  message: { recipient: string; subject: string; body: string; key: string },
+  request: typeof fetch = fetch,
+): Promise<GmailDelivery> {
+  const raw = encodeGmailMessage(message);
+  try {
+    const response = await request("https://graph.microsoft.com/v1.0/me/sendMail", {
+      method: "POST",
+      redirect: "error",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "text/plain" },
+      signal: AbortSignal.timeout(10000),
+      body: Buffer.from(raw, "base64url").toString("base64"),
+    });
+    if (response.status === 202)
+      return { status: "unknown", reason: "provider-accepted-delivery-unverified" };
+    return {
+      status: response.status >= 500 || response.ok ? "unknown" : "failed",
+      reason: `provider-${response.status}`,
     };
   } catch {
     return { status: "unknown", reason: "provider-timeout-or-network-error" };

@@ -3,7 +3,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { chromium } from "playwright";
 const origin=process.env.AUTH_SMOKE_ORIGIN ?? "http://127.0.0.1:8081";
-assert.ok(["http://127.0.0.1:8081","https://primal-directive-loose-ends-co.vercel.app"].includes(origin));
+assert.ok(["http://127.0.0.1:8081"].includes(origin), "Mutable venue acceptance requires the isolated built preview");
 const email="venue-qa-"+randomUUID()+"@example.invalid",password=randomBytes(32).toString("base64url");
 const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
 const context=await browser.newContext({viewport:{width:1280,height:800}}),page=await context.newPage();

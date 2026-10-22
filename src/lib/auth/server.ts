@@ -7,6 +7,7 @@
  * DATABASE_URL; do not require a second integration or a copied secret.
  */
 import { betterAuth } from "better-auth";
+import { microsoftOAuthOptions, MICROSOFT_LINKING_POLICY } from "./microsoft.server";
 import { bearer, genericOAuth } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
@@ -44,18 +45,17 @@ const grokIssuer = env("GROK_AUTH_ISSUER") ?? GROK_ISSUER_DEFAULT;
 const grokClientId = env("GROK_AUTH_CLIENT_ID") ?? PREVIEW_CLIENT_ID;
 const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? PREVIEW_CLIENT_SECRET;
 
-export const authConfigured =
-  !authDisabled && Boolean(grokClientId && grokClientSecret);
+export const authConfigured = !authDisabled && Boolean(grokClientId && grokClientSecret);
 
 const explicitBaseURL = env("BETTER_AUTH_URL");
 const originForHost = (value: string): string => {
-  const normalized = value.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const normalized = value
+    .trim()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
   return `https://${normalized}`;
 };
-const deploymentOrigins = [
-  env("VERCEL_PROJECT_PRODUCTION_URL"),
-  env("VERCEL_URL"),
-]
+const deploymentOrigins = [env("VERCEL_PROJECT_PRODUCTION_URL"), env("VERCEL_URL")]
   .filter((host): host is string => Boolean(host))
   .map(originForHost);
 const previewAllowedHosts: string[] = [...PREVIEW_ALLOWED_HOSTS];
@@ -67,18 +67,19 @@ const LOCAL_DEV_ORIGINS: string[] = [
   "http://[::1]:8080",
 ];
 const PRODUCTION_HOST = "primal-directive-loose-ends-co.vercel.app";
-const baseURL = explicitBaseURL ?? deploymentOrigins[0] ?? {
-  allowedHosts: [
-    ...previewAllowedHosts,
-    ...deploymentOrigins.map((origin) => origin.replace(/^https?:\/\//, "")),
-    "primal-directive-loose-ends-co.vercel.app",
-    "localhost",
-    "127.0.0.1",
-    "[::1]",
-  ],
-  protocol: "auto" as const,
-  fallback: `https://${PRODUCTION_HOST}`,
-};
+const baseURL = explicitBaseURL ??
+  deploymentOrigins[0] ?? {
+    allowedHosts: [
+      ...previewAllowedHosts,
+      ...deploymentOrigins.map((origin) => origin.replace(/^https?:\/\//, "")),
+      "primal-directive-loose-ends-co.vercel.app",
+      "localhost",
+      "127.0.0.1",
+      "[::1]",
+    ],
+    protocol: "auto" as const,
+    fallback: `https://${PRODUCTION_HOST}`,
+  };
 
 const trustedOrigins: string[] = [
   ...(explicitBaseURL ? [originForHost(explicitBaseURL)] : []),
@@ -154,27 +155,36 @@ export const auth = betterAuth({
   database,
   trustedOrigins,
   socialProviders: {
-    ...(googleOAuthConfigured ? { google: {
-      clientId: env("GOOGLE_CLIENT_ID")!,
-      clientSecret: env("GOOGLE_CLIENT_SECRET")!,
-      // Gmail access is opt-in, distinct from signing in with Google.
-      // Only request these permissions after the owner enables the integration.
-      ...(env("GMAIL_INTEGRATION_ENABLED") === "true"
-        ? {
-            scope: ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.send"],
+    ...(env("MICROSOFT_CLIENT_ID") && env("MICROSOFT_CLIENT_SECRET")
+      ? {
+          microsoft: microsoftOAuthOptions(
+            env("MICROSOFT_CLIENT_ID")!,
+            env("MICROSOFT_CLIENT_SECRET")!,
+          ),
+        }
+      : {}),
+    ...(googleOAuthConfigured
+      ? {
+          google: {
+            clientId: env("GOOGLE_CLIENT_ID")!,
+            clientSecret: env("GOOGLE_CLIENT_SECRET")!,
+            // Mail permissions are requested only by explicit account-page actions.
+            // Google preserves previous grants with include_granted_scopes internally.
             prompt: "consent" as const,
             accessType: "offline" as const,
-          }
-        : {}),
-    } } : {}),
+          },
+        }
+      : {}),
   },
   account: {
     encryptOAuthTokens: true,
     accountLinking: {
       enabled: true,
+      ...MICROSOFT_LINKING_POLICY,
       trustedProviders: [
         ...GROK_PROVIDERS.map((p) => p.providerId),
         GATE_PROVIDER_ID,
+        ...MICROSOFT_LINKING_POLICY.trustedProviders,
       ],
       requireLocalEmailVerified: false,
     },
