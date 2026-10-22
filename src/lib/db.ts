@@ -42,6 +42,7 @@ export interface Sql {
     text: string,
     params?: unknown[],
   ): Promise<T[]>;
+  transaction<T>(work: (sql: Sql) => Promise<T>): Promise<T>;
 }
 
 const globalRef = globalThis as typeof globalThis & {
@@ -57,7 +58,7 @@ const identity = (v: string) => v;
 
 type Run = <T>(text: string, params: unknown[]) => Promise<T[]>;
 
-function toSql(run: Run): Sql {
+function toSql(run: Run, transaction?: <T>(work: (sql: Sql) => Promise<T>) => Promise<T>): Sql {
   const sql = (async <T = Record<string, unknown>>(
     strings: TemplateStringsArray,
     ...values: unknown[]
@@ -72,6 +73,7 @@ function toSql(run: Run): Sql {
     text: string,
     params: unknown[] = [],
   ) => run<T>(text, params);
+  sql.transaction = transaction ?? (async () => { throw new Error("Nested transaction unavailable"); });
   return sql;
 }
 
@@ -100,6 +102,17 @@ function createPostgresSql(): Promise<Sql> {
     return toSql(async <T>(text: string, params: unknown[]) => {
       const res = await pool.query(text, params);
       return res.rows as T[];
+    }, async (work) => {
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const result = await work(toSql(async <T>(text: string, params: unknown[]) => (await client.query(text, params)).rows as T[]));
+        await client.query("COMMIT");
+        return result;
+      } catch (error) {
+        await client.query("ROLLBACK").catch(() => undefined);
+        throw error;
+      } finally { client.release(); }
     });
   })().catch((err) => {
     globalRef.__pgSqlPromise__ = undefined;
@@ -158,7 +171,7 @@ async function createPgliteSql(): Promise<Sql> {
   return toSql(async <T>(text: string, params: unknown[]) => {
     const result = await pg.query<T>(text, params);
     return result.rows;
-  });
+  }, (work) => pg.transaction((tx) => work(toSql(async <T>(text: string, params: unknown[]) => (await tx.query<T>(text, params)).rows))));
 }
 
 let sqlPromise: Promise<Sql> | null = null;

@@ -10,31 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoRouteImport } from './routes/demo'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as GigsRouteImport } from './routes/gigs'
-import { Route as MoneyRouteImport } from './routes/money'
-import { Route as PeopleRouteImport } from './routes/people'
-import { Route as TourRouteImport } from './routes/tour'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as MerchRouteImport } from './routes/merch'
+import { Route as MoneyRouteImport } from './routes/money'
+import { Route as OutreachRouteImport } from './routes/outreach'
+import { Route as PeopleRouteImport } from './routes/people'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as TasksRouteImport } from './routes/tasks'
-import { Route as ApiAuthRouteImport } from './routes/api.auth.$'
+import { Route as TourRouteImport } from './routes/tour'
+import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
+import { Route as ApiStripeWebhookRouteImport } from './routes/api.stripe.webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoRoute = DemoRouteImport.update({
-  id: '/demo',
-  path: '/demo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoardRoute = BoardRouteImport.update({
@@ -47,24 +48,29 @@ const CalendarRoute = CalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GigsRoute = GigsRouteImport.update({
   id: '/gigs',
   path: '/gigs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MoneyRoute = MoneyRouteImport.update({
-  id: '/money',
-  path: '/money',
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PeopleRoute = PeopleRouteImport.update({
-  id: '/people',
-  path: '/people',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TourRoute = TourRouteImport.update({
-  id: '/tour',
-  path: '/tour',
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MerchRoute = MerchRouteImport.update({
@@ -72,102 +78,206 @@ const MerchRoute = MerchRouteImport.update({
   path: '/merch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MoneyRoute = MoneyRouteImport.update({
+  id: '/money',
+  path: '/money',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutreachRoute = OutreachRouteImport.update({
+  id: '/outreach',
+  path: '/outreach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthRoute = ApiAuthRouteImport.update({
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
+  id: '/api/stripe/webhook',
+  path: '/api/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/api/auth/$': typeof ApiAuthRoute
   '/': typeof IndexRoute
-  '/demo': typeof DemoRoute
-  '/dashboard': typeof DashboardRoute
+  '/account': typeof AccountRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
+  '/dashboard': typeof DashboardRoute
+  '/demo': typeof DemoRoute
   '/gigs': typeof GigsRoute
-  '/money': typeof MoneyRoute
-  '/people': typeof PeopleRoute
-  '/tour': typeof TourRoute
+  '/help': typeof HelpRoute
+  '/legal': typeof LegalRoute
   '/merch': typeof MerchRoute
+  '/money': typeof MoneyRoute
+  '/outreach': typeof OutreachRoute
+  '/people': typeof PeopleRoute
+  '/pricing': typeof PricingRoute
   '/tasks': typeof TasksRoute
+  '/tour': typeof TourRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
-  '/api/auth/$': typeof ApiAuthRoute
   '/': typeof IndexRoute
-  '/demo': typeof DemoRoute
+  '/account': typeof AccountRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
+  '/dashboard': typeof DashboardRoute
+  '/demo': typeof DemoRoute
   '/gigs': typeof GigsRoute
-  '/money': typeof MoneyRoute
-  '/people': typeof PeopleRoute
-  '/tour': typeof TourRoute
+  '/help': typeof HelpRoute
+  '/legal': typeof LegalRoute
   '/merch': typeof MerchRoute
+  '/money': typeof MoneyRoute
+  '/outreach': typeof OutreachRoute
+  '/people': typeof PeopleRoute
+  '/pricing': typeof PricingRoute
   '/tasks': typeof TasksRoute
+  '/tour': typeof TourRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
-  '/api/auth/$': typeof ApiAuthRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/demo': typeof DemoRoute
+  '/account': typeof AccountRoute
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
+  '/dashboard': typeof DashboardRoute
+  '/demo': typeof DemoRoute
   '/gigs': typeof GigsRoute
-  '/money': typeof MoneyRoute
-  '/people': typeof PeopleRoute
-  '/tour': typeof TourRoute
+  '/help': typeof HelpRoute
+  '/legal': typeof LegalRoute
   '/merch': typeof MerchRoute
+  '/money': typeof MoneyRoute
+  '/outreach': typeof OutreachRoute
+  '/people': typeof PeopleRoute
+  '/pricing': typeof PricingRoute
   '/tasks': typeof TasksRoute
+  '/tour': typeof TourRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/board'
+    | '/calendar'
+    | '/dashboard'
+    | '/demo'
+    | '/gigs'
+    | '/help'
+    | '/legal'
+    | '/merch'
+    | '/money'
+    | '/outreach'
+    | '/people'
+    | '/pricing'
+    | '/tasks'
+    | '/tour'
+    | '/api/auth/$'
+    | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
-  id: '__root__' | '/' | '/demo' | '/dashboard' | '/board' | '/calendar' | '/gigs' | '/money' | '/people' | '/tour' | '/merch' | '/tasks' | '/api/auth/$'
+  to:
+    | '/'
+    | '/account'
+    | '/board'
+    | '/calendar'
+    | '/dashboard'
+    | '/demo'
+    | '/gigs'
+    | '/help'
+    | '/legal'
+    | '/merch'
+    | '/money'
+    | '/outreach'
+    | '/people'
+    | '/pricing'
+    | '/tasks'
+    | '/tour'
+    | '/api/auth/$'
+    | '/api/stripe/webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/board'
+    | '/calendar'
+    | '/dashboard'
+    | '/demo'
+    | '/gigs'
+    | '/help'
+    | '/legal'
+    | '/merch'
+    | '/money'
+    | '/outreach'
+    | '/people'
+    | '/pricing'
+    | '/tasks'
+    | '/tour'
+    | '/api/auth/$'
+    | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DemoRoute: typeof DemoRoute
-  DashboardRoute: typeof DashboardRoute
+  AccountRoute: typeof AccountRoute
   BoardRoute: typeof BoardRoute
   CalendarRoute: typeof CalendarRoute
+  DashboardRoute: typeof DashboardRoute
+  DemoRoute: typeof DemoRoute
   GigsRoute: typeof GigsRoute
-  MoneyRoute: typeof MoneyRoute
-  PeopleRoute: typeof PeopleRoute
-  TourRoute: typeof TourRoute
+  HelpRoute: typeof HelpRoute
+  LegalRoute: typeof LegalRoute
   MerchRoute: typeof MerchRoute
+  MoneyRoute: typeof MoneyRoute
+  OutreachRoute: typeof OutreachRoute
+  PeopleRoute: typeof PeopleRoute
+  PricingRoute: typeof PricingRoute
   TasksRoute: typeof TasksRoute
-  ApiAuthRoute: typeof ApiAuthRoute
+  TourRoute: typeof TourRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/demo': {
-      id: '/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/board': {
@@ -184,6 +294,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gigs': {
       id: '/gigs'
       path: '/gigs'
@@ -191,25 +315,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GigsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/money': {
-      id: '/money'
-      path: '/money'
-      fullPath: '/money'
-      preLoaderRoute: typeof MoneyRouteImport
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/people': {
-      id: '/people'
-      path: '/people'
-      fullPath: '/people'
-      preLoaderRoute: typeof PeopleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tour': {
-      id: '/tour'
-      path: '/tour'
-      fullPath: '/tour'
-      preLoaderRoute: typeof TourRouteImport
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/merch': {
@@ -219,6 +336,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MerchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/money': {
+      id: '/money'
+      path: '/money'
+      fullPath: '/money'
+      preLoaderRoute: typeof MoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outreach': {
+      id: '/outreach'
+      path: '/outreach'
+      fullPath: '/outreach'
+      preLoaderRoute: typeof OutreachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks': {
       id: '/tasks'
       path: '/tasks'
@@ -226,11 +371,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthRouteImport
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stripe/webhook': {
+      id: '/api/stripe/webhook'
+      path: '/api/stripe/webhook'
+      fullPath: '/api/stripe/webhook'
+      preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -238,17 +397,23 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DemoRoute: DemoRoute,
-  DashboardRoute: DashboardRoute,
+  AccountRoute: AccountRoute,
   BoardRoute: BoardRoute,
   CalendarRoute: CalendarRoute,
+  DashboardRoute: DashboardRoute,
+  DemoRoute: DemoRoute,
   GigsRoute: GigsRoute,
-  MoneyRoute: MoneyRoute,
-  PeopleRoute: PeopleRoute,
-  TourRoute: TourRoute,
+  HelpRoute: HelpRoute,
+  LegalRoute: LegalRoute,
   MerchRoute: MerchRoute,
+  MoneyRoute: MoneyRoute,
+  OutreachRoute: OutreachRoute,
+  PeopleRoute: PeopleRoute,
+  PricingRoute: PricingRoute,
   TasksRoute: TasksRoute,
-  ApiAuthRoute: ApiAuthRoute,
+  TourRoute: TourRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
