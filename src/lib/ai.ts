@@ -396,7 +396,11 @@ function researchNeeded(message: string, history: z.infer<typeof HistoryItem>[])
 export const askGrowthAdvisor = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => Input.parse(input))
-  .handler(async ({ data }): Promise<ChatOk | ChatErr> => {
+  .handler(async ({ data, context }): Promise<ChatOk | ChatErr> => {
+    if (process.env.BILLING_ENABLED === "true") {
+      const { requirePaid } = await import("./billing.server");
+      await requirePaid(context.userId);
+    }
     const xaiKey = process.env.XAI_API_KEY;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;

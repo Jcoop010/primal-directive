@@ -38,6 +38,8 @@ const NAV = [
   { to: "/tour", label: "Tour", icon: RouteIcon },
   { to: "/merch", label: "Merch", icon: ShoppingBag },
   { to: "/tasks", label: "Tasks", icon: ListChecks },
+  { to: "/outreach", label: "Outreach", icon: Music2 },
+  { to: "/account", label: "Account & billing", icon: UserRound },
 ] as const;
 
 function SignInScreen() {
@@ -58,8 +60,9 @@ function SignInScreen() {
           <SignInButtons />
         </div>
         <p className="mt-5 text-center text-[11px] text-muted">
-          Your data is never shared between artist accounts.
+          Your workspace is private to your account.
         </p>
+        <div className="mt-4 flex justify-center gap-5 text-xs text-accent"><Link to="/pricing">Plans</Link><Link to="/help">Help</Link><Link to="/legal">Privacy</Link></div>
       </div>
     </div>
   );
@@ -107,7 +110,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     else setComposer({ commandOpen: true });
   }
 
-  if (pathname === "/demo") return <>{children}</>;
+  if (["/demo", "/pricing", "/help", "/legal"].includes(pathname)) return <>{children}</>;
 
   return (
     <SignInGate fallback={<SignInScreen />}>
