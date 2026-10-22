@@ -48,6 +48,11 @@ export async function subscriptionState(userId: string) {
   };
 }
 export async function requirePaid(userId: string, studio = false) {
+  // Billing is an optional commercial release gate. Until it is explicitly
+  // enabled, preserve core artist-management access without requiring Stripe.
+  // This does not bypass separate Gmail OAuth, outreach release, approval,
+  // suppression, quota, or delivery safeguards.
+  if (!billingConfiguration().enabled) return;
   const state = await subscriptionState(userId);
   if (state.plan === "free" || (studio && state.plan !== "studio"))
     throw new Error(
