@@ -17,7 +17,10 @@ export const Route = createFileRoute("/legal")({
         Google sign-in identifies your account. Optional Gmail read access supports bounded inbox
         previews and reply headers. Optional Gmail send access supports sending a message you
         approve when sending is released. Google authorization alone is not approval to contact a
-        venue. Tokens are encrypted on the server. You can revoke access through your Google
+        venue. If you explicitly enable scheduled follow-ups, related thread content is read on the
+        server to detect replies and opt-outs. This feature stores reply identifiers and
+        conservative classifications, not message bodies, and does not forward those bodies to AI
+        providers. Tokens are encrypted on the server. You can revoke access through your Google
         account.
       </p>
       <h2 className="text-lg font-bold">AI and outreach</h2>

@@ -3,18 +3,13 @@ import { getRequest } from "@tanstack/react-start/server";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { authMiddleware } from "./auth/middleware";
-import { auth } from "./auth/server";
 import { getSql } from "./db";
-import { requirePaid } from "./billing.server";
 import {
-  deliverGmail,
   encodeGmailMessage,
   messageFingerprint,
   normalizeRecipient,
   OUTREACH_POLICY_VERSION,
 } from "./outreach-message";
-import { reserveOutreachDelivery, settleOutreachDelivery } from "./outreach-delivery-ledger";
-const SEND_SCOPE = "https://www.googleapis.com/auth/gmail.send";
 export function sendingReleased() {
   return (
     process.env.OUTREACH_SEND_ENABLED === "true" && process.env.OUTREACH_RELEASE_VERIFIED === "true"
@@ -47,7 +42,7 @@ export const outreachStatus = createServerFn({ method: "GET" })
       body: string;
       approved_at: Date;
     }>(
-      "select id,gig_id,recipient,subject,body,approved_at from outreach_approvals a where user_id=$1 and revoked_at is null and expires_at>now() and not exists(select 1 from outreach_delivery_audit d where d.user_id=a.user_id and d.approval_id=a.id) order by approved_at desc limit 50",
+      "select id,gig_id,recipient,subject,body,approved_at from outreach_approvals a where user_id=$1 and revoked_at is null and expires_at>now() and not exists(select 1 from outreach_delivery_audit d where d.user_id=a.user_id and d.approval_id=a.id) and not exists(select 1 from outreach_jobs j where j.user_id=a.user_id and j.approval_id=a.id) order by approved_at desc limit 50",
       [context.userId],
     );
     return {
@@ -73,6 +68,11 @@ export const pauseOutreach = createServerFn({ method: "POST" })
     if (data.paused)
       await sql.query(
         "update outreach_approvals set revoked_at=now() where user_id=$1 and revoked_at is null",
+        [context.userId],
+      );
+    if (data.paused)
+      await sql.query(
+        "update outreach_jobs set status='cancelled',result_code='account-paused',updated_at=now() where user_id=$1 and status='scheduled'",
         [context.userId],
       );
     return { paused: data.paused };
@@ -150,73 +150,8 @@ export const sendApprovedBooking = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(z.object({ id: z.string().uuid() }))
   .handler(async ({ context, data }) => {
-    if (!sendingReleased())
-      throw new Error("Sending remains disabled pending Gmail test-account verification");
-    await requirePaid(context.userId);
-    const sql = await getSql();
-    const rows = await sql.query<{
-      id: string;
-      gig_id: string;
-      recipient: string;
-      subject: string;
-      body: string;
-      message_fingerprint: string;
-    }>(
-      "select id,gig_id,recipient,subject,body,message_fingerprint from outreach_approvals where id=$1 and user_id=$2 and revoked_at is null and expires_at>now()",
-      [data.id, context.userId],
-    );
-    const approval = rows[0];
-    if (!approval) throw new Error("Approval expired, revoked or unavailable");
-    const accounts = await sql.query<{ scope: string | null }>(
-      'select scope from account where "userId"=$1 and "providerId"=\'google\'',
-      [context.userId],
-    );
-    if (!accounts.some((a) => (a.scope ?? "").split(/\s+/).includes(SEND_SCOPE)))
-      throw new Error("Reconnect Gmail with send permission");
     const request = getRequest();
     if (!request) throw new Error("Session required");
-    // Better Auth refreshes/decrypts this account's token; never return it to the browser.
-    let token;
-    try {
-      token = await auth.api.getAccessToken({
-        body: { providerId: "google" },
-        headers: request.headers,
-      });
-    } catch {
-      throw new Error("Gmail authorization expired or revoked. Reconnect Gmail.");
-    }
-    if (!token?.accessToken) throw new Error("Reconnect Gmail");
-    const key = `${context.userId}:${approval.id}`;
-    const raw = encodeGmailMessage({
-      recipient: approval.recipient,
-      subject: approval.subject,
-      body: approval.body,
-      key,
-    });
-    if (
-      !(await reserveOutreachDelivery({
-        userId: context.userId,
-        gigId: approval.gig_id,
-        recipient: approval.recipient,
-        idempotencyKey: key,
-        approvalId: approval.id,
-        messageFingerprint: approval.message_fingerprint,
-      }))
-    )
-      throw new Error(
-        "Send blocked: paused, suppressed, duplicate, expired approval or quota limit",
-      );
-    const delivery = await deliverGmail(token.accessToken, raw);
-    const persisted = await settleOutreachDelivery({
-      userId: context.userId,
-      idempotencyKey: key,
-      status: delivery.status,
-      ...(delivery.status === "sent"
-        ? { providerMessageId: delivery.messageId, providerThreadId: delivery.threadId }
-        : {}),
-    });
-    if (!persisted) throw new Error("Delivery reconciliation required. Do not retry.");
-    return delivery.status === "sent"
-      ? { status: delivery.status, messageId: delivery.messageId }
-      : { status: delivery.status, reason: delivery.reason };
+    const { dispatchApprovedBooking } = await import("./outreach-dispatch.server");
+    return dispatchApprovedBooking(context.userId, data.id, request.headers);
   });

@@ -20,6 +20,7 @@ export function encodeGmailMessage(input: {
   subject: string;
   body: string;
   key: string;
+  replyToKey?: string;
 }): string {
   const recipient = normalizeRecipient(input.recipient);
   if (
@@ -42,6 +43,12 @@ export function encodeGmailMessage(input: {
       `To: ${recipient}`,
       `Subject: =?UTF-8?B?${subject}?=`,
       `Message-ID: <${id}@primal-directive-loose-ends-co.vercel.app>`,
+      ...(input.replyToKey
+        ? [
+            `In-Reply-To: <${createHash("sha256").update(input.replyToKey).digest("hex")}@primal-directive-loose-ends-co.vercel.app>`,
+            `References: <${createHash("sha256").update(input.replyToKey).digest("hex")}@primal-directive-loose-ends-co.vercel.app>`,
+          ]
+        : []),
       "MIME-Version: 1.0",
       'Content-Type: text/plain; charset="UTF-8"',
       "Content-Transfer-Encoding: base64",
@@ -58,12 +65,13 @@ export async function deliverGmail(
   token: string,
   raw: string,
   request: typeof fetch = fetch,
+  threadId?: string,
 ): Promise<GmailDelivery> {
   try {
     const response = await request("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ raw }),
+      body: JSON.stringify({ raw, ...(threadId ? { threadId } : {}) }),
       signal: AbortSignal.timeout(10000),
     });
     if (!response.ok)

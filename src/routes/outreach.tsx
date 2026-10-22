@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { OutreachScheduling } from "@/components/outreach-scheduling";
 import { Button } from "@/components/ui/button";
 import { useMusician } from "@/lib/store";
 import {
@@ -282,6 +283,13 @@ function Outreach() {
           </article>
         ))}
       </section>
+      {status && (
+        <OutreachScheduling
+          approvals={status.approvals}
+          activity={status.activity}
+          onChanged={refresh}
+        />
+      )}
       <section className="space-y-4 rounded-2xl border border-line bg-surface p-6">
         <h2 className="text-lg font-bold">Contact preferences</h2>
         <p className="text-sm text-muted">
