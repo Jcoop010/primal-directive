@@ -165,17 +165,18 @@ try {
   }
 
   await ready("/outreach");
-  await page.getByText("Sending disabled · test-account verification pending", {exact:true}).waitFor();
+  await page.getByText("Sending disabled · production verification pending", {exact:true}).waitFor();
   await page.getByLabel("Saved booking", {exact:true}).selectOption((await state()).gigs[0].id);
   await page.getByRole("button", {name:"Build draft from profile",exact:true}).click();
   await page.getByLabel("Recipient email", {exact:true}).fill("fictional-booker@example.invalid");
   await page.getByLabel("Official booking contact source (HTTPS)", {exact:true}).fill("https://example.invalid/booking-contact");
   await page.getByRole("checkbox").check();
-  await page.getByRole("button", {name:"Save explicit approval",exact:true}).click();
-  await page.getByText("Approval saved. Nothing has been sent.", {exact:true}).waitFor();
+  // An email/password-only artist has no authorized mailbox. Never fabricate one for UI acceptance.
+  assert.equal(await page.getByRole("button", {name:"Save explicit approval",exact:true}).isEnabled(),false);
+  await page.getByText("Connect or grant mailbox send permission →",{exact:true}).waitFor();
   await ready("/outreach");
-  await page.getByRole("button", {name:"Send from Primal Directive",exact:true}).waitFor();
-  assert.equal(await page.getByRole("button", {name:"Send from Primal Directive",exact:true}).isEnabled(),false);
+  await page.getByText("No pending approvals.",{exact:true}).waitFor();
+  assert.equal(await page.getByRole("button", {name:"Send from Primal Directive",exact:true}).count(),0);
   await ready("/account");
   await page.getByText("Current access: FREE", {exact:true}).waitFor();
   await page.getByRole("region", {name:"Email integrations"}).waitFor();

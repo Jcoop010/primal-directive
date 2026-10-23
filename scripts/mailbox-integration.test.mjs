@@ -400,6 +400,25 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
     await api.selectMailbox({ data: { accountId: "aa" } });
     assert.equal((await api.mailboxStatus()).selected, "aa");
     globalThis.fetch = async (url) => {
+      assert.equal(url, "https://graph.microsoft.com/oidc/userinfo");
+      return Response.json({ email: "Outlook-Owner@example.invalid" });
+    };
+    assert.equal(
+      (await api.mailboxIdentity({ data: { accountId: "aa" } })).address,
+      "outlook-owner@example.invalid",
+    );
+    await assert.rejects(() => api.mailboxIdentity({ data: { accountId: "bb" } }), /unavailable/);
+    current = "b";
+    globalThis.fetch = async (url) => {
+      assert.equal(url, "https://gmail.googleapis.com/gmail/v1/users/me/profile");
+      return Response.json({ emailAddress: "Gmail-Owner@example.invalid" });
+    };
+    assert.equal(
+      (await api.mailboxIdentity({ data: { accountId: "bb" } })).address,
+      "gmail-owner@example.invalid",
+    );
+    current = "a";
+    globalThis.fetch = async (url) => {
       if (String(url).includes("/sentitems/"))
         return Response.json({
           value: [

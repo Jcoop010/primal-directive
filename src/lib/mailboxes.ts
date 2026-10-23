@@ -96,6 +96,27 @@ export const mailboxStatus = createServerFn({ method: "GET" })
       gigs: state?.state.gigs?.map((g) => ({ id: g.id, label: g.title || g.venue || g.id })) ?? [],
     };
   });
+/** Provider-verified address for display; never use a different linked login's email. */
+export const mailboxIdentity = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .validator(accountInput)
+  .handler(async ({ context, data }) => {
+    await ownedMailbox(context.userId, data.accountId);
+    await event(context.userId, data.accountId, "identity-checked");
+    const { account, token } = await mailboxToken(context.userId, data.accountId, "read");
+    try {
+      const profile = await mailboxFetch(
+        token,
+        account.providerId === "google"
+          ? "https://gmail.googleapis.com/gmail/v1/users/me/profile"
+          : "https://graph.microsoft.com/oidc/userinfo",
+      );
+      const address = account.providerId === "google" ? profile.emailAddress : profile.email;
+      return { address: typeof address === "string" ? normalizeRecipient(address) : null };
+    } catch {
+      return { address: null };
+    }
+  });
 export const enableMailbox = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(z.object({ provider: z.enum(["google", "microsoft"]) }))

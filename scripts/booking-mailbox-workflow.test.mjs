@@ -19,6 +19,7 @@ const require = createRequire(import.meta.url);
 const zod = pathToFileURL(require.resolve("zod")).href;
 const transport = compile(read("src/lib/outreach-message.ts"));
 const policy = compile(read("src/lib/mailbox-policy.ts"));
+const release = compile(read("src/lib/outreach-release.server.ts"));
 const { outreachInternetMessageId } = await import(transport);
 const connectionTest = compile(
   read("src/lib/mailbox-test.server.ts").replace(
@@ -43,6 +44,8 @@ test("actual booking handlers approve, reserve, send once, sync replies and revo
   const db = new PGlite();
   const previousFetch = globalThis.fetch;
   const previousFlags = [process.env.OUTREACH_SEND_ENABLED, process.env.OUTREACH_RELEASE_VERIFIED];
+  const previousGrant = process.env.OUTREACH_VERIFICATION_GRANT;
+  delete process.env.OUTREACH_VERIFICATION_GRANT;
   const sqlFor = (client) => ({
     query: async (q, p = []) => (await client.query(q, p)).rows,
     transaction: (work) => db.transaction((tx) => work(sqlFor(tx))),
@@ -77,7 +80,9 @@ test("actual booking handlers approve, reserve, send once, sync replies and revo
           "const requirePaid=async()=>{};",
         )
         .replace('from "./mailbox-provider.server"', `from "${provider}"`)
-        .replace('from "./outreach-delivery-ledger"', `from "${ledger}"`),
+        .replace('from "./outreach-delivery-ledger"', `from "${ledger}"`)
+        .replace('from "./outreach-release.server"', `from "${release}"`)
+        .replace('from "./mailbox-policy"', `from "${policy}"`),
     )
   );
   const mail = await import(
@@ -150,6 +155,57 @@ test("actual booking handlers approve, reserve, send once, sync replies and revo
       /Sending remains disabled/,
     );
     assert.equal(calls, 0);
+    const row = (
+      await db.query("select message_fingerprint from outreach_approvals where id=$1", [
+        gmailApproval,
+      ])
+    ).rows[0];
+    const grant = {
+      approvalId: gmailApproval,
+      ownerEmail: "a@example.invalid",
+      recipient: "gmail-test@example.invalid",
+      mailboxAccountId: "gmail-a",
+      messageFingerprint: row.message_fingerprint,
+      expiresAt: new Date(Date.now() + 3600000).toISOString(),
+    };
+    const { verificationApprovalId } = await import(release);
+    for (const changed of [
+      { recipient: "someone-else@example.invalid" },
+      { ownerEmail: "b@example.invalid" },
+      { mailboxAccountId: "gmail-b" },
+      { messageFingerprint: "b".repeat(64) },
+      { expiresAt: new Date(0).toISOString() },
+    ]) {
+      process.env.OUTREACH_VERIFICATION_GRANT = JSON.stringify({ ...grant, ...changed });
+      assert.equal(await verificationApprovalId(globalThis.__bookingSql, "artist-a"), null);
+    }
+    process.env.OUTREACH_VERIFICATION_GRANT = JSON.stringify(grant);
+    assert.equal(await verificationApprovalId(globalThis.__bookingSql, "artist-a"), gmailApproval);
+    assert.equal(await verificationApprovalId(globalThis.__bookingSql, "artist-b"), null);
+    globalThis.fetch = async () => {
+      calls++;
+      return Response.json({ id: "scoped-live-fixture", threadId: "gmail-thread" });
+    };
+    await assert.rejects(
+      () => outreach.sendApprovedBooking({ data: { id: gmailApproval } }),
+      /Send blocked/,
+    );
+    assert.equal(calls, 0);
+    await outreach.pauseOutreach({ data: { paused: false } });
+    assert.equal(
+      (await outreach.sendApprovedBooking({ data: { id: gmailApproval } })).status,
+      "sent",
+    );
+    assert.equal(calls, 1);
+    assert.equal(await verificationApprovalId(globalThis.__bookingSql, "artist-a"), null);
+    await assert.rejects(
+      () => outreach.sendApprovedBooking({ data: { id: gmailApproval } }),
+      /Sending remains disabled/,
+    );
+    assert.equal(calls, 1);
+    // Reset only this isolated fixture so the same handler is also tested in general-release mode.
+    await db.query("delete from outreach_delivery_audit where approval_id=$1", [gmailApproval]);
+    delete process.env.OUTREACH_VERIFICATION_GRANT;
     // Flags affect this isolated Node process only. No real credentials or network are used.
     process.env.OUTREACH_SEND_ENABLED = "true";
     process.env.OUTREACH_RELEASE_VERIFIED = "true";
@@ -330,6 +386,8 @@ test("actual booking handlers approve, reserve, send once, sync replies and revo
       if (previousFlags[i] === undefined) delete process.env[key];
       else process.env[key] = previousFlags[i];
     }
+    if (previousGrant === undefined) delete process.env.OUTREACH_VERIFICATION_GRANT;
+    else process.env.OUTREACH_VERIFICATION_GRANT = previousGrant;
     delete globalThis.__bookingSql;
     delete globalThis.__bookingUser;
     delete globalThis.__bookingToken;
