@@ -72,3 +72,37 @@ test("provider receipt, expiration, revocation, throttling, failure and unknown 
   assert.equal(result.status, "unknown");
   assert.equal(calls, 1);
 });
+
+test("MIME dates and folded Unicode subjects satisfy header limits without changing content", () => {
+  for (const subject of [
+    "River Fold — booking workflow test",
+    "🎵é漢字 ".repeat(25),
+    "A".repeat(200),
+  ]) {
+    const raw = Buffer.from(
+      encodeGmailMessage({
+        recipient: "test@example.invalid",
+        subject,
+        body: "Test",
+        key: "stable",
+      }),
+      "base64url",
+    ).toString();
+    const header = raw.split("\r\n\r\n")[0];
+    const words = [...header.matchAll(/=\?UTF-8\?B\?([^?]+)\?=/g)];
+    assert.ok(words.length);
+    assert.equal(words.map((w) => Buffer.from(w[1], "base64").toString()).join(""), subject);
+    assert.ok(words.every((w) => w[0].length <= 75));
+    assert.ok(header.split("\r\n").every((line) => line.length <= 998));
+    assert.ok(Number.isFinite(Date.parse(header.match(/^Date: (.+)$/m)[1].trim())));
+  }
+});
+
+test("Gmail transport rejects redirects instead of forwarding provider credentials", async () => {
+  const result = await deliverGmail("private", "mime", async (_url, options) => {
+    assert.equal(options.redirect, "error");
+    throw new TypeError("redirect rejected");
+  });
+  assert.equal(result.status, "unknown");
+  assert.doesNotMatch(JSON.stringify(result), /private/);
+});
