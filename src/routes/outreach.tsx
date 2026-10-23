@@ -264,7 +264,7 @@ function Outreach() {
                     consent: true,
                   },
                 }),
-              "Approval saved. Send directly below from your connected mailbox—no Outlook or Gmail app required.",
+              "Approval saved. Nothing has been sent.",
             )
           }
         >
