@@ -174,8 +174,8 @@ try {
   await page.getByRole("button", {name:"Save explicit approval",exact:true}).click();
   await page.getByText("Approval saved. Nothing has been sent.", {exact:true}).waitFor();
   await ready("/outreach");
-  await page.getByRole("button", {name:"Send approved email",exact:true}).waitFor();
-  assert.equal(await page.getByRole("button", {name:"Send approved email",exact:true}).isEnabled(),false);
+  await page.getByRole("button", {name:"Send from Primal Directive",exact:true}).waitFor();
+  assert.equal(await page.getByRole("button", {name:"Send from Primal Directive",exact:true}).isEnabled(),false);
   await ready("/account");
   await page.getByText("Current access: FREE", {exact:true}).waitFor();
   await page.getByRole("region", {name:"Email integrations"}).waitFor();
@@ -218,7 +218,7 @@ try {
   assert.equal(bob.profile.artistName, "");
   await ready("/outreach");
   await page.getByText("No pending approvals.", {exact:true}).waitFor();
-  assert.equal(await page.getByRole("button",{name:"Send approved email",exact:true}).count(),0);
+  assert.equal(await page.getByRole("button",{name:"Send from Primal Directive",exact:true}).count(),0);
   await auth("sign-out", {});
   await auth("sign-in/email", { email: emailA, password });
   await ready("/people");

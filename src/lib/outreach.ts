@@ -5,7 +5,6 @@ import { z } from "zod";
 import { authMiddleware } from "./auth/middleware";
 import { mailboxToken, ownedMailbox } from "./mailbox-provider.server";
 import { getSql } from "./db";
-import { requirePaid } from "./billing.server";
 import {
   deliverGmail,
   deliverOutlook,
@@ -165,7 +164,6 @@ export const sendApprovedBooking = createServerFn({ method: "POST" })
       throw new Error(
         "Sending remains disabled pending provider test-account verification and owner authorization",
       );
-    await requirePaid(context.userId);
     const sql = await getSql();
     const rows = await sql.query<{
       id: string;
