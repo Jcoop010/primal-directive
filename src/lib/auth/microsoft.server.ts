@@ -13,7 +13,6 @@ export function microsoftOAuthOptions(clientId: string, clientSecret: string) {
     tenantId: "common",
     disableDefaultScope: true,
     scope: ["openid", "profile", "email"],
-    prompt: "consent" as const,
     disableProfilePhoto: true,
     // Omit scope on refresh: Microsoft's default provider otherwise narrows the
     // renewed token to login scopes and drops explicitly consented mail scopes.
