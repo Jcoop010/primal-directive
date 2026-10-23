@@ -414,6 +414,7 @@ function Outreach() {
               Approval saved {new Date(a.approved_at).toLocaleString()} ·{" "}
               {a.mail_provider === "microsoft" ? "Outlook" : "Gmail"} · exact recipient and message
             </p>
+            <p className="break-all text-xs text-muted">Approval reference: {a.id}</p>
             <details className="text-sm">
               <summary className="min-h-11 cursor-pointer py-3">Read approved message</summary>
               <p className="whitespace-pre-wrap break-words">{a.body}</p>
