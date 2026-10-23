@@ -2,57 +2,42 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { askGrowthAdvisor } from "@/lib/ai";
-import { extractVenueProfile, officialVenueEvidence, sameVenue, venueEvidenceSources, researchStatus, type SourcePage } from "./venue-research";
+import { fetchSourcePage } from "./source-fetch.server";
+import { officialVenueEvidence, venueEvidenceSources, researchStatus, venueSourceLinks, type SourcePage } from "./venue-research";
 
 export const researchSavedVenue = createServerFn({method:"POST"})
   .middleware([authMiddleware])
-  .validator(z.object({venue:z.string().trim().min(1).max(200),city:z.string().trim().max(200)}))
+  .validator(z.object({venue:z.string().trim().min(1).max(200),city:z.string().trim().max(200),sourceUrls:z.array(z.string().url().max(2000)).max(3).optional()}))
   .handler(async ({data}) => {
-    // Fixed official seed URLs, never fetch arbitrary client/model URLs (SSRF).
-    const urls = sameVenue(data.venue,"Thunderbird Cafe") && /pittsburgh/i.test(data.city)
-      ? ["https://thunderbirdmusichall.com/aboutus/", "https://thunderbirdmusichall.com/contact/"]
-      : sameVenue(data.venue,"Mr. Smalls Theatre") && /(?:pittsburgh|millvale)/i.test(data.city)
-        ? ["https://mrsmalls.com/booking/", "https://mrsmalls.com/contact/"]
-      : sameVenue(data.venue,"Johnny Brenda's") && /philadelphia/i.test(data.city)
-        ? ["https://johnnybrendas.com/menu-2-2/", "https://johnnybrendas.com/menu-2/", "https://www.songkick.com/venues/254-johnny-brendas", "https://www.jambase.com/venue/johnny-brendas", "https://www.visitphilly.com/things-to-do/food-drink/johnny-brendas/"] : [];
     const pages: SourcePage[] = [];
-    await Promise.all(urls.map(async url => {
-      try {
-        const r = await fetch(url,{redirect:"error",signal:AbortSignal.timeout(10000),headers:{accept:"text/html"}});
-        if (!r.ok || !r.headers.get("content-type")?.includes("text/html")) { await r.body?.cancel(); return; }
-        // Bound bytes before decoding so unexpected pages cannot exhaust memory.
-        const reader = r.body?.getReader(); if (!reader) return;
-        const chunks: Uint8Array[] = []; let size=0;
-        try { for (;;) { const {done,value}=await reader.read(); if(done) break; size+=value.length; if(size>1000000) {await reader.cancel();return;} chunks.push(value); } }
-        finally {reader.releaseLock();}
-        pages.push({url,html:Buffer.concat(chunks).toString("utf8")});
-      } catch { /* Provider research below can still resolve unavailable official pages. */ }
-    }));
-    const official = officialVenueEvidence(data.venue,pages);
-    // Partial official evidence must not prevent the AI from finding the remaining fields.
-    // Never overwrite a source-verified official fact with model output.
-    if (researchStatus(official) === "Verified") {
-      return {evidence:official,citations:venueEvidenceSources(official),message:"Venue details verified from fetched official sources."};
+    const attempted = new Set<string>();
+    async function readSources(urls: string[]) {
+      const selected = [...new Set(urls)].filter(url => !attempted.has(url)).slice(0, Math.max(0, 6 - attempted.size));
+      selected.forEach(url => attempted.add(url));
+      const fetched = await Promise.all(selected.map(url => fetchSourcePage(url)));
+      pages.push(...fetched.filter((page): page is SourcePage => page !== null));
     }
+    await readSources(data.sourceUrls || []);
+    await readSources(pages.flatMap(venueSourceLinks));
+    let evidence = officialVenueEvidence(data.venue, pages, data.city);
+    if (researchStatus(evidence) === "Verified") return {evidence,citations:venueEvidenceSources(evidence),message:"Venue facts corroborated in fetched source pages. Review the room, layout and current submission requirements."};
+    let citations = venueEvidenceSources(evidence);
+    let providerUnavailable = false;
     try {
       const response = await askGrowthAdvisor({data:{
-        message:`Research this exact saved music venue: ${data.venue}, ${data.city}. Return a venueResearch object with venue, city, venueCapacity, capacitySourceUrl, bookingContactName, bookingContactSourceUrl and bookingRoute. Cite each fact's exact live supporting HTTPS URL. Omit unsupported fields. Do not invent dates, fees or contacts.`,
+        message:`Research this exact saved music venue: ${data.venue}, ${data.city}. Find the official website, booking submission route and source-supported room capacity. Return exact accessible HTTPS source URLs. Never invent contacts, dates, availability or terms.`,
         targetVenue:data.venue,targetCity:data.city,mode:"research",history:[],context:"Enrich an existing saved venue only. No new gigs or communications."
       }});
       if (!response.ok) throw new Error(response.error);
-      // Normalize and independently validate every AI field against citations.
-      // The backend's pre-extracted venueEvidence is a fallback, not a reason to skip validation.
-      const aiEvidence = extractVenueProfile(response,data.venue,data.city,response.citations);
-      const evidence = {...aiEvidence,...official};
-      return {evidence,citations:[...new Set([...response.citations,...venueEvidenceSources(official)])],
-        message:venueEvidenceSources(evidence).length
-          ? "Source-supported venue details found. Review remaining unverified fields."
-          : "No source-supported venue details found. Retry later or check the official venue website."};
-    } catch (error) {
-      if (venueEvidenceSources(official).length) {
-        return {evidence:official,citations:venueEvidenceSources(official),
-          message:"Some official venue details were verified; additional research is temporarily unavailable."};
-      }
-      throw error;
-    }
+      citations = [...new Set([...citations, ...response.citations])];
+      await readSources(response.citations);
+      evidence = officialVenueEvidence(data.venue, pages, data.city);
+      providerUnavailable = !response.citations.length;
+    } catch { providerUnavailable = true; }
+    const supported = venueEvidenceSources(evidence);
+    return {evidence,citations:[...new Set([...citations,...supported])],message:supported.length
+      ? "Some venue facts were corroborated in fetched pages. Missing or ambiguous claims remain unverified."
+      : providerUnavailable
+        ? "Live research is unavailable. Existing saved evidence was preserved; no current venue facts were verified. Add an official source or retry later."
+        : "Research returned source links, but no venue facts could be independently corroborated. Review the links; contacts, capacity and booking route remain unverified."};
   });
