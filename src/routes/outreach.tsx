@@ -264,7 +264,7 @@ function Outreach() {
                     consent: true,
                   },
                 }),
-              "Approval saved. Nothing has been sent.",
+              "Approval saved. Send directly below from your connected mailbox—no Outlook or Gmail app required.",
             )
           }
         >
@@ -272,7 +272,8 @@ function Outreach() {
         </Button>
       </section>
       <section className="space-y-4 rounded-2xl border border-line bg-surface p-6">
-        <h2 className="text-lg font-bold">Approved messages</h2>
+        <h2 className="text-lg font-bold">Send directly from Primal Directive</h2>
+        <p className="text-sm text-muted">After saving approval, select Send approved email here. Your connected Outlook or Gmail account sends it; you do not need to open the email app. Sending remains unavailable until the owner-controlled release verification is enabled.</p>
         {status?.approvals.length === 0 && (
           <p className="text-sm text-muted">No pending approvals.</p>
         )}
@@ -300,7 +301,7 @@ function Outreach() {
                   }, "Provider confirmed submission; message receipt recorded.")
                 }
               >
-                Send approved email
+                Send from Primal Directive
               </Button>
               <Button
                 variant="subtle"
