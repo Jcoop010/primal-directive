@@ -33,6 +33,9 @@ function Outreach() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const readableError = (message: string) => message.includes("contactSourceUrl") || message.includes("invalid_format")
+    ? "Enter a valid official HTTPS booking contact source before approving real outreach. For an Outlook draft test, return to Email settings → Prepare a booking draft; no outreach approval is needed."
+    : message;
   useEffect(() => {
     if (!reviewDraftId) return;
     let active = true;
@@ -81,7 +84,7 @@ function Outreach() {
       await refresh();
       setNotice(message);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Outreach operation failed");
+      setError(readableError(e instanceof Error ? e.message : "Outreach operation failed"));
     } finally {
       setBusy(false);
     }
@@ -147,9 +150,10 @@ function Outreach() {
         </p>
       </section>
       {error && (
-        <p role="alert" className="rounded-xl border border-line p-4 text-sm">
-          {error}
-        </p>
+        <div role="alert" className="rounded-xl border border-line p-4 text-sm">
+          <p>{error}</p>
+          <a href="/account#booking-drafts" className="mt-2 inline-block text-accent underline">Go to email draft editor →</a>
+        </div>
       )}
       {notice && (
         <p role="status" className="rounded-xl border border-line p-4 text-sm">
