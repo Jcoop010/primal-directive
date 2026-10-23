@@ -33,7 +33,21 @@ export function encodeGmailMessage(input: {
     throw new Error("Invalid subject");
   if (!input.body.trim() || Buffer.byteLength(input.body) > 50000)
     throw new Error("Invalid message body");
-  const subject = Buffer.from(input.subject).toString("base64");
+  // RFC 2047 encoded words must stay under 75 characters, including delimiters.
+  // Split at Unicode code points so each word independently decodes as UTF-8.
+  const chunks: string[] = [];
+  let chunk = "";
+  for (const point of input.subject) {
+    if (Buffer.byteLength(chunk + point) > 42) {
+      chunks.push(chunk);
+      chunk = "";
+    }
+    chunk += point;
+  }
+  if (chunk) chunks.push(chunk);
+  const subject = chunks
+    .map((part) => `=?UTF-8?B?${Buffer.from(part).toString("base64")}?=`)
+    .join("\r\n ");
   const content =
     Buffer.from(input.body.replace(/\r?\n/g, "\r\n"))
       .toString("base64")
@@ -43,7 +57,8 @@ export function encodeGmailMessage(input: {
   return Buffer.from(
     [
       `To: ${recipient}`,
-      `Subject: =?UTF-8?B?${subject}?=`,
+      `Subject: ${subject}`,
+      `Date: ${new Date().toUTCString()}`,
       `Message-ID: ${id}`,
       "MIME-Version: 1.0",
       'Content-Type: text/plain; charset="UTF-8"',
@@ -65,6 +80,7 @@ export async function deliverGmail(
   try {
     const response = await request("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
       method: "POST",
+      redirect: "error",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ raw }),
       signal: AbortSignal.timeout(10000),
