@@ -13,6 +13,11 @@ import {
   reconcileMailboxSubmissions,
 } from "./mailbox-provider.server";
 import { normalizeRecipient, encodeGmailMessage } from "./outreach-message";
+import {
+  mailboxTestPlan,
+  executeMailboxTest,
+  recordMailboxTestReplies,
+} from "./mailbox-test.server";
 const accountInput = z.object({ accountId: z.string().min(1).max(200) });
 export const mailboxStatus = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
@@ -70,6 +75,7 @@ export const mailboxStatus = createServerFn({ method: "GET" })
       state: { gigs?: { id: string; venue: string; title: string }[] };
     }>("select state from app_state where user_id=$1", [context.userId]);
     return {
+      connectionTest: await mailboxTestPlan(sql, context.userId),
       microsoftConfigured: Boolean(
         process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET,
       ),
@@ -101,6 +107,17 @@ export const enableMailbox = createServerFn({ method: "POST" })
       [context.userId, data.provider],
     );
     return { ok: true };
+  });
+export const sendMailboxConnectionTest = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(accountInput.extend({ grantId: z.string().uuid(), consent: z.literal(true) }))
+  .handler(async ({ context, data }) => {
+    await ownedMailbox(context.userId, data.accountId);
+    await event(context.userId, data.accountId, "connection-test-requested");
+    const sql = await getSql();
+    return executeMailboxTest(sql, context.userId, data.accountId, data.grantId, () =>
+      mailboxToken(context.userId, data.accountId, "send"),
+    );
   });
 export const selectMailbox = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
@@ -164,6 +181,7 @@ export const syncMailbox = createServerFn({ method: "POST" })
       await sql.transaction(async (tx) => {
         // A reply cancels unsent approvals; it never automatically confirms a booking.
         await tx.query("update outreach_dispatch_guard set epoch=epoch+1 where id=1");
+        await recordMailboxTestReplies(tx, context.userId, data.accountId, messages);
         for (const m of messages) {
           const [match] = await tx.query<{ gig_id: string; recipient: string }>(
             `select gig_id,recipient from outreach_delivery_audit where user_id=$1 and mailbox_account_id=$2 and provider_thread_id=$3 and status in ('sent','unknown') order by created_at desc limit 1`,

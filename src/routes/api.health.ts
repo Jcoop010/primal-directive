@@ -13,11 +13,13 @@ export const Route = createFileRoute("/api/health")({
             app_state: string | null;
             approvals: string | null;
             mailboxes: string | null;
+            mailbox_tests: string | null;
           }>(
-            "select to_regclass('public.outreach_delivery_audit')::text as outreach,to_regclass('public.pd_subscriptions')::text as billing,to_regclass('public.outreach_approvals')::text as approvals,to_regclass('public.app_state')::text as app_state,to_regclass('public.mailbox_connections')::text as mailboxes",
+            "select to_regclass('public.outreach_delivery_audit')::text as outreach,to_regclass('public.pd_subscriptions')::text as billing,to_regclass('public.outreach_approvals')::text as approvals,to_regclass('public.app_state')::text as app_state,to_regclass('public.mailbox_connections')::text as mailboxes,to_regclass('public.mailbox_connection_tests')::text as mailbox_tests",
           );
           if (
             !state?.mailboxes ||
+            !state?.mailbox_tests ||
             !state?.outreach ||
             !state.approvals ||
             !state.app_state ||

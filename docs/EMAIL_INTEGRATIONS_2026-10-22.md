@@ -1,5 +1,13 @@
 # Google/Gmail and Microsoft/Outlook acceptance register
 
+## One-time owner-authorized Gmail connection test
+
+An optional production-only `MAILBOX_TEST_GRANT` JSON setting may contain `id` (a fresh UUID), `ownerEmail` (the existing artist's verified sign-in email), `recipient` (the exact owner-authorized test address), and `expiresAt` (ISO timestamp within 24 hours). Keep it unset unless the owner explicitly requests a test. Do not enable outreach release flags to run a connection test.
+
+Account shows the exact fixed test subject/body and recipient only to the matching verified artist. The authenticated POST uses the selected, verified Gmail mailbox, checks current connection/send permission under the shared dispatch lock, and atomically consumes the grant once. Recipient, content, and grant ownership cannot be supplied or changed by the client. The separate RLS-protected audit table stores approval time/policy, provider receipt, ambiguous outcomes and exact thread/sender reply evidence. No booking, venue contact, subscription, or general outreach permission is fabricated or modified. A provider receipt proves submission only. Failed, reserved and unknown attempts are never retried automatically; investigate Sent Items before authorizing a different grant. Remove the setting after the test; retain its audit record.
+
+Tests use fictional addresses and mocked provider transport with real PGlite transactions. They cover concurrent attempts, foreign artist/mailbox rejection, missing scope, local disconnect, expired grant, expired/revoked token failure, provider 401, ambiguous timeout, fixed MIME recipient, and scoped reply matching. A production test still requires the actual artist session and explicit recipient authorization.
+
 Baseline independently inspected: main c6b6a26957d224d0294aaae008a6e67c19d0970d (#263), production dpl_DoMuoqdsE1jvcYnMkWuyojspWcjQ READY. Existing PostgreSQL, Better Auth, Vercel project and customer records are retained. Additive migration 0007 adds server-only mailbox settings, metadata, drafts and audit records.
 
 ## Implemented
