@@ -143,6 +143,7 @@ const grokOAuthPlugin = authConfigured
   : null;
 
 const googleOAuthConfigured = Boolean(env("GOOGLE_CLIENT_ID") && env("GOOGLE_CLIENT_SECRET"));
+const microsoftOAuthConfigured = Boolean(env("MICROSOFT_CLIENT_ID") && env("MICROSOFT_CLIENT_SECRET"));
 
 const configuredAuthSecret = env("BETTER_AUTH_SECRET");
 if (process.env.VERCEL_ENV === "production" && !configuredAuthSecret) {
