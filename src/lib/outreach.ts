@@ -5,6 +5,8 @@ import { z } from "zod";
 import { authMiddleware } from "./auth/middleware";
 import { mailboxToken, ownedMailbox } from "./mailbox-provider.server";
 import { getSql } from "./db";
+import { verificationApprovalId } from "./outreach-release.server";
+import { hasMailScope, parseMailScopes } from "./mailbox-policy";
 import {
   deliverGmail,
   deliverOutlook,
@@ -30,6 +32,7 @@ export const outreachStatus = createServerFn({ method: "GET" })
     );
     const activity = await sql.query<{
       idempotency_key: string;
+      approval_id: string | null;
       gig_id: string;
       recipient: string;
       status: string;
@@ -37,7 +40,7 @@ export const outreachStatus = createServerFn({ method: "GET" })
       mail_provider: string;
       created_at: Date;
     }>(
-      "select idempotency_key,gig_id,recipient,status,provider_message_id,mail_provider,created_at from outreach_delivery_audit where user_id=$1 order by created_at desc limit 50",
+      "select idempotency_key,approval_id,gig_id,recipient,status,provider_message_id,mail_provider,created_at from outreach_delivery_audit where user_id=$1 order by created_at desc limit 50",
       [context.userId],
     );
     const approvals = await sql.query<{
@@ -54,6 +57,7 @@ export const outreachStatus = createServerFn({ method: "GET" })
     );
     return {
       released: sendingReleased(),
+      verificationApprovalId: await verificationApprovalId(sql, context.userId),
       paused: preferences[0]?.paused ?? true,
       activity: activity.map((a) => ({ ...a, created_at: new Date(a.created_at).toISOString() })),
       approvals: approvals.map((a) => ({
@@ -126,7 +130,12 @@ export const approveBookingMessage = createServerFn({ method: "POST" })
       [context.userId],
     );
     const mailboxAccountId = data.mailboxAccountId ?? preference?.account_id ?? null;
-    if (mailboxAccountId) await ownedMailbox(context.userId, mailboxAccountId);
+    if (!mailboxAccountId) throw new Error("Select a connected sending mailbox before approving");
+    const selectedAccount = await ownedMailbox(context.userId, mailboxAccountId);
+    if (!hasMailScope(selectedAccount.providerId, parseMailScopes(selectedAccount.scope), "send"))
+      throw new Error(
+        "Mailbox send permission is missing. Grant permission in Account before approving.",
+      );
     await sql.query(
       `insert into outreach_approvals(id,user_id,gig_id,recipient,subject,body,message_fingerprint,contact_source_url,policy_version,mailbox_account_id)
     values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
@@ -160,11 +169,11 @@ export const sendApprovedBooking = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(z.object({ id: z.string().uuid() }))
   .handler(async ({ context, data }) => {
-    if (!sendingReleased())
+    const sql = await getSql();
+    if (!sendingReleased() && (await verificationApprovalId(sql, context.userId)) !== data.id)
       throw new Error(
         "Sending remains disabled pending provider test-account verification and owner authorization",
       );
-    const sql = await getSql();
     const rows = await sql.query<{
       id: string;
       gig_id: string;
