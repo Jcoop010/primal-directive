@@ -333,7 +333,7 @@ export function MailboxSettings() {
           </article>
         ))}
       </div>
-      <div className="space-y-3 border-t border-line pt-5">
+      <div id="booking-drafts" className="scroll-mt-24 space-y-3 border-t border-line pt-5">
         <h3 className="font-bold">Prepare a booking draft</h3>
         <p className="text-sm text-muted">
           {selected
