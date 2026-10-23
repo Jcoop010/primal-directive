@@ -60,6 +60,7 @@ test("the enabled app exposes auth, app-state, security, and automation migratio
     { name: "0005_outreach_delivery.sql", path: "0005_outreach_delivery.sql" },
     { name: "0006_billing.sql", path: "0006_billing.sql" },
     { name: "0007_mailboxes.sql", path: "0007_mailboxes.sql" },
+    { name: "0008_mailbox_connection_tests.sql", path: "0008_mailbox_connection_tests.sql" },
   ]);
   assert.ok(readdirSync(join(migrationsDir, "auth")).includes("0001_auth.sql"));
 });

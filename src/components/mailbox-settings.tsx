@@ -10,6 +10,7 @@ import {
   disconnectMailbox,
   saveMailboxDraft,
   exportOutlookDraft,
+  sendMailboxConnectionTest,
 } from "@/lib/mailboxes";
 import { mailboxConsentScopes, type MailProvider } from "@/lib/mailbox-policy";
 type Status = Awaited<ReturnType<typeof mailboxStatus>>;
@@ -256,6 +257,55 @@ export function MailboxSettings() {
         (work/school accounts may require your administrator). Revocation is detected on the next
         API check. Live outreach remains disabled.
       </p>
+      {(status?.connectionTest.grant || status?.connectionTest.latest) && (
+        <div
+          className="space-y-3 rounded-xl border border-line p-4"
+          aria-label="Gmail connection test"
+        >
+          <h3 className="font-bold">One-time Gmail test</h3>
+          {status.connectionTest.grant && (
+            <>
+              <p className="text-sm text-muted">To: {status.connectionTest.grant.recipient}</p>
+              <p className="text-sm font-semibold">{status.connectionTest.grant.subject}</p>
+              <p className="whitespace-pre-wrap text-sm text-muted">
+                {status.connectionTest.grant.body}
+              </p>
+              <Button
+                disabled={busy || !selected?.send || selected.providerId !== "google"}
+                onClick={() =>
+                  void run(async () => {
+                    const grant = status.connectionTest.grant;
+                    if (!grant || !selected) return;
+                    const result = await sendMailboxConnectionTest({
+                      data: { accountId: selected.id, grantId: grant.id, consent: true },
+                    });
+                    if (result.status !== "sent")
+                      throw new Error(
+                        result.status === "unknown"
+                          ? "Test submission is unconfirmed. Check Gmail Sent before any further action. Do not retry."
+                          : "Gmail rejected this test. No automatic retry will occur.",
+                      );
+                  }, "Gmail accepted the test message. Recipient delivery is not yet verified.")
+                }
+              >
+                Send this one test email
+              </Button>
+            </>
+          )}
+          {status.connectionTest.latest && (
+            <p role="status" className="text-sm text-muted">
+              {status.connectionTest.latest.recipient} ·{" "}
+              {status.connectionTest.latest.reply_message_id
+                ? "Reply synchronized"
+                : status.connectionTest.latest.status === "sent"
+                  ? "Gmail accepted; awaiting recipient confirmation or reply"
+                  : status.connectionTest.latest.status === "failed"
+                    ? "Test rejected; no retry"
+                    : "Submission unconfirmed; check Gmail Sent. Do not resend."}
+            </p>
+          )}
+        </div>
+      )}
       <div className="space-y-3 border-t border-line pt-5">
         <h3 className="font-bold">Booking conversations</h3>
         <p className="text-sm text-muted">

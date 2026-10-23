@@ -23,7 +23,173 @@ const oauthModule = read("src/lib/auth/microsoft.server.ts").replace(
 const { microsoftOAuthOptions, MICROSOFT_LINKING_POLICY } = await import(compile(oauthModule));
 
 const transportUrl = compile(read("src/lib/outreach-message.ts"));
+const testServiceUrl = compile(
+  read("src/lib/mailbox-test.server.ts").replace(
+    'from "./outreach-message"',
+    `from "${transportUrl}"`,
+  ),
+);
 const { deliverOutlook, outreachInternetMessageId } = await import(transportUrl);
+test("one-time Gmail tests bind verified owner, selected mailbox and fixed recipient; concurrent and ambiguous sends never retry", async () => {
+  const { executeMailboxTest, configuredMailboxTest, recordMailboxTestReplies } = await import(
+    testServiceUrl
+  );
+  const db = new PGlite();
+  const previousFetch = globalThis.fetch;
+  const sqlFor = (client) => ({
+    query: async (q, p = []) => (await client.query(q, p)).rows,
+    transaction: (work) => db.transaction((tx) => work(sqlFor(tx))),
+  });
+  const sql = sqlFor(db);
+  const grant = (n) => ({
+    id: `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`,
+    ownerEmail: "a@example.invalid",
+    recipient: "test-recipient@example.invalid",
+    expiresAt: new Date(Date.now() + 3600000).toISOString(),
+  });
+  const tokenFor = async () => ({ account: { providerId: "google" }, token: "PRIVATE-TOKEN" });
+  let sends = 0;
+  try {
+    for (const migration of [
+      "0001_auth.sql",
+      "0002_app_state.sql",
+      "0003_security_hardening.sql",
+      "0004_automation_runs.sql",
+      "0005_outreach_delivery.sql",
+      "0006_billing.sql",
+      "0007_mailboxes.sql",
+      "0008_mailbox_connection_tests.sql",
+    ])
+      await db.exec(read("migrations/" + migration));
+    await db.exec(`insert into "user"(id,name,email,"emailVerified") values('a','A','a@example.invalid',true),('b','B','b@example.invalid',true);
+      insert into account(id,"userId","providerId","accountId",scope,"accessToken","refreshToken","updatedAt") values('aa','a','google','pa','https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send','encrypted','encrypted',now()),('bb','b','google','pb','https://www.googleapis.com/auth/gmail.send','encrypted','encrypted',now());
+      insert into mailbox_preferences(user_id,account_id) values('a','aa'),('b','bb');
+      insert into mailbox_connections(user_id,account_id,last_sync_at) values('a','aa',now()),('b','bb',now());`);
+    globalThis.fetch = async (url, init) => {
+      sends++;
+      assert.equal(url, "https://gmail.googleapis.com/gmail/v1/users/me/messages/send");
+      const mime = Buffer.from(JSON.parse(init.body).raw, "base64url").toString();
+      assert.match(mime, /^To: test-recipient@example.invalid\r\n/);
+      assert.doesNotMatch(mime, /PRIVATE-TOKEN|Bcc:|Cc:/);
+      return Response.json({ id: "provider-test", threadId: "test-thread" });
+    };
+    assert.equal(await configuredMailboxTest(sql, "b", JSON.stringify(grant(1))), null);
+    assert.equal(
+      await configuredMailboxTest(
+        sql,
+        "a",
+        JSON.stringify({ ...grant(1), expiresAt: new Date(0).toISOString() }),
+      ),
+      null,
+    );
+    await assert.rejects(
+      () => executeMailboxTest(sql, "b", "bb", grant(1).id, tokenFor, JSON.stringify(grant(1))),
+      /not authorized/,
+    );
+    await assert.rejects(
+      () => executeMailboxTest(sql, "a", "bb", grant(1).id, tokenFor, JSON.stringify(grant(1))),
+      /Select and verify/,
+    );
+    await assert.rejects(
+      () =>
+        executeMailboxTest(
+          sql,
+          "a",
+          "aa",
+          grant(1).id,
+          async () => {
+            throw new Error("Authorization revoked");
+          },
+          JSON.stringify(grant(1)),
+        ),
+      /revoked/,
+    );
+    assert.equal(sends, 0);
+    const concurrent = await Promise.allSettled(
+      [1, 2].map(() =>
+        executeMailboxTest(sql, "a", "aa", grant(1).id, tokenFor, JSON.stringify(grant(1))),
+      ),
+    );
+    assert.equal(concurrent.filter((r) => r.status === "fulfilled").length, 1);
+    assert.equal(sends, 1);
+    const [audit] = await sql.query("select * from mailbox_connection_tests where grant_id=$1", [
+      grant(1).id,
+    ]);
+    assert.equal(audit.provider_message_id, "provider-test");
+    assert.equal(audit.provider_thread_id, "test-thread");
+    assert.equal(audit.recipient, "test-recipient@example.invalid");
+    assert.match(audit.policy_version, /connection-test/);
+    assert.ok(audit.approved_at);
+    assert.doesNotMatch(JSON.stringify(audit), /PRIVATE-TOKEN/);
+    const reply = {
+      id: "incoming-reply",
+      threadId: "test-thread",
+      from: "test-recipient@example.invalid",
+      subject: "Re: test",
+      date: "fixture",
+      replyTo: "",
+    };
+    await recordMailboxTestReplies(sql, "b", "bb", [reply]);
+    await recordMailboxTestReplies(sql, "a", "aa", [
+      { ...reply, from: "unrelated@example.invalid" },
+    ]);
+    assert.equal(
+      (await sql.query("select reply_message_id from mailbox_connection_tests"))[0]
+        .reply_message_id,
+      null,
+    );
+    await recordMailboxTestReplies(sql, "a", "aa", [reply]);
+    assert.equal(
+      (await sql.query("select reply_message_id from mailbox_connection_tests"))[0]
+        .reply_message_id,
+      "incoming-reply",
+    );
+    globalThis.fetch = async () => {
+      sends++;
+      throw new Error("ambiguous timeout PRIVATE-TOKEN");
+    };
+    const unknown = await executeMailboxTest(
+      sql,
+      "a",
+      "aa",
+      grant(2).id,
+      tokenFor,
+      JSON.stringify(grant(2)),
+    );
+    assert.equal(unknown.status, "unknown");
+    await assert.rejects(
+      () => executeMailboxTest(sql, "a", "aa", grant(2).id, tokenFor, JSON.stringify(grant(2))),
+      /already been attempted/,
+    );
+    assert.equal(sends, 2);
+    globalThis.fetch = async () => {
+      sends++;
+      return new Response(null, { status: 401 });
+    };
+    assert.equal(
+      (await executeMailboxTest(sql, "a", "aa", grant(3).id, tokenFor, JSON.stringify(grant(3))))
+        .status,
+      "failed",
+    );
+    await sql.query("update mailbox_connections set enabled=false where user_id='a'");
+    await assert.rejects(
+      () => executeMailboxTest(sql, "a", "aa", grant(4).id, tokenFor, JSON.stringify(grant(4))),
+      /Select and verify/,
+    );
+    assert.equal(sends, 3);
+    await sql.query("update mailbox_connections set enabled=true where user_id='a'");
+    await sql.query("update account set scope='openid' where id='aa'");
+    await assert.rejects(
+      () => executeMailboxTest(sql, "a", "aa", grant(4).id, tokenFor, JSON.stringify(grant(4))),
+      /Select and verify/,
+    );
+    assert.equal(sends, 3);
+    assert.equal((await sql.query("select count(*)::int n from mailbox_connection_tests"))[0].n, 3);
+  } finally {
+    globalThis.fetch = previousFetch;
+    await db.close();
+  }
+});
 test("mailbox grants preserve previous permissions and separate login, read, send, drafts", () => {
   assert.deepEqual(
     policy.mailboxConsentScopes("google", [policy.MAIL_SCOPES.google.read], "send"),
@@ -210,6 +376,7 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
     .replace('from "zod"', `from "${zod}"`)
     .replace('from "./mailbox-policy"', `from "${policyUrl}"`)
     .replace('from "./mailbox-provider.server"', `from "${providerUrl}"`)
+    .replace('from "./mailbox-test.server"', `from "${testServiceUrl}"`)
     .replace('from "./outreach-message"', `from "${transportUrl}"`);
   const api = await import(compile(service));
   try {
@@ -221,6 +388,7 @@ test("mailbox services persist sync/drafts, enforce account ownership, and disco
       "0005_outreach_delivery.sql",
       "0006_billing.sql",
       "0007_mailboxes.sql",
+      "0008_mailbox_connection_tests.sql",
     ])
       await db.exec(read("migrations/" + migration));
     await db.exec(`insert into "user"(id,name,email,"emailVerified") values('a','A','a@example.invalid',true),('b','B','b@example.invalid',true);

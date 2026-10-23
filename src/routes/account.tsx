@@ -2,10 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { billingStatus, openBillingPortal } from "@/lib/billing";
 import { MailboxSettings } from "@/components/mailbox-settings";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
 
 import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/account")({ component: Account });
 function Account() {
+  const user = useCurrentUser();
   const [billing, setBilling] = useState<Awaited<ReturnType<typeof billingStatus>>>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,6 +45,9 @@ function Account() {
         <p className="mt-2 text-sm text-muted">
           Review your plan and connect only the email permissions you need.
         </p>
+        {user?.primaryEmail && (
+          <p className="mt-2 break-all text-sm text-muted">Signed in as {user.primaryEmail}</p>
+        )}
       </section>
       {error && (
         <p role="alert" className="rounded-xl border border-line p-4 text-sm">
