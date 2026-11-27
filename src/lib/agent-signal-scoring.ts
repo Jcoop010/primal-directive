@@ -7,6 +7,22 @@ export type SignalUrgency = (typeof SIGNAL_URGENCIES)[number];
 export const SIGNAL_SORTS = ["score", "newest"] as const;
 export type SignalSortMode = (typeof SIGNAL_SORTS)[number];
 
+export const SIGNAL_BILL_ROLES = ["support", "co_bill", "headliner", "festival", "session"] as const;
+export type SignalBillRole = (typeof SIGNAL_BILL_ROLES)[number];
+
+export const SIGNAL_DEAL_TYPES = ["guarantee", "door_split", "versus", "promo_showcase"] as const;
+export type SignalDealType = (typeof SIGNAL_DEAL_TYPES)[number];
+
+export const SIGNAL_BOOKING_STAGES = [
+  "lead",
+  "hold_requested",
+  "hold_confirmed",
+  "advance_in_progress",
+  "booked",
+  "passed",
+] as const;
+export type SignalBookingStage = (typeof SIGNAL_BOOKING_STAGES)[number];
+
 export interface SignalScoringInput {
   signalType: string;
   summary?: string | null;
@@ -16,6 +32,10 @@ export interface SignalScoringInput {
   priorityTier?: SignalPriorityTier | null;
   urgency?: SignalUrgency | null;
   recommendedAction?: string | null;
+  corridor?: string | null;
+  billRole?: SignalBillRole | null;
+  targetWindow?: string | null;
+  dealType?: SignalDealType | null;
 }
 
 export interface NormalizedSignalScoring {
@@ -75,6 +95,7 @@ const RICH_BAND_PAYLOAD_KEYS = new Set([
   "date",
   "targetWindow",
   "routingFit",
+  "corridor",
 ]);
 
 export function clampFitScore(value: number): number {
@@ -98,6 +119,12 @@ export function derivePriorityTier(fitScore: number, urgency: SignalUrgency): Si
 function defaultBandRecommendedAction(input: SignalScoringInput): string | null {
   const type = input.signalType.trim().toLowerCase();
   if (LOW_SIGNAL_TYPES.has(type)) return null;
+  if (input.billRole === "festival" || type === "festival_slot" || type === "festival_open") {
+    return "Convert to Lead, verify submission deadline, and send EPK + live video clip.";
+  }
+  if (input.billRole === "support" || type === "tour_support" || type === "opener_slot") {
+    return "Convert to Lead, check corridor routing dates, and request a support hold.";
+  }
   if (HIGH_VALUE_BAND_TYPES.has(type)) {
     return "Convert to Lead, confirm hold dates, and reply with EPK + guarantee terms.";
   }
@@ -105,6 +132,53 @@ function defaultBandRecommendedAction(input: SignalScoringInput): string | null 
     return "Convert to Lead and pitch EPK, live video link, and regional draw history.";
   }
   return null;
+}
+
+export function buildBookingOutreachDraft(input: {
+  venue: string;
+  city?: string | null;
+  corridor?: string | null;
+  billRole?: SignalBillRole | null;
+  targetWindow?: string | null;
+  dealType?: SignalDealType | null;
+  recommendedAction?: string | null;
+}): string {
+  const venue = input.venue.trim() || "your room";
+  const cityPart = input.city?.trim() ? ` in ${input.city.trim()}` : "";
+  const roleLabel =
+    input.billRole === "support"
+      ? "a direct support slot"
+      : input.billRole === "co_bill"
+        ? "a co-bill"
+        : input.billRole === "headliner"
+          ? "a regional headlining date"
+          : input.billRole === "festival"
+            ? "an artist showcase/festival slot"
+            : input.billRole === "session"
+              ? "a live session"
+              : "an upcoming live bill";
+  const windowPart = input.targetWindow?.trim() ? ` around ${input.targetWindow.trim()}` : "";
+  const corridorPart = input.corridor?.trim()
+    ? ` We are routing through the ${input.corridor.trim()} corridor and would love to lock a hold.`
+    : "";
+  const dealPart =
+    input.dealType === "guarantee"
+      ? " Happy to discuss guarantee terms."
+      : input.dealType === "door_split"
+        ? " Open to a fair door split and local cross-promotion."
+        : input.dealType === "versus"
+          ? " Open to a guarantee-versus-door structure."
+          : "";
+  const angle = input.recommendedAction?.trim()
+    ? `\n\nNotes: ${input.recommendedAction.trim()}`
+    : "";
+
+  return (
+    `Hi ${venue} booking team,\n\n` +
+    `We are reaching out about ${roleLabel} at ${venue}${cityPart}${windowPart}.${corridorPart}${dealPart} ` +
+    `We can share our EPK, live set video, stage plot, and recent regional draw numbers right away—please let us know what dates are open for a hold.` +
+    angle
+  );
 }
 
 export function computeSignalScore(input: SignalScoringInput): number {
@@ -123,6 +197,14 @@ export function computeSignalScore(input: SignalScoringInput): number {
   if (urgency === "urgent") score += 20;
   else if (urgency === "high") score += 12;
   else if (urgency === "low") score -= 10;
+
+  if (input.corridor && input.corridor.trim().length > 0) score += 6;
+  if (input.billRole === "support" || input.billRole === "festival" || input.billRole === "headliner") {
+    score += 6;
+  } else if (input.billRole === "co_bill" || input.billRole === "session") {
+    score += 4;
+  }
+  if (input.targetWindow && input.targetWindow.trim().length > 0) score += 4;
 
   if (input.sourceUrl && input.sourceUrl.trim().length > 0) score += 10;
   if (input.summary && input.summary.trim().length >= 24) score += 5;

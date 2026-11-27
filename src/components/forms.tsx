@@ -7,12 +7,19 @@ import { toIsoDay } from "@/lib/format";
 import { suggestedFollowUp, bookingDraft } from "@/lib/booking-workflow";
 import { useMusician } from "@/lib/store";
 import {
+  BILL_ROLES,
+  BOOKING_STAGE_LABEL,
+  BOOKING_STAGES,
+  DEAL_TYPES,
   GIG_STATUS_LABEL,
   GIG_STATUSES,
   MONEY_TYPE_LABEL,
   MONEY_TYPES,
   PERSON_ROLE_LABEL,
   PERSON_ROLES,
+  type BillRole,
+  type BookingStage,
+  type DealType,
   type Gig,
   type GigStatus,
   type MoneyEntry,
@@ -97,6 +104,15 @@ function GigForm({
     initial?.outreachLastContactedAt ?? "",
   );
   const [outreachNotes, setOutreachNotes] = useState(initial?.outreachNotes ?? "");
+  const [corridor, setCorridor] = useState(initial?.corridor ?? "");
+  const [billRole, setBillRole] = useState<BillRole | "">(initial?.billRole ?? "");
+  const [targetWindow, setTargetWindow] = useState(initial?.targetWindow ?? "");
+  const [dealType, setDealType] = useState<DealType | "">(initial?.dealType ?? "");
+  const [bookingStage, setBookingStage] = useState<BookingStage>(initial?.bookingStage ?? "lead");
+  const [epkReady, setEpkReady] = useState(Boolean(initial?.epkReady));
+  const [techPlotReady, setTechPlotReady] = useState(Boolean(initial?.techPlotReady));
+  const [routingChecked, setRoutingChecked] = useState(Boolean(initial?.routingChecked));
+  const [outreachDraft, setOutreachDraft] = useState(initial?.outreachDraft ?? "");
 
   return (
     <form
@@ -124,6 +140,15 @@ function GigForm({
             outreachNextFollowUp,
             outreachLastContactedAt,
             outreachNotes,
+            corridor: corridor.trim() || undefined,
+            billRole: billRole || undefined,
+            targetWindow: targetWindow.trim() || undefined,
+            dealType: dealType || undefined,
+            bookingStage,
+            epkReady,
+            techPlotReady,
+            routingChecked,
+            outreachDraft: outreachDraft.trim() || undefined,
             researchVerifiedAt:
               researchSourceUrl === initial?.researchSourceUrl ? initial?.researchVerifiedAt : "",
           });
@@ -196,6 +221,128 @@ function GigForm({
           placeholder="Load-in, bill, follow-up…"
         />
       </Field>
+      <section
+        aria-label="Booking, routing and outreach draft"
+        className="space-y-3 rounded-xl border border-[#243652] bg-[#0A1628]/80 p-3.5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-fg">Booking, routing &amp; outreach draft</h3>
+          <span className="rounded-full border border-[#E25822]/40 bg-[#E25822]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#ffb088]">
+            Human-reviewed only
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Booking stage">
+            <NativeSelect
+              value={bookingStage}
+              onChange={(e) => setBookingStage(e.target.value as BookingStage)}
+            >
+              {BOOKING_STAGES.map((stage) => (
+                <option key={stage} value={stage}>
+                  {BOOKING_STAGE_LABEL[stage]}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label="Bill role">
+            <NativeSelect
+              value={billRole}
+              onChange={(e) => setBillRole(e.target.value as BillRole | "")}
+            >
+              <option value="">Unspecified</option>
+              {BILL_ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {role.replace("_", " ")}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Routing corridor">
+            <Input
+              value={corridor}
+              onChange={(e) => setCorridor(e.target.value)}
+              placeholder="I-40 / Southeast…"
+            />
+          </Field>
+          <Field label="Target window">
+            <Input
+              value={targetWindow}
+              onChange={(e) => setTargetWindow(e.target.value)}
+              placeholder="Spring 2027 / Oct weekends…"
+            />
+          </Field>
+        </div>
+        <Field label="Deal type">
+          <NativeSelect
+            value={dealType}
+            onChange={(e) => setDealType(e.target.value as DealType | "")}
+          >
+            <option value="">Unspecified</option>
+            {DEAL_TYPES.map((deal) => (
+              <option key={deal} value={deal}>
+                {deal.replace("_", " ")}
+              </option>
+            ))}
+          </NativeSelect>
+        </Field>
+        <div className="flex flex-wrap gap-3 pt-1 text-xs text-soft">
+          <label className="inline-flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={epkReady}
+              onChange={(e) => setEpkReady(e.target.checked)}
+              className="size-4 accent-[#E25822]"
+            />
+            EPK ready
+          </label>
+          <label className="inline-flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={techPlotReady}
+              onChange={(e) => setTechPlotReady(e.target.checked)}
+              className="size-4 accent-[#E25822]"
+            />
+            Tech plot ready
+          </label>
+          <label className="inline-flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={routingChecked}
+              onChange={(e) => setRoutingChecked(e.target.checked)}
+              className="size-4 accent-[#E25822]"
+            />
+            Routing checked
+          </label>
+        </div>
+        <Field label="Editable outreach pitch / hold request draft">
+          <Textarea
+            value={outreachDraft}
+            onChange={(e) => setOutreachDraft(e.target.value)}
+            rows={5}
+            placeholder="Tailored venue pitch or hold request (never auto-sent)…"
+          />
+        </Field>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] text-muted">
+            Saved to your private workspace; nothing is emailed automatically.
+          </span>
+          <button
+            type="button"
+            disabled={!outreachDraft.trim()}
+            onClick={() => {
+              void navigator.clipboard
+                ?.writeText(outreachDraft)
+                .then(() => toast.success("Outreach draft copied"))
+                .catch(() => toast.error("Could not copy draft"));
+            }}
+            className="min-h-9 rounded-md border border-line-strong bg-surface-2 px-3 text-xs font-semibold text-fg hover:border-[#E25822] disabled:opacity-40"
+          >
+            Copy draft
+          </button>
+        </div>
+      </section>
       <section
         aria-label="Booking research and outreach"
         className="space-y-3 rounded-lg border border-line p-3"

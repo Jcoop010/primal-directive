@@ -7,6 +7,10 @@
     "summary": "Nashville independent band and songwriter room actively accepting EPKs, live performance links, and local draw history through its talent buyer. Ideal anchor room for building Nashville draw or kicking off a Southeast weekend run.",
     "sourceUrl": "https://localnash.com",
     "urgency": "high",
+    "corridor": "Nashville / Middle TN",
+    "billRole": "co_bill",
+    "targetWindow": "Q1 2027 Weekends",
+    "dealType": "door_split",
     "recommendedAction": "Convert to Lead and send EPK, live video link, and 3 target weekend dates to the talent buyer.",
     "payload": {
       "venue": "The Local",
@@ -26,6 +30,10 @@
     "summary": "West Asheville and downtown taprooms regularly book touring regional bands across indie, funk, jazz, and Americana via their dedicated booking request portal. Strong I-40 routing bridge between Knoxville/Nashville and Carolinas dates.",
     "sourceUrl": "https://oneworldbrewing.com",
     "urgency": "high",
+    "corridor": "I-40 (Nashville -> Knoxville -> Asheville)",
+    "billRole": "headliner",
+    "targetWindow": "Spring 2027 Routing",
+    "dealType": "guarantee",
     "recommendedAction": "Convert to Lead and submit regional routing dates + live set clips via the venue booking form.",
     "payload": {
       "venue": "One World Brewing",
@@ -45,6 +53,10 @@
     "summary": "Premier independent mid-sized room in downtown Asheville coordinating touring support bills and regional headliners directly through its booking desk. High-leverage support slot opportunity for expanding Western NC fan base.",
     "sourceUrl": "https://ashevillemusichall.com",
     "urgency": "high",
+    "corridor": "Western NC / Southeast Circuit",
+    "billRole": "support",
+    "targetWindow": "6-10 Weeks Out",
+    "dealType": "versus",
     "recommendedAction": "Convert to Lead, inspect upcoming calendar bills, and pitch direct support on genre-matched touring stops.",
     "payload": {
       "venue": "Asheville Music Hall",
@@ -64,6 +76,10 @@
     "summary": "Historic Atlanta independent venue coordinating breaking-band and regional bills in the Atlanta Room and Music Room. Reliable Southeast routing anchor for bands establishing Atlanta draw and press visibility.",
     "sourceUrl": "https://sobatl.com",
     "urgency": "normal",
+    "corridor": "I-75 (Chattanooga -> Atlanta)",
+    "billRole": "co_bill",
+    "targetWindow": "Spring 2027",
+    "dealType": "door_split",
     "recommendedAction": "Convert to Lead and propose a 3-band Atlanta bill with two local draw partners.",
     "payload": {
       "venue": "Smith's Olde Bar",
@@ -73,6 +89,50 @@
       "capacity": 300,
       "bookingEmail": "juliettrowe@gmail.com",
       "recommendedAngle": "Pitch a curated 3-band bill pairing out-of-market routing with two established Atlanta acts."
+    }
+  },
+  {
+    "idempotencyKey": "band-scout-2026-11-27-musicians-corner-nashville",
+    "sourceAgent": "band-scout-bot",
+    "signalType": "festival_slot",
+    "title": "Musicians Corner (Centennial Park) — Seasonal Nashville festival submissions",
+    "summary": "Nashville's flagship outdoor concert series and festival in Centennial Park accepts artist submissions valid for a full year across diverse independent genres. High-visibility local and regional fan-discovery stage.",
+    "sourceUrl": "https://musicianscorner.com",
+    "urgency": "high",
+    "corridor": "Nashville / Middle TN",
+    "billRole": "festival",
+    "targetWindow": "Spring / Fall 2027 Season",
+    "dealType": "promo_showcase",
+    "recommendedAction": "Convert to Lead, prepare EPK + live YouTube clip, and submit before spring lineup locks.",
+    "payload": {
+      "venue": "Musicians Corner",
+      "city": "Nashville, TN",
+      "segment": "festival_slot",
+      "billType": "Outdoor festival stage",
+      "genres": "Indie, Americana, Rock, Roots",
+      "recommendedAngle": "Highlight Nashville draw, polished live video, and new release cycle."
+    }
+  },
+  {
+    "idempotencyKey": "band-scout-2026-11-27-carolina-indie-fest-nc",
+    "sourceAgent": "band-scout-bot",
+    "signalType": "festival_slot",
+    "title": "Carolina Indie Fest — Rolling original-band festival applications",
+    "summary": "North Carolina independent festival running rolling applications for spring and fall bills exclusively for original bands with 60+ minutes of original material. Prefers live performance video links.",
+    "sourceUrl": "https://carolinaindiefest.net",
+    "urgency": "normal",
+    "corridor": "Carolinas / Piedmont Routing",
+    "billRole": "festival",
+    "targetWindow": "Spring / Fall 2027",
+    "dealType": "guarantee",
+    "recommendedAction": "Convert to Lead, confirm 60-min original setlist + live video link, and submit festival application.",
+    "payload": {
+      "venue": "Carolina Indie Fest",
+      "city": "Sanford, NC",
+      "segment": "festival_slot",
+      "billType": "Original-band festival set",
+      "genres": "Original Indie, Rock, Alt-Country",
+      "recommendedAngle": "Pair festival date with nearby Asheville/Raleigh club dates for a profitable Carolinas run."
     }
   }
 ]

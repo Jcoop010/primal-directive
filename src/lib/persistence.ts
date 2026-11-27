@@ -4,6 +4,9 @@ import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { venueEvidenceShape } from "@/lib/venue-evidence";
 import {
+  BILL_ROLES,
+  BOOKING_STAGES,
+  DEAL_TYPES,
   GIG_STATUSES,
   MERCH_CATEGORIES,
   MERCH_PAYMENT_METHODS,
@@ -44,6 +47,15 @@ const gigSchema = z.object({
   conf: z.number(),
   status: z.enum(GIG_STATUSES),
   notes: z.string(),
+  corridor: z.string().max(160).optional(),
+  billRole: z.enum(BILL_ROLES).optional(),
+  targetWindow: z.string().max(120).optional(),
+  dealType: z.enum(DEAL_TYPES).optional(),
+  bookingStage: z.enum(BOOKING_STAGES).optional(),
+  epkReady: z.boolean().optional(),
+  techPlotReady: z.boolean().optional(),
+  routingChecked: z.boolean().optional(),
+  outreachDraft: z.string().max(6000).optional(),
   stageHistory: z.array(z.object({ from: z.enum(GIG_STATUSES), to: z.enum(GIG_STATUSES), at: z.string() })).max(100).optional(),
   researchSourceUrl: z.string().optional(),
   researchVerifiedAt: z.string().optional(),

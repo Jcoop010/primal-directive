@@ -24,6 +24,11 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 14:56 EST — Antigravity
+- **Band Booking, Routing & Outreach Draft Engine (`0013`):** Added `migrations/0013_band_booking_routing.sql` (`corridor`, `bill_role`, `target_window`, `deal_type`, `booking_stage`, `epk_ready`, `tech_plot_ready`, `routing_checked`, `outreach_draft`), updated `agent-signal-scoring.ts` with corridor/bill-role boosts + tailored `buildBookingOutreachDraft()`, carried all metadata into `Convert to Lead` (`app_state` gigs), and added the Booking, Routing & Outreach Draft panel to `GigDrawer` + corridor/role/window chips on `/signals`.
+- **Multi-Stream Band Discovery:** Expanded `data/lead-scout-queue.json` to 6 verified Southeast opportunities (venue bookings, tour support, regional routing, promoter bills, and 2 festival calls: Musicians Corner & Carolina Indie Fest; zero X/Twitter links) and forwarded routing/bill fields in `scripts/lead-scout-push.mjs`.
+- **Verification & Next Step:** Merged to `main`, promoted Vercel production deploy (`0001`–`0013`), and verified live `/api/health` (`200`), `oauth-state-smoke.mjs` (`200`), and band signal push (`201` + `200 deduplicated`). Ready to triage and convert all 6 live band opportunities in `/signals`.
+
 ### 2026-11-27 14:43 EST — Antigravity
 - **Phase 1 & 2 Reconciled & Merged:** Merged PR #275 (`0011_agent_signals_scoring.sql`) and PR #277 (`0012_agent_signals_conversion.sql` + idempotent `Convert to Lead` into `app_state` + `/gigs?gig=<id>` deep-link) onto `main` with zero migration collisions.
 - **Band & Live-Music Pivot (PR #276):** Tuned `src/lib/agent-signal-scoring.ts` for bands, touring support, festivals, and regional routing; replaced B2B leads in `data/lead-scout-queue.json` with 4 verified Southeast live-music venues (zero X/Twitter URLs); updated `scripts/lead-scout-push.mjs`, `scripts/lead-scout-push.test.mjs`, and `.github/workflows/lead-scout-intake.yml`.

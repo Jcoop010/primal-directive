@@ -69,6 +69,31 @@ export const MONEY_TYPE_LABEL: Record<MoneyType, string> = {
   cost: "Cost",
 };
 
+export const BILL_ROLES = ["support", "co_bill", "headliner", "festival", "session"] as const;
+export type BillRole = (typeof BILL_ROLES)[number];
+
+export const DEAL_TYPES = ["guarantee", "door_split", "versus", "promo_showcase"] as const;
+export type DealType = (typeof DEAL_TYPES)[number];
+
+export const BOOKING_STAGES = [
+  "lead",
+  "hold_requested",
+  "hold_confirmed",
+  "advance_in_progress",
+  "booked",
+  "passed",
+] as const;
+export type BookingStage = (typeof BOOKING_STAGES)[number];
+
+export const BOOKING_STAGE_LABEL: Record<BookingStage, string> = {
+  lead: "Lead",
+  hold_requested: "Hold requested",
+  hold_confirmed: "Hold confirmed",
+  advance_in_progress: "Advance in progress",
+  booked: "Booked",
+  passed: "Passed",
+};
+
 export type Gig = import("./venue-evidence").VenueEvidence & {
   id: string;
   name: string;
@@ -79,6 +104,15 @@ export type Gig = import("./venue-evidence").VenueEvidence & {
   conf: number;
   status: GigStatus;
   notes: string;
+  corridor?: string;
+  billRole?: BillRole;
+  targetWindow?: string;
+  dealType?: DealType;
+  bookingStage?: BookingStage;
+  epkReady?: boolean;
+  techPlotReady?: boolean;
+  routingChecked?: boolean;
+  outreachDraft?: string;
   stageHistory?: { from: GigStatus; to: GigStatus; at: string }[];
   /** Research is not proof that the booking contact or opportunity is verified. */
   venueResearchStatus?: "Not researched" | "Researching" | "Partially verified" | "Verified" | "Research unavailable";

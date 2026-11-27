@@ -118,6 +118,12 @@ export function validateLeadSignal(raw, isoDay = new Date().toISOString().slice(
       summary,
       sourceUrl,
       urgency,
+      ...(typeof raw.corridor === "string" && raw.corridor.trim() ? { corridor: raw.corridor.trim() } : {}),
+      ...(typeof raw.billRole === "string" && raw.billRole.trim() ? { billRole: raw.billRole.trim() } : {}),
+      ...(typeof raw.targetWindow === "string" && raw.targetWindow.trim()
+        ? { targetWindow: raw.targetWindow.trim() }
+        : {}),
+      ...(typeof raw.dealType === "string" && raw.dealType.trim() ? { dealType: raw.dealType.trim() } : {}),
       recommendedAction:
         typeof raw.recommendedAction === "string" && raw.recommendedAction.trim()
           ? raw.recommendedAction.trim()
