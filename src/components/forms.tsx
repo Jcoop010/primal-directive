@@ -123,6 +123,7 @@ function GigForm({
     String(initial?.roadAndRoomCostEst ?? ""),
   );
   const [anchorGapNote, setAnchorGapNote] = useState(initial?.anchorGapNote ?? "");
+  const [draftCopied, setDraftCopied] = useState(false);
 
   const yieldEst = computePreShowYield({
     guaranteeOrSplitEst: Number(guaranteeOrSplitEst) || 0,
@@ -131,9 +132,21 @@ function GigForm({
     roadAndRoomCostEst: Number(roadAndRoomCostEst) || 0,
   });
 
+  function copyOutreachDraft() {
+    if (!outreachDraft.trim()) return;
+    void navigator.clipboard
+      ?.writeText(outreachDraft)
+      .then(() => {
+        setDraftCopied(true);
+        toast.success("Outreach draft copied");
+        window.setTimeout(() => setDraftCopied(false), 2000);
+      })
+      .catch(() => toast.error("Could not copy draft"));
+  }
+
   return (
     <form
-      className="space-y-3"
+      className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (!name.trim()) return;
@@ -180,6 +193,54 @@ function GigForm({
         }
       }}
     >
+      {/* Sticky Pre-Show Net Yield Summary Bar */}
+      <div
+        aria-label="Live pre-show net yield summary"
+        className="sticky top-0 z-10 -mx-5 border-y border-[#243652] bg-[#0A1628]/95 px-5 py-2.5 backdrop-blur-md"
+      >
+        <div className="grid grid-cols-4 gap-2 text-center">
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Net yield
+            </div>
+            <div
+              className={`tabular mt-0.5 text-sm font-bold ${
+                yieldEst.netYieldEst >= 0 ? "text-live" : "text-danger"
+              }`}
+            >
+              {yieldEst.netYieldEst >= 0 ? "+" : "-"}$
+              {Math.abs(yieldEst.netYieldEst).toFixed(0)}
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Merch gross
+            </div>
+            <div className="tabular mt-0.5 text-sm font-bold text-fg">
+              ${yieldEst.merchGrossEst.toFixed(0)}
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              BE heads
+            </div>
+            <div className="tabular mt-0.5 text-sm font-bold text-fg">
+              {yieldEst.breakEvenAttendance === null ? "N/A" : yieldEst.breakEvenAttendance}
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              BE $/head
+            </div>
+            <div className="tabular mt-0.5 text-sm font-bold text-fg">
+              {yieldEst.breakEvenMerchPerHead === null
+                ? "N/A"
+                : `$${yieldEst.breakEvenMerchPerHead.toFixed(2)}`}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Field label="Opportunity">
         <Input
           value={name}
@@ -244,143 +305,18 @@ function GigForm({
           placeholder="Load-in, bill, follow-up…"
         />
       </Field>
+      {/* Section 1: Show Economics & Gap Context */}
       <section
-        aria-label="Booking, routing and outreach draft"
-        className="space-y-3 rounded-xl border border-[#243652] bg-[#0A1628]/80 p-3.5"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-fg">Booking, routing &amp; outreach draft</h3>
-          <span className="rounded-full border border-[#E25822]/40 bg-[#E25822]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#ffb088]">
-            Human-reviewed only
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Booking stage">
-            <NativeSelect
-              value={bookingStage}
-              onChange={(e) => setBookingStage(e.target.value as BookingStage)}
-            >
-              {BOOKING_STAGES.map((stage) => (
-                <option key={stage} value={stage}>
-                  {BOOKING_STAGE_LABEL[stage]}
-                </option>
-              ))}
-            </NativeSelect>
-          </Field>
-          <Field label="Bill role">
-            <NativeSelect
-              value={billRole}
-              onChange={(e) => setBillRole(e.target.value as BillRole | "")}
-            >
-              <option value="">Unspecified</option>
-              {BILL_ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {role.replace("_", " ")}
-                </option>
-              ))}
-            </NativeSelect>
-          </Field>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Routing corridor">
-            <Input
-              value={corridor}
-              onChange={(e) => setCorridor(e.target.value)}
-              placeholder="I-40 / Southeast…"
-            />
-          </Field>
-          <Field label="Target window">
-            <Input
-              value={targetWindow}
-              onChange={(e) => setTargetWindow(e.target.value)}
-              placeholder="Spring 2027 / Oct weekends…"
-            />
-          </Field>
-        </div>
-        <Field label="Deal type">
-          <NativeSelect
-            value={dealType}
-            onChange={(e) => setDealType(e.target.value as DealType | "")}
-          >
-            <option value="">Unspecified</option>
-            {DEAL_TYPES.map((deal) => (
-              <option key={deal} value={deal}>
-                {deal.replace("_", " ")}
-              </option>
-            ))}
-          </NativeSelect>
-        </Field>
-        <div className="flex flex-wrap gap-3 pt-1 text-xs text-soft">
-          <label className="inline-flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={epkReady}
-              onChange={(e) => setEpkReady(e.target.checked)}
-              className="size-4 accent-[#E25822]"
-            />
-            EPK ready
-          </label>
-          <label className="inline-flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={techPlotReady}
-              onChange={(e) => setTechPlotReady(e.target.checked)}
-              className="size-4 accent-[#E25822]"
-            />
-            Tech plot ready
-          </label>
-          <label className="inline-flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={routingChecked}
-              onChange={(e) => setRoutingChecked(e.target.checked)}
-              className="size-4 accent-[#E25822]"
-            />
-            Routing checked
-          </label>
-        </div>
-        <Field label="Editable outreach pitch / hold request draft">
-          <Textarea
-            value={outreachDraft}
-            onChange={(e) => setOutreachDraft(e.target.value)}
-            rows={5}
-            placeholder="Tailored venue pitch or hold request (never auto-sent)…"
-          />
-        </Field>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] text-muted">
-            Saved to your private workspace; nothing is emailed automatically.
-          </span>
-          <button
-            type="button"
-            disabled={!outreachDraft.trim()}
-            onClick={() => {
-              void navigator.clipboard
-                ?.writeText(outreachDraft)
-                .then(() => toast.success("Outreach draft copied"))
-                .catch(() => toast.error("Could not copy draft"));
-            }}
-            className="min-h-9 rounded-md border border-line-strong bg-surface-2 px-3 text-xs font-semibold text-fg hover:border-[#E25822] disabled:opacity-40"
-          >
-            Copy draft
-          </button>
-        </div>
-      </section>
-      <section
-        aria-label="Pre-show net yield estimator"
+        aria-label="Show economics and routing gap context"
         className="space-y-3 rounded-xl border border-line-strong bg-surface p-3.5"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-fg">Pre-show net yield estimator</h3>
-          <span
-            className={`tabular rounded-full border px-2.5 py-0.5 text-xs font-bold ${
-              yieldEst.netYieldEst >= 0
-                ? "border-live/45 bg-live/12 text-live"
-                : "border-danger/45 bg-danger/12 text-danger"
-            }`}
-          >
-            Net: {yieldEst.netYieldEst >= 0 ? "+" : "-"}${Math.abs(yieldEst.netYieldEst).toFixed(2)}
-          </span>
+          <h3 className="text-sm font-semibold text-fg">1. Show economics &amp; gap context</h3>
+          {typeof initial?.gapFitScore === "number" ? (
+            <span className="tabular rounded-full border border-live/45 bg-live/12 px-2 py-0.5 text-[11px] font-bold text-live">
+              Gap fit {initial.gapFitScore}
+            </span>
+          ) : null}
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Show payout / door est. ($)">
@@ -426,27 +362,49 @@ function GigForm({
             />
           </Field>
         </div>
-        <div className="grid grid-cols-3 gap-2 rounded-lg border border-line bg-bg/70 p-2.5 text-center text-xs">
-          <div>
-            <div className="text-[10px] uppercase tracking-wide text-muted">Merch gross</div>
-            <div className="tabular mt-0.5 font-semibold text-fg">
-              ${yieldEst.merchGrossEst.toFixed(0)}
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-wide text-muted">Break-even heads</div>
-            <div className="tabular mt-0.5 font-semibold text-fg">
-              {yieldEst.breakEvenAttendance === null ? "N/A" : yieldEst.breakEvenAttendance}
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-wide text-muted">Break-even $/head</div>
-            <div className="tabular mt-0.5 font-semibold text-fg">
-              {yieldEst.breakEvenMerchPerHead === null
-                ? "N/A"
-                : `$${yieldEst.breakEvenMerchPerHead.toFixed(2)}`}
-            </div>
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Routing corridor">
+            <Input
+              value={corridor}
+              onChange={(e) => setCorridor(e.target.value)}
+              placeholder="I-40 / Southeast…"
+            />
+          </Field>
+          <Field label="Target window">
+            <Input
+              value={targetWindow}
+              onChange={(e) => setTargetWindow(e.target.value)}
+              placeholder="Spring 2027 / Oct…"
+            />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Bill role">
+            <NativeSelect
+              value={billRole}
+              onChange={(e) => setBillRole(e.target.value as BillRole | "")}
+            >
+              <option value="">Unspecified</option>
+              {BILL_ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {role.replace("_", " ")}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label="Deal type">
+            <NativeSelect
+              value={dealType}
+              onChange={(e) => setDealType(e.target.value as DealType | "")}
+            >
+              <option value="">Unspecified</option>
+              {DEAL_TYPES.map((deal) => (
+                <option key={deal} value={deal}>
+                  {deal.replace("_", " ")}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
         </div>
         <Field label="Anchor routing gap note">
           <Input
@@ -455,6 +413,96 @@ function GigForm({
             placeholder="Bridges Fri Nashville -> Sun Asheville…"
           />
         </Field>
+      </section>
+
+      {/* Section 2: Booking Stage & Readiness */}
+      <section
+        aria-label="Booking stage and readiness"
+        className="space-y-3 rounded-xl border border-[#243652] bg-[#0A1628]/80 p-3.5"
+      >
+        <h3 className="text-sm font-semibold text-fg">2. Booking stage &amp; readiness</h3>
+        <Field label="Booking stage">
+          <NativeSelect
+            value={bookingStage}
+            onChange={(e) => setBookingStage(e.target.value as BookingStage)}
+          >
+            {BOOKING_STAGES.map((stage) => (
+              <option key={stage} value={stage}>
+                {BOOKING_STAGE_LABEL[stage]}
+              </option>
+            ))}
+          </NativeSelect>
+        </Field>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {[
+            { label: "EPK ready", checked: epkReady, toggle: () => setEpkReady((v) => !v) },
+            {
+              label: "Tech plot ready",
+              checked: techPlotReady,
+              toggle: () => setTechPlotReady((v) => !v),
+            },
+            {
+              label: "Routing checked",
+              checked: routingChecked,
+              toggle: () => setRoutingChecked((v) => !v),
+            },
+          ].map((item) => (
+            <label
+              key={item.label}
+              className={`flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition-colors ${
+                item.checked
+                  ? "border-live/50 bg-live/12 text-live"
+                  : "border-line bg-bg/60 text-soft hover:border-line-strong"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={item.checked}
+                onChange={item.toggle}
+                className="size-4 accent-[#E25822]"
+              />
+              <span>{item.label}</span>
+            </label>
+          ))}
+        </div>
+      </section>
+
+      {/* Section 3: Outreach Draft */}
+      <section
+        aria-label="Outreach draft"
+        className="space-y-3 rounded-xl border border-[#243652] bg-[#0A1628]/80 p-3.5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-fg">3. Outreach draft</h3>
+          <span className="rounded-full border border-[#E25822]/40 bg-[#E25822]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#ffb088]">
+            Human-reviewed only
+          </span>
+        </div>
+        <Field label="Editable outreach pitch / hold request draft">
+          <Textarea
+            value={outreachDraft}
+            onChange={(e) => setOutreachDraft(e.target.value)}
+            rows={5}
+            placeholder="Tailored venue pitch or hold request (never auto-sent)…"
+          />
+        </Field>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[11px] text-muted">
+            Saved to your private workspace; nothing is emailed automatically.
+          </span>
+          <button
+            type="button"
+            disabled={!outreachDraft.trim()}
+            onClick={copyOutreachDraft}
+            className={`min-h-10 rounded-lg border px-3.5 text-xs font-semibold transition-colors disabled:opacity-40 ${
+              draftCopied
+                ? "border-live/60 bg-live/15 text-live"
+                : "border-line-strong bg-surface-2 text-fg hover:border-[#E25822]"
+            }`}
+          >
+            {draftCopied ? "Copied!" : "Copy draft"}
+          </button>
+        </div>
       </section>
       <section
         aria-label="Booking research and outreach"
