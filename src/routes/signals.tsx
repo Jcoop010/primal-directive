@@ -327,6 +327,21 @@ function SignalsInboxPage() {
                       <span className="rounded-full border border-line bg-bg/70 px-2 py-0.5 text-[11px] font-medium text-muted">
                         {signal.signalType}
                       </span>
+                      {signal.billRole ? (
+                        <span className="rounded-full border border-[#243652] bg-[#0A1628] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-soft">
+                          {signal.billRole.replace("_", " ")}
+                        </span>
+                      ) : null}
+                      {signal.corridor ? (
+                        <span className="rounded-full border border-[#243652] bg-[#0A1628] px-2 py-0.5 text-[11px] font-medium text-info">
+                          {signal.corridor}
+                        </span>
+                      ) : null}
+                      {signal.targetWindow ? (
+                        <span className="rounded-full border border-line bg-bg/70 px-2 py-0.5 text-[11px] font-medium text-muted">
+                          {signal.targetWindow}
+                        </span>
+                      ) : null}
                       <span className="text-[11px] text-muted">
                         {new Date(signal.receivedAt).toLocaleString()}
                       </span>

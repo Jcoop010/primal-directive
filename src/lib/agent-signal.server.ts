@@ -1,9 +1,14 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import {
+  buildBookingOutreachDraft,
   normalizeSignalScoring,
+  SIGNAL_BILL_ROLES,
+  SIGNAL_DEAL_TYPES,
   SIGNAL_PRIORITIES,
   SIGNAL_URGENCIES,
+  type SignalBillRole,
+  type SignalDealType,
 } from "./agent-signal-scoring.ts";
 import type { Sql } from "./db.ts";
 
@@ -46,6 +51,11 @@ export const agentSignalSchema = z.object({
   priorityTier: z.enum(SIGNAL_PRIORITIES).optional(),
   urgency: z.enum(SIGNAL_URGENCIES).optional(),
   recommendedAction: z.string().trim().max(300).optional(),
+  corridor: z.string().trim().max(160).optional(),
+  billRole: z.enum(SIGNAL_BILL_ROLES).optional(),
+  targetWindow: z.string().trim().max(120).optional(),
+  dealType: z.enum(SIGNAL_DEAL_TYPES).optional(),
+  outreachDraft: z.string().trim().max(6000).optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -76,6 +86,15 @@ export function verifyBearerToken(authHeader: string | null, expectedSecret: str
   const a = createHash("sha256").update(provided, "utf8").digest();
   const b = createHash("sha256").update(expectedSecret, "utf8").digest();
   return timingSafeEqual(a, b);
+}
+
+function readPayloadString(payload: Record<string, unknown> | undefined, keys: readonly string[]): string | null {
+  if (!payload) return null;
+  for (const key of keys) {
+    const val = payload[key];
+    if (typeof val === "string" && val.trim()) return val.trim();
+  }
+  return null;
 }
 
 export async function handleAgentSignalRequest(
@@ -131,6 +150,21 @@ export async function handleAgentSignalRequest(
   }
 
   const data = validated.data;
+  const corridor =
+    data.corridor ?? readPayloadString(data.payload, ["corridor", "routingFit", "cityRegion"]);
+  const rawRole = data.billRole ?? readPayloadString(data.payload, ["billRole"]);
+  const billRole: SignalBillRole | null =
+    rawRole && (SIGNAL_BILL_ROLES as readonly string[]).includes(rawRole)
+      ? (rawRole as SignalBillRole)
+      : null;
+  const targetWindow =
+    data.targetWindow ?? readPayloadString(data.payload, ["targetWindow", "deadline", "date"]);
+  const rawDeal = data.dealType ?? readPayloadString(data.payload, ["dealType"]);
+  const dealType: SignalDealType | null =
+    rawDeal && (SIGNAL_DEAL_TYPES as readonly string[]).includes(rawDeal)
+      ? (rawDeal as SignalDealType)
+      : null;
+
   const scoring = normalizeSignalScoring({
     signalType: data.signalType,
     summary: data.summary,
@@ -140,7 +174,31 @@ export async function handleAgentSignalRequest(
     priorityTier: data.priorityTier,
     urgency: data.urgency,
     recommendedAction: data.recommendedAction,
+    corridor,
+    billRole,
+    targetWindow,
+    dealType,
   });
+
+  const venueName =
+    readPayloadString(data.payload, ["venue", "festival", "promoter"]) ??
+    data.title.split("—")[0]?.trim() ??
+    data.title;
+  const cityName = readPayloadString(data.payload, ["city", "market", "region"]);
+  const outreachDraft =
+    data.outreachDraft ??
+    (data.signalType === "smoke_test"
+      ? null
+      : buildBookingOutreachDraft({
+          venue: venueName,
+          city: cityName,
+          corridor,
+          billRole,
+          targetWindow,
+          dealType,
+          recommendedAction: scoring.recommendedAction,
+        }));
+
   const dedupeFingerprint = buildDedupeFingerprint(data);
   const id = randomUUID();
 
@@ -158,8 +216,9 @@ export async function handleAgentSignalRequest(
     }>(
       `insert into public.agent_signals (
          id, source_agent, signal_type, title, summary, source_url, payload,
-         idempotency_key, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint
-       ) values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13)
+         idempotency_key, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint,
+         corridor, bill_role, target_window, deal_type, outreach_draft
+       ) values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        on conflict (idempotency_key) do nothing
        returning id, status, fit_score, priority_tier, urgency, received_at`,
       [
@@ -176,6 +235,11 @@ export async function handleAgentSignalRequest(
         scoring.urgency,
         scoring.recommendedAction,
         dedupeFingerprint,
+        corridor,
+        billRole,
+        targetWindow,
+        dealType,
+        outreachDraft,
       ],
     );
 

@@ -26,6 +26,7 @@ async function createTestSql(): Promise<Sql> {
     "0010_agent_signals_approved_status.sql",
     "0011_agent_signals_scoring.sql",
     "0012_agent_signals_conversion.sql",
+    "0013_band_booking_routing.sql",
   ]) {
     await pg.exec(readFileSync(join(process.cwd(), "migrations", file), "utf8"));
   }
@@ -255,6 +256,10 @@ test("convertSignalToLeadInDb creates one status='lead' gig in app_state and is 
       title: "The Local — Nashville band showcase slot",
       summary: "Independent songwriter/band lounge accepting EPKs and local draw history.",
       sourceUrl: "https://localnash.com",
+      corridor: "Nashville / Middle TN",
+      billRole: "co_bill",
+      targetWindow: "Q1 2027 Weekends",
+      dealType: "door_split",
       idempotencyKey: "band-convert-test-1",
       payload: { venue: "The Local", city: "Nashville, TN", guarantee: 650 },
     }),
@@ -273,6 +278,12 @@ test("convertSignalToLeadInDb creates one status='lead' gig in app_state and is 
   assert.equal(first.gig?.venue, "The Local");
   assert.equal(first.gig?.city, "Nashville, TN");
   assert.equal(first.gig?.fee, 650);
+  assert.equal(first.gig?.corridor, "Nashville / Middle TN");
+  assert.equal(first.gig?.billRole, "co_bill");
+  assert.equal(first.gig?.targetWindow, "Q1 2027 Weekends");
+  assert.equal(first.gig?.dealType, "door_split");
+  assert.equal(first.gig?.bookingStage, "lead");
+  assert.ok(first.gig?.outreachDraft?.includes("The Local"));
 
   const second = await convertSignalToLeadInDb(sql, { signalId, userId: "artist-1" });
   assert.equal(second.alreadyConverted, true);

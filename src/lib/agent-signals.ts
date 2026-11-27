@@ -2,6 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
   normalizeSignalScoring,
+  SIGNAL_BILL_ROLES,
+  SIGNAL_BOOKING_STAGES,
+  SIGNAL_DEAL_TYPES,
+  type SignalBillRole,
+  type SignalBookingStage,
+  type SignalDealType,
   type SignalPriorityTier,
   type SignalUrgency,
 } from "./agent-signal-scoring";
@@ -41,6 +47,15 @@ export interface AgentSignalRow {
   convertedGigId: string | null;
   convertedAt: string | null;
   convertedBy: string | null;
+  corridor: string | null;
+  billRole: SignalBillRole | null;
+  targetWindow: string | null;
+  dealType: SignalDealType | null;
+  bookingStage: SignalBookingStage;
+  epkReady: boolean;
+  techPlotReady: boolean;
+  routingChecked: boolean;
+  outreachDraft: string | null;
 }
 
 const statusUpdateSchema = z.object({
@@ -73,7 +88,23 @@ interface RawSignalRow {
   converted_gig_id: string | null;
   converted_at: string | Date | null;
   converted_by: string | null;
+  corridor: string | null;
+  bill_role: string | null;
+  target_window: string | null;
+  deal_type: string | null;
+  booking_stage: string | null;
+  epk_ready: boolean | null;
+  tech_plot_ready: boolean | null;
+  routing_checked: boolean | null;
+  outreach_draft: string | null;
 }
+
+const SIGNAL_SELECT_COLUMNS = `id, source_agent, signal_type, title, summary, source_url, payload,
+  status, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint,
+  idempotency_key, received_at, reviewed_by, reviewed_at,
+  converted_gig_id, converted_at, converted_by,
+  corridor, bill_role, target_window, deal_type, booking_stage,
+  epk_ready, tech_plot_ready, routing_checked, outreach_draft`;
 
 function toIso(value: string | Date | null | undefined): string | null {
   if (!value) return null;
@@ -84,6 +115,19 @@ function mapSignalRow(row: RawSignalRow): AgentSignalRow {
   const payloadObj = row.payload && typeof row.payload === "object" ? row.payload : {};
   const payloadJson =
     Object.keys(payloadObj).length > 0 ? JSON.stringify(payloadObj, null, 2) : "";
+  const billRole: SignalBillRole | null =
+    row.bill_role && (SIGNAL_BILL_ROLES as readonly string[]).includes(row.bill_role)
+      ? (row.bill_role as SignalBillRole)
+      : null;
+  const dealType: SignalDealType | null =
+    row.deal_type && (SIGNAL_DEAL_TYPES as readonly string[]).includes(row.deal_type)
+      ? (row.deal_type as SignalDealType)
+      : null;
+  const bookingStage: SignalBookingStage =
+    row.booking_stage && (SIGNAL_BOOKING_STAGES as readonly string[]).includes(row.booking_stage)
+      ? (row.booking_stage as SignalBookingStage)
+      : "lead";
+
   const scoring = normalizeSignalScoring({
     signalType: row.signal_type,
     summary: row.summary,
@@ -104,6 +148,10 @@ function mapSignalRow(row: RawSignalRow): AgentSignalRow {
         ? row.urgency
         : null,
     recommendedAction: row.recommended_action,
+    corridor: row.corridor,
+    billRole,
+    targetWindow: row.target_window,
+    dealType,
   });
 
   const status = (AGENT_SIGNAL_STATUSES as readonly string[]).includes(row.status)
@@ -131,6 +179,15 @@ function mapSignalRow(row: RawSignalRow): AgentSignalRow {
     convertedGigId: row.converted_gig_id ?? null,
     convertedAt: toIso(row.converted_at),
     convertedBy: row.converted_by ?? null,
+    corridor: row.corridor ?? null,
+    billRole,
+    targetWindow: row.target_window ?? null,
+    dealType,
+    bookingStage,
+    epkReady: Boolean(row.epk_ready),
+    techPlotReady: Boolean(row.tech_plot_ready),
+    routingChecked: Boolean(row.routing_checked),
+    outreachDraft: row.outreach_draft ?? null,
   };
 }
 
@@ -139,10 +196,7 @@ export const listAgentSignals = createServerFn({ method: "GET" })
   .handler(async (): Promise<{ signals: AgentSignalRow[] }> => {
     const sql = await getSql();
     const rows = await sql.query<RawSignalRow>(
-      `select id, source_agent, signal_type, title, summary, source_url, payload,
-              status, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint,
-              idempotency_key, received_at, reviewed_by, reviewed_at,
-              converted_gig_id, converted_at, converted_by
+      `select ${SIGNAL_SELECT_COLUMNS}
        from public.agent_signals
        order by fit_score desc, received_at desc
        limit 100`,
@@ -159,10 +213,7 @@ export const updateAgentSignalStatus = createServerFn({ method: "POST" })
       `update public.agent_signals
        set status = $2, reviewed_by = $3, reviewed_at = now()
        where id = $1
-       returning id, source_agent, signal_type, title, summary, source_url, payload,
-                 status, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint,
-                 idempotency_key, received_at, reviewed_by, reviewed_at,
-                 converted_gig_id, converted_at, converted_by`,
+       returning ${SIGNAL_SELECT_COLUMNS}`,
       [data.id, data.status, context.userId],
     );
     if (!rows[0]) {
