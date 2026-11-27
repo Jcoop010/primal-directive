@@ -8,7 +8,7 @@
 
 | Component | Status | Notes |
 | --- | --- | --- |
-| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`d98f997`). |
+| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`6b546d1`). |
 | **Production Database (Neon `neon-cerulean-candle`)** | **ACTIVE_HEALTHY (IPv4, No Auto-Pause)** | Replaced suspended Vercel Supabase stores (`supabase-carmine-lever`, `supabase-camel-flame`). `DATABASE_URL` auto-injected in Production & Preview. |
 | **Auth & Sign-In** | **PASS (Google + Email/Pass Live)** | `scripts/oauth-state-smoke.mjs` passed (`HTTP 200`, host-only `__Host-` state cookie). Microsoft OAuth ready once Entra creds are verified. |
 | **Band Discovery, Scoring & Conversion (`/signals` → `/gigs`)** | **LIVE & CLOSED-LOOP** | `POST /api/intake/agent-signal` (Bearer `AGENT_WEBHOOK_SECRET`) scores band/live-music signals (`0011`), surfaces them on `/signals`, and converts them idempotently into `status: "lead"` gigs (`0012`) linked to `/gigs?gig=<id>`. |
@@ -23,6 +23,16 @@
 ---
 
 ## Recent Agent Handoffs
+
+### 2026-11-27 16:56 EST — Antigravity
+- **Touring Corridor Presets & Stale-Filter Reset (`feat/preset-gap-sort-reset`):** Added 4 Southeast & Midwest touring corridor presets (`I-40 · Nashville → Asheville`, `I-75 · Nashville → Atlanta`, `I-65 · Nashville → Chicago`, `Midwest · Louisville → Appleton`), expanded `REGION_ALIASES` for Midwest states (`KY`, `IN`, `IL`, `OH`, `WI`), and added pure state helpers (`applyCorridorPreset`, `clearAnchorsFromFilterState`, `createDefaultSignalsFilterState`) in `src/lib/agent-signal-scoring.ts`.
+- **`/signals` UX Wiring (`src/routes/signals.tsx`):** Clicking any touring corridor preset populates `Prev stop`, `Prev date`, `Next stop`, and `Next date`, switches `Sort` to **Gap fit** (`gap`), and resets active status/priority filters to `all` so matching routing signals surface immediately; manual anchor edits clear the active preset pill, and `Clear anchors` / `Reset filters & anchors` stay predictable.
+- **Verification & Next Step:** Added unit tests in `src/lib/agent-signal.test.ts` verifying preset anchor population, gap-sort switch, stale filter reset, and `Clear anchors` behavior. Ran tests, `typecheck`, `lint`, and production build; opened PR for review before merging into `main`.
+
+### 2026-11-27 16:53 EST — Antigravity
+- **Southeast & Midwest Queue Expansion Merged & Live (PR #281, `main@6b546d1`, `dpl_4qepxg9wAa8qfExF5wbLCyeKkxEz`):** Appended 7 verified `https://` Southeast & Midwest live-music opportunities to `data/lead-scout-queue.json` (13 total: Cat's Cradle, The Pour House Music Hall, Zanzabar, HI-FI Indy, The Empty Bottle, MOTR Pub, Mile of Music), tightened `scripts/lead-scout-push.mjs` to `https:`-only + non-X/Twitter, and added a full queue-integrity test in `scripts/lead-scout-push.test.mjs`.
+- **Production Double-Push PASSED:** Promoted `dpl_4qepxg9wAa8qfExF5wbLCyeKkxEz` (`GET /api/health` → `200` at `6b546d1c32c9f5357ea534bac268a26cc0f5abb2`), then ran `node scripts/lead-scout-push.mjs` twice against production: Run 1 → `7 inserted (201, fitScore: 100)` + `6 deduplicated (200)`; Run 2 → `0 inserted` + `13 deduplicated (200)` (`0 rejected`, `0 failed`).
+- **Next Step:** Open `/signals` on `https://primal-directive-loose-ends-co.vercel.app/signals` to triage all 13 live Southeast & Midwest band opportunities and test anchor-date routing gap scoring (e.g. `Prev stop: Nashville`, `Next stop: Chicago`).
 
 ### 2026-11-27 16:38 EST — Antigravity
 - **PR #280 Merged & Live (`main@d98f997`, `dpl_AV6xp6GuanJHYB9eerEAQXffe9Bx`):** Squash-merged `feat/signals-gigdrawer-ui-polish` into `main` (`d98f9977d21e39ddfed3f5ede994188a004f242f`) after green CI (`validate`, `verify`, preview deploy) and promoted `primal-directive-3u74z4nd0-loose-ends-co.vercel.app` to `https://primal-directive-loose-ends-co.vercel.app` (`[migrate] up to date.` for `0001`–`0014` on Neon Postgres `neon-cerulean-candle`).

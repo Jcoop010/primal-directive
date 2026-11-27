@@ -19,11 +19,16 @@ import { toast } from "sonner";
 import { MetricCard } from "@/components/metric-card";
 import { Card } from "@/components/ui/card";
 import {
+  applyCorridorPreset,
+  clearAnchorsFromFilterState,
   computeRoutingGapFit,
+  createDefaultSignalsFilterState,
   filterAndSortSignals,
+  TOURING_CORRIDOR_PRESETS,
   type RoutingAnchorWindow,
   type SignalPriorityTier,
-  type SignalSortMode,
+  type SignalsFilterState,
+  type TouringCorridorPreset,
 } from "@/lib/agent-signal-scoring";
 import {
   convertAgentSignalToLead,
@@ -75,13 +80,11 @@ function SignalsInboxPage() {
   const [signals, setSignals] = useState<AgentSignalRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<BusyAction | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | AgentSignalStatus>("all");
-  const [priorityFilter, setPriorityFilter] = useState<"all" | SignalPriorityTier>("all");
-  const [sortMode, setSortMode] = useState<SignalSortMode>("score");
-  const [prevCity, setPrevCity] = useState("");
-  const [prevDate, setPrevDate] = useState("");
-  const [nextCity, setNextCity] = useState("");
-  const [nextDate, setNextDate] = useState("");
+  const [filterState, setFilterState] = useState<SignalsFilterState<AgentSignalStatus>>(() =>
+    createDefaultSignalsFilterState<AgentSignalStatus>(),
+  );
+  const { statusFilter, priorityFilter, sortMode, prevCity, prevDate, nextCity, nextDate, activePresetId } =
+    filterState;
 
   const anchors: RoutingAnchorWindow = useMemo(
     () => ({ prevCity, prevDate, nextCity, nextDate }),
@@ -94,13 +97,18 @@ function SignalsInboxPage() {
     statusFilter !== "all" || priorityFilter !== "all" || sortMode !== "score" || hasAnchors;
 
   const resetAllFilters = () => {
-    setStatusFilter("all");
-    setPriorityFilter("all");
-    setSortMode("score");
-    setPrevCity("");
-    setPrevDate("");
-    setNextCity("");
-    setNextDate("");
+    setFilterState(createDefaultSignalsFilterState<AgentSignalStatus>());
+  };
+
+  const selectCorridorPreset = (preset: TouringCorridorPreset) => {
+    setFilterState(applyCorridorPreset<AgentSignalStatus>(preset));
+  };
+
+  const updateAnchorField = (
+    field: "prevCity" | "prevDate" | "nextCity" | "nextDate",
+    value: string,
+  ) => {
+    setFilterState((prev) => ({ ...prev, [field]: value, activePresetId: null }));
   };
 
   const refresh = useCallback(async () => {
@@ -250,9 +258,17 @@ function SignalsInboxPage() {
             <button
               type="button"
               onClick={() =>
-                setSortMode((m) =>
-                  m === "score" ? (hasAnchors ? "gap" : "newest") : m === "gap" ? "newest" : "score",
-                )
+                setFilterState((prev) => ({
+                  ...prev,
+                  sortMode:
+                    prev.sortMode === "score"
+                      ? hasAnchors
+                        ? "gap"
+                        : "newest"
+                      : prev.sortMode === "gap"
+                        ? "newest"
+                        : "score",
+                }))
               }
               className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line-strong bg-bg/70 px-3 text-xs font-semibold text-fg hover:border-[#E25822]/60"
             >
@@ -284,7 +300,7 @@ function SignalsInboxPage() {
               key={item}
               type="button"
               aria-pressed={statusFilter === item}
-              onClick={() => setStatusFilter(item)}
+              onClick={() => setFilterState((prev) => ({ ...prev, statusFilter: item }))}
               className={cn(
                 "min-h-9 rounded-lg border px-2.5 text-xs font-semibold capitalize",
                 statusFilter === item
@@ -303,7 +319,7 @@ function SignalsInboxPage() {
               key={item.key}
               type="button"
               aria-pressed={priorityFilter === item.key}
-              onClick={() => setPriorityFilter(item.key)}
+              onClick={() => setFilterState((prev) => ({ ...prev, priorityFilter: item.key }))}
               className={cn(
                 "inline-flex min-h-8 items-center gap-1 rounded-full border px-2.5 text-[11px] font-semibold",
                 priorityFilter === item.key
@@ -329,32 +345,54 @@ function SignalsInboxPage() {
         </div>
 
         <div className="mt-3 border-t border-line/70 pt-3">
-          <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+          <div className="mb-2 flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3 text-[#E25822]" /> Anchor-date routing gap
             </span>
             {hasAnchors ? (
               <button
                 type="button"
-                onClick={() => {
-                  setPrevCity("");
-                  setPrevDate("");
-                  setNextCity("");
-                  setNextDate("");
-                  if (sortMode === "gap") setSortMode("score");
-                }}
+                onClick={() => setFilterState((prev) => clearAnchorsFromFilterState(prev))}
                 className="text-[11px] font-semibold normal-case text-[#E25822] hover:underline"
               >
                 Clear anchors
               </button>
             ) : null}
           </div>
+
+          <div
+            role="group"
+            aria-label="Touring corridor presets"
+            className="mb-2.5 flex flex-wrap items-center gap-1.5"
+          >
+            <span className="mr-0.5 text-[11px] font-medium text-muted">Presets:</span>
+            {TOURING_CORRIDOR_PRESETS.map((preset) => {
+              const isSelected = activePresetId === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => selectCorridorPreset(preset)}
+                  className={cn(
+                    "inline-flex min-h-8 items-center gap-1 rounded-full border px-2.5 text-[11px] font-semibold transition-colors",
+                    isSelected
+                      ? "border-[#E25822] bg-[#E25822]/20 text-[#ffb088]"
+                      : "border-line bg-bg/50 text-soft hover:border-[#E25822]/60 hover:text-fg",
+                  )}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <input
               type="text"
               aria-label="Previous stop city"
               value={prevCity}
-              onChange={(e) => setPrevCity(e.target.value)}
+              onChange={(e) => updateAnchorField("prevCity", e.target.value)}
               placeholder="Prev stop (e.g. Nashville, TN)"
               className="min-h-10 w-full min-w-0 rounded-lg border border-line bg-bg/70 px-3 text-xs text-fg outline-none focus:border-[#E25822]"
             />
@@ -362,14 +400,14 @@ function SignalsInboxPage() {
               type="date"
               aria-label="Previous stop date"
               value={prevDate}
-              onChange={(e) => setPrevDate(e.target.value)}
+              onChange={(e) => updateAnchorField("prevDate", e.target.value)}
               className="min-h-10 w-full min-w-0 rounded-lg border border-line bg-bg/70 px-3 text-xs text-fg outline-none focus:border-[#E25822]"
             />
             <input
               type="text"
               aria-label="Next stop city"
               value={nextCity}
-              onChange={(e) => setNextCity(e.target.value)}
+              onChange={(e) => updateAnchorField("nextCity", e.target.value)}
               placeholder="Next stop (e.g. Asheville, NC)"
               className="min-h-10 w-full min-w-0 rounded-lg border border-line bg-bg/70 px-3 text-xs text-fg outline-none focus:border-[#E25822]"
             />
@@ -377,7 +415,7 @@ function SignalsInboxPage() {
               type="date"
               aria-label="Next stop date"
               value={nextDate}
-              onChange={(e) => setNextDate(e.target.value)}
+              onChange={(e) => updateAnchorField("nextDate", e.target.value)}
               className="min-h-10 w-full min-w-0 rounded-lg border border-line bg-bg/70 px-3 text-xs text-fg outline-none focus:border-[#E25822]"
             />
           </div>

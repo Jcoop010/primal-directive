@@ -4,11 +4,15 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import {
+  applyCorridorPreset,
+  clearAnchorsFromFilterState,
   computePreShowYield,
   computeRoutingGapFit,
   computeSignalScore,
+  createDefaultSignalsFilterState,
   filterAndSortSignals,
   normalizeSignalScoring,
+  TOURING_CORRIDOR_PRESETS,
 } from "./agent-signal-scoring.ts";
 import {
   buildDedupeFingerprint,
@@ -367,4 +371,68 @@ test("computePreShowYield calculates net yield and break-even attendance/merch a
   assert.equal(coveredByGuarantee.netYieldEst, 850);
   assert.equal(coveredByGuarantee.breakEvenAttendance, 0);
   assert.equal(coveredByGuarantee.breakEvenMerchPerHead, 0);
+});
+
+test("selecting a touring corridor preset populates anchors, switches sort to gap, and resets stale filters", () => {
+  const staleState = {
+    ...createDefaultSignalsFilterState(),
+    statusFilter: "archived" as const,
+    priorityFilter: "low" as const,
+    sortMode: "newest" as const,
+  };
+  assert.equal(staleState.statusFilter, "archived");
+
+  const midwestPreset = TOURING_CORRIDOR_PRESETS.find((p) => p.id === "mw-i65-nash-chi");
+  assert.ok(midwestPreset, "Expected Midwest I-65 preset");
+
+  const nextState = applyCorridorPreset(midwestPreset);
+  assert.equal(nextState.prevCity, "Nashville, TN");
+  assert.equal(nextState.prevDate, "2027-05-07");
+  assert.equal(nextState.nextCity, "Chicago, IL");
+  assert.equal(nextState.nextDate, "2027-05-11");
+  assert.equal(nextState.sortMode, "gap");
+  assert.equal(nextState.statusFilter, "all");
+  assert.equal(nextState.priorityFilter, "all");
+  assert.equal(nextState.activePresetId, midwestPreset.id);
+
+  const candidates = [
+    {
+      id: "se-only",
+      title: "Atlanta Club Night",
+      corridor: "I-75 (Chattanooga -> Atlanta)",
+      targetWindow: "Fall 2027",
+      status: "new",
+      fitScore: 95,
+      priorityTier: "high" as const,
+      receivedAt: "2026-11-27T12:00:00Z",
+    },
+    {
+      id: "mw-bridge",
+      title: "Zanzabar Louisville",
+      corridor: "I-65 (Nashville -> Louisville -> Indianapolis)",
+      targetWindow: "Spring 2027 Routing",
+      status: "new",
+      fitScore: 90,
+      priorityTier: "high" as const,
+      receivedAt: "2026-11-27T11:00:00Z",
+    },
+  ].map((s) => ({
+    ...s,
+    gapFitScore: computeRoutingGapFit(s, nextState).gapFitScore,
+  }));
+
+  const sorted = filterAndSortSignals(candidates, {
+    statusFilter: nextState.statusFilter,
+    priorityFilter: nextState.priorityFilter,
+    sortMode: nextState.sortMode,
+  });
+  assert.equal(sorted.length, 2);
+  assert.equal(sorted[0]?.id, "mw-bridge");
+
+  const cleared = clearAnchorsFromFilterState({ ...nextState, statusFilter: "approved" });
+  assert.equal(cleared.prevCity, "");
+  assert.equal(cleared.nextCity, "");
+  assert.equal(cleared.activePresetId, null);
+  assert.equal(cleared.sortMode, "score");
+  assert.equal(cleared.statusFilter, "approved");
 });
