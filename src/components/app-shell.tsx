@@ -8,6 +8,7 @@ import {
   Music2,
   Plus,
   Menu,
+  Radio,
   Search,
   X,
   Route as RouteIcon,
@@ -39,6 +40,7 @@ const NAV = [
   { to: "/merch", label: "Merch", icon: ShoppingBag },
   { to: "/tasks", label: "Tasks", icon: ListChecks },
   { to: "/outreach", label: "Outreach", icon: Music2 },
+  { to: "/signals", label: "Signals", icon: Radio },
   { to: "/account", label: "Account & billing", icon: UserRound },
 ] as const;
 

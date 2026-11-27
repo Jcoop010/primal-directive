@@ -10,7 +10,12 @@ async function createTestSql(): Promise<Sql> {
   const pg = new PGlite();
   await pg.waitReady;
   const migration = readFileSync(join(process.cwd(), "migrations", "0009_agent_signals.sql"), "utf8");
+  const migration10 = readFileSync(
+    join(process.cwd(), "migrations", "0010_agent_signals_approved_status.sql"),
+    "utf8",
+  );
   await pg.exec(migration);
+  await pg.exec(migration10);
   const sql = (async <T = Record<string, unknown>>(
     strings: TemplateStringsArray,
     ...values: unknown[]
@@ -120,4 +125,11 @@ test("POST /api/intake/agent-signal persists structured signal and deduplicates 
   assert.equal(rows.length, 1);
   assert.equal(rows[0].source_agent, "grok");
   assert.equal(rows[0].payload.capacity, 400);
+
+  const approved = await sql.query<{ status: string; reviewed_by: string | null }>(
+    "update public.agent_signals set status = 'approved', reviewed_by = 'artist-1', reviewed_at = now() where id = $1 returning status, reviewed_by",
+    [firstJson.id],
+  );
+  assert.equal(approved[0]?.status, "approved");
+  assert.equal(approved[0]?.reviewed_by, "artist-1");
 });

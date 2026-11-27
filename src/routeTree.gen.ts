@@ -23,6 +23,7 @@ import { Route as MoneyRouteImport } from './routes/money'
 import { Route as OutreachRouteImport } from './routes/outreach'
 import { Route as PeopleRouteImport } from './routes/people'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as SignalsRouteImport } from './routes/signals'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as ApiHealthRouteImport } from './routes/api.health'
@@ -100,6 +101,11 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignalsRoute = SignalsRouteImport.update({
+  id: '/signals',
+  path: '/signals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/outreach': typeof OutreachRoute
   '/people': typeof PeopleRoute
   '/pricing': typeof PricingRoute
+  '/signals': typeof SignalsRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/outreach': typeof OutreachRoute
   '/people': typeof PeopleRoute
   '/pricing': typeof PricingRoute
+  '/signals': typeof SignalsRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/outreach': typeof OutreachRoute
   '/people': typeof PeopleRoute
   '/pricing': typeof PricingRoute
+  '/signals': typeof SignalsRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/people'
     | '/pricing'
+    | '/signals'
     | '/tasks'
     | '/tour'
     | '/api/health'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/people'
     | '/pricing'
+    | '/signals'
     | '/tasks'
     | '/tour'
     | '/api/health'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/people'
     | '/pricing'
+    | '/signals'
     | '/tasks'
     | '/tour'
     | '/api/health'
@@ -282,6 +294,7 @@ export interface RootRouteChildren {
   OutreachRoute: typeof OutreachRoute
   PeopleRoute: typeof PeopleRoute
   PricingRoute: typeof PricingRoute
+  SignalsRoute: typeof SignalsRoute
   TasksRoute: typeof TasksRoute
   TourRoute: typeof TourRoute
   ApiHealthRoute: typeof ApiHealthRoute
@@ -390,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signals': {
+      id: '/signals'
+      path: '/signals'
+      fullPath: '/signals'
+      preLoaderRoute: typeof SignalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks': {
       id: '/tasks'
       path: '/tasks'
@@ -450,6 +470,7 @@ const rootRouteChildren: RootRouteChildren = {
   OutreachRoute: OutreachRoute,
   PeopleRoute: PeopleRoute,
   PricingRoute: PricingRoute,
+  SignalsRoute: SignalsRoute,
   TasksRoute: TasksRoute,
   TourRoute: TourRoute,
   ApiHealthRoute: ApiHealthRoute,

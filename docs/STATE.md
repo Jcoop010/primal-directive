@@ -26,6 +26,11 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 13:12 EST — Antigravity
+- **Signals Inbox & Migration 0010 Built:** Since Cursor's `.patch` was not on disk, implemented the authenticated `/signals` Inbox (`src/routes/signals.tsx`, `src/lib/agent-signals.ts`, sidebar link in `src/components/app-shell.tsx`) and `migrations/0010_agent_signals_approved_status.sql` (`approved` status + `reviewed_by`/`reviewed_at` columns), registered `0010` in `scripts/migration-plan.test.mjs`, and verified `typecheck`, `lint`, `vite build`, and unit tests.
+- **Connection Verification:** Confirmed `.env.local` (containing generated 32-byte hex `AGENT_WEBHOOK_SECRET`) and `.agents/mcp_config.json` are gitignored, and installed `vercel` CLI globally. However, `vercel whoami` is still logged out and `supabase_mcp` still lacks permission on `rgivgiwfmoehrcmwakwk` (needs `.agents/mcp_config.json` with PAT + Antigravity restart).
+- **Next Step:** Complete `vercel.cmd login` + `vercel.cmd link`, save your Supabase PAT in `.agents/mcp_config.json`, unpause `rgivgiwfmoehrcmwakwk` in Supabase Dashboard, then say **"resume go-live"** to push `AGENT_WEBHOOK_SECRET` to Vercel, merge PR #274 into `main`, and run the live `smoke-test-2026-11-27` deduplication check.
+
 ### 2026-11-27 13:02 EST — Antigravity
 - **Live Status & CI Fix:** Confirmed `GET https://primal-directive-loose-ends-co.vercel.app/api/health` is still `HTTP 503 {"status":"unavailable"}` and GitHub check `Supabase Preview` confirms `rgivgiwfmoehrcmwakwk` is the connected Supabase project; fixed PR #274 CI failure in `scripts/migration-plan.test.mjs` by registering `0009_agent_signals.sql`.
 - **Migrations & Secret Prep:** Generated a 32-byte hex `AGENT_WEBHOOK_SECRET` into gitignored `.env.local` (never committed); `migrations/0009_agent_signals.sql` is ready, while `0010_agent_signals_approved_status.sql` and Cursor's patch (`0001-feat-add-authenticated-Signals-Inbox-for-agent_signa.patch`) were not found on disk or remote branches.
