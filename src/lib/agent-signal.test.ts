@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import {
+  computePreShowYield,
+  computeRoutingGapFit,
   computeSignalScore,
   filterAndSortSignals,
   normalizeSignalScoring,
@@ -27,6 +29,7 @@ async function createTestSql(): Promise<Sql> {
     "0011_agent_signals_scoring.sql",
     "0012_agent_signals_conversion.sql",
     "0013_band_booking_routing.sql",
+    "0014_routing_gap_and_yield.sql",
   ]) {
     await pg.exec(readFileSync(join(process.cwd(), "migrations", file), "utf8"));
   }
@@ -271,7 +274,12 @@ test("convertSignalToLeadInDb creates one status='lead' gig in app_state and is 
   assert.equal(created.status, 201);
   const { id: signalId } = (await created.json()) as { id: string };
 
-  const first = await convertSignalToLeadInDb(sql, { signalId, userId: "artist-1" });
+  const first = await convertSignalToLeadInDb(sql, {
+    signalId,
+    userId: "artist-1",
+    anchorGapNote: "Bridges Nashville -> Asheville",
+    gapFitScore: 88,
+  });
   assert.equal(first.alreadyConverted, false);
   assert.equal(first.row.status, "imported");
   assert.equal(first.gig?.status, "lead");
@@ -283,16 +291,80 @@ test("convertSignalToLeadInDb creates one status='lead' gig in app_state and is 
   assert.equal(first.gig?.targetWindow, "Q1 2027 Weekends");
   assert.equal(first.gig?.dealType, "door_split");
   assert.equal(first.gig?.bookingStage, "lead");
+  assert.equal(first.gig?.guaranteeOrSplitEst, 650);
+  assert.equal(first.gig?.anchorGapNote, "Bridges Nashville -> Asheville");
+  assert.equal(first.gig?.gapFitScore, 88);
   assert.ok(first.gig?.outreachDraft?.includes("The Local"));
 
   const second = await convertSignalToLeadInDb(sql, { signalId, userId: "artist-1" });
   assert.equal(second.alreadyConverted, true);
   assert.equal(second.gigId, first.gigId);
 
-  const [stateRow] = await sql.query<{ state: { gigs: Array<{ id: string; status: string }> } }>(
-    "select state from public.app_state where user_id = 'artist-1'",
-  );
+  const [stateRow] = await sql.query<{
+    state: { gigs: Array<{ id: string; status: string; guaranteeOrSplitEst?: number; gapFitScore?: number }> };
+  }>("select state from public.app_state where user_id = 'artist-1'");
   assert.equal(stateRow.state.gigs.length, 1);
   assert.equal(stateRow.state.gigs[0].id, first.gigId);
   assert.equal(stateRow.state.gigs[0].status, "lead");
+  assert.equal(stateRow.state.gigs[0].guaranteeOrSplitEst, 650);
+  assert.equal(stateRow.state.gigs[0].gapFitScore, 88);
+});
+
+test("computeRoutingGapFit scores corridor/window alignment and returns null without anchors", () => {
+  const signal = {
+    title: "One World Brewing — Asheville routing slot",
+    summary: "Regional stop along I-40 between Knoxville and Carolinas.",
+    corridor: "I-40 (Nashville -> Knoxville -> Asheville)",
+    targetWindow: "Spring 2027 Routing",
+  };
+  assert.equal(computeRoutingGapFit(signal, {}).gapFitScore, null);
+
+  const strong = computeRoutingGapFit(signal, {
+    prevCity: "Nashville, TN",
+    prevDate: "2027-04-02",
+    nextCity: "Asheville, NC",
+    nextDate: "2027-04-05",
+  });
+  assert.ok((strong.gapFitScore ?? 0) >= 85, `expected strong gap fit, got ${strong.gapFitScore}`);
+  assert.equal(strong.gapLabel, "Strong gap fit");
+
+  const offCorridor = computeRoutingGapFit(
+    {
+      title: "Seattle Club Night",
+      corridor: "Pacific Northwest",
+      targetWindow: "2027-09-15",
+    },
+    {
+      prevCity: "Nashville, TN",
+      prevDate: "2027-04-02",
+      nextCity: "Asheville, NC",
+      nextDate: "2027-04-05",
+    },
+  );
+  assert.ok((offCorridor.gapFitScore ?? 100) < 45);
+  assert.equal(offCorridor.gapLabel, "Off-corridor");
+});
+
+test("computePreShowYield calculates net yield and break-even attendance/merch accurately", () => {
+  const profitable = computePreShowYield({
+    guaranteeOrSplitEst: 500,
+    estAttendance: 80,
+    merchPerHeadEst: 6,
+    roadAndRoomCostEst: 620,
+  });
+  assert.equal(profitable.merchGrossEst, 480);
+  assert.equal(profitable.totalGrossEst, 980);
+  assert.equal(profitable.netYieldEst, 360);
+  assert.equal(profitable.breakEvenAttendance, 20);
+  assert.equal(profitable.breakEvenMerchPerHead, 1.5);
+
+  const coveredByGuarantee = computePreShowYield({
+    guaranteeOrSplitEst: 1000,
+    estAttendance: 50,
+    merchPerHeadEst: 5,
+    roadAndRoomCostEst: 400,
+  });
+  assert.equal(coveredByGuarantee.netYieldEst, 850);
+  assert.equal(coveredByGuarantee.breakEvenAttendance, 0);
+  assert.equal(coveredByGuarantee.breakEvenMerchPerHead, 0);
 });

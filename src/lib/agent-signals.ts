@@ -56,6 +56,12 @@ export interface AgentSignalRow {
   techPlotReady: boolean;
   routingChecked: boolean;
   outreachDraft: string | null;
+  guaranteeOrSplitEst: number;
+  estAttendance: number;
+  merchPerHeadEst: number;
+  roadAndRoomCostEst: number;
+  anchorGapNote: string | null;
+  gapFitScore: number | null;
 }
 
 const statusUpdateSchema = z.object({
@@ -65,6 +71,8 @@ const statusUpdateSchema = z.object({
 
 const convertSignalSchema = z.object({
   id: z.string().trim().min(1).max(128),
+  anchorGapNote: z.string().trim().max(400).optional(),
+  gapFitScore: z.number().int().min(0).max(100).optional(),
 });
 
 interface RawSignalRow {
@@ -97,6 +105,12 @@ interface RawSignalRow {
   tech_plot_ready: boolean | null;
   routing_checked: boolean | null;
   outreach_draft: string | null;
+  guarantee_or_split_est: number | string | null;
+  est_attendance: number | null;
+  merch_per_head_est: number | string | null;
+  road_and_room_cost_est: number | string | null;
+  anchor_gap_note: string | null;
+  gap_fit_score: number | null;
 }
 
 const SIGNAL_SELECT_COLUMNS = `id, source_agent, signal_type, title, summary, source_url, payload,
@@ -104,7 +118,9 @@ const SIGNAL_SELECT_COLUMNS = `id, source_agent, signal_type, title, summary, so
   idempotency_key, received_at, reviewed_by, reviewed_at,
   converted_gig_id, converted_at, converted_by,
   corridor, bill_role, target_window, deal_type, booking_stage,
-  epk_ready, tech_plot_ready, routing_checked, outreach_draft`;
+  epk_ready, tech_plot_ready, routing_checked, outreach_draft,
+  guarantee_or_split_est, est_attendance, merch_per_head_est, road_and_room_cost_est,
+  anchor_gap_note, gap_fit_score`;
 
 function toIso(value: string | Date | null | undefined): string | null {
   if (!value) return null;
@@ -188,6 +204,12 @@ function mapSignalRow(row: RawSignalRow): AgentSignalRow {
     techPlotReady: Boolean(row.tech_plot_ready),
     routingChecked: Boolean(row.routing_checked),
     outreachDraft: row.outreach_draft ?? null,
+    guaranteeOrSplitEst: Number(row.guarantee_or_split_est) || 0,
+    estAttendance: Number(row.est_attendance) || 0,
+    merchPerHeadEst: Number(row.merch_per_head_est) || 0,
+    roadAndRoomCostEst: Number(row.road_and_room_cost_est) || 0,
+    anchorGapNote: row.anchor_gap_note ?? null,
+    gapFitScore: typeof row.gap_fit_score === "number" ? row.gap_fit_score : null,
   };
 }
 
@@ -240,6 +262,8 @@ export const convertAgentSignalToLead = createServerFn({ method: "POST" })
       const result = await convertSignalToLeadInDb(sql, {
         signalId: data.id,
         userId: context.userId,
+        anchorGapNote: data.anchorGapNote,
+        gapFitScore: data.gapFitScore,
       });
       return {
         signal: mapSignalRow(result.row),
