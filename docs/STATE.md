@@ -26,6 +26,11 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 14:32 EST — Antigravity
+- **Lead Scout Automation Built (`feat/lead-scout-intake-automation`):** Added `scripts/lead-scout-push.mjs`, `scripts/lead-scout-push.test.mjs` (3/3 pass), `.github/workflows/lead-scout-intake.yml` (Mon/Thu 13:00 UTC + `workflow_dispatch`), and `data/lead-scout-queue.json` (3 verified Tennessee accounting & home-services opportunities, zero X/Twitter URLs, deterministic `lead-scout-2026-11-27-<slug>` keys).
+- **Live Push & Deduplication Verified:** Ran `lead-scout-push.mjs` twice against live `POST https://primal-directive-loose-ends-co.vercel.app/api/intake/agent-signal` using local `.env.local`'s `AGENT_WEBHOOK_SECRET` (never printed): Run 1 inserted 3/3 (`HTTP 201`), Run 2 deduplicated 3/3 (`HTTP 200`, `deduplicated: true`).
+- **Next Step:** Review Draft PR #276, merge into `main`, and triage the 3 live Loose Ends leads in `https://primal-directive-loose-ends-co.vercel.app/signals`.
+
 ### 2026-11-27 13:57 EST — Antigravity
 - **Root Cause Confirmed via Live Vercel Logs & Integrations:** Logged in as `jcoop010` and linked `loose-ends-co/primal-directive`. Live production logs show `(ENOTFOUND) tenant/user postgres.kxtcfvsitqmdznopaufh not found` on `/api/auth/sign-in/social` and `/api/auth/sign-in/email`. `vercel integration list --all` confirmed both Vercel Marketplace Supabase stores attached to `primal-directive` (`supabase-carmine-lever` = `kxtcfvsitqmdznopaufh` and `supabase-camel-flame` = `vdactpndbcwqvsfbzjrk`) are **Suspended**.
 - **Secret Provisioned:** Added `AGENT_WEBHOOK_SECRET` (from gitignored `.env.local`) as a Sensitive Secret to both Vercel **Production** and **Preview** on `loose-ends-co/primal-directive`. Deleted temporary `.env.vercel.prod` and restored `.gitignore`.

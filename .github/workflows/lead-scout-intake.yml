@@ -1,0 +1,38 @@
+name: Lead Scout Intake Push
+
+on:
+  schedule:
+    # Run Mondays and Thursdays at 13:00 UTC
+    - cron: "0 13 * * 1,4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lead-scout-intake
+  cancel-in-progress: true
+
+jobs:
+  push-signals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Push verified lead signals to Primal Directive
+        env:
+          AGENT_WEBHOOK_SECRET: ${{ secrets.AGENT_WEBHOOK_SECRET }}
+          AGENT_SIGNAL_ENDPOINT: ${{ vars.AGENT_SIGNAL_ENDPOINT || 'https://primal-directive-loose-ends-co.vercel.app/api/intake/agent-signal' }}
+        run: |
+          if [ -z "${AGENT_WEBHOOK_SECRET}" ]; then
+            echo "::notice::AGENT_WEBHOOK_SECRET repository secret is not configured yet; skipping live push."
+            exit 0
+          fi
+          node scripts/lead-scout-push.mjs --input data/lead-scout-queue.json

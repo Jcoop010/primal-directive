@@ -1,0 +1,47 @@
+[
+  {
+    "idempotencyKey": "lead-scout-2026-11-27-hildreth-associates-cpa",
+    "sourceAgent": "lead-scout-bot",
+    "signalType": "lead_opportunity",
+    "title": "Hildreth & Associates CPA — Client intake & monthly close workflow automation",
+    "summary": "Nashville/Brentwood small-business CPA firm offering bookkeeping, financial statements, cash flow management, and tax prep. Small advisory firms frequently lose billable hours to manual client document chasing and unstandardized onboarding follow-ups. Offering a lightweight automated intake and recurring close-reminder workflow delivers immediate ROI ahead of year-end close.",
+    "sourceUrl": "https://hildrethcpa.com",
+    "payload": {
+      "company": "Hildreth & Associates CPA",
+      "segment": "accounting_firm",
+      "painPoint": "Manual client document chasing, fragmented onboarding, and slow follow-up ahead of tax/close deadlines",
+      "recommendedAngle": "14-day automated client intake + missing-document follow-up pipeline pilot",
+      "urgency": "high"
+    }
+  },
+  {
+    "idempotencyKey": "lead-scout-2026-11-27-callison-cpa",
+    "sourceAgent": "lead-scout-bot",
+    "signalType": "lead_opportunity",
+    "title": "Callison CPA — Contractor bookkeeping & payroll ops automation",
+    "summary": "Chattanooga CPA firm serving small businesses and contractors with bookkeeping, payroll, financial statements, and assurance. Contractor-focused bookkeeping creates recurring bottlenecks around receipt collection, job-cost categorization, and monthly client check-ins. Loose Ends can pitch a structured intake and automated client status cadence before Q1 tax prep peaks.",
+    "sourceUrl": "https://callisoncpa.com",
+    "payload": {
+      "company": "Callison CPA",
+      "segment": "accounting_firm",
+      "painPoint": "Recurring receipt/payroll collection friction and manual monthly client follow-up",
+      "recommendedAngle": "Automated contractor document collection & monthly close status workflow",
+      "urgency": "high"
+    }
+  },
+  {
+    "idempotencyKey": "lead-scout-2026-11-27-hometown-plumbing-electrical-hvac",
+    "sourceAgent": "lead-scout-bot",
+    "signalType": "lead_opportunity",
+    "title": "Hometown Plumbing, Electrical & HVAC — Missed-call & unclosed quote revenue recovery",
+    "summary": "Knoxville multi-trade home-service operator offering 24/7 emergency plumbing, electrical, and same-day HVAC service with online scheduling prompts. High-volume multi-trade shops routinely leak revenue on after-hours inquiries and unclosed diagnostic quotes when dispatchers are overloaded. An automated missed-call text-back and 3-touch quote follow-up system recovers booked jobs immediately.",
+    "sourceUrl": "https://hometownplumbingtn.com",
+    "payload": {
+      "company": "Hometown Plumbing, Electrical & HVAC",
+      "segment": "home_services",
+      "painPoint": "After-hours lead leakage, manual quote follow-up, and multi-trade dispatch handoff gaps",
+      "recommendedAngle": "Missed-call SMS recovery + automated 72-hour estimate follow-up sequence",
+      "urgency": "high"
+    }
+  }
+]
