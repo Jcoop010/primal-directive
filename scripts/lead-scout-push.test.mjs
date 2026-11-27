@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { test } from "node:test";
 import {
   buildLeadIdempotencyKey,
@@ -102,4 +104,35 @@ test("pushLeadSignals handles 201 insert, 200 deduplicated, and blocks Twitter l
   assert.equal(summary.deduplicated, 1);
   assert.equal(summary.rejected, 1);
   assert.equal(summary.failed, 0);
+});
+
+test("data/lead-scout-queue.json contains only valid HTTPS non-X/Twitter Southeast & Midwest band signals", () => {
+  const queueRaw = readFileSync(resolve(process.cwd(), "data/lead-scout-queue.json"), "utf8");
+  assert.equal(/\b(?:https?:\/\/)?(?:www\.|mobile\.)?(?:x|twitter)\.com\b/i.test(queueRaw), false);
+
+  const items = JSON.parse(queueRaw);
+  assert.ok(Array.isArray(items) && items.length >= 12);
+
+  const keys = new Set();
+  let hasSoutheast = false;
+  let hasMidwest = false;
+
+  for (const item of items) {
+    const checked = validateLeadSignal(item);
+    assert.equal(checked.ok, true, `Invalid queue item ${item?.idempotencyKey}: ${checked.error}`);
+    assert.ok(checked.signal.sourceUrl.startsWith("https://"), `Expected https URL for ${item.idempotencyKey}`);
+    assert.ok(checked.signal.corridor, `Missing corridor for ${item.idempotencyKey}`);
+    assert.ok(checked.signal.billRole, `Missing billRole for ${item.idempotencyKey}`);
+    assert.ok(checked.signal.targetWindow, `Missing targetWindow for ${item.idempotencyKey}`);
+    assert.ok(checked.signal.dealType, `Missing dealType for ${item.idempotencyKey}`);
+    assert.equal(keys.has(checked.signal.idempotencyKey), false, `Duplicate idempotencyKey: ${checked.signal.idempotencyKey}`);
+    keys.add(checked.signal.idempotencyKey);
+
+    const city = checked.signal.payload.city;
+    if (/(TN|NC|GA)\b/.test(city)) hasSoutheast = true;
+    if (/(KY|IN|IL|OH|WI)\b/.test(city)) hasMidwest = true;
+  }
+
+  assert.equal(hasSoutheast, true);
+  assert.equal(hasMidwest, true);
 });
