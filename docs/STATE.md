@@ -24,6 +24,16 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 16:24 EST — Antigravity
+- **`/signals` UI/UX Polish (`feat/signals-gigdrawer-ui-polish`):** Rebuilt `src/routes/signals.tsx` card hierarchy for 3-second scanning (Title/Source/Corridor + `tabular-nums` Score/Gap badges top row, routing/bill metadata chips + single-line fit/action summary middle row, collapsible Details/source/payload drawer, distinct Converted/Archived visual states, per-action loading labels, and one-click empty-state filter/anchor reset).
+- **`GigDrawer` Sticky Net-Yield & Ergonomics:** Added a sticky top `tabular-nums` summary header (Net Yield, Merch Gross, Break-Even Heads, Break-Even \$/Head) inside `src/components/forms.tsx` and reorganized fields into 3 scannable sections (`1. Show economics & gap context`, `2. Booking stage & readiness` pill toggles, `3. Outreach draft` with `Copied!` confirmation and human-review badge).
+- **Verification & Next Step:** Verified `agent-signal.test.ts` (8/8), script tests (39/39), `typecheck`, `lint`, and `vite build`. Opened PR for owner review before merging into `main`.
+
+### 2026-11-27 15:20 EST — Antigravity
+- **PR #279 Merged & Live (`main@cf9f284`, `dpl_vYkAPKHd3YgH7f68TNQHgbrGJeg6`):** Merged `feat/routing-gap-and-net-yield` into `main`, promoted `primal-directive-ctsavhpwz-loose-ends-co.vercel.app` to `https://primal-directive-loose-ends-co.vercel.app`, and confirmed migrations `0001`–`0014` (`0014_routing_gap_and_yield.sql`) applied cleanly on Neon Postgres `neon-cerulean-candle`.
+- **All Live Production Checks PASSED:** `GET /api/health` → `200` (`commit: cf9f284102d8dc368773d2838dc4f49d264325aa`), `scripts/oauth-state-smoke.mjs` → `200`, and `POST /api/intake/agent-signal` (`band-yield-check-2026-11-27`) → `201` insert + `200` deduplicated.
+- **Next Step:** Open `/signals`, test anchor cities/dates (`Prev stop` / `Next stop`) + `Sort: Gap fit`, convert a Southeast band signal to a lead, and verify the live Pre-Show Net Yield & Break-Even estimator inside `/gigs?gig=<id>`.
+
 ### 2026-11-27 15:15 EST — Antigravity
 - **Migration `0014` & Routing/Yield Math (`feat/routing-gap-and-net-yield`):** Added `migrations/0014_routing_gap_and_yield.sql` (`guarantee_or_split_est`, `est_attendance`, `merch_per_head_est`, `road_and_room_cost_est`, `anchor_gap_note`, `gap_fit_score`, registered in `scripts/migration-plan.test.mjs`) and pure `computeRoutingGapFit()` + `computePreShowYield()` helpers in `src/lib/agent-signal-scoring.ts`.
 - **`/signals` Anchor Gap & `GigDrawer` Net Yield Estimator:** Added inline Prev/Next anchor city & date bar, Gap Fit badges/reasons, and `Sort: Gap fit` to `src/routes/signals.tsx`; wired gap & yield carryover into `convertAgentSignalToLead`; added live Pre-Show Net Yield + Break-Even Attendance/Merch estimator inside `GigDrawer` (`src/components/forms.tsx`, persisted via `app_state`).
