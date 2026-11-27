@@ -24,6 +24,11 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 15:15 EST — Antigravity
+- **Migration `0014` & Routing/Yield Math (`feat/routing-gap-and-net-yield`):** Added `migrations/0014_routing_gap_and_yield.sql` (`guarantee_or_split_est`, `est_attendance`, `merch_per_head_est`, `road_and_room_cost_est`, `anchor_gap_note`, `gap_fit_score`, registered in `scripts/migration-plan.test.mjs`) and pure `computeRoutingGapFit()` + `computePreShowYield()` helpers in `src/lib/agent-signal-scoring.ts`.
+- **`/signals` Anchor Gap & `GigDrawer` Net Yield Estimator:** Added inline Prev/Next anchor city & date bar, Gap Fit badges/reasons, and `Sort: Gap fit` to `src/routes/signals.tsx`; wired gap & yield carryover into `convertAgentSignalToLead`; added live Pre-Show Net Yield + Break-Even Attendance/Merch estimator inside `GigDrawer` (`src/components/forms.tsx`, persisted via `app_state`).
+- **Verification & Next Step:** Verified `agent-signal.test.ts` (8/8), script tests (39/39), `typecheck`, `lint`, and `vite build`. Opened Draft PR for review before merging into `main`.
+
 ### 2026-11-27 14:56 EST — Antigravity
 - **Band Booking, Routing & Outreach Draft Engine (`0013`):** Added `migrations/0013_band_booking_routing.sql` (`corridor`, `bill_role`, `target_window`, `deal_type`, `booking_stage`, `epk_ready`, `tech_plot_ready`, `routing_checked`, `outreach_draft`), updated `agent-signal-scoring.ts` with corridor/bill-role boosts + tailored `buildBookingOutreachDraft()`, carried all metadata into `Convert to Lead` (`app_state` gigs), and added the Booking, Routing & Outreach Draft panel to `GigDrawer` + corridor/role/window chips on `/signals`.
 - **Multi-Stream Band Discovery:** Expanded `data/lead-scout-queue.json` to 6 verified Southeast opportunities (venue bookings, tour support, regional routing, promoter bills, and 2 festival calls: Musicians Corner & Carolina Indie Fest; zero X/Twitter links) and forwarded routing/bill fields in `scripts/lead-scout-push.mjs`.

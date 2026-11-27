@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
+import { computePreShowYield } from "@/lib/agent-signal-scoring";
 import { suggestedFollowUp, bookingDraft } from "@/lib/booking-workflow";
 import { useMusician } from "@/lib/store";
 import {
@@ -113,6 +114,22 @@ function GigForm({
   const [techPlotReady, setTechPlotReady] = useState(Boolean(initial?.techPlotReady));
   const [routingChecked, setRoutingChecked] = useState(Boolean(initial?.routingChecked));
   const [outreachDraft, setOutreachDraft] = useState(initial?.outreachDraft ?? "");
+  const [guaranteeOrSplitEst, setGuaranteeOrSplitEst] = useState(
+    String(initial?.guaranteeOrSplitEst ?? initial?.fee ?? ""),
+  );
+  const [estAttendance, setEstAttendance] = useState(String(initial?.estAttendance ?? ""));
+  const [merchPerHeadEst, setMerchPerHeadEst] = useState(String(initial?.merchPerHeadEst ?? ""));
+  const [roadAndRoomCostEst, setRoadAndRoomCostEst] = useState(
+    String(initial?.roadAndRoomCostEst ?? ""),
+  );
+  const [anchorGapNote, setAnchorGapNote] = useState(initial?.anchorGapNote ?? "");
+
+  const yieldEst = computePreShowYield({
+    guaranteeOrSplitEst: Number(guaranteeOrSplitEst) || 0,
+    estAttendance: Number(estAttendance) || 0,
+    merchPerHeadEst: Number(merchPerHeadEst) || 0,
+    roadAndRoomCostEst: Number(roadAndRoomCostEst) || 0,
+  });
 
   return (
     <form
@@ -149,6 +166,12 @@ function GigForm({
             techPlotReady,
             routingChecked,
             outreachDraft: outreachDraft.trim() || undefined,
+            guaranteeOrSplitEst: Number(guaranteeOrSplitEst) || 0,
+            estAttendance: Math.max(0, Math.round(Number(estAttendance) || 0)),
+            merchPerHeadEst: Number(merchPerHeadEst) || 0,
+            roadAndRoomCostEst: Number(roadAndRoomCostEst) || 0,
+            anchorGapNote: anchorGapNote.trim() || undefined,
+            gapFitScore: initial?.gapFitScore,
             researchVerifiedAt:
               researchSourceUrl === initial?.researchSourceUrl ? initial?.researchVerifiedAt : "",
           });
@@ -342,6 +365,96 @@ function GigForm({
             Copy draft
           </button>
         </div>
+      </section>
+      <section
+        aria-label="Pre-show net yield estimator"
+        className="space-y-3 rounded-xl border border-line-strong bg-surface p-3.5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-fg">Pre-show net yield estimator</h3>
+          <span
+            className={`tabular rounded-full border px-2.5 py-0.5 text-xs font-bold ${
+              yieldEst.netYieldEst >= 0
+                ? "border-live/45 bg-live/12 text-live"
+                : "border-danger/45 bg-danger/12 text-danger"
+            }`}
+          >
+            Net: {yieldEst.netYieldEst >= 0 ? "+" : "-"}${Math.abs(yieldEst.netYieldEst).toFixed(2)}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Show payout / door est. ($)">
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={guaranteeOrSplitEst}
+              onChange={(e) => setGuaranteeOrSplitEst(e.target.value)}
+              placeholder="500"
+            />
+          </Field>
+          <Field label="Est. attendance">
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={estAttendance}
+              onChange={(e) => setEstAttendance(e.target.value)}
+              placeholder="80"
+            />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Merch / head est. ($)">
+            <Input
+              type="number"
+              min={0}
+              step="0.5"
+              value={merchPerHeadEst}
+              onChange={(e) => setMerchPerHeadEst(e.target.value)}
+              placeholder="6"
+            />
+          </Field>
+          <Field label="Road &amp; room cost est. ($)">
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={roadAndRoomCostEst}
+              onChange={(e) => setRoadAndRoomCostEst(e.target.value)}
+              placeholder="350"
+            />
+          </Field>
+        </div>
+        <div className="grid grid-cols-3 gap-2 rounded-lg border border-line bg-bg/70 p-2.5 text-center text-xs">
+          <div>
+            <div className="text-[10px] uppercase tracking-wide text-muted">Merch gross</div>
+            <div className="tabular mt-0.5 font-semibold text-fg">
+              ${yieldEst.merchGrossEst.toFixed(0)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-wide text-muted">Break-even heads</div>
+            <div className="tabular mt-0.5 font-semibold text-fg">
+              {yieldEst.breakEvenAttendance === null ? "N/A" : yieldEst.breakEvenAttendance}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-wide text-muted">Break-even $/head</div>
+            <div className="tabular mt-0.5 font-semibold text-fg">
+              {yieldEst.breakEvenMerchPerHead === null
+                ? "N/A"
+                : `$${yieldEst.breakEvenMerchPerHead.toFixed(2)}`}
+            </div>
+          </div>
+        </div>
+        <Field label="Anchor routing gap note">
+          <Input
+            value={anchorGapNote}
+            onChange={(e) => setAnchorGapNote(e.target.value)}
+            placeholder="Bridges Fri Nashville -> Sun Asheville…"
+          />
+        </Field>
       </section>
       <section
         aria-label="Booking research and outreach"

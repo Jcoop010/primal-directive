@@ -40,6 +40,12 @@ export interface ConvertibleSignalRow {
   tech_plot_ready: boolean | null;
   routing_checked: boolean | null;
   outreach_draft: string | null;
+  guarantee_or_split_est: number | string | null;
+  est_attendance: number | null;
+  merch_per_head_est: number | string | null;
+  road_and_room_cost_est: number | string | null;
+  anchor_gap_note: string | null;
+  gap_fit_score: number | null;
 }
 
 function readString(obj: Record<string, unknown>, keys: readonly string[]): string {
@@ -58,7 +64,10 @@ function readNumber(obj: Record<string, unknown>, keys: readonly string[]): numb
   return 0;
 }
 
-export function buildLeadGigFromSignal(row: ConvertibleSignalRow): Gig {
+export function buildLeadGigFromSignal(
+  row: ConvertibleSignalRow,
+  overrides?: { anchorGapNote?: string; gapFitScore?: number },
+): Gig {
   const payload = row.payload && typeof row.payload === "object" ? row.payload : {};
   const gigId = `gig-sig-${row.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12)}`;
   const venue =
@@ -108,6 +117,19 @@ export function buildLeadGigFromSignal(row: ConvertibleSignalRow): Gig {
     `Imported from ${row.source_agent} (${row.signal_type})`,
   ].filter(Boolean);
 
+  const guaranteeOrSplitEst =
+    Number(row.guarantee_or_split_est) > 0 ? Number(row.guarantee_or_split_est) : fee;
+  const estAttendance = Number(row.est_attendance) || 0;
+  const merchPerHeadEst = Number(row.merch_per_head_est) || 0;
+  const roadAndRoomCostEst = Number(row.road_and_room_cost_est) || 0;
+  const anchorGapNote = overrides?.anchorGapNote?.trim() || row.anchor_gap_note?.trim() || undefined;
+  const gapFitScore =
+    typeof overrides?.gapFitScore === "number"
+      ? overrides.gapFitScore
+      : typeof row.gap_fit_score === "number"
+        ? row.gap_fit_score
+        : undefined;
+
   return {
     id: gigId,
     name: row.title.slice(0, 140),
@@ -127,6 +149,12 @@ export function buildLeadGigFromSignal(row: ConvertibleSignalRow): Gig {
     techPlotReady: Boolean(row.tech_plot_ready),
     routingChecked: Boolean(row.routing_checked),
     outreachDraft,
+    guaranteeOrSplitEst,
+    estAttendance,
+    merchPerHeadEst,
+    roadAndRoomCostEst,
+    anchorGapNote,
+    gapFitScore,
     stageHistory: [{ from: "lead", to: "lead", at: nowIso }],
     ...(row.source_url ? { researchSourceUrl: row.source_url } : {}),
     ...(outreachEmail ? { outreachEmail } : {}),
@@ -139,11 +167,13 @@ const SIGNAL_SELECT_COLUMNS = `id, source_agent, signal_type, title, summary, so
   idempotency_key, received_at, reviewed_by, reviewed_at,
   converted_gig_id, converted_at, converted_by,
   corridor, bill_role, target_window, deal_type, booking_stage,
-  epk_ready, tech_plot_ready, routing_checked, outreach_draft`;
+  epk_ready, tech_plot_ready, routing_checked, outreach_draft,
+  guarantee_or_split_est, est_attendance, merch_per_head_est, road_and_room_cost_est,
+  anchor_gap_note, gap_fit_score`;
 
 export async function convertSignalToLeadInDb(
   sql: Sql,
-  input: { signalId: string; userId: string },
+  input: { signalId: string; userId: string; anchorGapNote?: string; gapFitScore?: number },
 ): Promise<{
   row: ConvertibleSignalRow;
   gig: Gig | null;
@@ -172,7 +202,10 @@ export async function convertSignalToLeadInDb(
       };
     }
 
-    const gig = buildLeadGigFromSignal(signal);
+    const gig = buildLeadGigFromSignal(signal, {
+      anchorGapNote: input.anchorGapNote,
+      gapFitScore: input.gapFitScore,
+    });
 
     const stateRows = await tx.query<{ state: Record<string, unknown>; version: number }>(
       `select state, version from public.app_state where user_id = $1 for update`,
@@ -213,10 +246,19 @@ export async function convertSignalToLeadInDb(
            converted_by = $3,
            reviewed_by = coalesce(reviewed_by, $3),
            reviewed_at = coalesce(reviewed_at, now()),
-           outreach_draft = coalesce(outreach_draft, $4)
+           outreach_draft = coalesce(outreach_draft, $4),
+           anchor_gap_note = coalesce($5, anchor_gap_note),
+           gap_fit_score = coalesce($6, gap_fit_score)
        where id = $1
        returning ${SIGNAL_SELECT_COLUMNS}`,
-      [input.signalId, gig.id, input.userId, gig.outreachDraft ?? null],
+      [
+        input.signalId,
+        gig.id,
+        input.userId,
+        gig.outreachDraft ?? null,
+        gig.anchorGapNote ?? null,
+        typeof gig.gapFitScore === "number" ? gig.gapFitScore : null,
+      ],
     );
 
     return {

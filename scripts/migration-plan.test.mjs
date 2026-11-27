@@ -66,6 +66,7 @@ test("the enabled app exposes auth, app-state, security, and automation migratio
     { name: "0011_agent_signals_scoring.sql", path: "0011_agent_signals_scoring.sql" },
     { name: "0012_agent_signals_conversion.sql", path: "0012_agent_signals_conversion.sql" },
     { name: "0013_band_booking_routing.sql", path: "0013_band_booking_routing.sql" },
+    { name: "0014_routing_gap_and_yield.sql", path: "0014_routing_gap_and_yield.sql" },
   ]);
   assert.ok(readdirSync(join(migrationsDir, "auth")).includes("0001_auth.sql"));
 });

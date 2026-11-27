@@ -16,7 +16,9 @@ import { toast } from "sonner";
 import { MetricCard } from "@/components/metric-card";
 import { Card } from "@/components/ui/card";
 import {
+  computeRoutingGapFit,
   filterAndSortSignals,
+  type RoutingAnchorWindow,
   type SignalPriorityTier,
   type SignalSortMode,
 } from "@/lib/agent-signal-scoring";
@@ -70,6 +72,18 @@ function SignalsInboxPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | AgentSignalStatus>("all");
   const [priorityFilter, setPriorityFilter] = useState<"all" | SignalPriorityTier>("all");
   const [sortMode, setSortMode] = useState<SignalSortMode>("score");
+  const [prevCity, setPrevCity] = useState("");
+  const [prevDate, setPrevDate] = useState("");
+  const [nextCity, setNextCity] = useState("");
+  const [nextDate, setNextDate] = useState("");
+
+  const anchors: RoutingAnchorWindow = useMemo(
+    () => ({ prevCity, prevDate, nextCity, nextDate }),
+    [prevCity, prevDate, nextCity, nextDate],
+  );
+  const hasAnchors = Boolean(
+    prevCity.trim() || prevDate.trim() || nextCity.trim() || nextDate.trim(),
+  );
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -100,14 +114,29 @@ function SignalsInboxPage() {
     return c;
   }, [signals]);
 
+  const enrichedSignals = useMemo(
+    () =>
+      signals.map((signal) => {
+        const gap = computeRoutingGapFit(signal, anchors);
+        return {
+          ...signal,
+          computedGapScore: gap.gapFitScore,
+          computedGapLabel: gap.gapLabel,
+          computedGapReason: gap.gapReason,
+          gapFitScore: gap.gapFitScore ?? signal.gapFitScore,
+        };
+      }),
+    [signals, anchors],
+  );
+
   const visible = useMemo(
     () =>
-      filterAndSortSignals(signals, {
+      filterAndSortSignals(enrichedSignals, {
         statusFilter,
         priorityFilter,
         sortMode,
       }),
-    [signals, statusFilter, priorityFilter, sortMode],
+    [enrichedSignals, statusFilter, priorityFilter, sortMode],
   );
 
   async function setStatus(id: string, nextStatus: AgentSignalStatus) {
@@ -129,10 +158,28 @@ function SignalsInboxPage() {
     }
   }
 
-  async function convertToLead(id: string) {
+  async function convertToLead(
+    id: string,
+    gapMeta?: { gapFitScore?: number | null; gapReason?: string | null },
+  ) {
     setBusyId(id);
     try {
-      const res = await convertAgentSignalToLead({ data: { id } });
+      const anchorParts = [
+        prevCity.trim() || prevDate.trim()
+          ? `From ${prevCity.trim() || "prev stop"} ${prevDate.trim()}`.trim()
+          : "",
+        nextCity.trim() || nextDate.trim()
+          ? `To ${nextCity.trim() || "next stop"} ${nextDate.trim()}`.trim()
+          : "",
+        gapMeta?.gapReason ?? "",
+      ].filter(Boolean);
+      const res = await convertAgentSignalToLead({
+        data: {
+          id,
+          ...(typeof gapMeta?.gapFitScore === "number" ? { gapFitScore: gapMeta.gapFitScore } : {}),
+          ...(anchorParts.length > 0 ? { anchorGapNote: anchorParts.join(" · ").slice(0, 400) } : {}),
+        },
+      });
       setSignals((prev) => prev.map((item) => (item.id === res.signal.id ? res.signal : item)));
       if (res.gig) {
         const existing = useMusician.getState().gigs;
@@ -188,11 +235,20 @@ function SignalsInboxPage() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setSortMode((m) => (m === "score" ? "newest" : "score"))}
+              onClick={() =>
+                setSortMode((m) =>
+                  m === "score" ? (hasAnchors ? "gap" : "newest") : m === "gap" ? "newest" : "score",
+                )
+              }
               className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line-strong bg-bg/70 px-3 text-xs font-semibold text-fg hover:border-[#E25822]/60"
             >
               <ArrowUpDown className="size-3.5 text-[#E25822]" />
-              Sort: {sortMode === "score" ? "Highest score" : "Newest"}
+              Sort:{" "}
+              {sortMode === "score"
+                ? "Highest score"
+                : sortMode === "gap"
+                  ? "Gap fit"
+                  : "Newest"}
             </button>
             <button
               type="button"
@@ -245,19 +301,59 @@ function SignalsInboxPage() {
               {item.label}
             </button>
           ))}
-          {(statusFilter !== "all" || priorityFilter !== "all" || sortMode !== "score") && (
+          {(statusFilter !== "all" ||
+            priorityFilter !== "all" ||
+            sortMode !== "score" ||
+            hasAnchors) && (
             <button
               type="button"
               onClick={() => {
                 setStatusFilter("all");
                 setPriorityFilter("all");
                 setSortMode("score");
+                setPrevCity("");
+                setPrevDate("");
+                setNextCity("");
+                setNextDate("");
               }}
               className="ml-auto text-xs font-semibold text-[#E25822] hover:underline"
             >
               Reset filters
             </button>
           )}
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-2 border-t border-line/70 pt-3 sm:grid-cols-4">
+          <input
+            type="text"
+            aria-label="Previous stop city"
+            value={prevCity}
+            onChange={(e) => setPrevCity(e.target.value)}
+            placeholder="Prev stop (e.g. Nashville, TN)"
+            className="min-h-9 rounded-lg border border-line bg-bg/70 px-2.5 text-xs text-fg outline-none focus:border-[#E25822]"
+          />
+          <input
+            type="date"
+            aria-label="Previous stop date"
+            value={prevDate}
+            onChange={(e) => setPrevDate(e.target.value)}
+            className="min-h-9 rounded-lg border border-line bg-bg/70 px-2.5 text-xs text-fg outline-none focus:border-[#E25822]"
+          />
+          <input
+            type="text"
+            aria-label="Next stop city"
+            value={nextCity}
+            onChange={(e) => setNextCity(e.target.value)}
+            placeholder="Next stop (e.g. Asheville, NC)"
+            className="min-h-9 rounded-lg border border-line bg-bg/70 px-2.5 text-xs text-fg outline-none focus:border-[#E25822]"
+          />
+          <input
+            type="date"
+            aria-label="Next stop date"
+            value={nextDate}
+            onChange={(e) => setNextDate(e.target.value)}
+            className="min-h-9 rounded-lg border border-line bg-bg/70 px-2.5 text-xs text-fg outline-none focus:border-[#E25822]"
+          />
         </div>
       </section>
 
@@ -342,12 +438,30 @@ function SignalsInboxPage() {
                           {signal.targetWindow}
                         </span>
                       ) : null}
+                      {typeof signal.computedGapScore === "number" && signal.computedGapLabel ? (
+                        <span
+                          className={cn(
+                            "tabular rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                            signal.computedGapScore >= 70
+                              ? "border-live/50 bg-live/15 text-live"
+                              : signal.computedGapScore >= 45
+                                ? "border-warn/50 bg-warn/15 text-warn"
+                                : "border-line bg-bg/70 text-muted",
+                          )}
+                        >
+                          Gap {signal.computedGapScore} · {signal.computedGapLabel}
+                        </span>
+                      ) : null}
                       <span className="text-[11px] text-muted">
                         {new Date(signal.receivedAt).toLocaleString()}
                       </span>
                     </div>
 
                     <h3 className="font-display text-base font-bold text-fg">{signal.title}</h3>
+
+                    {signal.computedGapReason ? (
+                      <p className="text-xs font-medium text-info">{signal.computedGapReason}</p>
+                    ) : null}
 
                     {signal.summary ? (
                       <p className="text-sm leading-relaxed text-soft/90">{signal.summary}</p>
@@ -400,7 +514,12 @@ function SignalsInboxPage() {
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => void convertToLead(signal.id)}
+                      onClick={() =>
+                        void convertToLead(signal.id, {
+                          gapFitScore: signal.computedGapScore,
+                          gapReason: signal.computedGapReason,
+                        })
+                      }
                       className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#E25822]/60 bg-[#0A1628] px-3.5 text-xs font-bold text-[#ffb088] hover:border-[#E25822] hover:bg-[#E25822]/15 disabled:opacity-40"
                     >
                       <Music2 className="size-3.5 text-[#E25822]" />
