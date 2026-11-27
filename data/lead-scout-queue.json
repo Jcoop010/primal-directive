@@ -1,0 +1,78 @@
+[
+  {
+    "idempotencyKey": "band-scout-2026-11-27-the-local-nashville",
+    "sourceAgent": "band-scout-bot",
+    "signalType": "venue_lead",
+    "title": "The Local — Independent band & songwriter showcase booking",
+    "summary": "Nashville independent band and songwriter room actively accepting EPKs, live performance links, and local draw history through its talent buyer. Ideal anchor room for building Nashville draw or kicking off a Southeast weekend run.",
+    "sourceUrl": "https://localnash.com",
+    "urgency": "high",
+    "recommendedAction": "Convert to Lead and send EPK, live video link, and 3 target weekend dates to the talent buyer.",
+    "payload": {
+      "venue": "The Local",
+      "city": "Nashville, TN",
+      "segment": "venue_booking",
+      "billType": "Showcase / Co-bill",
+      "genres": "Indie Rock, Americana, Singer-Songwriter",
+      "bookingEmail": "thelocalnash@gmail.com",
+      "recommendedAngle": "Pitch a co-bill with a local Nashville opener and include live video + draw numbers."
+    }
+  },
+  {
+    "idempotencyKey": "band-scout-2026-11-27-one-world-brewing-asheville",
+    "sourceAgent": "band-scout-bot",
+    "signalType": "tour_routing",
+    "title": "One World Brewing (West Asheville) — Regional touring band slots",
+    "summary": "West Asheville and downtown taprooms regularly book touring regional bands across indie, funk, jazz, and Americana via their dedicated booking request portal. Strong I-40 routing bridge between Knoxville/Nashville and Carolinas dates.",
+    "sourceUrl": "https://oneworldbrewing.com",
+    "urgency": "high",
+    "recommendedAction": "Convert to Lead and submit regional routing dates + live set clips via the venue booking form.",
+    "payload": {
+      "venue": "One World Brewing",
+      "city": "Asheville, NC",
+      "segment": "regional_routing",
+      "billType": "Full-band evening set",
+      "genres": "Indie, Funk, Bluegrass, Americana",
+      "routingFit": "I-40 corridor (Nashville -> Knoxville -> Asheville)",
+      "recommendedAngle": "Anchor a Thursday/Friday routing stop with merch table + local cross-promo."
+    }
+  },
+  {
+    "idempotencyKey": "band-scout-2026-11-27-asheville-music-hall",
+    "sourceAgent": "band-scout-bot",
+    "signalType": "tour_support",
+    "title": "Asheville Music Hall — Regional headliner & tour support routing",
+    "summary": "Premier independent mid-sized room in downtown Asheville coordinating touring support bills and regional headliners directly through its booking desk. High-leverage support slot opportunity for expanding Western NC fan base.",
+    "sourceUrl": "https://ashevillemusichall.com",
+    "urgency": "high",
+    "recommendedAction": "Convert to Lead, inspect upcoming calendar bills, and pitch direct support on genre-matched touring stops.",
+    "payload": {
+      "venue": "Asheville Music Hall",
+      "city": "Asheville, NC",
+      "segment": "tour_support",
+      "billType": "Direct support / Regional headliner",
+      "capacity": 350,
+      "routingFit": "Southeast regional tour circuit",
+      "recommendedAngle": "Target open direct-support slots on announced regional bills 6-10 weeks out."
+    }
+  },
+  {
+    "idempotencyKey": "band-scout-2026-11-27-smiths-olde-bar-atlanta",
+    "sourceAgent": "band-scout-bot",
+    "signalType": "promoter_lead",
+    "title": "Smith's Olde Bar — Atlanta market-entry independent bills",
+    "summary": "Historic Atlanta independent venue coordinating breaking-band and regional bills in the Atlanta Room and Music Room. Reliable Southeast routing anchor for bands establishing Atlanta draw and press visibility.",
+    "sourceUrl": "https://sobatl.com",
+    "urgency": "normal",
+    "recommendedAction": "Convert to Lead and propose a 3-band Atlanta bill with two local draw partners.",
+    "payload": {
+      "venue": "Smith's Olde Bar",
+      "city": "Atlanta, GA",
+      "segment": "promoter_bill",
+      "billType": "3-band independent bill",
+      "capacity": 300,
+      "bookingEmail": "juliettrowe@gmail.com",
+      "recommendedAngle": "Pitch a curated 3-band bill pairing out-of-market routing with two established Atlanta acts."
+    }
+  }
+]
