@@ -26,6 +26,11 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 13:57 EST — Antigravity
+- **Root Cause Confirmed via Live Vercel Logs & Integrations:** Logged in as `jcoop010` and linked `loose-ends-co/primal-directive`. Live production logs show `(ENOTFOUND) tenant/user postgres.kxtcfvsitqmdznopaufh not found` on `/api/auth/sign-in/social` and `/api/auth/sign-in/email`. `vercel integration list --all` confirmed both Vercel Marketplace Supabase stores attached to `primal-directive` (`supabase-carmine-lever` = `kxtcfvsitqmdznopaufh` and `supabase-camel-flame` = `vdactpndbcwqvsfbzjrk`) are **Suspended**.
+- **Secret Provisioned:** Added `AGENT_WEBHOOK_SECRET` (from gitignored `.env.local`) as a Sensitive Secret to both Vercel **Production** and **Preview** on `loose-ends-co/primal-directive`. Deleted temporary `.env.vercel.prod` and restored `.gitignore`.
+- **Next Step:** Either (A) add `DATABASE_URL` (the `rgivgiwfmoehrcmwakwk` `us-east-2` Session Pooler URI from Supabase Connect) in Vercel Production & Preview (which overrides the suspended `POSTGRES_*` vars), or (B) un-suspend `supabase-carmine-lever` in Vercel Storage if preserving Oct 2026 data. Then merge PR #274 and run live `/api/health`, `oauth-state-smoke.mjs`, and `/api/intake/agent-signal` smoke tests.
+
 ### 2026-11-27 13:42 EST — Antigravity
 - **Auth Root Cause Diagnosed:** Live `GET /api/health` is still `HTTP 503 {"status":"unavailable"}` (Supabase `rgivgiwfmoehrcmwakwk` paused), causing `POST /api/auth/sign-in/social` to return **`HTTP 500`** (Better Auth cannot write OAuth state to `public.verification` or read/write `"user"`/`session`). Zero auth regressions were introduced by PR #274 (`git diff main...HEAD -- src/lib/auth src/routes/api.auth.$.ts` was empty), and redirect/cookie config (`__Host-primal-directive.oauth_state`, `Secure; HttpOnly; SameSite=Lax; Path=/`, dynamic `VERCEL_PROJECT_PRODUCTION_URL` + `primal-directive-loose-ends-co.vercel.app`) is clean.
 - **Code Fix Applied:** Patched `src/lib/auth/verify.server.ts` so `databaseConfigured` uses `dbSource === "postgres"` instead of checking only `DATABASE_URL`, ensuring fail-closed auth parity when Vercel supplies `STORAGE_URL` or `POSTGRES_*` aliases. Verified `typecheck`, `lint`, `vite build`, and auth unit tests.
