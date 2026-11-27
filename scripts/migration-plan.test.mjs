@@ -63,6 +63,7 @@ test("the enabled app exposes auth, app-state, security, and automation migratio
     { name: "0008_mailbox_connection_tests.sql", path: "0008_mailbox_connection_tests.sql" },
     { name: "0009_agent_signals.sql", path: "0009_agent_signals.sql" },
     { name: "0010_agent_signals_approved_status.sql", path: "0010_agent_signals_approved_status.sql" },
+    { name: "0011_agent_signals_scoring.sql", path: "0011_agent_signals_scoring.sql" },
   ]);
   assert.ok(readdirSync(join(migrationsDir, "auth")).includes("0001_auth.sql"));
 });

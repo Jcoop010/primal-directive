@@ -1,9 +1,20 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
+import {
+  normalizeSignalScoring,
+  SIGNAL_PRIORITIES,
+  SIGNAL_URGENCIES,
+} from "./agent-signal-scoring.ts";
 import type { Sql } from "./db.ts";
 
 const MAX_BODY_BYTES = 100_000;
-const BLOCKED_HOSTS = new Set(["x.com", "www.x.com", "twitter.com", "www.twitter.com", "mobile.twitter.com"]);
+const BLOCKED_HOSTS = new Set([
+  "x.com",
+  "www.x.com",
+  "twitter.com",
+  "www.twitter.com",
+  "mobile.twitter.com",
+]);
 
 function isAllowedSourceUrl(value: string): boolean {
   try {
@@ -31,10 +42,29 @@ export const agentSignalSchema = z.object({
     .refine(isAllowedSourceUrl, "sourceUrl must be a valid non-X/Twitter http(s) URL")
     .optional(),
   idempotencyKey: z.string().trim().min(1).max(128).optional(),
+  fitScore: z.number().min(0).max(100).optional(),
+  priorityTier: z.enum(SIGNAL_PRIORITIES).optional(),
+  urgency: z.enum(SIGNAL_URGENCIES).optional(),
+  recommendedAction: z.string().trim().max(300).optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type AgentSignalInput = z.infer<typeof agentSignalSchema>;
+
+export function buildDedupeFingerprint(input: {
+  sourceAgent: string;
+  signalType: string;
+  title: string;
+  sourceUrl?: string | null;
+}): string {
+  const canonical = [
+    input.sourceAgent.trim().toLowerCase(),
+    input.signalType.trim().toLowerCase(),
+    input.title.trim().toLowerCase(),
+    (input.sourceUrl ?? "").trim().toLowerCase(),
+  ].join("|");
+  return createHash("sha256").update(canonical, "utf8").digest("hex").slice(0, 32);
+}
 
 export function verifyBearerToken(authHeader: string | null, expectedSecret: string): boolean {
   if (!authHeader || !expectedSecret) return false;
@@ -101,17 +131,37 @@ export async function handleAgentSignalRequest(
   }
 
   const data = validated.data;
+  const scoring = normalizeSignalScoring({
+    signalType: data.signalType,
+    summary: data.summary,
+    sourceUrl: data.sourceUrl,
+    payload: data.payload,
+    fitScore: data.fitScore,
+    priorityTier: data.priorityTier,
+    urgency: data.urgency,
+    recommendedAction: data.recommendedAction,
+  });
+  const dedupeFingerprint = buildDedupeFingerprint(data);
   const id = randomUUID();
+
   try {
     const sql = options?.sqlProvider
       ? await options.sqlProvider()
       : await (await import("./db.ts")).getSql();
-    const inserted = await sql.query<{ id: string; status: string; received_at: string }>(
+    const inserted = await sql.query<{
+      id: string;
+      status: string;
+      fit_score: number;
+      priority_tier: string;
+      urgency: string;
+      received_at: string;
+    }>(
       `insert into public.agent_signals (
-         id, source_agent, signal_type, title, summary, source_url, payload, idempotency_key
-       ) values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)
+         id, source_agent, signal_type, title, summary, source_url, payload,
+         idempotency_key, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint
+       ) values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13)
        on conflict (idempotency_key) do nothing
-       returning id, status, received_at`,
+       returning id, status, fit_score, priority_tier, urgency, received_at`,
       [
         id,
         data.sourceAgent,
@@ -121,6 +171,11 @@ export async function handleAgentSignalRequest(
         data.sourceUrl ?? null,
         JSON.stringify(data.payload ?? {}),
         data.idempotencyKey ?? null,
+        scoring.fitScore,
+        scoring.priorityTier,
+        scoring.urgency,
+        scoring.recommendedAction,
+        dedupeFingerprint,
       ],
     );
 
@@ -137,6 +192,9 @@ export async function handleAgentSignalRequest(
         ok: true,
         id: row?.id ?? id,
         status: row?.status ?? "new",
+        fitScore: row?.fit_score ?? scoring.fitScore,
+        priorityTier: row?.priority_tier ?? scoring.priorityTier,
+        urgency: row?.urgency ?? scoring.urgency,
         receivedAt: row?.received_at ?? new Date().toISOString(),
       },
       { status: 201, headers },
