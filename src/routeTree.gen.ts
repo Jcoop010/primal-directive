@@ -23,10 +23,12 @@ import { Route as MoneyRouteImport } from './routes/money'
 import { Route as OutreachRouteImport } from './routes/outreach'
 import { Route as PeopleRouteImport } from './routes/people'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as SignalsRouteImport } from './routes/signals'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
+import { Route as ApiIntakeAgentSignalRouteImport } from './routes/api.intake.agent-signal'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api.stripe.webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -99,6 +101,11 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignalsRoute = SignalsRouteImport.update({
+  id: '/signals',
+  path: '/signals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
@@ -117,6 +124,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIntakeAgentSignalRoute = ApiIntakeAgentSignalRouteImport.update({
+  id: '/api/intake/agent-signal',
+  path: '/api/intake/agent-signal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
@@ -140,10 +152,12 @@ export interface FileRoutesByFullPath {
   '/outreach': typeof OutreachRoute
   '/people': typeof PeopleRoute
   '/pricing': typeof PricingRoute
+  '/signals': typeof SignalsRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/intake/agent-signal': typeof ApiIntakeAgentSignalRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -161,10 +175,12 @@ export interface FileRoutesByTo {
   '/outreach': typeof OutreachRoute
   '/people': typeof PeopleRoute
   '/pricing': typeof PricingRoute
+  '/signals': typeof SignalsRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/intake/agent-signal': typeof ApiIntakeAgentSignalRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -183,10 +199,12 @@ export interface FileRoutesById {
   '/outreach': typeof OutreachRoute
   '/people': typeof PeopleRoute
   '/pricing': typeof PricingRoute
+  '/signals': typeof SignalsRoute
   '/tasks': typeof TasksRoute
   '/tour': typeof TourRoute
   '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/intake/agent-signal': typeof ApiIntakeAgentSignalRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -206,10 +224,12 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/people'
     | '/pricing'
+    | '/signals'
     | '/tasks'
     | '/tour'
     | '/api/health'
     | '/api/auth/$'
+    | '/api/intake/agent-signal'
     | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -227,10 +247,12 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/people'
     | '/pricing'
+    | '/signals'
     | '/tasks'
     | '/tour'
     | '/api/health'
     | '/api/auth/$'
+    | '/api/intake/agent-signal'
     | '/api/stripe/webhook'
   id:
     | '__root__'
@@ -248,10 +270,12 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/people'
     | '/pricing'
+    | '/signals'
     | '/tasks'
     | '/tour'
     | '/api/health'
     | '/api/auth/$'
+    | '/api/intake/agent-signal'
     | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -270,10 +294,12 @@ export interface RootRouteChildren {
   OutreachRoute: typeof OutreachRoute
   PeopleRoute: typeof PeopleRoute
   PricingRoute: typeof PricingRoute
+  SignalsRoute: typeof SignalsRoute
   TasksRoute: typeof TasksRoute
   TourRoute: typeof TourRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiIntakeAgentSignalRoute: typeof ApiIntakeAgentSignalRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
@@ -377,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signals': {
+      id: '/signals'
+      path: '/signals'
+      fullPath: '/signals'
+      preLoaderRoute: typeof SignalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks': {
       id: '/tasks'
       path: '/tasks'
@@ -405,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/intake/agent-signal': {
+      id: '/api/intake/agent-signal'
+      path: '/api/intake/agent-signal'
+      fullPath: '/api/intake/agent-signal'
+      preLoaderRoute: typeof ApiIntakeAgentSignalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -430,10 +470,12 @@ const rootRouteChildren: RootRouteChildren = {
   OutreachRoute: OutreachRoute,
   PeopleRoute: PeopleRoute,
   PricingRoute: PricingRoute,
+  SignalsRoute: SignalsRoute,
   TasksRoute: TasksRoute,
   TourRoute: TourRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiIntakeAgentSignalRoute: ApiIntakeAgentSignalRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

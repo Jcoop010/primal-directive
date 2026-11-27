@@ -1,0 +1,29 @@
+# Primal Directive — Cursor Rules
+
+You are working in the **Primal Directive** codebase (Autonomous Band OS).
+Read `AGENTS.md` for full architecture and multi-agent operating rules.
+
+## Mandatory Multi-Agent State Protocol
+- **Before starting work:** You (and every agent: Antigravity, Cursor, OpenCode, Jules) **MUST** read `docs/STATE.md` to check current live status, active branches/PRs, recent handoffs, and open blockers.
+- **Before finishing work:** You **MUST** append a 3-bullet handoff entry (timestamp, agent name, summary, next step) to `docs/STATE.md` under `## Recent Agent Handoffs`.
+
+## Tech Stack
+- Framework: TanStack Start (`@tanstack/react-start`) + TanStack Router (`src/routes/`)
+- UI: React 19, Vite 8, Tailwind CSS v4, Radix UI, Lucide, Recharts, Zustand, Zod v4
+- Auth: Better Auth (`src/lib/auth/server.ts`) — Google OAuth, Microsoft Entra ID (`common` tenant, PKCE), Email/Password
+- Database: PostgreSQL (`pg` via `src/lib/db.ts`) in production; PGlite locally. Versioned SQL in `migrations/000N_*.sql`.
+- Deploy: Vercel via Nitro (`preset: "vercel"`).
+
+## Cursor Lane (Strict)
+- **Own:** Surgical refactors, TypeScript strictness/types, single-component UI polish, targeted bug fixes, and unit tests (`*.test.ts`).
+- **Defer to Antigravity:** Multi-file feature builds, SQL migrations, GitHub Actions/DevOps workflows, RLS/security audits, and E2E browser verification.
+- **External Research Bots:** Structured webhook intake only (validated JSON + source URLs). **No X/Twitter integrations.**
+
+## Non-Negotiable Code & Security Rules
+1. **Branch & PR only:** Never push to `main`. Work on a dedicated branch and verify with `npm run typecheck`, `npm run lint`, and `npm test`.
+2. **Zero secrets:** Never create `.env` files with real credentials, never commit secrets, and never log secret values. Only `VITE_*` variables are exposed to the browser.
+3. **Server-only isolation:** Any module importing `@tanstack/react-start/server`, `pg`, or secrets must be named `*.server.ts` (or dynamically imported inside server handlers) to avoid browser bundle leaks.
+4. **Auth & tenant isolation:** Every private `createServerFn` must use `.middleware([authMiddleware])` and scope all DB queries by `context.userId`. Never trust a client-supplied user ID.
+5. **RLS & SQL hygiene:** Never run DDL inside request handlers. All `public.*` tables must have RLS enabled (deny-by-default for PostgREST) and `REVOKE ALL FROM anon, authenticated`. Never write destructive migrations.
+6. **Outreach & billing safety:** Never bypass `reserve_booking_outreach()`, never auto-retry `failed`/`reserved`/`unknown` email sends, and never enable `BILLING_ENABLED` or `OUTREACH_SEND_ENABLED` flags without owner sign-off.
+7. **Protected files:** Do not modify or remove `vite.config.ts` port contracts (`8080`/`8081`), `server/middleware/grok-pwa.ts`, `public/__grok/`, or `startup.sh`. Start dev with `npm run dev`.
