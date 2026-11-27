@@ -3,6 +3,10 @@
 You are working in the **Primal Directive** codebase (Autonomous Band OS).
 Read `AGENTS.md` for full architecture and multi-agent operating rules.
 
+## Mandatory Multi-Agent State Protocol
+- **Before starting work:** You (and every agent: Antigravity, Cursor, OpenCode, Jules) **MUST** read `docs/STATE.md` to check current live status, active branches/PRs, recent handoffs, and open blockers.
+- **Before finishing work:** You **MUST** append a 3-bullet handoff entry (timestamp, agent name, summary, next step) to `docs/STATE.md` under `## Recent Agent Handoffs`.
+
 ## Tech Stack
 - Framework: TanStack Start (`@tanstack/react-start`) + TanStack Router (`src/routes/`)
 - UI: React 19, Vite 8, Tailwind CSS v4, Radix UI, Lucide, Recharts, Zustand, Zod v4

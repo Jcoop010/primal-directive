@@ -54,7 +54,16 @@
 
 ---
 
-## 4. Strict Multi-Agent Lane Separation
+## 4. Strict Multi-Agent Lane Separation & Mandatory State Protocol
+
+### Mandatory `docs/STATE.md` Handoff Rule
+Every agent (**Antigravity, Cursor, OpenCode, Jules**) **MUST**:
+1. **Read `docs/STATE.md` before starting any work** to check live production status, active branches/PRs, recent handoffs, and open blockers.
+2. **Append a 3-bullet handoff entry** (timestamp, agent name, summary, next step) to `docs/STATE.md` under `## Recent Agent Handoffs` before finishing its task.
+
+### External Bot Intake Webhook
+- External research/signal bots (e.g. Grok) may **only** submit structured JSON payloads to `POST /api/intake/agent-signal` authenticated via `Authorization: Bearer <AGENT_WEBHOOK_SECRET>`.
+- Payloads are validated with Zod, reject X/Twitter URLs, and persist into the RLS-locked `public.agent_signals` table (`migrations/0009_agent_signals.sql`).
 
 To prevent conflicting edits, schema drift, and unauthorized external side effects, all agents must respect these lanes:
 
