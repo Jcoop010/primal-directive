@@ -8,77 +8,89 @@ import {
 } from "./lead-scout-push.mjs";
 
 test("isAllowedLeadSourceUrl blocks x.com and twitter.com hosts", () => {
-  assert.equal(isAllowedLeadSourceUrl("https://hildrethcpa.com"), true);
-  assert.equal(isAllowedLeadSourceUrl("https://x.com/somebiz/status/1"), false);
-  assert.equal(isAllowedLeadSourceUrl("https://twitter.com/somebiz"), false);
-  assert.equal(isAllowedLeadSourceUrl("https://mobile.twitter.com/somebiz"), false);
+  assert.equal(isAllowedLeadSourceUrl("https://localnash.com"), true);
+  assert.equal(isAllowedLeadSourceUrl("https://x.com/somevenue/status/1"), false);
+  assert.equal(isAllowedLeadSourceUrl("https://twitter.com/somevenue"), false);
+  assert.equal(isAllowedLeadSourceUrl("https://mobile.twitter.com/somevenue"), false);
   assert.equal(isAllowedLeadSourceUrl("javascript:alert(1)"), false);
 });
 
-test("validateLeadSignal enforces contract and generates deterministic idempotencyKey", () => {
+test("validateLeadSignal enforces band/live-music contract and deterministic idempotencyKey", () => {
   const res = validateLeadSignal(
     {
-      title: "Hildreth & Associates CPA — Client intake & monthly close automation",
-      summary: "Small business CPA firm in Nashville/Brentwood handling bookkeeping and cash flow.",
-      sourceUrl: "https://hildrethcpa.com",
+      title: "The Local — Independent band showcase",
+      summary: "Nashville independent band room accepting EPKs and local draw history.",
+      sourceUrl: "https://localnash.com",
+      urgency: "high",
       payload: {
-        company: "Hildreth & Associates CPA",
-        segment: "accounting_firm",
-        painPoint: "Manual client document chasing and slow onboarding follow-up",
-        recommendedAngle: "Automated intake checklist and monthly close reminders",
-        urgency: "high",
+        venue: "The Local",
+        city: "Nashville, TN",
+        segment: "venue_booking",
+        billType: "Showcase / Co-bill",
+        recommendedAngle: "Pitch EPK + live video + weekend dates",
       },
     },
     "2026-11-27",
   );
   assert.equal(res.ok, true);
-  assert.equal(res.signal.idempotencyKey, "lead-scout-2026-11-27-hildreth-associates-cpa");
-  assert.equal(res.signal.sourceAgent, "lead-scout-bot");
-  assert.equal(res.signal.signalType, "lead_opportunity");
+  assert.equal(res.signal.idempotencyKey, "band-scout-2026-11-27-the-local-nashville-tn");
+  assert.equal(res.signal.sourceAgent, "band-scout-bot");
+  assert.equal(res.signal.signalType, "venue_lead");
 
   const badSegment = validateLeadSignal({
-    title: "Test",
-    summary: "Summary",
+    title: "Non-music B2B lead",
+    summary: "Should be rejected by band-only segment allowlist",
     sourceUrl: "https://example.com",
     payload: {
-      company: "Acme",
-      segment: "unknown_segment",
-      painPoint: "Slow",
-      recommendedAngle: "Fast",
-      urgency: "high",
+      venue: "Acme CPA",
+      city: "Nashville, TN",
+      segment: "accounting_firm",
+      billType: "N/A",
+      recommendedAngle: "N/A",
     },
   });
   assert.equal(badSegment.ok, false);
-  assert.equal(buildLeadIdempotencyKey("Callison CPA", "2026-11-27"), "lead-scout-2026-11-27-callison-cpa");
+  assert.equal(
+    buildLeadIdempotencyKey("Asheville Music Hall", "2026-11-27"),
+    "band-scout-2026-11-27-asheville-music-hall",
+  );
 });
 
-test("pushLeadSignals handles 201 insert, 200 deduplicated, and rejects Twitter links without calling fetch", async () => {
+test("pushLeadSignals handles 201 insert, 200 deduplicated, and blocks Twitter links without fetch", async () => {
   let calls = 0;
   const mockFetch = async () => {
     calls += 1;
     if (calls === 1) {
-      return new Response(JSON.stringify({ ok: true, id: "sig-1", status: "new" }), { status: 201 });
+      return new Response(
+        JSON.stringify({ ok: true, id: "sig-band-1", status: "new", fitScore: 92, priorityTier: "high" }),
+        { status: 201 },
+      );
     }
     return new Response(
-      JSON.stringify({ ok: true, deduplicated: true, idempotencyKey: "lead-scout-2026-11-27-acme" }),
+      JSON.stringify({
+        ok: true,
+        deduplicated: true,
+        idempotencyKey: "band-scout-2026-11-27-asheville-music-hall",
+      }),
       { status: 200 },
     );
   };
 
   const valid = {
-    idempotencyKey: "lead-scout-2026-11-27-acme",
-    title: "Acme HVAC — Missed-call recovery",
-    summary: "Local service team handling high call volume with manual quote follow-up.",
-    sourceUrl: "https://example.com/acme-hvac",
+    idempotencyKey: "band-scout-2026-11-27-asheville-music-hall",
+    title: "Asheville Music Hall — Direct tour support slot",
+    summary: "Mid-size independent room coordinating Southeast regional support bills.",
+    sourceUrl: "https://ashevillemusichall.com",
+    urgency: "high",
     payload: {
-      company: "Acme HVAC",
-      segment: "home_services",
-      painPoint: "Missed calls and unclosed estimate follow-up",
-      recommendedAngle: "Missed-call SMS recovery + automated estimate follow-up",
-      urgency: "high",
+      venue: "Asheville Music Hall",
+      city: "Asheville, NC",
+      segment: "tour_support",
+      billType: "Direct support",
+      recommendedAngle: "Pitch EPK + routing dates 8 weeks out",
     },
   };
-  const blocked = { ...valid, sourceUrl: "https://x.com/acmehvac" };
+  const blocked = { ...valid, sourceUrl: "https://x.com/ashevillemusichall" };
 
   const summary = await pushLeadSignals([valid, valid, blocked], {
     secret: "test-secret",

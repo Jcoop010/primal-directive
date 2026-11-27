@@ -3,19 +3,32 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
-import { handleAgentSignalRequest, verifyBearerToken } from "./agent-signal.server.ts";
+import {
+  computeSignalScore,
+  filterAndSortSignals,
+  normalizeSignalScoring,
+} from "./agent-signal-scoring.ts";
+import {
+  buildDedupeFingerprint,
+  handleAgentSignalRequest,
+  verifyBearerToken,
+} from "./agent-signal.server.ts";
+import { convertSignalToLeadInDb } from "./agent-signal-convert.server.ts";
 import type { Sql } from "./db.ts";
 
 async function createTestSql(): Promise<Sql> {
   const pg = new PGlite();
   await pg.waitReady;
-  const migration = readFileSync(join(process.cwd(), "migrations", "0009_agent_signals.sql"), "utf8");
-  const migration10 = readFileSync(
-    join(process.cwd(), "migrations", "0010_agent_signals_approved_status.sql"),
-    "utf8",
-  );
-  await pg.exec(migration);
-  await pg.exec(migration10);
+  for (const file of [
+    "0001_auth.sql",
+    "0002_app_state.sql",
+    "0009_agent_signals.sql",
+    "0010_agent_signals_approved_status.sql",
+    "0011_agent_signals_scoring.sql",
+    "0012_agent_signals_conversion.sql",
+  ]) {
+    await pg.exec(readFileSync(join(process.cwd(), "migrations", file), "utf8"));
+  }
   const sql = (async <T = Record<string, unknown>>(
     strings: TemplateStringsArray,
     ...values: unknown[]
@@ -26,9 +39,23 @@ async function createTestSql(): Promise<Sql> {
   }) as unknown as Sql;
   sql.query = async <T = Record<string, unknown>>(text: string, params: unknown[] = []) =>
     (await pg.query<T>(text, params)).rows;
-  sql.transaction = async () => {
-    throw new Error("Not needed in unit test");
-  };
+  sql.transaction = async <T>(work: (tx: Sql) => Promise<T>) =>
+    pg.transaction((tx) => {
+      const txSql = (async <R = Record<string, unknown>>(
+        strings: TemplateStringsArray,
+        ...values: unknown[]
+      ): Promise<R[]> => {
+        let text = strings[0];
+        for (let i = 0; i < values.length; i += 1) text += `$${i + 1}${strings[i + 1]}`;
+        return (await tx.query<R>(text, values)).rows;
+      }) as unknown as Sql;
+      txSql.query = async <R = Record<string, unknown>>(text: string, params: unknown[] = []) =>
+        (await tx.query<R>(text, params)).rows;
+      txSql.transaction = async () => {
+        throw new Error("Nested tx unsupported");
+      };
+      return work(txSql);
+    });
   return sql;
 }
 
@@ -39,6 +66,57 @@ test("verifyBearerToken enforces exact Bearer match", () => {
   assert.equal(verifyBearerToken("Basic super-secret-token", "super-secret-token"), false);
   assert.equal(verifyBearerToken(null, "super-secret-token"), false);
   assert.equal(verifyBearerToken("Bearer super-secret-token", ""), false);
+});
+
+test("deterministic signal scoring ranks high-leverage leads above smoke tests", () => {
+  const highLead = normalizeSignalScoring({
+    signalType: "venue_lead",
+    summary: "Official booking page lists open October support slots.",
+    sourceUrl: "https://www.thebasementnashville.com/booking",
+    urgency: "high",
+    recommendedAction: "Draft pitch with Nashville draw stats",
+    payload: { city: "Nashville, TN", capacity: 400, bookingEmail: "book@example.com" },
+  });
+  assert.ok(highLead.fitScore >= 85, `expected high score, got ${highLead.fitScore}`);
+  assert.equal(highLead.priorityTier, "high");
+
+  const lowSmoke = normalizeSignalScoring({
+    signalType: "smoke_test",
+    summary: "ping",
+  });
+  assert.ok(lowSmoke.fitScore < 45, `expected low score, got ${lowSmoke.fitScore}`);
+  assert.equal(lowSmoke.priorityTier, "low");
+
+  const urgentOverride = normalizeSignalScoring({
+    signalType: "market_intel",
+    urgency: "urgent",
+    fitScore: 60,
+  });
+  assert.equal(urgentOverride.fitScore, 60);
+  assert.equal(urgentOverride.priorityTier, "high");
+  assert.equal(computeSignalScore({ signalType: "venue_lead", fitScore: 140 }), 100);
+});
+
+test("filterAndSortSignals defaults to highest score and filters by status and priority", () => {
+  const items = [
+    { id: "a", status: "new", fitScore: 40, priorityTier: "low" as const, receivedAt: "2026-11-27T12:00:00Z" },
+    { id: "b", status: "new", fitScore: 92, priorityTier: "high" as const, receivedAt: "2026-11-26T12:00:00Z" },
+    { id: "c", status: "archived", fitScore: 88, priorityTier: "high" as const, receivedAt: "2026-11-27T14:00:00Z" },
+    { id: "d", status: "approved", fitScore: 70, priorityTier: "medium" as const, receivedAt: "2026-11-27T13:00:00Z" },
+  ];
+
+  assert.deepEqual(
+    filterAndSortSignals(items, { statusFilter: "all", priorityFilter: "all", sortMode: "score" }).map((i) => i.id),
+    ["b", "c", "d", "a"],
+  );
+  assert.deepEqual(
+    filterAndSortSignals(items, { statusFilter: "all", priorityFilter: "all", sortMode: "newest" }).map((i) => i.id),
+    ["c", "d", "a", "b"],
+  );
+  assert.deepEqual(
+    filterAndSortSignals(items, { statusFilter: "new", priorityFilter: "high", sortMode: "score" }).map((i) => i.id),
+    ["b"],
+  );
 });
 
 test("POST /api/intake/agent-signal rejects missing secret, bad token, and X/Twitter URLs", async () => {
@@ -80,7 +158,7 @@ test("POST /api/intake/agent-signal rejects missing secret, bad token, and X/Twi
   assert.equal(blockedUrl.status, 400);
 });
 
-test("POST /api/intake/agent-signal persists structured signal and deduplicates by idempotencyKey", async () => {
+test("POST /api/intake/agent-signal persists score/enrichment, deduplicates, and supports approve/archive", async () => {
   const sql = await createTestSql();
   const body = {
     sourceAgent: "grok",
@@ -88,6 +166,8 @@ test("POST /api/intake/agent-signal persists structured signal and deduplicates 
     title: "The Basement East — Fall booking window open",
     summary: "Official booking page lists October/November support slots.",
     sourceUrl: "https://www.thebasementnashville.com/booking",
+    urgency: "high" as const,
+    recommendedAction: "Send EPK + Nashville draw history to talent buyer",
     idempotencyKey: "grok-basement-east-2026-11-27",
     payload: { city: "Nashville, TN", capacity: 400 },
   };
@@ -106,9 +186,19 @@ test("POST /api/intake/agent-signal persists structured signal and deduplicates 
     sqlProvider: async () => sql,
   });
   assert.equal(first.status, 201);
-  const firstJson = (await first.json()) as { ok: boolean; id: string; status: string };
+  const firstJson = (await first.json()) as {
+    ok: boolean;
+    id: string;
+    status: string;
+    fitScore: number;
+    priorityTier: string;
+    urgency: string;
+  };
   assert.equal(firstJson.ok, true);
   assert.equal(firstJson.status, "new");
+  assert.ok(firstJson.fitScore >= 85);
+  assert.equal(firstJson.priorityTier, "high");
+  assert.equal(firstJson.urgency, "high");
 
   const duplicate = await handleAgentSignalRequest(makeReq(), {
     secret: "test-secret",
@@ -119,11 +209,22 @@ test("POST /api/intake/agent-signal persists structured signal and deduplicates 
   assert.equal(dupJson.ok, true);
   assert.equal(dupJson.deduplicated, true);
 
-  const rows = await sql.query<{ source_agent: string; title: string; payload: { capacity: number } }>(
-    "select source_agent, title, payload from public.agent_signals",
+  const rows = await sql.query<{
+    source_agent: string;
+    fit_score: number;
+    priority_tier: string;
+    recommended_action: string | null;
+    dedupe_fingerprint: string | null;
+    payload: { capacity: number };
+  }>(
+    "select source_agent, fit_score, priority_tier, recommended_action, dedupe_fingerprint, payload from public.agent_signals",
   );
   assert.equal(rows.length, 1);
   assert.equal(rows[0].source_agent, "grok");
+  assert.equal(rows[0].fit_score, firstJson.fitScore);
+  assert.equal(rows[0].priority_tier, "high");
+  assert.equal(rows[0].recommended_action, body.recommendedAction);
+  assert.equal(rows[0].dedupe_fingerprint, buildDedupeFingerprint(body));
   assert.equal(rows[0].payload.capacity, 400);
 
   const approved = await sql.query<{ status: string; reviewed_by: string | null }>(
@@ -132,4 +233,55 @@ test("POST /api/intake/agent-signal persists structured signal and deduplicates 
   );
   assert.equal(approved[0]?.status, "approved");
   assert.equal(approved[0]?.reviewed_by, "artist-1");
+
+  const archived = await sql.query<{ status: string }>(
+    "update public.agent_signals set status = 'archived', reviewed_by = 'artist-1', reviewed_at = now() where id = $1 returning status",
+    [firstJson.id],
+  );
+  assert.equal(archived[0]?.status, "archived");
+});
+
+test("convertSignalToLeadInDb creates one status='lead' gig in app_state and is idempotent on retry", async () => {
+  const sql = await createTestSql();
+  await sql.query(
+    `insert into "user" ("id", "name", "email", "emailVerified") values ('artist-1', 'Test Band', 'band@example.com', true)`,
+  );
+  const req = new Request("https://primal-directive-loose-ends-co.vercel.app/api/intake/agent-signal", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: "Bearer test-secret" },
+    body: JSON.stringify({
+      sourceAgent: "lead-scout-bot",
+      signalType: "venue_lead",
+      title: "The Local — Nashville band showcase slot",
+      summary: "Independent songwriter/band lounge accepting EPKs and local draw history.",
+      sourceUrl: "https://localnash.com",
+      idempotencyKey: "band-convert-test-1",
+      payload: { venue: "The Local", city: "Nashville, TN", guarantee: 650 },
+    }),
+  });
+  const created = await handleAgentSignalRequest(req, {
+    secret: "test-secret",
+    sqlProvider: async () => sql,
+  });
+  assert.equal(created.status, 201);
+  const { id: signalId } = (await created.json()) as { id: string };
+
+  const first = await convertSignalToLeadInDb(sql, { signalId, userId: "artist-1" });
+  assert.equal(first.alreadyConverted, false);
+  assert.equal(first.row.status, "imported");
+  assert.equal(first.gig?.status, "lead");
+  assert.equal(first.gig?.venue, "The Local");
+  assert.equal(first.gig?.city, "Nashville, TN");
+  assert.equal(first.gig?.fee, 650);
+
+  const second = await convertSignalToLeadInDb(sql, { signalId, userId: "artist-1" });
+  assert.equal(second.alreadyConverted, true);
+  assert.equal(second.gigId, first.gigId);
+
+  const [stateRow] = await sql.query<{ state: { gigs: Array<{ id: string; status: string }> } }>(
+    "select state from public.app_state where user_id = 'artist-1'",
+  );
+  assert.equal(stateRow.state.gigs.length, 1);
+  assert.equal(stateRow.state.gigs[0].id, first.gigId);
+  assert.equal(stateRow.state.gigs[0].status, "lead");
 });

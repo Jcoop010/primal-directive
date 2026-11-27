@@ -1,4 +1,4 @@
-name: Lead Scout Intake Push
+name: Band Scout Intake Push
 
 on:
   schedule:
@@ -10,11 +10,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: lead-scout-intake
+  group: band-scout-intake
   cancel-in-progress: true
 
 jobs:
-  push-signals:
+  push-band-signals:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Push verified lead signals to Primal Directive
+      - name: Push verified band & live-music signals to Primal Directive
         env:
           AGENT_WEBHOOK_SECRET: ${{ secrets.AGENT_WEBHOOK_SECRET }}
           AGENT_SIGNAL_ENDPOINT: ${{ vars.AGENT_SIGNAL_ENDPOINT || 'https://primal-directive-loose-ends-co.vercel.app/api/intake/agent-signal' }}

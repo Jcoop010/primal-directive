@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Qualified Loose Ends lead-signal pusher for POST /api/intake/agent-signal.
+ * Band & live-music opportunity scout pusher for POST /api/intake/agent-signal.
  * - Loads AGENT_WEBHOOK_SECRET from process.env or local gitignored .env.local (never printed).
  * - Strictly bans x.com / twitter.com URLs.
  * - Enforces deterministic idempotencyKey so retries deduplicate cleanly (HTTP 200).
@@ -19,12 +19,14 @@ const BLOCKED_HOSTS = new Set([
   "mobile.twitter.com",
 ]);
 const VALID_SEGMENTS = new Set([
-  "accounting_firm",
-  "home_services",
-  "local_service",
-  "b2b_ops",
+  "venue_booking",
+  "tour_support",
+  "festival_slot",
+  "promoter_bill",
+  "regional_routing",
+  "studio_merch",
 ]);
-const VALID_URGENCIES = new Set(["high", "medium", "low"]);
+const VALID_URGENCIES = new Set(["urgent", "high", "normal", "low"]);
 
 export function isAllowedLeadSourceUrl(value) {
   if (typeof value !== "string" || !value.trim()) return false;
@@ -49,9 +51,9 @@ export function slugify(value) {
     .slice(0, 64);
 }
 
-export function buildLeadIdempotencyKey(companyOrTitle, isoDay = new Date().toISOString().slice(0, 10)) {
-  const slug = slugify(companyOrTitle) || "signal";
-  return `lead-scout-${isoDay}-${slug}`;
+export function buildLeadIdempotencyKey(venueOrTitle, isoDay = new Date().toISOString().slice(0, 10)) {
+  const slug = slugify(venueOrTitle) || "signal";
+  return `band-scout-${isoDay}-${slug}`;
 }
 
 export function validateLeadSignal(raw, isoDay = new Date().toISOString().slice(0, 10)) {
@@ -70,27 +72,35 @@ export function validateLeadSignal(raw, isoDay = new Date().toISOString().slice(
   }
   if (!payload) return { ok: false, error: "Missing payload object" };
 
-  const company = typeof payload.company === "string" ? payload.company.trim() : "";
+  const venue = typeof payload.venue === "string" ? payload.venue.trim() : "";
+  const city = typeof payload.city === "string" ? payload.city.trim() : "";
   const segment = typeof payload.segment === "string" ? payload.segment.trim() : "";
-  const painPoint = typeof payload.painPoint === "string" ? payload.painPoint.trim() : "";
+  const billType = typeof payload.billType === "string" ? payload.billType.trim() : "";
   const recommendedAngle =
     typeof payload.recommendedAngle === "string" ? payload.recommendedAngle.trim() : "";
-  const urgency = typeof payload.urgency === "string" ? payload.urgency.trim() : "";
+  const rawUrgency =
+    typeof raw.urgency === "string" && raw.urgency.trim()
+      ? raw.urgency.trim()
+      : typeof payload.urgency === "string"
+        ? payload.urgency.trim()
+        : "normal";
+  const urgency = rawUrgency === "medium" ? "normal" : rawUrgency;
 
-  if (!company) return { ok: false, error: "Missing payload.company" };
+  if (!venue) return { ok: false, error: "Missing payload.venue" };
+  if (!city) return { ok: false, error: "Missing payload.city" };
   if (!VALID_SEGMENTS.has(segment)) {
     return { ok: false, error: `Invalid payload.segment: ${segment}` };
   }
-  if (!painPoint) return { ok: false, error: "Missing payload.painPoint" };
+  if (!billType) return { ok: false, error: "Missing payload.billType" };
   if (!recommendedAngle) return { ok: false, error: "Missing payload.recommendedAngle" };
   if (!VALID_URGENCIES.has(urgency)) {
-    return { ok: false, error: `Invalid payload.urgency: ${urgency}` };
+    return { ok: false, error: `Invalid urgency: ${urgency}` };
   }
 
   const idempotencyKey =
     typeof raw.idempotencyKey === "string" && raw.idempotencyKey.trim()
       ? raw.idempotencyKey.trim()
-      : buildLeadIdempotencyKey(company || title, isoDay);
+      : buildLeadIdempotencyKey(`${venue}-${city}`, isoDay);
 
   return {
     ok: true,
@@ -99,20 +109,26 @@ export function validateLeadSignal(raw, isoDay = new Date().toISOString().slice(
       sourceAgent:
         typeof raw.sourceAgent === "string" && raw.sourceAgent.trim()
           ? raw.sourceAgent.trim()
-          : "lead-scout-bot",
+          : "band-scout-bot",
       signalType:
         typeof raw.signalType === "string" && raw.signalType.trim()
           ? raw.signalType.trim()
-          : "lead_opportunity",
+          : "venue_lead",
       title,
       summary,
       sourceUrl,
+      urgency,
+      recommendedAction:
+        typeof raw.recommendedAction === "string" && raw.recommendedAction.trim()
+          ? raw.recommendedAction.trim()
+          : recommendedAngle,
       payload: {
-        company,
+        ...payload,
+        venue,
+        city,
         segment,
-        painPoint,
+        billType,
         recommendedAngle,
-        urgency,
       },
     },
   };
@@ -154,7 +170,7 @@ export async function pushLeadSignals(
       results.items.push({
         status: "dry_run",
         idempotencyKey: checked.signal.idempotencyKey,
-        company: checked.signal.payload.company,
+        venue: checked.signal.payload.venue,
       });
       continue;
     }
@@ -181,8 +197,10 @@ export async function pushLeadSignals(
         status: "inserted",
         httpStatus: 201,
         id: body.id,
+        fitScore: body.fitScore,
+        priorityTier: body.priorityTier,
         idempotencyKey: checked.signal.idempotencyKey,
-        company: checked.signal.payload.company,
+        venue: checked.signal.payload.venue,
       });
     } else if (response.status === 200 && body?.deduplicated) {
       results.deduplicated += 1;
@@ -190,7 +208,7 @@ export async function pushLeadSignals(
         status: "deduplicated",
         httpStatus: 200,
         idempotencyKey: checked.signal.idempotencyKey,
-        company: checked.signal.payload.company,
+        venue: checked.signal.payload.venue,
       });
     } else {
       results.failed += 1;
@@ -218,7 +236,7 @@ async function main(argv) {
 
   const candidates = JSON.parse(readFileSync(resolve(process.cwd(), inputPath), "utf8"));
   if (!Array.isArray(candidates)) {
-    throw new Error("Input JSON must be an array of lead signal objects.");
+    throw new Error("Input JSON must be an array of band signal objects.");
   }
 
   const secret = resolveWebhookSecret();

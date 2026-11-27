@@ -22,9 +22,14 @@ import { cn } from "@/lib/utils";
 
 const hasResearchableVenue = (gig: Gig) => Boolean(gig.city?.trim() && (gig.venue || gig.name)?.trim() && !/^(test|testing|demo|sample|untitled|unknown|tbd|n\/a)$/i.test((gig.venue || gig.name).trim()));
 
-export const Route = createFileRoute("/gigs")({ component: GigsPage });
+export const Route = createFileRoute("/gigs")({
+  validateSearch: (search: Record<string, unknown>): { gig?: string } =>
+    typeof search.gig === "string" && search.gig.trim() ? { gig: search.gig.trim() } : {},
+  component: GigsPage,
+});
 
 function GigsPage() {
+  const { gig: focusedGigId } = Route.useSearch();
   const gigs = useMusician((s) => s.gigs);
   const artistProfile = useMusician((s) => s.profile);
   const ownerId = useMusician((s) => s.workspaceOwnerId);
@@ -56,6 +61,15 @@ function GigsPage() {
   }, [ownerId]);
   const [view, setView] = useState<"board" | "list">("board");
   const [query, setQuery] = useState("");
+  const openedFocusedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusedGigId || openedFocusedRef.current === focusedGigId) return;
+    const match = gigs.find((g) => g.id === focusedGigId);
+    if (!match) return;
+    openedFocusedRef.current = focusedGigId;
+    setQuery(match.venue || match.name);
+    openGig(match.id);
+  }, [focusedGigId, gigs, openGig]);
   const [researchId, setResearchId] = useState<string | null>(null);
   const [researchResult, setResearchResult] = useState<{ id: string; answer: string; citations: string[]; source: string; leadUrl?: string; evidence?: { venueCapacity?: number; capacitySourceUrl?: string; bookingRoute?: string; bookingContactName?: string; bookingContactSourceUrl?: string } } | null>(null);
   const [researchError, setResearchError] = useState("");
