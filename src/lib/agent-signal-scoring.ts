@@ -302,11 +302,118 @@ export interface RoutingGapAssessment {
 }
 
 const REGION_ALIASES: Record<string, readonly string[]> = {
-  tn: ["tn", "tennessee", "nashville", "knoxville", "chattanooga", "memphis", "i-40", "i-75", "southeast"],
-  nc: ["nc", "north carolina", "asheville", "raleigh", "charlotte", "sanford", "carolinas", "i-40", "southeast"],
+  tn: ["tn", "tennessee", "nashville", "knoxville", "chattanooga", "memphis", "i-40", "i-75", "i-65", "southeast"],
+  nc: ["nc", "north carolina", "asheville", "raleigh", "carrboro", "chapel hill", "charlotte", "sanford", "carolinas", "piedmont", "i-40", "i-85", "southeast"],
   ga: ["ga", "georgia", "atlanta", "athens", "savannah", "i-75", "southeast"],
   sc: ["sc", "south carolina", "charleston", "greenville", "carolinas", "southeast"],
+  ky: ["ky", "kentucky", "louisville", "lexington", "i-65", "i-71", "ohio river", "midwest"],
+  in: ["in", "indiana", "indianapolis", "indy", "i-65", "i-70", "midwest"],
+  il: ["il", "illinois", "chicago", "great lakes", "midwest"],
+  oh: ["oh", "ohio", "cincinnati", "columbus", "cleveland", "i-71", "ohio river", "midwest"],
+  wi: ["wi", "wisconsin", "appleton", "milwaukee", "madison", "upper midwest", "midwest"],
 };
+
+export interface TouringCorridorPreset {
+  id: string;
+  label: string;
+  region: "Southeast" | "Midwest";
+  prevCity: string;
+  prevDate: string;
+  nextCity: string;
+  nextDate: string;
+}
+
+export const TOURING_CORRIDOR_PRESETS: readonly TouringCorridorPreset[] = [
+  {
+    id: "se-i40-nash-avl",
+    label: "I-40 · Nashville → Asheville",
+    region: "Southeast",
+    prevCity: "Nashville, TN",
+    prevDate: "2027-04-02",
+    nextCity: "Asheville, NC",
+    nextDate: "2027-04-05",
+  },
+  {
+    id: "se-i75-nash-atl",
+    label: "I-75 · Nashville → Atlanta",
+    region: "Southeast",
+    prevCity: "Nashville, TN",
+    prevDate: "2027-04-16",
+    nextCity: "Atlanta, GA",
+    nextDate: "2027-04-19",
+  },
+  {
+    id: "mw-i65-nash-chi",
+    label: "I-65 · Nashville → Chicago",
+    region: "Midwest",
+    prevCity: "Nashville, TN",
+    prevDate: "2027-05-07",
+    nextCity: "Chicago, IL",
+    nextDate: "2027-05-11",
+  },
+  {
+    id: "mw-loop-lou-app",
+    label: "Midwest · Louisville → Appleton",
+    region: "Midwest",
+    prevCity: "Louisville, KY",
+    prevDate: "2027-08-05",
+    nextCity: "Appleton, WI",
+    nextDate: "2027-08-09",
+  },
+] as const;
+
+export interface SignalsFilterState<TStatus extends string = string> {
+  statusFilter: "all" | TStatus;
+  priorityFilter: "all" | SignalPriorityTier;
+  sortMode: SignalSortMode;
+  prevCity: string;
+  prevDate: string;
+  nextCity: string;
+  nextDate: string;
+  activePresetId: string | null;
+}
+
+export function createDefaultSignalsFilterState<TStatus extends string = string>(): SignalsFilterState<TStatus> {
+  return {
+    statusFilter: "all",
+    priorityFilter: "all",
+    sortMode: "score",
+    prevCity: "",
+    prevDate: "",
+    nextCity: "",
+    nextDate: "",
+    activePresetId: null,
+  };
+}
+
+export function applyCorridorPreset<TStatus extends string = string>(
+  preset: TouringCorridorPreset,
+): SignalsFilterState<TStatus> {
+  return {
+    statusFilter: "all",
+    priorityFilter: "all",
+    sortMode: "gap",
+    prevCity: preset.prevCity,
+    prevDate: preset.prevDate,
+    nextCity: preset.nextCity,
+    nextDate: preset.nextDate,
+    activePresetId: preset.id,
+  };
+}
+
+export function clearAnchorsFromFilterState<TStatus extends string = string>(
+  state: SignalsFilterState<TStatus>,
+): SignalsFilterState<TStatus> {
+  return {
+    ...state,
+    prevCity: "",
+    prevDate: "",
+    nextCity: "",
+    nextDate: "",
+    activePresetId: null,
+    sortMode: state.sortMode === "gap" ? "score" : state.sortMode,
+  };
+}
 
 function tokenizeCity(value?: string): string[] {
   if (!value) return [];
