@@ -26,6 +26,11 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 13:02 EST — Antigravity
+- **Live Status & CI Fix:** Confirmed `GET https://primal-directive-loose-ends-co.vercel.app/api/health` is still `HTTP 503 {"status":"unavailable"}` and GitHub check `Supabase Preview` confirms `rgivgiwfmoehrcmwakwk` is the connected Supabase project; fixed PR #274 CI failure in `scripts/migration-plan.test.mjs` by registering `0009_agent_signals.sql`.
+- **Migrations & Secret Prep:** Generated a 32-byte hex `AGENT_WEBHOOK_SECRET` into gitignored `.env.local` (never committed); `migrations/0009_agent_signals.sql` is ready, while `0010_agent_signals_approved_status.sql` and Cursor's patch (`0001-feat-add-authenticated-Signals-Inbox-for-agent_signa.patch`) were not found on disk or remote branches.
+- **Next Step (Manual Blockers):** Owner must (1) drop Cursor's `.patch` into repo root or `~/Downloads` (or push its branch), (2) unpause Supabase `rgivgiwfmoehrcmwakwk` in the owning Supabase Dashboard, and (3) copy `AGENT_WEBHOOK_SECRET` from local `.env.local` into Vercel Production & Preview env vars (or install/login `vercel` CLI) before merging PR #274 and running the live deduplication smoke test.
+
 ### 2026-11-27 12:41 EST — Antigravity
 - **Summary:** Completed 4-phase Primal Directive audit & stabilization on `chore/primal-directive-revival` (Draft PR #274): restored Supabase `phygbwjhozjjipxosszj`, added `.github/workflows/supabase-keepalive.yml`, hardened `.github/workflows/ci.yml`, replaced `AGENTS.md` + created `.cursorrules`, and published `docs/PRIMAL_DIRECTIVE_AUDIT.md`.
 - **Added Coordination & Intake:** Created `docs/STATE.md`, enforced mandatory state-read/handoff rules in `AGENTS.md` and `.cursorrules`, and implemented `migrations/0009_agent_signals.sql` + `POST /api/intake/agent-signal` (Bearer `AGENT_WEBHOOK_SECRET`, timing-safe auth, Zod validation, no X/Twitter URLs, RLS-locked `public.agent_signals`).
