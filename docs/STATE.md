@@ -8,7 +8,7 @@
 
 | Component | Status | Notes |
 | --- | --- | --- |
-| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0012` landed cleanly on `main`. |
+| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`d98f997`). |
 | **Production Database (Neon `neon-cerulean-candle`)** | **ACTIVE_HEALTHY (IPv4, No Auto-Pause)** | Replaced suspended Vercel Supabase stores (`supabase-carmine-lever`, `supabase-camel-flame`). `DATABASE_URL` auto-injected in Production & Preview. |
 | **Auth & Sign-In** | **PASS (Google + Email/Pass Live)** | `scripts/oauth-state-smoke.mjs` passed (`HTTP 200`, host-only `__Host-` state cookie). Microsoft OAuth ready once Entra creds are verified. |
 | **Band Discovery, Scoring & Conversion (`/signals` → `/gigs`)** | **LIVE & CLOSED-LOOP** | `POST /api/intake/agent-signal` (Bearer `AGENT_WEBHOOK_SECRET`) scores band/live-music signals (`0011`), surfaces them on `/signals`, and converts them idempotently into `status: "lead"` gigs (`0012`) linked to `/gigs?gig=<id>`. |
@@ -23,6 +23,11 @@
 ---
 
 ## Recent Agent Handoffs
+
+### 2026-11-27 16:38 EST — Antigravity
+- **PR #280 Merged & Live (`main@d98f997`, `dpl_AV6xp6GuanJHYB9eerEAQXffe9Bx`):** Squash-merged `feat/signals-gigdrawer-ui-polish` into `main` (`d98f9977d21e39ddfed3f5ede994188a004f242f`) after green CI (`validate`, `verify`, preview deploy) and promoted `primal-directive-3u74z4nd0-loose-ends-co.vercel.app` to `https://primal-directive-loose-ends-co.vercel.app` (`[migrate] up to date.` for `0001`–`0014` on Neon Postgres `neon-cerulean-candle`).
+- **Live Production Verification PASSED (Zero Extra Test Rows):** `GET /api/health` → `200` (`commit: d98f9977d21e39ddfed3f5ede994188a004f242f`), `scripts/oauth-state-smoke.mjs` (`AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app`) → `200`, `GET /signals` → `200` (5952 bytes, clean SSR HTML), and `GET /gigs` → `200` (5653 bytes, clean SSR HTML).
+- **Next Step:** Open `/signals` in a signed-in browser to review the polished 3-second scannable card hierarchy, test Prev/Next anchor gap sorting + mobile responsiveness, and open a converted lead in `/gigs?gig=<id>` to verify the sticky Net Yield header and `Copy draft` button.
 
 ### 2026-11-27 16:24 EST — Antigravity
 - **`/signals` UI/UX Polish (`feat/signals-gigdrawer-ui-polish`):** Rebuilt `src/routes/signals.tsx` card hierarchy for 3-second scanning (Title/Source/Corridor + `tabular-nums` Score/Gap badges top row, routing/bill metadata chips + single-line fit/action summary middle row, collapsible Details/source/payload drawer, distinct Converted/Archived visual states, per-action loading labels, and one-click empty-state filter/anchor reset).

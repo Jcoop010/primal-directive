@@ -32,7 +32,7 @@ export function isAllowedLeadSourceUrl(value) {
   if (typeof value !== "string" || !value.trim()) return false;
   try {
     const parsed = new URL(value.trim());
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    if (parsed.protocol !== "https:") return false;
     const host = parsed.hostname.toLowerCase();
     if (BLOCKED_HOSTS.has(host) || host.endsWith(".x.com") || host.endsWith(".twitter.com")) {
       return false;
