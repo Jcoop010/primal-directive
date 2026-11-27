@@ -1,0 +1,64 @@
+name: Supabase Keepalive
+
+on:
+  schedule:
+    # Run every 4 days at 06:00 UTC to prevent Supabase free-tier inactivity pausing.
+    - cron: "0 6 */4 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping production read-only health endpoint
+        env:
+          HEALTH_URL: ${{ vars.SUPABASE_HEALTH_URL || 'https://primal-directive-loose-ends-co.vercel.app/api/health' }}
+        run: |
+          set -euo pipefail
+          echo "Pinging read-only health endpoint: ${HEALTH_URL}"
+          HTTP_STATUS=$(curl --silent --show-error --max-time 30 \
+            --output /tmp/health-response.json \
+            --write-out "%{http_code}" \
+            "${HEALTH_URL}")
+          echo "HTTP status: ${HTTP_STATUS}"
+          cat /tmp/health-response.json
+          echo ""
+          if [ "${HTTP_STATUS}" -ne 200 ]; then
+            echo "::error::Health endpoint returned HTTP ${HTTP_STATUS}. Check whether the Supabase database is paused or unreachable."
+            exit 1
+          fi
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const payload = JSON.parse(fs.readFileSync("/tmp/health-response.json", "utf8"));
+            if (payload?.status !== "ok") {
+              console.error("Unexpected health status:", payload?.status ?? "missing");
+              process.exit(1);
+            }
+            console.log("Database keepalive verified (status=ok).");
+          '
+
+      - name: Ping optional preview health endpoint
+        if: ${{ vars.SUPABASE_PREVIEW_HEALTH_URL != '' }}
+        env:
+          PREVIEW_HEALTH_URL: ${{ vars.SUPABASE_PREVIEW_HEALTH_URL }}
+        run: |
+          set -euo pipefail
+          echo "Pinging preview read-only health endpoint: ${PREVIEW_HEALTH_URL}"
+          HTTP_STATUS=$(curl --silent --show-error --max-time 30 \
+            --output /tmp/preview-health-response.json \
+            --write-out "%{http_code}" \
+            "${PREVIEW_HEALTH_URL}")
+          echo "Preview HTTP status: ${HTTP_STATUS}"
+          cat /tmp/preview-health-response.json
+          echo ""
+          if [ "${HTTP_STATUS}" -ne 200 ]; then
+            echo "::warning::Preview health endpoint returned HTTP ${HTTP_STATUS}."
+          fi
