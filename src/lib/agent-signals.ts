@@ -1,5 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import {
+  normalizeSignalScoring,
+  type SignalPriorityTier,
+  type SignalUrgency,
+} from "./agent-signal-scoring";
 import { authMiddleware } from "./auth/middleware";
 import { getSql } from "./db";
 
@@ -23,6 +28,11 @@ export interface AgentSignalRow {
   sourceUrl: string | null;
   payloadJson: string;
   status: AgentSignalStatus;
+  fitScore: number;
+  priorityTier: SignalPriorityTier;
+  urgency: SignalUrgency;
+  recommendedAction: string | null;
+  dedupeFingerprint: string | null;
   idempotencyKey: string | null;
   receivedAt: string;
   reviewedBy: string | null;
@@ -43,6 +53,11 @@ interface RawSignalRow {
   source_url: string | null;
   payload: Record<string, unknown> | null;
   status: AgentSignalStatus;
+  fit_score: number | null;
+  priority_tier: SignalPriorityTier | null;
+  urgency: SignalUrgency | null;
+  recommended_action: string | null;
+  dedupe_fingerprint: string | null;
   idempotency_key: string | null;
   received_at: string | Date;
   reviewed_by: string | null;
@@ -53,6 +68,17 @@ function mapSignalRow(row: RawSignalRow): AgentSignalRow {
   const payloadObj = row.payload && typeof row.payload === "object" ? row.payload : {};
   const payloadJson =
     Object.keys(payloadObj).length > 0 ? JSON.stringify(payloadObj, null, 2) : "";
+  const scoring = normalizeSignalScoring({
+    signalType: row.signal_type,
+    summary: row.summary,
+    sourceUrl: row.source_url,
+    payload: payloadObj,
+    fitScore: row.fit_score,
+    priorityTier: row.priority_tier,
+    urgency: row.urgency,
+    recommendedAction: row.recommended_action,
+  });
+
   return {
     id: row.id,
     sourceAgent: row.source_agent,
@@ -62,6 +88,11 @@ function mapSignalRow(row: RawSignalRow): AgentSignalRow {
     sourceUrl: row.source_url,
     payloadJson,
     status: row.status,
+    fitScore: scoring.fitScore,
+    priorityTier: scoring.priorityTier,
+    urgency: scoring.urgency,
+    recommendedAction: scoring.recommendedAction,
+    dedupeFingerprint: row.dedupe_fingerprint,
     idempotencyKey: row.idempotency_key,
     receivedAt:
       row.received_at instanceof Date ? row.received_at.toISOString() : String(row.received_at),
@@ -81,9 +112,10 @@ export const listAgentSignals = createServerFn({ method: "GET" })
     const sql = await getSql();
     const rows = await sql.query<RawSignalRow>(
       `select id, source_agent, signal_type, title, summary, source_url, payload,
-              status, idempotency_key, received_at, reviewed_by, reviewed_at
+              status, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint,
+              idempotency_key, received_at, reviewed_by, reviewed_at
        from public.agent_signals
-       order by received_at desc
+       order by fit_score desc, received_at desc
        limit 100`,
     );
     return { signals: rows.map(mapSignalRow) };
@@ -99,7 +131,8 @@ export const updateAgentSignalStatus = createServerFn({ method: "POST" })
        set status = $2, reviewed_by = $3, reviewed_at = now()
        where id = $1
        returning id, source_agent, signal_type, title, summary, source_url, payload,
-                 status, idempotency_key, received_at, reviewed_by, reviewed_at`,
+                 status, fit_score, priority_tier, urgency, recommended_action, dedupe_fingerprint,
+                 idempotency_key, received_at, reviewed_by, reviewed_at`,
       [data.id, data.status, context.userId],
     );
     if (!rows[0]) {

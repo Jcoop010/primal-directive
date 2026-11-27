@@ -8,12 +8,10 @@
 
 | Component | Status | Notes |
 | --- | --- | --- |
-| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **DEGRADED (HTTP 503 on `/api/health`)** | App code deployed cleanly at `main@5b372ac` (Oct 23, 2026), but `/api/health` returned `HTTP 503 {"status":"unavailable"}` on 2026-11-27 because the wired production Postgres DB is paused/unreachable. |
-| **Supabase (`rgivgiwfmoehrcmwakwk`)** | **UNKNOWN / EXTERNAL ORG** | Not accessible from connected Supabase MCP org (`bzdreuvqbamxjljogeyv`). Owner must unpause in Supabase Dashboard and confirm Vercel `DATABASE_URL` / `STORAGE_URL`. |
-| **Supabase (`phygbwjhozjjipxosszj` — "Primal Directive")** | **ACTIVE_HEALTHY (0 rows)** | Restored from `INACTIVE` on 2026-11-27. Holds legacy Sept 2026 schema + 3 old Stripe Edge Functions; missing migrations `0004`–`0009`. |
-| **Auth & Mailboxes** | **Google Live / Microsoft Unconfigured** | Google OAuth & Email/Password active. Microsoft Entra ID implemented but disabled awaiting `MICROSOFT_CLIENT_ID` / `MICROSOFT_CLIENT_SECRET`. |
-| **Billing & Outbound Outreach** | **Intentionally Disabled** | `BILLING_ENABLED`, `STRIPE_LIVE_VERIFIED`, `OUTREACH_SEND_ENABLED`, and `OUTREACH_RELEASE_VERIFIED` remain off pending sandbox/owner verification. |
-| **Agent Signal Intake** (`/api/intake/agent-signal`) | **Implemented on Branch (Pending Deploy & Secret)** | Protected by `Authorization: Bearer <AGENT_WEBHOOK_SECRET>`; writes to `public.agent_signals` (`migrations/0009_agent_signals.sql`). |
+| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Deployed & promoted `main@8629e7e` (`dpl_6pWeVE23ggCGZz3cug58Lzw7mmG7`, PR #274 merged). All migrations `0001`–`0010` applied cleanly. |
+| **Production Database (Neon `neon-cerulean-candle`)** | **ACTIVE_HEALTHY (IPv4, No Auto-Pause)** | Disconnected suspended Supabase Marketplace stores (`supabase-carmine-lever`, `supabase-camel-flame`) and connected Neon Postgres `neon-cerulean-candle` (`DATABASE_URL` auto-injected in Production & Preview). |
+| **Auth & Sign-In** | **PASS (Google + Email/Pass Live)** | `scripts/oauth-state-smoke.mjs` passed (`HTTP 200`, host-only `__Host-` state cookie). Microsoft OAuth ready once Entra creds are verified. |
+| **Agent Signal Intake & `/signals` Inbox** | **LIVE & VERIFIED** | `AGENT_WEBHOOK_SECRET` provisioned in Vercel Production & Preview. `POST /api/intake/agent-signal` passed live insert (`201`) + deduplication (`200`, `smoke-test-2026-11-27`). Authenticated `/signals` Inbox live. |
 
 ---
 
@@ -25,6 +23,16 @@
 ---
 
 ## Recent Agent Handoffs
+
+### 2026-11-27 14:25 EST — Cursor
+- **Scoring & Migration 0011:** Added `migrations/0011_agent_signals_scoring.sql` (`fit_score`, `priority_tier`, `urgency`, `recommended_action`, `dedupe_fingerprint` + composite/partial indexes, registered in `scripts/migration-plan.test.mjs`) and pure deterministic scoring module `src/lib/agent-signal-scoring.ts` wired into both `POST /api/intake/agent-signal` and server-gated `src/lib/agent-signals.ts` reads.
+- **`/signals` Triage Command Center:** Upgraded `src/routes/signals.tsx` with deep navy (`#0A1628`) / burnt orange (`#E25822` / `#D35400`) visual polish, status + priority filters, Highest Score (default) vs Newest sort, prominent score/urgency badges, recommended-action callouts, and single-click optimistic Approve/Archive actions with error rollback.
+- **Verification & Next Step:** Verified `agent-signal.test.ts` (5/5), `migration-plan.test.mjs` (7/7), `brand-check.test.mjs` (29/29), `typecheck`, `lint`, and `vite build` on branch `feat/signals-scoring-triage`. Ready for owner review and PR merge into `main`.
+
+### 2026-11-27 14:10 EST — Antigravity
+- **Production DB & Deploy Live:** Disconnected suspended Vercel Supabase stores (`supabase-carmine-lever`, `supabase-camel-flame`), connected Neon Postgres `neon-cerulean-candle` (`Production` + `Preview`), merged PR #274 into `main` (`8629e7e`), and promoted `dpl_6pWeVE23ggCGZz3cug58Lzw7mmG7` to `primal-directive-loose-ends-co.vercel.app` (all migrations `0001`–`0010` applied).
+- **All 3 Live Smoke Tests PASSED:** `GET /api/health` → `200 {"status":"ok","commit":"8629e7ef5172fede086f609779726c7b781ec248"}`; `scripts/oauth-state-smoke.mjs` → `200` (Google OAuth initiation verified); `POST /api/intake/agent-signal` (`smoke-test-2026-11-27`) → `201` insert + `200` deduplicated.
+- **Next Step:** Copy `AGENT_WEBHOOK_SECRET` from local gitignored `.env.local` into your Grok bot runner and sign into `https://primal-directive-loose-ends-co.vercel.app/signals` to verify the smoke-test signal in the UI.
 
 ### 2026-11-27 13:57 EST — Antigravity
 - **Root Cause Confirmed via Live Vercel Logs & Integrations:** Logged in as `jcoop010` and linked `loose-ends-co/primal-directive`. Live production logs show `(ENOTFOUND) tenant/user postgres.kxtcfvsitqmdznopaufh not found` on `/api/auth/sign-in/social` and `/api/auth/sign-in/email`. `vercel integration list --all` confirmed both Vercel Marketplace Supabase stores attached to `primal-directive` (`supabase-carmine-lever` = `kxtcfvsitqmdznopaufh` and `supabase-camel-flame` = `vdactpndbcwqvsfbzjrk`) are **Suspended**.
