@@ -26,6 +26,11 @@
 
 ## Recent Agent Handoffs
 
+### 2026-11-27 13:42 EST — Antigravity
+- **Auth Root Cause Diagnosed:** Live `GET /api/health` is still `HTTP 503 {"status":"unavailable"}` (Supabase `rgivgiwfmoehrcmwakwk` paused), causing `POST /api/auth/sign-in/social` to return **`HTTP 500`** (Better Auth cannot write OAuth state to `public.verification` or read/write `"user"`/`session`). Zero auth regressions were introduced by PR #274 (`git diff main...HEAD -- src/lib/auth src/routes/api.auth.$.ts` was empty), and redirect/cookie config (`__Host-primal-directive.oauth_state`, `Secure; HttpOnly; SameSite=Lax; Path=/`, dynamic `VERCEL_PROJECT_PRODUCTION_URL` + `primal-directive-loose-ends-co.vercel.app`) is clean.
+- **Code Fix Applied:** Patched `src/lib/auth/verify.server.ts` so `databaseConfigured` uses `dbSource === "postgres"` instead of checking only `DATABASE_URL`, ensuring fail-closed auth parity when Vercel supplies `STORAGE_URL` or `POSTGRES_*` aliases. Verified `typecheck`, `lint`, `vite build`, and auth unit tests.
+- **Next Step:** Unpause Supabase `rgivgiwfmoehrcmwakwk` in the Supabase Dashboard (immediately restores Google & Email/Password sign-in), verify Google/Microsoft OAuth callback URLs, and add `MICROSOFT_CLIENT_ID` / `MICROSOFT_CLIENT_SECRET` in Vercel if Microsoft sign-in is desired.
+
 ### 2026-11-27 13:12 EST — Antigravity
 - **Signals Inbox & Migration 0010 Built:** Since Cursor's `.patch` was not on disk, implemented the authenticated `/signals` Inbox (`src/routes/signals.tsx`, `src/lib/agent-signals.ts`, sidebar link in `src/components/app-shell.tsx`) and `migrations/0010_agent_signals_approved_status.sql` (`approved` status + `reviewed_by`/`reviewed_at` columns), registered `0010` in `scripts/migration-plan.test.mjs`, and verified `typecheck`, `lint`, `vite build`, and unit tests.
 - **Connection Verification:** Confirmed `.env.local` (containing generated 32-byte hex `AGENT_WEBHOOK_SECRET`) and `.agents/mcp_config.json` are gitignored, and installed `vercel` CLI globally. However, `vercel whoami` is still logged out and `supabase_mcp` still lacks permission on `rgivgiwfmoehrcmwakwk` (needs `.agents/mcp_config.json` with PAT + Antigravity restart).
