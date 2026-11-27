@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Archive,
+  ArrowRight,
   ArrowUpDown,
   Check,
   ExternalLink,
   Flame,
+  Music2,
   RefreshCw,
   Sparkles,
   X,
@@ -19,11 +21,13 @@ import {
   type SignalSortMode,
 } from "@/lib/agent-signal-scoring";
 import {
+  convertAgentSignalToLead,
   listAgentSignals,
   updateAgentSignalStatus,
   type AgentSignalRow,
   type AgentSignalStatus,
 } from "@/lib/agent-signals";
+import { useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/signals")({ component: SignalsInboxPage });
@@ -120,6 +124,29 @@ function SignalsInboxPage() {
     } catch (error) {
       setSignals(previous);
       toast.error(error instanceof Error ? error.message : "Could not update signal.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function convertToLead(id: string) {
+    setBusyId(id);
+    try {
+      const res = await convertAgentSignalToLead({ data: { id } });
+      setSignals((prev) => prev.map((item) => (item.id === res.signal.id ? res.signal : item)));
+      if (res.gig) {
+        const existing = useMusician.getState().gigs;
+        if (!existing.some((g) => g.id === res.gig!.id)) {
+          useMusician.setState({ gigs: [res.gig, ...existing] });
+        }
+      }
+      toast.success(
+        res.alreadyConverted
+          ? "Signal was already converted to a gig lead."
+          : "Converted signal into a booking lead.",
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not convert signal.");
     } finally {
       setBusyId(null);
     }
@@ -346,6 +373,25 @@ function SignalsInboxPage() {
                 ) : null}
 
                 <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/70 pt-3">
+                  {signal.convertedGigId ? (
+                    <Link
+                      to="/gigs"
+                      search={{ gig: signal.convertedGigId }}
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-live/50 bg-live/15 px-3.5 text-xs font-bold text-live hover:bg-live/25"
+                    >
+                      View lead <ArrowRight className="size-3.5" />
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void convertToLead(signal.id)}
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#E25822]/60 bg-[#0A1628] px-3.5 text-xs font-bold text-[#ffb088] hover:border-[#E25822] hover:bg-[#E25822]/15 disabled:opacity-40"
+                    >
+                      <Music2 className="size-3.5 text-[#E25822]" />
+                      {busy ? "Converting…" : "Convert to Lead"}
+                    </button>
+                  )}
                   <button
                     type="button"
                     disabled={busy || signal.status === "approved"}

@@ -13,15 +13,19 @@ import {
   handleAgentSignalRequest,
   verifyBearerToken,
 } from "./agent-signal.server.ts";
+import { convertSignalToLeadInDb } from "./agent-signal-convert.server.ts";
 import type { Sql } from "./db.ts";
 
 async function createTestSql(): Promise<Sql> {
   const pg = new PGlite();
   await pg.waitReady;
   for (const file of [
+    "0001_auth.sql",
+    "0002_app_state.sql",
     "0009_agent_signals.sql",
     "0010_agent_signals_approved_status.sql",
     "0011_agent_signals_scoring.sql",
+    "0012_agent_signals_conversion.sql",
   ]) {
     await pg.exec(readFileSync(join(process.cwd(), "migrations", file), "utf8"));
   }
@@ -35,9 +39,23 @@ async function createTestSql(): Promise<Sql> {
   }) as unknown as Sql;
   sql.query = async <T = Record<string, unknown>>(text: string, params: unknown[] = []) =>
     (await pg.query<T>(text, params)).rows;
-  sql.transaction = async () => {
-    throw new Error("Not needed in unit test");
-  };
+  sql.transaction = async <T>(work: (tx: Sql) => Promise<T>) =>
+    pg.transaction((tx) => {
+      const txSql = (async <R = Record<string, unknown>>(
+        strings: TemplateStringsArray,
+        ...values: unknown[]
+      ): Promise<R[]> => {
+        let text = strings[0];
+        for (let i = 0; i < values.length; i += 1) text += `$${i + 1}${strings[i + 1]}`;
+        return (await tx.query<R>(text, values)).rows;
+      }) as unknown as Sql;
+      txSql.query = async <R = Record<string, unknown>>(text: string, params: unknown[] = []) =>
+        (await tx.query<R>(text, params)).rows;
+      txSql.transaction = async () => {
+        throw new Error("Nested tx unsupported");
+      };
+      return work(txSql);
+    });
   return sql;
 }
 
@@ -221,4 +239,49 @@ test("POST /api/intake/agent-signal persists score/enrichment, deduplicates, and
     [firstJson.id],
   );
   assert.equal(archived[0]?.status, "archived");
+});
+
+test("convertSignalToLeadInDb creates one status='lead' gig in app_state and is idempotent on retry", async () => {
+  const sql = await createTestSql();
+  await sql.query(
+    `insert into "user" ("id", "name", "email", "emailVerified") values ('artist-1', 'Test Band', 'band@example.com', true)`,
+  );
+  const req = new Request("https://primal-directive-loose-ends-co.vercel.app/api/intake/agent-signal", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: "Bearer test-secret" },
+    body: JSON.stringify({
+      sourceAgent: "lead-scout-bot",
+      signalType: "venue_lead",
+      title: "The Local — Nashville band showcase slot",
+      summary: "Independent songwriter/band lounge accepting EPKs and local draw history.",
+      sourceUrl: "https://localnash.com",
+      idempotencyKey: "band-convert-test-1",
+      payload: { venue: "The Local", city: "Nashville, TN", guarantee: 650 },
+    }),
+  });
+  const created = await handleAgentSignalRequest(req, {
+    secret: "test-secret",
+    sqlProvider: async () => sql,
+  });
+  assert.equal(created.status, 201);
+  const { id: signalId } = (await created.json()) as { id: string };
+
+  const first = await convertSignalToLeadInDb(sql, { signalId, userId: "artist-1" });
+  assert.equal(first.alreadyConverted, false);
+  assert.equal(first.row.status, "imported");
+  assert.equal(first.gig?.status, "lead");
+  assert.equal(first.gig?.venue, "The Local");
+  assert.equal(first.gig?.city, "Nashville, TN");
+  assert.equal(first.gig?.fee, 650);
+
+  const second = await convertSignalToLeadInDb(sql, { signalId, userId: "artist-1" });
+  assert.equal(second.alreadyConverted, true);
+  assert.equal(second.gigId, first.gigId);
+
+  const [stateRow] = await sql.query<{ state: { gigs: Array<{ id: string; status: string }> } }>(
+    "select state from public.app_state where user_id = 'artist-1'",
+  );
+  assert.equal(stateRow.state.gigs.length, 1);
+  assert.equal(stateRow.state.gigs[0].id, first.gigId);
+  assert.equal(stateRow.state.gigs[0].status, "lead");
 });
