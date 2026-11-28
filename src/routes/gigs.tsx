@@ -174,31 +174,44 @@ function GigsPage() {
           <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")} className={cn("inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold", view === "list" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}><List className="size-4" /> List</button>
         </div>
       </div>
-      <div role="status" className="mb-3 rounded-xl border border-line bg-surface px-4 py-3 text-xs text-muted">
-        <span className="font-semibold text-fg">Gmail integration:</span>{" "}
-        {gmailStatus === "checking" ? "Checking account permissions…" :
-          gmailStatus === "unlinked" ? "No Google account linked to this sign-in." :
-          gmailStatus === "google-only" ? "Google sign-in linked; Gmail inbox and send permissions not confirmed." :
-          gmailStatus === "verified" ? "Gmail read access verified with Google; automatic sending is not enabled." :
-          gmailStatus === "consented" ? "Gmail permissions granted, but live API access could not be verified." :
-          "Unable to verify Gmail permissions. No messages will be sent."}
-      </div>
-      <div className="mb-3 px-1">
-        <button type="button" disabled={inboxLoading} className="rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-fg disabled:opacity-50" onClick={() => {
-          setInboxLoading(true);
-          void previewGmailInbox().then(setInboxPreview).catch(() => setInboxPreview({ connected: false, messages: [] })).finally(() => setInboxLoading(false));
-        }}>{inboxLoading ? "Checking Gmail…" : "Check Gmail inbox connection"}</button>
-        {inboxPreview && <p role="status" className="mt-2 text-xs text-muted">{inboxPreview.connected ? `Gmail inbox accessible · ${inboxPreview.messages.length} recent message references retrieved. Replies are not yet linked to gigs.` : "Gmail inbox access unavailable. Connect and authorize Gmail before checking."}</p>}
-      </div>
-      <div className="mb-3 px-1">
-        <button type="button" disabled={replyLoading} className="rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-fg disabled:opacity-50" onClick={() => {
-          setReplyLoading(true);
-          void previewGmailReplyHeaders().then(setReplyPreview).catch(() => setReplyPreview({ connected: false, replies: [] })).finally(() => setReplyLoading(false));
-        }}>{replyLoading ? "Checking replies…" : "Review recent Gmail reply headers"}</button>
-        {replyPreview && <div role="status" className="mt-2 text-xs text-muted">{replyPreview.connected ? `${replyPreview.replies.length} recent messages contain reply headers. Review manually; no gig status is changed.` : "Gmail reply metadata is unavailable."}
-          {replyPreview.connected && replyCandidates.map((reply) => <p key={reply.id} className="mt-1 break-words">{reply.from} — {reply.subject} ({reply.date}){reply.matches.length === 1 ? ` · Possible match: ${reply.matches[0].venue || reply.matches[0].name} (review before updating)` : reply.matches.length > 1 ? " · Multiple possible matches; manual review needed" : " · No matching saved booking contact"}</p>)}
-        </div>}
-      </div>
+      <details className="mb-3 rounded-xl border border-line bg-surface px-4 py-2.5 text-xs text-muted">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-semibold text-fg">
+          <span>
+            Gmail inbox &amp; reply tools{" "}
+            <span className="font-normal text-muted">
+              ·{" "}
+              {gmailStatus === "checking"
+                ? "Checking…"
+                : gmailStatus === "verified"
+                  ? "Read verified (manual send only)"
+                  : gmailStatus === "consented"
+                    ? "Permissions granted"
+                    : gmailStatus === "google-only"
+                      ? "Google linked (Gmail not authorized)"
+                      : gmailStatus === "unlinked"
+                        ? "Not linked"
+                        : "Check permissions"}
+            </span>
+          </span>
+          <span className="text-[11px] font-semibold text-accent">Expand</span>
+        </summary>
+        <div className="mt-3 space-y-2.5 border-t border-line/70 pt-3">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" disabled={inboxLoading} className="rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-fg disabled:opacity-50" onClick={() => {
+              setInboxLoading(true);
+              void previewGmailInbox().then(setInboxPreview).catch(() => setInboxPreview({ connected: false, messages: [] })).finally(() => setInboxLoading(false));
+            }}>{inboxLoading ? "Checking Gmail…" : "Check Gmail inbox connection"}</button>
+            <button type="button" disabled={replyLoading} className="rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-fg disabled:opacity-50" onClick={() => {
+              setReplyLoading(true);
+              void previewGmailReplyHeaders().then(setReplyPreview).catch(() => setReplyPreview({ connected: false, replies: [] })).finally(() => setReplyLoading(false));
+            }}>{replyLoading ? "Checking replies…" : "Review recent Gmail reply headers"}</button>
+          </div>
+          {inboxPreview && <p role="status" className="text-xs text-muted">{inboxPreview.connected ? `Gmail inbox accessible · ${inboxPreview.messages.length} recent message references retrieved. Replies are not yet linked to gigs.` : "Gmail inbox access unavailable. Connect and authorize Gmail before checking."}</p>}
+          {replyPreview && <div role="status" className="text-xs text-muted">{replyPreview.connected ? `${replyPreview.replies.length} recent messages contain reply headers. Review manually; no gig status is changed.` : "Gmail reply metadata is unavailable."}
+            {replyPreview.connected && replyCandidates.map((reply) => <p key={reply.id} className="mt-1 break-words">{reply.from} — {reply.subject} ({reply.date}){reply.matches.length === 1 ? ` · Possible match: ${reply.matches[0].venue || reply.matches[0].name} (review before updating)` : reply.matches.length > 1 ? " · Multiple possible matches; manual review needed" : " · No matching saved booking contact"}</p>)}
+          </div>}
+        </div>
+      </details>
       <section aria-label="Booking pipeline health" className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
         <div className="command-surface rounded-xl p-3 sm:p-4"><div className="command-kicker text-muted">Active leads</div><div className="mt-2 font-display text-3xl font-extrabold tabular text-info">{active.length}</div><p className="mt-1 text-xs text-muted">Not confirmed bookings</p></div>
         <div className="command-surface rounded-xl p-4"><div className="command-kicker text-muted">Follow-ups due</div><div className="mt-2 font-display text-3xl font-extrabold tabular text-accent">{due.length}</div><p className="mt-1 text-xs text-muted">Due today or overdue</p></div>
@@ -214,7 +227,7 @@ function GigsPage() {
         </div>
       </section>
       <label className="mb-3 flex min-h-11 items-center gap-3 rounded-xl border border-line-strong bg-surface px-4 text-sm text-muted"><Search className="size-4 shrink-0" /><span className="sr-only">Search bookings</span><input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search venue, city, opportunity, or contact…" className="min-w-0 w-full bg-transparent text-fg outline-none placeholder:text-muted" /></label>
-      <button type="button" aria-pressed={followUpOnly} onClick={() => {setFollowUpOnly((value) => !value);setAttentionFilter("all");}} className={cn("mb-3 rounded-lg border px-3 py-2 text-xs font-semibold", followUpOnly ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:text-fg")}>Follow-ups due ({due.length}) {followUpOnly ? "· Showing due" : "· Show only"}</button>
+      <button type="button" aria-pressed={followUpOnly} onClick={() => {setFollowUpOnly((value) => !value);setAttentionFilter("all");}} className={cn("mb-3 rounded-lg border px-3 py-2 text-xs font-semibold lg:hidden", followUpOnly ? "border-accent bg-accent/10 text-accent" : "border-line text-muted hover:text-fg")}>Follow-ups due ({due.length}) {followUpOnly ? "· Showing due" : "· Show only"}</button>
       <label className="mb-4 flex items-center gap-2 text-sm md:hidden"><span className="shrink-0 text-muted">Stage</span><select aria-label="Filter booking stage" value={filter} onChange={e => setFilter(e.target.value as "all" | GigStatus)} className="min-h-11 min-w-0 flex-1 rounded-lg border border-line bg-surface px-3"><option value="all">All stages</option>{GIG_STATUSES.map(status => <option key={status} value={status}>{GIG_STATUS_LABEL[status]}</option>)}</select></label>
       <div className="mb-5 hidden flex-wrap gap-2 pb-2 md:flex">
         <FilterChip

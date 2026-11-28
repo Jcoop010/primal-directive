@@ -10,6 +10,7 @@ import {
   computeRoutingGapFit,
   computeSignalScore,
   createDefaultSignalsFilterState,
+  deriveOpenTourGapFromGigs,
   filterAndSortSignals,
   normalizeSignalScoring,
   TOURING_CORRIDOR_PRESETS,
@@ -435,4 +436,53 @@ test("selecting a touring corridor preset populates anchors, switches sort to ga
   assert.equal(cleared.activePresetId, null);
   assert.equal(cleared.sortMode, "score");
   assert.equal(cleared.statusFilter, "approved");
+});
+
+test("deriveOpenTourGapFromGigs detects upcoming booked/hold gaps and triage/search filters work", () => {
+  assert.equal(deriveOpenTourGapFromGigs([], "2027-04-01"), null);
+
+  const gap = deriveOpenTourGapFromGigs(
+    [
+      { status: "lead", date: "2027-04-02", city: "Memphis, TN" },
+      { status: "booked", date: "2027-04-04", city: "Nashville, TN" },
+      { status: "hold", date: "2027-04-08", city: "Chicago, IL" },
+    ],
+    "2027-04-01",
+  );
+  assert.ok(gap);
+  assert.equal(gap.prevCity, "Nashville, TN");
+  assert.equal(gap.prevDate, "2027-04-04");
+  assert.equal(gap.nextCity, "Chicago, IL");
+  assert.equal(gap.nextDate, "2027-04-08");
+
+  const items = [
+    {
+      id: "1",
+      title: "Zanzabar Louisville",
+      corridor: "I-65 Midwest",
+      status: "new",
+      fitScore: 95,
+      priorityTier: "high" as const,
+      receivedAt: "2026-11-27T12:00:00Z",
+    },
+    {
+      id: "2",
+      title: "Archived Noise",
+      corridor: "I-65 Midwest",
+      status: "archived",
+      fitScore: 40,
+      priorityTier: "low" as const,
+      receivedAt: "2026-11-27T11:00:00Z",
+    },
+  ];
+  const triaged = filterAndSortSignals(items, {
+    statusFilter: "triage",
+    priorityFilter: "all",
+    sortMode: "score",
+    searchQuery: "louisville",
+  });
+  assert.deepEqual(
+    triaged.map((i) => i.id),
+    ["1"],
+  );
 });

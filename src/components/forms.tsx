@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
@@ -490,18 +491,30 @@ function GigForm({
           <span className="text-[11px] text-muted">
             Saved to your private workspace; nothing is emailed automatically.
           </span>
-          <button
-            type="button"
-            disabled={!outreachDraft.trim()}
-            onClick={copyOutreachDraft}
-            className={`min-h-10 rounded-lg border px-3.5 text-xs font-semibold transition-colors disabled:opacity-40 ${
-              draftCopied
-                ? "border-live/60 bg-live/15 text-live"
-                : "border-line-strong bg-surface-2 text-fg hover:border-[#E25822]"
-            }`}
-          >
-            {draftCopied ? "Copied!" : "Copy draft"}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              disabled={!outreachDraft.trim()}
+              onClick={copyOutreachDraft}
+              className={`min-h-10 rounded-lg border px-3.5 text-xs font-semibold transition-colors disabled:opacity-40 ${
+                draftCopied
+                  ? "border-live/60 bg-live/15 text-live"
+                  : "border-line-strong bg-surface-2 text-fg hover:border-[#E25822]"
+              }`}
+            >
+              {draftCopied ? "Copied!" : "Copy draft"}
+            </button>
+            {initial?.id ? (
+              <Link
+                to="/outreach"
+                search={{ gig: initial.id }}
+                onClick={() => useMusician.getState().setComposer({ gigOpen: false, editingGigId: undefined })}
+                className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#E25822] px-3.5 text-xs font-bold text-white hover:bg-[#D35400]"
+              >
+                Open in Outreach →
+              </Link>
+            ) : null}
+          </div>
         </div>
       </section>
       <section

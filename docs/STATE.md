@@ -8,7 +8,7 @@
 
 | Component | Status | Notes |
 | --- | --- | --- |
-| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`6b546d1`). |
+| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`c318b24`). |
 | **Production Database (Neon `neon-cerulean-candle`)** | **ACTIVE_HEALTHY (IPv4, No Auto-Pause)** | Replaced suspended Vercel Supabase stores (`supabase-carmine-lever`, `supabase-camel-flame`). `DATABASE_URL` auto-injected in Production & Preview. |
 | **Auth & Sign-In** | **PASS (Google + Email/Pass Live)** | `scripts/oauth-state-smoke.mjs` passed (`HTTP 200`, host-only `__Host-` state cookie). Microsoft OAuth ready once Entra creds are verified. |
 | **Band Discovery, Scoring & Conversion (`/signals` → `/gigs`)** | **LIVE & CLOSED-LOOP** | `POST /api/intake/agent-signal` (Bearer `AGENT_WEBHOOK_SECRET`) scores band/live-music signals (`0011`), surfaces them on `/signals`, and converts them idempotently into `status: "lead"` gigs (`0012`) linked to `/gigs?gig=<id>`. |
@@ -23,6 +23,16 @@
 ---
 
 ## Recent Agent Handoffs
+
+### 2026-11-27 22:55 EST — Antigravity
+- **Elite OS System & Interface Upgrade (`feat/elite-os-upgrade`):** Grouped sidebar navigation into **Booking / Operations / Business**, added `Signals` to the 5-slot mobile bottom bar, removed the dead `SCENE INTEL` pill, upgraded `⌘K` into a workspace command search (pages, saved gigs, contacts, quick actions), and collapsed `/gigs` Gmail debug tools into a clean expandable panel.
+- **Closed-Loop Booking Flow (`/signals` → `/gigs` → `/tour` → `/outreach`):** Wired `0014` Pre-Show Net Yield into `/tour` (live gross, road/room + linked costs, net yield, break-even heads, clickable stops), added **Open in Outreach →** from `GigDrawer` to `/outreach?gig=<id>` (auto-prefills recipient, source URL, subject, and draft; human-reviewed only), and added `/signals` keyword search, **Needs triage** filter, and 1-click **My gap** auto-anchors from booked/hold shows.
+- **Zero-Warning Hygiene & Verification:** Cleared all 3 lingering ESLint warnings (`app-shell.tsx`, `use-current-user.ts`, `outreach-audit.ts`), renamed `Production Health Keepalive` workflow, added unit tests in `src/lib/agent-signal.test.ts`, and verified tests, typecheck, lint (0 errors / 0 warnings), and production build.
+
+### 2026-11-27 17:03 EST — Antigravity
+- **PR #282 Merged & Live (`main@c318b24`, `dpl_2wjTmcsDSbk7nbekT6WVMFweM6CA`):** Squash-merged `feat/preset-gap-sort-reset` into `main` (`c318b24130fbc029b291d7497d7dfda48ad91ef2`) after green CI (`validate`, `verify`, preview deploy) and promoted `primal-directive-c0u09q95w-loose-ends-co.vercel.app` to `https://primal-directive-loose-ends-co.vercel.app` (`[migrate] up to date.` for `0001`–`0014` on Neon Postgres `neon-cerulean-candle`).
+- **Live Production Checks PASSED (Zero Extra Test Rows):** `GET /api/health` → `200` (`commit: c318b24130fbc029b291d7497d7dfda48ad91ef2`), `scripts/oauth-state-smoke.mjs` (`AUTH_SMOKE_ORIGIN=https://primal-directive-loose-ends-co.vercel.app`) → `200`, `GET /signals` → `200` (5,952 bytes, clean SSR HTML), and `GET /gigs` → `200` (clean SSR HTML).
+- **Next Step:** Open `/signals` in a signed-in browser, apply a restrictive filter (e.g. `Archived` + `Low`), then click each Southeast/Midwest corridor preset (`I-40 · Nashville → Asheville`, `I-75 · Nashville → Atlanta`, `I-65 · Nashville → Chicago`, `Midwest · Louisville → Appleton`) to confirm anchors populate, sort switches to **Gap fit**, and matching leads surface immediately.
 
 ### 2026-11-27 16:56 EST — Antigravity
 - **Touring Corridor Presets & Stale-Filter Reset (`feat/preset-gap-sort-reset`):** Added 4 Southeast & Midwest touring corridor presets (`I-40 · Nashville → Asheville`, `I-75 · Nashville → Atlanta`, `I-65 · Nashville → Chicago`, `Midwest · Louisville → Appleton`), expanded `REGION_ALIASES` for Midwest states (`KY`, `IN`, `IL`, `OH`, `WI`), and added pure state helpers (`applyCorridorPreset`, `clearAnchorsFromFilterState`, `createDefaultSignalsFilterState`) in `src/lib/agent-signal-scoring.ts`.

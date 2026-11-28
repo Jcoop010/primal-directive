@@ -30,7 +30,7 @@ export function settleOutreach(existing: readonly SendAuditEvent[], key: string,
     ? { ...event, status, updatedAt, ...(providerMessageId ? { providerMessageId } : {}) }
     : event);
 }
-export function isOutreachRetrySafe(event: SendAuditEvent): boolean {
+export function isOutreachRetrySafe(_event: SendAuditEvent): boolean {
   // Failed/unknown/reserved may have reached the provider; require human review.
   return false;
 }

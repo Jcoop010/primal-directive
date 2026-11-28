@@ -363,9 +363,10 @@ export const TOURING_CORRIDOR_PRESETS: readonly TouringCorridorPreset[] = [
 ] as const;
 
 export interface SignalsFilterState<TStatus extends string = string> {
-  statusFilter: "all" | TStatus;
+  statusFilter: "all" | "triage" | TStatus;
   priorityFilter: "all" | SignalPriorityTier;
   sortMode: SignalSortMode;
+  searchQuery: string;
   prevCity: string;
   prevDate: string;
   nextCity: string;
@@ -378,6 +379,7 @@ export function createDefaultSignalsFilterState<TStatus extends string = string>
     statusFilter: "all",
     priorityFilter: "all",
     sortMode: "score",
+    searchQuery: "",
     prevCity: "",
     prevDate: "",
     nextCity: "",
@@ -387,12 +389,13 @@ export function createDefaultSignalsFilterState<TStatus extends string = string>
 }
 
 export function applyCorridorPreset<TStatus extends string = string>(
-  preset: TouringCorridorPreset,
+  preset: Pick<TouringCorridorPreset, "id" | "prevCity" | "prevDate" | "nextCity" | "nextDate">,
 ): SignalsFilterState<TStatus> {
   return {
     statusFilter: "all",
     priorityFilter: "all",
     sortMode: "gap",
+    searchQuery: "",
     prevCity: preset.prevCity,
     prevDate: preset.prevDate,
     nextCity: preset.nextCity,
@@ -412,6 +415,69 @@ export function clearAnchorsFromFilterState<TStatus extends string = string>(
     nextDate: "",
     activePresetId: null,
     sortMode: state.sortMode === "gap" ? "score" : state.sortMode,
+  };
+}
+
+export interface DetectedTourGap {
+  id: string;
+  label: string;
+  prevCity: string;
+  prevDate: string;
+  nextCity: string;
+  nextDate: string;
+}
+
+export function deriveOpenTourGapFromGigs(
+  gigs: ReadonlyArray<{
+    status: string;
+    date: string;
+    city?: string | null;
+    venue?: string | null;
+    name?: string | null;
+  }>,
+  todayIso: string,
+): DetectedTourGap | null {
+  const upcoming = gigs
+    .filter(
+      (g) =>
+        (g.status === "booked" || g.status === "hold") &&
+        /^\d{4}-\d{2}-\d{2}$/.test(g.date) &&
+        g.date >= todayIso,
+    )
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  if (upcoming.length === 0) return null;
+
+  const stopName = (g: (typeof upcoming)[number]) =>
+    g.city?.trim() || g.venue?.trim() || g.name?.trim() || "Booked stop";
+
+  for (let i = 0; i < upcoming.length - 1; i += 1) {
+    const a = upcoming[i];
+    const b = upcoming[i + 1];
+    const diffDays = Math.round((Date.parse(b.date) - Date.parse(a.date)) / 86_400_000);
+    if (diffDays >= 2) {
+      const prevCity = stopName(a);
+      const nextCity = stopName(b);
+      return {
+        id: `booked-gap:${a.date}:${b.date}`,
+        label: `My gap: ${prevCity} → ${nextCity}`,
+        prevCity,
+        prevDate: a.date,
+        nextCity,
+        nextDate: b.date,
+      };
+    }
+  }
+
+  const first = upcoming[0];
+  const prevCity = stopName(first);
+  return {
+    id: `booked-anchor:${first.date}`,
+    label: `After ${prevCity} (${first.date})`,
+    prevCity,
+    prevDate: first.date,
+    nextCity: "",
+    nextDate: "",
   };
 }
 
@@ -550,6 +616,11 @@ export interface SortableSignal {
   priorityTier: SignalPriorityTier;
   receivedAt: string;
   gapFitScore?: number | null;
+  title?: string;
+  summary?: string | null;
+  corridor?: string | null;
+  targetWindow?: string | null;
+  payloadJson?: string | null;
 }
 
 export function filterAndSortSignals<T extends SortableSignal>(
@@ -558,12 +629,30 @@ export function filterAndSortSignals<T extends SortableSignal>(
     statusFilter: string;
     priorityFilter: "all" | SignalPriorityTier;
     sortMode: SignalSortMode;
+    searchQuery?: string;
   },
 ): T[] {
+  const q = options.searchQuery?.trim().toLowerCase() ?? "";
   const filtered = signals.filter((signal) => {
-    if (options.statusFilter !== "all" && signal.status !== options.statusFilter) return false;
+    if (options.statusFilter === "triage") {
+      if (signal.status !== "new" && signal.status !== "approved") return false;
+    } else if (options.statusFilter !== "all" && signal.status !== options.statusFilter) {
+      return false;
+    }
     if (options.priorityFilter !== "all" && signal.priorityTier !== options.priorityFilter) {
       return false;
+    }
+    if (q) {
+      const hay = [
+        signal.title ?? "",
+        signal.summary ?? "",
+        signal.corridor ?? "",
+        signal.targetWindow ?? "",
+        signal.payloadJson ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!hay.includes(q)) return false;
     }
     return true;
   });
