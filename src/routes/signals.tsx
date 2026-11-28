@@ -12,6 +12,7 @@ import {
   Music2,
   RefreshCw,
   RotateCcw,
+  Search,
   Sparkles,
   X,
 } from "lucide-react";
@@ -23,6 +24,7 @@ import {
   clearAnchorsFromFilterState,
   computeRoutingGapFit,
   createDefaultSignalsFilterState,
+  deriveOpenTourGapFromGigs,
   filterAndSortSignals,
   TOURING_CORRIDOR_PRESETS,
   type RoutingAnchorWindow,
@@ -37,13 +39,15 @@ import {
   type AgentSignalRow,
   type AgentSignalStatus,
 } from "@/lib/agent-signals";
+import { toIsoDay } from "@/lib/format";
 import { useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/signals")({ component: SignalsInboxPage });
 
-const STATUS_FILTERS: ReadonlyArray<"all" | AgentSignalStatus> = [
+const STATUS_FILTERS: ReadonlyArray<"all" | "triage" | AgentSignalStatus> = [
   "all",
+  "triage",
   "new",
   "approved",
   "imported",
@@ -77,14 +81,29 @@ const PRIORITY_STYLE: Record<SignalPriorityTier, string> = {
 type BusyAction = { id: string; kind: "approve" | "archive" | "review" | "reject" | "convert" };
 
 function SignalsInboxPage() {
+  const savedGigs = useMusician((s) => s.gigs);
   const [signals, setSignals] = useState<AgentSignalRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<BusyAction | null>(null);
   const [filterState, setFilterState] = useState<SignalsFilterState<AgentSignalStatus>>(() =>
     createDefaultSignalsFilterState<AgentSignalStatus>(),
   );
-  const { statusFilter, priorityFilter, sortMode, prevCity, prevDate, nextCity, nextDate, activePresetId } =
-    filterState;
+  const {
+    statusFilter,
+    priorityFilter,
+    sortMode,
+    searchQuery,
+    prevCity,
+    prevDate,
+    nextCity,
+    nextDate,
+    activePresetId,
+  } = filterState;
+
+  const detectedTourGap = useMemo(
+    () => deriveOpenTourGapFromGigs(savedGigs, toIsoDay(new Date())),
+    [savedGigs],
+  );
 
   const anchors: RoutingAnchorWindow = useMemo(
     () => ({ prevCity, prevDate, nextCity, nextDate }),
@@ -94,13 +113,19 @@ function SignalsInboxPage() {
     prevCity.trim() || prevDate.trim() || nextCity.trim() || nextDate.trim(),
   );
   const hasActiveFilters =
-    statusFilter !== "all" || priorityFilter !== "all" || sortMode !== "score" || hasAnchors;
+    statusFilter !== "all" ||
+    priorityFilter !== "all" ||
+    sortMode !== "score" ||
+    Boolean(searchQuery.trim()) ||
+    hasAnchors;
 
   const resetAllFilters = () => {
     setFilterState(createDefaultSignalsFilterState<AgentSignalStatus>());
   };
 
-  const selectCorridorPreset = (preset: TouringCorridorPreset) => {
+  const selectCorridorPreset = (
+    preset: Pick<TouringCorridorPreset, "id" | "prevCity" | "prevDate" | "nextCity" | "nextDate">,
+  ) => {
     setFilterState(applyCorridorPreset<AgentSignalStatus>(preset));
   };
 
@@ -161,8 +186,9 @@ function SignalsInboxPage() {
         statusFilter,
         priorityFilter,
         sortMode,
+        searchQuery,
       }),
-    [enrichedSignals, statusFilter, priorityFilter, sortMode],
+    [enrichedSignals, statusFilter, priorityFilter, sortMode, searchQuery],
   );
 
   async function setStatus(
@@ -294,23 +320,36 @@ function SignalsInboxPage() {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-line/70 pt-3">
-          {STATUS_FILTERS.map((item) => (
-            <button
-              key={item}
-              type="button"
-              aria-pressed={statusFilter === item}
-              onClick={() => setFilterState((prev) => ({ ...prev, statusFilter: item }))}
-              className={cn(
-                "min-h-9 rounded-lg border px-2.5 text-xs font-semibold capitalize",
-                statusFilter === item
-                  ? "border-[#E25822] bg-[#E25822]/15 text-fg"
-                  : "border-line bg-bg/50 text-muted hover:text-fg",
-              )}
-            >
-              {item === "imported" ? "Converted" : item}
-            </button>
-          ))}
+        <div className="mt-3 flex flex-col gap-2 border-t border-line/70 pt-3 sm:flex-row sm:items-center">
+          <label className="flex min-h-9 flex-1 items-center gap-2 rounded-lg border border-line bg-bg/70 px-3 text-xs text-muted focus-within:border-[#E25822]">
+            <Search className="size-3.5 shrink-0 text-muted" />
+            <span className="sr-only">Search signals</span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }))}
+              placeholder="Search venue, city, corridor, or genre…"
+              className="w-full min-w-0 bg-transparent text-xs text-fg outline-none placeholder:text-muted"
+            />
+          </label>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {STATUS_FILTERS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                aria-pressed={statusFilter === item}
+                onClick={() => setFilterState((prev) => ({ ...prev, statusFilter: item }))}
+                className={cn(
+                  "min-h-9 rounded-lg border px-2.5 text-xs font-semibold capitalize",
+                  statusFilter === item
+                    ? "border-[#E25822] bg-[#E25822]/15 text-fg"
+                    : "border-line bg-bg/50 text-muted hover:text-fg",
+                )}
+              >
+                {item === "imported" ? "Converted" : item === "triage" ? "Needs triage" : item}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -366,6 +405,21 @@ function SignalsInboxPage() {
             className="mb-2.5 flex flex-wrap items-center gap-1.5"
           >
             <span className="mr-0.5 text-[11px] font-medium text-muted">Presets:</span>
+            {detectedTourGap ? (
+              <button
+                type="button"
+                aria-pressed={activePresetId === detectedTourGap.id}
+                onClick={() => selectCorridorPreset(detectedTourGap)}
+                className={cn(
+                  "inline-flex min-h-8 items-center gap-1 rounded-full border px-2.5 text-[11px] font-bold transition-colors",
+                  activePresetId === detectedTourGap.id
+                    ? "border-live bg-live/20 text-live"
+                    : "border-live/50 bg-live/10 text-live hover:bg-live/20",
+                )}
+              >
+                <Sparkles className="size-3" /> {detectedTourGap.label}
+              </button>
+            ) : null}
             {TOURING_CORRIDOR_PRESETS.map((preset) => {
               const isSelected = activePresetId === preset.id;
               return (

@@ -3,13 +3,13 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Banknote,
   CalendarDays,
-  LayoutGrid,
   ListChecks,
   Music2,
   Plus,
   Menu,
   Radio,
   Search,
+  Send,
   X,
   Route as RouteIcon,
   ShoppingBag,
@@ -30,19 +30,36 @@ import { todayLabel } from "@/lib/format";
 import { useMusician } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { to: "/", label: "Command Center", icon: Sparkles },
-  { to: "/gigs", label: "Gigs", icon: Music2 },
-  { to: "/people", label: "People", icon: Users },
-  { to: "/calendar", label: "Calendar", icon: CalendarDays },
-  { to: "/money", label: "Money", icon: Banknote },
-  { to: "/tour", label: "Tour", icon: RouteIcon },
-  { to: "/merch", label: "Merch", icon: ShoppingBag },
-  { to: "/tasks", label: "Tasks", icon: ListChecks },
-  { to: "/outreach", label: "Outreach", icon: Music2 },
-  { to: "/signals", label: "Signals", icon: Radio },
-  { to: "/account", label: "Account & billing", icon: UserRound },
+const NAV_GROUPS = [
+  {
+    label: "Booking",
+    items: [
+      { to: "/", label: "Command Center", icon: Sparkles },
+      { to: "/signals", label: "Signals", icon: Radio },
+      { to: "/gigs", label: "Gigs", icon: Music2 },
+      { to: "/outreach", label: "Outreach", icon: Send },
+      { to: "/tour", label: "Tour", icon: RouteIcon },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { to: "/calendar", label: "Calendar", icon: CalendarDays },
+      { to: "/tasks", label: "Tasks", icon: ListChecks },
+      { to: "/people", label: "People", icon: Users },
+    ],
+  },
+  {
+    label: "Business",
+    items: [
+      { to: "/money", label: "Money", icon: Banknote },
+      { to: "/merch", label: "Merch", icon: ShoppingBag },
+      { to: "/account", label: "Account & billing", icon: UserRound },
+    ],
+  },
 ] as const;
+
+const NAV = NAV_GROUPS.flatMap((group) => group.items);
 
 function SignInScreen() {
   return (
@@ -76,6 +93,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [commandQuery, setCommandQuery] = useState("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const profile = useMusician((s) => s.profile);
+  const gigs = useMusician((s) => s.gigs);
+  const people = useMusician((s) => s.people);
   const setComposer = useMusician((s) => s.setComposer);
   const openGig = useMusician((s) => s.openGig);
   const openPerson = useMusician((s) => s.openPerson);
@@ -100,7 +119,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", onShortcut);
     return () => window.removeEventListener("keydown", onShortcut);
   }, []);
-  const commandMatches = NAV.filter((item) => item.label.toLowerCase().includes(commandQuery.trim().toLowerCase()));
+  const trimmedCommandQuery = commandQuery.trim().toLowerCase();
+  const commandMatches = NAV.filter((item) =>
+    item.label.toLowerCase().includes(trimmedCommandQuery),
+  );
+  const gigMatches = trimmedCommandQuery
+    ? gigs
+        .filter((g) =>
+          [g.venue, g.name, g.city, g.corridor ?? ""]
+            .join(" ")
+            .toLowerCase()
+            .includes(trimmedCommandQuery),
+        )
+        .slice(0, 5)
+    : gigs.slice(0, 3);
+  const peopleMatches = trimmedCommandQuery
+    ? people
+        .filter((p) => [p.name, p.role, p.org].join(" ").toLowerCase().includes(trimmedCommandQuery))
+        .slice(0, 4)
+    : [];
   const pageTitle =
     NAV.find((n) => (n.to === "/" ? pathname === "/" : pathname.startsWith(n.to)))?.label ??
     "Command";
@@ -123,24 +160,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="text-[12px] font-extrabold tracking-[0.19em] text-accent">PRIMAL DIRECTIVE</div>
             <div className="mt-1 text-xs text-muted">Artist Command Center</div><div className="mt-5 flex items-center gap-2 text-[10px] font-bold tracking-[.15em] text-live"><span className="size-1.5 rounded-full bg-live shadow-[0_0_12px_#55d49a]" /> YOUR OPERATIONS HUB</div></div>
           </div>
-          <nav className="flex flex-1 flex-col gap-1 px-3">
-            {NAV.map((item) => {
-              const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "command-link flex h-11 items-center gap-3 rounded-lg px-4 text-sm font-semibold transition-colors",
-                    active ? "bg-accent/10 text-accent ring-1 ring-accent/20" : "text-muted hover:bg-surface hover:text-fg",
-                  )}
-                >
-                  <item.icon className="size-4" strokeWidth={1.75} />
-                  {item.label}
-                </Link>
-              );
-            })}
+          <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 pb-3">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.label} className="space-y-1">
+                <div className="px-4 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted/75">
+                  {group.label}
+                </div>
+                {group.items.map((item) => {
+                  const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "command-link flex h-10 items-center gap-3 rounded-lg px-4 text-sm font-semibold transition-colors",
+                        active ? "bg-accent/10 text-accent ring-1 ring-accent/20" : "text-muted hover:bg-surface hover:text-fg",
+                      )}
+                    >
+                      <item.icon className="size-4" strokeWidth={1.75} />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
           <div className="m-3 rounded-md border border-line p-3">
             <button
@@ -175,12 +219,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <div className="mt-1 hidden text-xs text-muted md:block">{todayLabel()}</div>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => {setCommandQuery("");setCommandSearchOpen(true);}} aria-label="Search workspace navigation" className="flex min-h-11 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-xs font-semibold text-muted transition-colors hover:border-accent/40 hover:text-fg"><Search className="size-4" /><span className="hidden lg:inline">Jump to page</span><kbd className="hidden rounded border border-line px-1.5 py-0.5 text-[10px] lg:inline">⌘ K</kbd></button>
+                <button type="button" onClick={() => {setCommandQuery("");setCommandSearchOpen(true);}} aria-label="Search workspace" className="flex min-h-11 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-xs font-semibold text-muted transition-colors hover:border-accent/40 hover:text-fg"><Search className="size-4" /><span className="hidden lg:inline">Search workspace</span><kbd className="hidden rounded border border-line px-1.5 py-0.5 text-[10px] lg:inline">⌘ K</kbd></button>
                 <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation" aria-expanded={mobileMenuOpen} className="flex size-11 items-center justify-center rounded-xl border border-line bg-surface md:hidden"><Menu className="size-5" /></button>
-                <div className="hidden items-center gap-2 rounded-full border border-line bg-bg px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-muted xl:flex">
-                  <span className="size-1.5 rounded-full bg-live shadow-[0_0_10px_var(--color-live)]" />
-                  SCENE INTEL
-                </div>
                 <button
                   type="button"
                   onClick={() => setComposer({ profileOpen: true })}
@@ -205,13 +245,50 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {commandSearchOpen && (
           <div className="fixed inset-0 z-[70] flex items-start justify-center bg-black/75 px-4 pt-[min(15vh,120px)] backdrop-blur-sm" onMouseDown={(event) => {if (event.target === event.currentTarget) setCommandSearchOpen(false);}}>
-            <section role="dialog" aria-modal="true" aria-label="Jump to workspace page" className="w-full max-w-lg overflow-hidden rounded-2xl border border-line-strong bg-surface shadow-2xl">
-              <div className="flex items-center gap-3 border-b border-line px-4 py-3"><Search className="size-5 text-accent"/><input autoFocus aria-label="Search pages" placeholder="Search pages…" value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} className="min-h-10 min-w-0 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-muted"/><button type="button" aria-label="Close page search" onClick={() => setCommandSearchOpen(false)} className="rounded-lg p-2 text-muted hover:bg-bg hover:text-fg"><X className="size-4"/></button></div>
-              <nav aria-label="Workspace search results" className="max-h-[min(60vh,480px)] overflow-y-auto p-2">
-                {commandMatches.map((item) => <Link key={item.to} to={item.to} onClick={() => {setCommandSearchOpen(false);setCommandQuery("");setMobileMenuOpen(false);}} className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-fg transition-colors hover:bg-accent/10 hover:text-accent"><item.icon className="size-4 text-accent"/>{item.label}</Link>)}
-                {commandMatches.length === 0 && <p className="px-3 py-6 text-center text-sm text-muted">No matching pages</p>}
+            <section role="dialog" aria-modal="true" aria-label="Workspace command search" className="w-full max-w-lg overflow-hidden rounded-2xl border border-line-strong bg-surface shadow-2xl">
+              <div className="flex items-center gap-3 border-b border-line px-4 py-3"><Search className="size-5 text-accent"/><input autoFocus aria-label="Search pages, gigs, and contacts" placeholder="Jump to page, venue, gig, or contact…" value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} className="min-h-10 min-w-0 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-muted"/><button type="button" aria-label="Close workspace search" onClick={() => setCommandSearchOpen(false)} className="rounded-lg p-2 text-muted hover:bg-bg hover:text-fg"><X className="size-4"/></button></div>
+              <nav aria-label="Workspace search results" className="max-h-[min(60vh,480px)] space-y-2 overflow-y-auto p-2">
+                {commandMatches.length > 0 && (
+                  <div>
+                    <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Pages</div>
+                    {commandMatches.map((item) => <Link key={item.to} to={item.to} onClick={() => {setCommandSearchOpen(false);setCommandQuery("");setMobileMenuOpen(false);}} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-fg transition-colors hover:bg-accent/10 hover:text-accent"><item.icon className="size-4 text-accent"/>{item.label}</Link>)}
+                  </div>
+                )}
+                {gigMatches.length > 0 && (
+                  <div>
+                    <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Gigs &amp; leads</div>
+                    {gigMatches.map((g) => (
+                      <button key={g.id} type="button" onClick={() => {setCommandSearchOpen(false);setCommandQuery("");openGig(g.id);}} className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-left text-sm font-semibold text-fg transition-colors hover:bg-accent/10 hover:text-accent">
+                        <span className="flex min-w-0 items-center gap-2.5"><Music2 className="size-4 shrink-0 text-accent"/><span className="truncate">{g.venue || g.name}</span></span>
+                        <span className="shrink-0 text-[11px] font-normal text-muted">{g.city || g.status}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {peopleMatches.length > 0 && (
+                  <div>
+                    <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Contacts</div>
+                    {peopleMatches.map((p) => (
+                      <button key={p.id} type="button" onClick={() => {setCommandSearchOpen(false);setCommandQuery("");openPerson(p.id);}} className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-left text-sm font-semibold text-fg transition-colors hover:bg-accent/10 hover:text-accent">
+                        <span className="flex min-w-0 items-center gap-2.5"><Users className="size-4 shrink-0 text-accent"/><span className="truncate">{p.name}</span></span>
+                        <span className="shrink-0 text-[11px] font-normal text-muted">{p.org || p.role}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!trimmedCommandQuery && (
+                  <div>
+                    <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Quick actions</div>
+                    <div className="grid grid-cols-3 gap-1.5 px-2 pt-1">
+                      <button type="button" onClick={() => {setCommandSearchOpen(false);openGig();}} className="rounded-lg border border-line bg-bg/70 px-2.5 py-2 text-xs font-semibold text-fg hover:border-accent/50">+ New gig</button>
+                      <button type="button" onClick={() => {setCommandSearchOpen(false);openPerson();}} className="rounded-lg border border-line bg-bg/70 px-2.5 py-2 text-xs font-semibold text-fg hover:border-accent/50">+ Contact</button>
+                      <button type="button" onClick={() => {setCommandSearchOpen(false);openMoney();}} className="rounded-lg border border-line bg-bg/70 px-2.5 py-2 text-xs font-semibold text-fg hover:border-accent/50">+ Money</button>
+                    </div>
+                  </div>
+                )}
+                {commandMatches.length === 0 && gigMatches.length === 0 && peopleMatches.length === 0 && <p className="px-3 py-6 text-center text-sm text-muted">No matching pages, gigs, or contacts</p>}
               </nav>
-              <p className="border-t border-line px-4 py-3 text-[11px] text-muted">Navigate across Advisor, bookings, tours, finance, people, merch, and tasks. Press Esc to close.</p>
+              <p className="border-t border-line px-4 py-3 text-[11px] text-muted">Search pages, saved gigs, and contacts, or trigger quick actions. Press Esc to close.</p>
             </section>
           </div>
         )}
@@ -235,7 +312,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <nav aria-label="Quick navigation" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur-xl md:hidden">
           <div className="mx-auto grid w-full max-w-lg grid-cols-5 px-1 pb-[env(safe-area-inset-bottom)]">
-            {NAV.filter((item) => ["/", "/gigs", "/calendar", "/tasks"].includes(item.to)).map((item) => {
+            {NAV.filter((item) => ["/", "/signals", "/gigs", "/calendar"].includes(item.to)).map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
               return <Link key={item.to} to={item.to} aria-current={active ? "page" : undefined} className={cn("flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold", active ? "text-accent" : "text-muted")}><item.icon className="size-5" strokeWidth={active ? 2.4 : 1.8} /><span className="max-w-full truncate text-center">{item.to === "/" ? "Command" : item.label}</span></Link>;
             })}

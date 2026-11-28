@@ -1,4 +1,4 @@
-name: Supabase Keepalive
+name: Production Health Keepalive
 
 on:
   schedule:

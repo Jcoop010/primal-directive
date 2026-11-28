@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { buildBookingOutreachDraft } from "@/lib/agent-signal-scoring";
 import {
   reviewMailboxDraft,
   mailboxStatus,
@@ -18,13 +19,15 @@ import {
   suppressOutreachContact,
 } from "@/lib/outreach";
 export const Route = createFileRoute("/outreach")({
-  validateSearch: (search: Record<string, unknown>): { draft?: string } => ({
-    draft: typeof search.draft === "string" ? search.draft : undefined,
+  validateSearch: (search: Record<string, unknown>): { draft?: string; gig?: string } => ({
+    ...(typeof search.draft === "string" && search.draft.trim() ? { draft: search.draft.trim() } : {}),
+    ...(typeof search.gig === "string" && search.gig.trim() ? { gig: search.gig.trim() } : {}),
   }),
   component: Outreach,
 });
 function Outreach() {
-  const { draft: reviewDraftId } = Route.useSearch();
+  const { draft: reviewDraftId, gig: prefillGigId } = Route.useSearch();
+  const prefilledGigRef = useRef<string | null>(null);
   const [draftMailboxId, setDraftMailboxId] = useState<string>();
   const [draftProvider, setDraftProvider] = useState<string>();
   const gigs = useMusician((s) => s.gigs),
@@ -70,6 +73,32 @@ function Outreach() {
       active = false;
     };
   }, [reviewDraftId]);
+  useEffect(() => {
+    if (!prefillGigId || reviewDraftId || prefilledGigRef.current === prefillGigId) return;
+    const match = gigs.find((g) => g.id === prefillGigId);
+    if (!match) return;
+    prefilledGigRef.current = prefillGigId;
+    setGigId(match.id);
+    if (match.outreachEmail?.trim()) setRecipient(match.outreachEmail.trim());
+    const verifiedUrl = match.bookingContactSourceUrl?.trim() || match.researchSourceUrl?.trim() || "";
+    if (verifiedUrl) setSource(verifiedUrl);
+    const artist = profile.artistName?.trim() || "Our band";
+    const venueName = match.venue?.trim() || match.name;
+    setSubject(`${artist} — booking inquiry for ${venueName}`);
+    setBody(
+      match.outreachDraft?.trim() ||
+        buildBookingOutreachDraft({
+          venue: venueName,
+          city: match.city,
+          corridor: match.corridor,
+          billRole: match.billRole,
+          targetWindow: match.targetWindow,
+          dealType: match.dealType,
+        }),
+    );
+    setConsent(false);
+    setNotice(`Pre-filled draft for ${venueName}. Review recipient, source URL, and copy before approving.`);
+  }, [prefillGigId, reviewDraftId, gigs, profile.artistName]);
   const inputClass = "min-h-11 w-full rounded-lg border border-line bg-bg p-3 text-sm";
   const refresh = async () => {
     const [nextStatus, nextMail] = await Promise.all([outreachStatus(), mailboxStatus()]);

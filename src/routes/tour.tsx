@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, MapPin, Wallet } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { computePreShowYield } from "@/lib/agent-signal-scoring";
 import { money, longDate } from "@/lib/format";
 import { summarizeTour } from "@/lib/tour-economics";
 import { summarizeMerch } from "@/lib/merch-ops";
@@ -21,11 +22,39 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
 
 function TourPage() {
   const gigs = useMusician((s) => s.gigs);
+  const openGig = useMusician((s) => s.openGig);
   const entries = useMusician((s) => s.money);
   const merchSales = useMusician((s) => s.merchSales);
   const merchProducts = useMusician((s) => s.merchProducts);
   const merchOrders = useMusician((s) => s.merchOrders);
   const merchRefunds = useMusician((s) => s.merchRefunds);
+
+  const stopYieldById = useMemo(() => {
+    const map = new Map<string, ReturnType<typeof computePreShowYield>>();
+    for (const gig of gigs) {
+      const recordedCosts = entries
+        .filter((entry) => entry.gigId === gig.id && entry.type === "cost")
+        .reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0);
+      const payout =
+        typeof gig.guaranteeOrSplitEst === "number" && Number.isFinite(gig.guaranteeOrSplitEst)
+          ? gig.guaranteeOrSplitEst
+          : Math.max(0, Number.isFinite(gig.fee) ? gig.fee : 0);
+      const roadRoom =
+        typeof gig.roadAndRoomCostEst === "number" && Number.isFinite(gig.roadAndRoomCostEst)
+          ? gig.roadAndRoomCostEst
+          : 0;
+      map.set(
+        gig.id,
+        computePreShowYield({
+          guaranteeOrSplitEst: payout,
+          estAttendance: gig.estAttendance ?? 0,
+          merchPerHeadEst: gig.merchPerHeadEst ?? 0,
+          roadAndRoomCostEst: roadRoom + Math.max(0, recordedCosts),
+        }),
+      );
+    }
+    return map;
+  }, [gigs, entries]);
 
   const tour = useMemo(() => {
     const stops = gigs
@@ -35,14 +64,21 @@ function TourPage() {
           .filter((entry) => entry.gigId === gig.id && entry.type === "cost")
           .reduce((sum, entry) => sum + (Number.isFinite(entry.amount) ? entry.amount : 0), 0);
         const netRecordedCosts = Math.max(0, costs);
+        const yieldEst = stopYieldById.get(gig.id);
+        const expectedGuarantee = yieldEst?.payoutEst ?? Math.max(0, Number.isFinite(gig.fee) ? gig.fee : 0);
+        const expectedMerch = yieldEst?.merchGrossEst ?? 0;
+        const roadAndRoom =
+          typeof gig.roadAndRoomCostEst === "number" && Number.isFinite(gig.roadAndRoomCostEst)
+            ? Math.max(0, gig.roadAndRoomCostEst)
+            : 0;
         return {
           id: gig.id,
           label: [gig.venue || gig.name, gig.city].filter(Boolean).join(" · "),
           date: gig.date,
-          expectedGuarantee: Math.max(0, Number.isFinite(gig.fee) ? gig.fee : 0),
+          expectedGuarantee,
           expectedDoor: 0,
-          expectedMerch: 0,
-          travelCost: 0,
+          expectedMerch,
+          travelCost: roadAndRoom,
           lodgingCost: 0,
           crewCost: 0,
           productionCost: 0,
@@ -51,7 +87,7 @@ function TourPage() {
         };
       });
     return summarizeTour(stops);
-  }, [gigs, entries]);
+  }, [gigs, entries, stopYieldById]);
 
   const actualMerch = useMemo(
     () => summarizeMerch(merchProducts, merchSales, merchOrders, merchRefunds),
@@ -85,11 +121,11 @@ function TourPage() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <Metric label="Baseline gross" value={money(tour.expectedGross)} detail="Guarantees only; other income is unentered" />
-        <Metric label="Linked costs" value={money(tour.expectedCosts)} detail="Recorded net expenses only" />
-        <Metric label="Baseline net" value={money(tour.expectedNet)} detail="Before unrecorded show costs" />
-        <Metric label="Confidence-weighted baseline" value={money(tour.riskAdjustedNet)} detail="Not a guarantee of profit" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <Metric label="Projected gross" value={money(tour.expectedGross)} detail="Payout/guarantee + pre-show merch est." />
+        <Metric label="Road & linked costs" value={money(tour.expectedCosts)} detail="Pre-show road/room + logged expenses" />
+        <Metric label="Projected net yield" value={money(tour.expectedNet)} detail="Across holds, booked & completed stops" />
+        <Metric label="Confidence-weighted net" value={money(tour.riskAdjustedNet)} detail="Weighted by gig confidence %" />
         <Metric label="Actual merch sales" value={money(actualMerchRevenue)} detail={`${actualMerchUnits} units recorded`} />
         <Metric label="Merch gross profit" value={money(actualMerchProfit)} detail="Recorded sales less saved item costs" />
       </div>
@@ -98,9 +134,9 @@ function TourPage() {
         <div className="flex items-start gap-3">
           <Wallet className="mt-0.5 size-4 shrink-0 text-accent" />
           <div>
-            <div className="text-sm font-semibold">What these numbers mean</div>
+            <div className="text-sm font-semibold">Live tour economics</div>
             <p className="mt-1 text-xs leading-relaxed text-muted">
-              These are incomplete planning baselines, not verified profit forecasts. Gross includes saved gig guarantees only; linked costs include recorded expenses and reversals. Door income, merch projections, fuel, lodging, crew, production, taxes, and other unentered items are missing—not assumed to be zero. Add those amounts to the linked show records before relying on the net figure. Actual merch totals exclude refunded orders and are reported separately from projected show income.
+              Combines each stop&apos;s pre-show net yield estimate (guarantee/split, attendance × merch/head, and road/room costs) with logged show expenses. Click any stop below to tune numbers in the Gig Drawer.
             </p>
           </div>
         </div>
@@ -128,24 +164,32 @@ function TourPage() {
               const gig = gigs.find((item) => item.id === stop.id);
               const status = gig?.status ?? "lead";
               const merch = merchByGig.get(stop.id);
+              const yieldEst = stopYieldById.get(stop.id);
               return (
-                <Card key={stop.id} className="p-4">
+                <button
+                  key={stop.id}
+                  type="button"
+                  onClick={() => openGig(stop.id)}
+                  className="block w-full text-left"
+                >
+                <Card className="p-4 transition-colors hover:border-accent/50">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-bold">{gig?.name || stop.label}</div>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted">
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
                         <MapPin className="size-3.5 shrink-0" />
                         <span className="truncate">{[gig?.venue, gig?.city].filter(Boolean).join(" · ") || "Venue details needed"}</span>
+                        {gig?.corridor ? <span className="text-info">· {gig.corridor}</span> : null}
                       </div>
                       <div className="mt-1 text-xs text-muted">{longDate(gig?.date)} · {status}</div>
-                    {merch && <div className="mt-1 text-xs font-medium text-accent">Merch: {money(merch.revenue)} sales · {merch.units} units · {money(merch.grossProfit)} gross profit</div>}
+                      {merch && <div className="mt-1 text-xs font-medium text-accent">Actual merch: {money(merch.revenue)} sales · {merch.units} units · {money(merch.grossProfit)} gross profit</div>}
                     </div>
                     <div className="shrink-0 text-right">
-                      <div className="text-sm font-bold tabular">{money(stop.expectedNet)}</div>
-                      <div className="mt-1 text-[10px] text-muted">baseline net</div>
+                      <div className={`text-sm font-bold tabular ${stop.expectedNet < 0 ? "text-danger" : "text-live"}`}>{money(stop.expectedNet)}</div>
+                      <div className="mt-1 text-[10px] text-muted">projected net</div>
                     </div>
                   </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">
+                  <div className="mt-3 grid grid-cols-4 gap-2 border-t border-line pt-3">
                     <div>
                       <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted">Gross</div>
                       <div className="mt-1 text-xs font-semibold tabular">{money(stop.expectedGross)}</div>
@@ -155,11 +199,20 @@ function TourPage() {
                       <div className="mt-1 text-xs font-semibold tabular">{money(stop.expectedCosts)}</div>
                     </div>
                     <div>
+                      <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted">BE heads</div>
+                      <div className="mt-1 text-xs font-semibold tabular">
+                        {yieldEst?.breakEvenAttendance === null || yieldEst?.breakEvenAttendance === undefined
+                          ? "—"
+                          : yieldEst.breakEvenAttendance}
+                      </div>
+                    </div>
+                    <div>
                       <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted">Confidence</div>
                       <div className="mt-1 text-xs font-semibold tabular">{Math.round(stop.confidence * 100)}%</div>
                     </div>
                   </div>
                 </Card>
+                </button>
               );
             })}
           </div>
