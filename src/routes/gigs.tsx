@@ -1,4 +1,5 @@
 import { BookingSummary } from "@/components/booking-summary";
+import { computeMultiDateRunRollup, getGigRunGroup } from "@/lib/agent-signal-scoring";
 import { bookingDraft } from "@/lib/booking-workflow";
 import { getGmailConnectionStatus } from "@/lib/gmail-status";
 import { previewGmailInbox, previewGmailReplyHeaders } from "@/lib/gmail-inbox";
@@ -132,9 +133,11 @@ function GigsPage() {
   const unsourced = active.filter((g) => !g.researchSourceUrl);
   const missingContact = active.filter((g) => !g.outreachContact?.trim() && !(g.bookingContactName && g.bookingContactSourceUrl));
   const [attentionFilter, setAttentionFilter] = useState<"all" | "unsourced" | "contact">("all");
+  const [runFilter, setRunFilter] = useState<string>("all");
+  const runRollup = computeMultiDateRunRollup(gigs, runFilter);
 
   const filtered = filter === "all" ? gigs : gigs.filter((g) => g.status === filter);
-  const shown = filtered.filter((g) => (!followUpOnly || (ACTIVE_BOOKING_STATUSES.includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && (attentionFilter === "all" || (ACTIVE_BOOKING_STATUSES.includes(g.status) && (attentionFilter === "unsourced" ? !g.researchSourceUrl : (!g.outreachContact?.trim() && !(g.bookingContactName && g.bookingContactSourceUrl))))) && [g.name, g.venue, g.city, g.outreachContact].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const shown = filtered.filter((g) => (runRollup.selectedRun === "all" || getGigRunGroup(g) === runRollup.selectedRun) && (!followUpOnly || (ACTIVE_BOOKING_STATUSES.includes(g.status) && Boolean(g.outreachNextFollowUp && g.outreachNextFollowUp <= today))) && (attentionFilter === "all" || (ACTIVE_BOOKING_STATUSES.includes(g.status) && (attentionFilter === "unsourced" ? !g.researchSourceUrl : (!g.outreachContact?.trim() && !(g.bookingContactName && g.bookingContactSourceUrl))))) && [g.name, g.venue, g.city, g.outreachContact, g.runLabel ?? "", g.corridor ?? ""].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
 
   // Build the board groups from the same filtered records rendered in their cards.
   // Otherwise search and attention filters leave unrelated empty stage columns visible.
@@ -218,6 +221,142 @@ function GigsPage() {
         <div className="command-surface hidden rounded-xl p-3 md:block"><div className="command-kicker text-muted">Source recorded</div><div className="mt-2 font-display text-3xl font-extrabold tabular">{sourced.length}<span className="text-sm text-muted"> / {active.length}</span></div><p className="mt-1 text-xs text-muted">Source recorded ≠ verified</p></div>
         <div className="command-surface hidden rounded-xl p-4 md:block"><div className="command-kicker text-muted">Open pipeline</div><div className="mt-2 font-display text-2xl font-extrabold tabular text-live">{money(pipelineValue(gigs))}</div><p className="mt-1 text-xs text-muted">Unconfirmed opportunity value</p></div>
       </section>
+      <section aria-label="Multi-date run roll-up economics" className="mb-4 rounded-2xl border border-[#243652] bg-[#0A1628]/90 p-4 shadow-card">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#E25822]">
+              Multi-Date Run Roll-Up
+            </div>
+            <p className="mt-0.5 text-xs text-muted">
+              Cumulative forecast &amp; post-show settled economics by run label or corridor.
+            </p>
+          </div>
+          <span
+            className={cn(
+              "rounded-full border px-2.5 py-0.5 text-[11px] font-bold",
+              runRollup.showCount === 0
+                ? "border-line bg-bg text-muted"
+                : runRollup.clearsBreakEven
+                  ? "border-live/50 bg-live/15 text-live"
+                  : "border-danger/50 bg-danger/15 text-danger",
+            )}
+          >
+            {runRollup.showCount === 0
+              ? "No stops in scope"
+              : runRollup.clearsBreakEven
+                ? runRollup.tightStopsCount > 0
+                  ? `Clears break-even · absorbs ${runRollup.tightStopsCount} tight stop${runRollup.tightStopsCount > 1 ? "s" : ""}`
+                  : "Run clears break-even"
+                : "Below break-even overall"}
+          </span>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            aria-pressed={runRollup.selectedRun === "all"}
+            onClick={() => setRunFilter("all")}
+            className={cn(
+              "min-h-8 rounded-full border px-2.5 text-[11px] font-semibold",
+              runRollup.selectedRun === "all"
+                ? "border-[#E25822] bg-[#E25822]/20 text-[#ffb088]"
+                : "border-line bg-bg/50 text-muted hover:text-fg",
+            )}
+          >
+            All gigs ({gigs.length})
+          </button>
+          {runRollup.availableRuns.map((run) => (
+            <button
+              key={run}
+              type="button"
+              aria-pressed={runRollup.selectedRun === run}
+              onClick={() => setRunFilter(run)}
+              className={cn(
+                "min-h-8 max-w-full truncate rounded-full border px-2.5 text-[11px] font-semibold",
+                runRollup.selectedRun === run
+                  ? "border-[#E25822] bg-[#E25822]/20 text-[#ffb088]"
+                  : "border-line bg-bg/50 text-soft hover:border-[#E25822]/50 hover:text-fg",
+              )}
+            >
+              {run}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="rounded-xl border border-line bg-bg/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">Stops</div>
+            <div className="tabular mt-1 font-display text-xl font-extrabold text-fg">
+              {runRollup.showCount}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted">{runRollup.settledCount} settled</div>
+          </div>
+          <div className="rounded-xl border border-line bg-bg/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Forecast gross
+            </div>
+            <div className="tabular mt-1 font-display text-xl font-extrabold text-fg">
+              {money(runRollup.forecastGross)}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted">
+              incl. {money(runRollup.forecastMerchGross)} merch
+            </div>
+          </div>
+          <div className="rounded-xl border border-line bg-bg/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Road &amp; room
+            </div>
+            <div className="tabular mt-1 font-display text-xl font-extrabold text-warn">
+              {money(runRollup.forecastRoadAndRoom)}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted">estimated overhead</div>
+          </div>
+          <div className="rounded-xl border border-line bg-bg/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Forecast run net
+            </div>
+            <div
+              className={cn(
+                "tabular mt-1 font-display text-xl font-extrabold",
+                runRollup.forecastNetYield >= 0 ? "text-live" : "text-danger",
+              )}
+            >
+              {runRollup.forecastNetYield >= 0 ? "+" : "-"}
+              {money(Math.abs(runRollup.forecastNetYield))}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted">cumulative projection</div>
+          </div>
+          <div className="col-span-2 rounded-xl border border-line bg-bg/70 p-3 sm:col-span-1">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-info">
+              Settled actual net
+            </div>
+            <div
+              className={cn(
+                "tabular mt-1 font-display text-xl font-extrabold",
+                runRollup.settledCount === 0
+                  ? "text-muted"
+                  : runRollup.settledActualNetYield >= 0
+                    ? "text-live"
+                    : "text-danger",
+              )}
+            >
+              {runRollup.settledCount === 0
+                ? "—"
+                : `${runRollup.settledActualNetYield >= 0 ? "+" : "-"}${money(
+                    Math.abs(runRollup.settledActualNetYield),
+                  )}`}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted">
+              {runRollup.settledVariance === null
+                ? "log actuals in GigDrawer"
+                : `${runRollup.settledVariance >= 0 ? "+" : "-"}${money(
+                    Math.abs(runRollup.settledVariance),
+                  )} vs forecast`}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section aria-label="Booking action queue" className="mb-4 hidden rounded-2xl border border-line-strong bg-surface p-4 lg:block">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="font-display text-base font-bold">Action queue</div><p className="mt-1 text-xs text-muted">Review missing information before outreach.</p></div><button type="button" className="text-xs font-semibold text-accent hover:underline" onClick={() => { setAttentionFilter("all"); setFollowUpOnly(false); setFilter("all"); setQuery(""); }}>Clear filters</button></div>
         <div className="mt-4 grid gap-2 sm:grid-cols-3">

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
-import { computePreShowYield } from "@/lib/agent-signal-scoring";
+import { computePostShowSettlement } from "@/lib/agent-signal-scoring";
 import { suggestedFollowUp, bookingDraft } from "@/lib/booking-workflow";
 import { useMusician } from "@/lib/store";
 import {
@@ -124,14 +124,35 @@ function GigForm({
     String(initial?.roadAndRoomCostEst ?? ""),
   );
   const [anchorGapNote, setAnchorGapNote] = useState(initial?.anchorGapNote ?? "");
+  const [runLabel, setRunLabel] = useState(initial?.runLabel ?? "");
+  const [actualPayout, setActualPayout] = useState(
+    initial?.actualPayout !== undefined ? String(initial.actualPayout) : "",
+  );
+  const [actualAttendance, setActualAttendance] = useState(
+    initial?.actualAttendance !== undefined ? String(initial.actualAttendance) : "",
+  );
+  const [actualMerchGross, setActualMerchGross] = useState(
+    initial?.actualMerchGross !== undefined ? String(initial.actualMerchGross) : "",
+  );
+  const [actualRoadAndRoomCost, setActualRoadAndRoomCost] = useState(
+    initial?.actualRoadAndRoomCost !== undefined ? String(initial.actualRoadAndRoomCost) : "",
+  );
+  const [settlementNote, setSettlementNote] = useState(initial?.settlementNote ?? "");
   const [draftCopied, setDraftCopied] = useState(false);
 
-  const yieldEst = computePreShowYield({
+  const settlement = computePostShowSettlement({
     guaranteeOrSplitEst: Number(guaranteeOrSplitEst) || 0,
     estAttendance: Number(estAttendance) || 0,
     merchPerHeadEst: Number(merchPerHeadEst) || 0,
     roadAndRoomCostEst: Number(roadAndRoomCostEst) || 0,
+    actualPayout: actualPayout.trim() === "" ? null : Number(actualPayout),
+    actualAttendance: actualAttendance.trim() === "" ? null : Number(actualAttendance),
+    actualMerchGross: actualMerchGross.trim() === "" ? null : Number(actualMerchGross),
+    actualRoadAndRoomCost:
+      actualRoadAndRoomCost.trim() === "" ? null : Number(actualRoadAndRoomCost),
+    settledAt: initial?.settledAt,
   });
+  const yieldEst = settlement.forecast;
 
   function copyOutreachDraft() {
     if (!outreachDraft.trim()) return;
@@ -186,6 +207,22 @@ function GigForm({
             roadAndRoomCostEst: Number(roadAndRoomCostEst) || 0,
             anchorGapNote: anchorGapNote.trim() || undefined,
             gapFitScore: initial?.gapFitScore,
+            runLabel: runLabel.trim() || undefined,
+            actualPayout: actualPayout.trim() === "" ? undefined : Math.max(0, Number(actualPayout) || 0),
+            actualAttendance:
+              actualAttendance.trim() === ""
+                ? undefined
+                : Math.max(0, Math.round(Number(actualAttendance) || 0)),
+            actualMerchGross:
+              actualMerchGross.trim() === "" ? undefined : Math.max(0, Number(actualMerchGross) || 0),
+            actualRoadAndRoomCost:
+              actualRoadAndRoomCost.trim() === ""
+                ? undefined
+                : Math.max(0, Number(actualRoadAndRoomCost) || 0),
+            settledAt: settlement.hasActuals
+              ? initial?.settledAt || new Date().toISOString()
+              : undefined,
+            settlementNote: settlementNote.trim() || undefined,
             researchVerifiedAt:
               researchSourceUrl === initial?.researchSourceUrl ? initial?.researchVerifiedAt : "",
           });
@@ -194,7 +231,7 @@ function GigForm({
         }
       }}
     >
-      {/* Sticky Pre-Show Net Yield Summary Bar */}
+      {/* Sticky Pre-Show Net Yield & Settlement Summary Bar */}
       <div
         aria-label="Live pre-show net yield summary"
         className="sticky top-0 z-10 -mx-5 border-y border-[#243652] bg-[#0A1628]/95 px-5 py-2.5 backdrop-blur-md"
@@ -202,7 +239,7 @@ function GigForm({
         <div className="grid grid-cols-4 gap-2 text-center">
           <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
-              Net yield
+              Forecast net
             </div>
             <div
               className={`tabular mt-0.5 text-sm font-bold ${
@@ -240,6 +277,49 @@ function GigForm({
             </div>
           </div>
         </div>
+        {settlement.hasActuals ? (
+          <div className="mt-2 grid grid-cols-3 gap-2 border-t border-[#243652]/80 pt-2 text-center">
+            <div className="min-w-0">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-info">
+                Settled net
+              </div>
+              <div
+                className={`tabular mt-0.5 text-xs font-bold ${
+                  settlement.actualNetYield >= 0 ? "text-live" : "text-danger"
+                }`}
+              >
+                {settlement.actualNetYield >= 0 ? "+" : "-"}$
+                {Math.abs(settlement.actualNetYield).toFixed(0)}
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                Actual $/head
+              </div>
+              <div className="tabular mt-0.5 text-xs font-bold text-fg">
+                {settlement.actualMerchPerHead === null
+                  ? "N/A"
+                  : `$${settlement.actualMerchPerHead.toFixed(2)}`}
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                Variance
+              </div>
+              <div
+                className={`tabular mt-0.5 text-xs font-bold ${
+                  (settlement.netYieldVariance ?? 0) >= 0 ? "text-live" : "text-danger"
+                }`}
+              >
+                {settlement.netYieldVariance === null
+                  ? "—"
+                  : `${settlement.netYieldVariance >= 0 ? "+" : "-"}$${Math.abs(
+                      settlement.netYieldVariance,
+                    ).toFixed(0)}`}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <Field label="Opportunity">
@@ -407,13 +487,22 @@ function GigForm({
             </NativeSelect>
           </Field>
         </div>
-        <Field label="Anchor routing gap note">
-          <Input
-            value={anchorGapNote}
-            onChange={(e) => setAnchorGapNote(e.target.value)}
-            placeholder="Bridges Fri Nashville -> Sun Asheville…"
-          />
-        </Field>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Multi-date run label">
+            <Input
+              value={runLabel}
+              onChange={(e) => setRunLabel(e.target.value)}
+              placeholder="Spring 2027 I-65 Run…"
+            />
+          </Field>
+          <Field label="Anchor routing gap note">
+            <Input
+              value={anchorGapNote}
+              onChange={(e) => setAnchorGapNote(e.target.value)}
+              placeholder="Bridges Fri Nashville -> Sun Asheville…"
+            />
+          </Field>
+        </div>
       </section>
 
       {/* Section 2: Booking Stage & Readiness */}
@@ -516,6 +605,130 @@ function GigForm({
             ) : null}
           </div>
         </div>
+      </section>
+
+      {/* Section 4: Post-Show Settlement (Forecast vs. Actuals) */}
+      <section
+        aria-label="Post-show settlement actuals"
+        className="space-y-3 rounded-xl border border-line-strong bg-surface p-3.5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-fg">
+            4. Post-show settlement (Forecast vs. Actuals)
+          </h3>
+          {settlement.hasActuals ? (
+            <span className="rounded-full border border-live/45 bg-live/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-live">
+              Settled
+            </span>
+          ) : (
+            <span className="rounded-full border border-line bg-bg px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Awaiting show
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Actual payout ($)">
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={actualPayout}
+              onChange={(e) => setActualPayout(e.target.value)}
+              placeholder="620"
+            />
+          </Field>
+          <Field label="Actual attendance">
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={actualAttendance}
+              onChange={(e) => setActualAttendance(e.target.value)}
+              placeholder="95"
+            />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Actual merch gross ($)">
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={actualMerchGross}
+              onChange={(e) => setActualMerchGross(e.target.value)}
+              placeholder="540"
+            />
+          </Field>
+          <Field label="Actual road &amp; room cost ($)">
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={actualRoadAndRoomCost}
+              onChange={(e) => setActualRoadAndRoomCost(e.target.value)}
+              placeholder="380"
+            />
+          </Field>
+        </div>
+        <div className="grid grid-cols-3 gap-2 rounded-lg border border-line bg-bg/70 p-2.5 text-center">
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Actual net
+            </div>
+            <div
+              className={`tabular mt-0.5 text-sm font-bold ${
+                !settlement.hasActuals
+                  ? "text-muted"
+                  : settlement.actualNetYield >= 0
+                    ? "text-live"
+                    : "text-danger"
+              }`}
+            >
+              {!settlement.hasActuals
+                ? "—"
+                : `${settlement.actualNetYield >= 0 ? "+" : "-"}$${Math.abs(
+                    settlement.actualNetYield,
+                  ).toFixed(0)}`}
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Actual $/head
+            </div>
+            <div className="tabular mt-0.5 text-sm font-bold text-fg">
+              {settlement.actualMerchPerHead === null
+                ? "—"
+                : `$${settlement.actualMerchPerHead.toFixed(2)}`}
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+              vs. forecast
+            </div>
+            <div
+              className={`tabular mt-0.5 text-sm font-bold ${
+                settlement.netYieldVariance === null
+                  ? "text-muted"
+                  : settlement.netYieldVariance >= 0
+                    ? "text-live"
+                    : "text-danger"
+              }`}
+            >
+              {settlement.netYieldVariance === null
+                ? "—"
+                : `${settlement.netYieldVariance >= 0 ? "+" : "-"}$${Math.abs(
+                    settlement.netYieldVariance,
+                  ).toFixed(0)}`}
+            </div>
+          </div>
+        </div>
+        <Field label="Settlement note">
+          <Input
+            value={settlementNote}
+            onChange={(e) => setSettlementNote(e.target.value)}
+            placeholder="Door split payout, merch table highlights, hotel/gas notes…"
+          />
+        </Field>
       </section>
       <section
         aria-label="Booking research and outreach"
