@@ -59,7 +59,12 @@ const NAV_GROUPS = [
   },
 ] as const;
 
-const NAV = NAV_GROUPS.flatMap((group) => group.items);
+type NavItem = (typeof NAV_GROUPS)[number]["items"][number];
+const NAV: readonly NavItem[] = [
+  ...NAV_GROUPS[0].items,
+  ...NAV_GROUPS[1].items,
+  ...NAV_GROUPS[2].items,
+];
 
 function SignInScreen() {
   return (
@@ -135,7 +140,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     : gigs.slice(0, 3);
   const peopleMatches = trimmedCommandQuery
     ? people
-        .filter((p) => [p.name, p.role, p.org].join(" ").toLowerCase().includes(trimmedCommandQuery))
+        .filter((p) =>
+          [p.name, p.role, p.city, p.contact].join(" ").toLowerCase().includes(trimmedCommandQuery),
+        )
         .slice(0, 4)
     : [];
   const pageTitle =
@@ -271,7 +278,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     {peopleMatches.map((p) => (
                       <button key={p.id} type="button" onClick={() => {setCommandSearchOpen(false);setCommandQuery("");openPerson(p.id);}} className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-left text-sm font-semibold text-fg transition-colors hover:bg-accent/10 hover:text-accent">
                         <span className="flex min-w-0 items-center gap-2.5"><Users className="size-4 shrink-0 text-accent"/><span className="truncate">{p.name}</span></span>
-                        <span className="shrink-0 text-[11px] font-normal text-muted">{p.org || p.role}</span>
+                        <span className="shrink-0 text-[11px] font-normal text-muted">{p.city || p.role}</span>
                       </button>
                     ))}
                   </div>
