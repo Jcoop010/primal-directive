@@ -9,7 +9,7 @@ import { researchSavedVenue } from "@/lib/venue-research-api";
 import { researchStatus, venueEvidenceSources } from "@/lib/venue-research";
 import type { Gig } from "@/lib/types";
 import { LayoutGrid, List, Search, CalendarClock } from "lucide-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, Eyebrow } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { downloadCsv, money } from "@/lib/format";
@@ -404,6 +404,22 @@ function GigsPage() {
                 {items.map((gig) => <div key={gig.id} className="overflow-hidden rounded-xl border border-line bg-bg/80"><button type="button" onClick={() => openGig(gig.id)} className="w-full rounded-xl border border-line bg-bg/80 p-3 text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                   <BookingSummary gig={gig} today={today} />
                 </button>
+                {(gig.status === "booked" || gig.status === "hold" || gig.bookingStage === "hold_confirmed" || gig.bookingStage === "advance_in_progress") ? (
+                  <div className="flex items-center justify-between gap-2 border-t border-line/60 px-3 py-2 text-[11px]">
+                    <span className="truncate text-muted">
+                      {gig.loadInTime || gig.setTime
+                        ? `Load-in ${gig.loadInTime || "TBD"} · Set ${gig.setTime || "TBD"}`
+                        : "Show advance ready"}
+                    </span>
+                    <Link
+                      to="/day-sheet"
+                      search={{ gig: gig.id }}
+                      className="shrink-0 font-bold text-[#E25822] hover:underline"
+                    >
+                      Day Sheet →
+                    </Link>
+                  </div>
+                ) : null}
                 <details className="px-3 pb-3 text-xs"><summary className="cursor-pointer py-2 text-muted hover:text-accent">More details & venue evidence</summary>
                   <div className="mb-3 grid grid-cols-2 gap-3 rounded-lg border border-line bg-surface-2/40 p-3 text-[11px]">
                     <div><span className="text-muted">Outreach contact</span><div className="break-words font-semibold">{gig.outreachContact || "Not recorded"}</div></div>
@@ -457,6 +473,15 @@ function GigsPage() {
             >
               <BookingSummary gig={g} today={today} />
             </button>
+            <div className="flex flex-wrap items-center justify-between gap-2 px-5 pb-2 text-xs">
+              <Link
+                to="/day-sheet"
+                search={{ gig: g.id }}
+                className="font-semibold text-[#E25822] hover:underline"
+              >
+                Open Road Day Sheet →
+              </Link>
+            </div>
             <details className="px-5 pb-4 text-xs">
               <summary className="cursor-pointer text-accent">Research & outreach</summary>
               <p className="my-2 text-muted">{g.researchVerifiedAt ? "Source reviewed on " + g.researchVerifiedAt : "Research not independently verified. Do not assume contact, availability or booking terms are confirmed."}</p>

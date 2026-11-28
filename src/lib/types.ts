@@ -126,6 +126,16 @@ export type Gig = import("./venue-evidence").VenueEvidence & {
   actualRoadAndRoomCost?: number;
   settledAt?: string;
   settlementNote?: string;
+  loadInTime?: string;
+  soundcheckTime?: string;
+  doorsTime?: string;
+  setTime?: string;
+  curfewTime?: string;
+  venueAddress?: string;
+  parkingLoadInNotes?: string;
+  productionContact?: string;
+  backlineWifiNotes?: string;
+  guestListHospitality?: string;
   stageHistory?: { from: GigStatus; to: GigStatus; at: string }[];
   /** Research is not proof that the booking contact or opportunity is verified. */
   venueResearchStatus?: "Not researched" | "Researching" | "Partially verified" | "Verified" | "Research unavailable";

@@ -5,6 +5,8 @@ import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import {
   applyCorridorPreset,
+  buildBandCallSheetText,
+  buildVenueAdvanceEmail,
   clearAnchorsFromFilterState,
   computeMultiDateRunRollup,
   computePostShowSettlement,
@@ -38,6 +40,7 @@ async function createTestSql(): Promise<Sql> {
     "0013_band_booking_routing.sql",
     "0014_routing_gap_and_yield.sql",
     "0015_post_show_settlement_and_runs.sql",
+    "0016_show_advance_day_sheet.sql",
   ]) {
     await pg.exec(readFileSync(join(process.cwd(), "migrations", file), "utf8"));
   }
@@ -618,4 +621,116 @@ test("migration 0015 persists post-show settlement columns and run_label on publ
   assert.equal(Number(updated[0]?.actual_road_and_room_cost), 410);
   assert.equal(updated[0]?.settlement_note, "Strong merch night");
   assert.equal(updated[0]?.run_label, "Spring 2027 I-65 Run");
+});
+
+test("buildVenueAdvanceEmail and buildBandCallSheetText format populated schedules and graceful fallbacks", () => {
+  const fullEmail = buildVenueAdvanceEmail(
+    {
+      venue: "Zanzabar",
+      city: "Louisville, KY",
+      date: "2027-05-08",
+      loadInTime: "5:00 PM",
+      soundcheckTime: "5:45 PM",
+      doorsTime: "7:00 PM",
+      setTime: "8:30 PM",
+      curfewTime: "11:30 PM",
+      parkingLoadInNotes: "Load-in via rear alley ramp",
+      productionContact: "Alex PM (555-0142)",
+      backlineWifiNotes: "Shared house drum shell pack",
+      guestListHospitality: "6 guest spots + $15 buyout",
+      techPlotReady: true,
+    },
+    "The Midnight Echo",
+  );
+  assert.match(fullEmail, /Subject: Show Advance — The Midnight Echo at Zanzabar \(2027-05-08\)/);
+  assert.match(fullEmail, /Hi Alex PM \(555-0142\),/);
+  assert.match(fullEmail, /Load-in: 5:00 PM/);
+  assert.match(fullEmail, /Set time: 8:30 PM/);
+  assert.match(fullEmail, /stage plot and input list are finalized/i);
+
+  const fallbackEmail = buildVenueAdvanceEmail({ name: "The Local" });
+  assert.match(fallbackEmail, /Subject: Show Advance — Our band at The Local/);
+  assert.match(fallbackEmail, /Load-in: TBD — please confirm/);
+
+  const callSheet = buildBandCallSheetText({
+    venue: "Zanzabar",
+    city: "Louisville, KY",
+    date: "2027-05-08",
+    runLabel: "Spring 2027 I-65 Run",
+    venueAddress: "2100 S Preston St, Louisville, KY",
+    loadInTime: "5:00 PM",
+    soundcheckTime: "5:45 PM",
+    doorsTime: "7:00 PM",
+    setTime: "8:30 PM",
+    curfewTime: "11:30 PM",
+    parkingLoadInNotes: "Rear alley ramp",
+    productionContact: "Alex PM",
+  });
+  assert.match(callSheet, /DAY SHEET: Zanzabar · Louisville, KY — 2027-05-08 \[Spring 2027 I-65 Run\]/);
+  assert.match(callSheet, /Address: 2100 S Preston St, Louisville, KY/);
+  assert.match(callSheet, /Load-in 5:00 PM \| SC 5:45 PM \| Doors 7:00 PM \| Set 8:30 PM \| Curfew 11:30 PM/);
+
+  const fallbackCallSheet = buildBandCallSheetText({});
+  assert.match(fallbackCallSheet, /DAY SHEET: Venue TBD — Date TBD/);
+  assert.match(fallbackCallSheet, /Address: TBD/);
+});
+
+test("migration 0016 persists show advance schedule and logistics columns on public.agent_signals", async () => {
+  const sql = await createTestSql();
+  const req = new Request("https://primal-directive-loose-ends-co.vercel.app/api/intake/agent-signal", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: "Bearer test-secret" },
+    body: JSON.stringify({
+      sourceAgent: "band-scout-bot",
+      signalType: "tour_routing",
+      title: "HI-FI Indy — Advance & Day Sheet Test",
+      summary: "Fountain Square touring stop.",
+      sourceUrl: "https://hifiindy.com/",
+      idempotencyKey: "advance-0016-test",
+    }),
+  });
+  const created = await handleAgentSignalRequest(req, {
+    secret: "test-secret",
+    sqlProvider: async () => sql,
+  });
+  assert.equal(created.status, 201);
+  const { id } = (await created.json()) as { id: string };
+
+  const updated = await sql.query<{
+    load_in_time: string;
+    soundcheck_time: string;
+    doors_time: string;
+    set_time: string;
+    curfew_time: string;
+    venue_address: string;
+    parking_load_in_notes: string;
+    production_contact: string;
+    backline_wifi_notes: string;
+    guest_list_hospitality: string;
+  }>(
+    `update public.agent_signals
+     set load_in_time = '4:30 PM',
+         soundcheck_time = '5:15 PM',
+         doors_time = '7:00 PM',
+         set_time = '8:45 PM',
+         curfew_time = '11:30 PM',
+         venue_address = '1043 Virginia Ave, Indianapolis, IN',
+         parking_load_in_notes = 'Rear Alley Loading Dock',
+         production_contact = 'Sam PM (317-555-0199)',
+         backline_wifi_notes = 'House Ampeg cab + Wi-Fi at FOH',
+         guest_list_hospitality = '8 guest spots, green room upstairs'
+     where id = $1
+     returning load_in_time, soundcheck_time, doors_time, set_time, curfew_time, venue_address, parking_load_in_notes, production_contact, backline_wifi_notes, guest_list_hospitality`,
+    [id],
+  );
+  assert.equal(updated[0]?.load_in_time, "4:30 PM");
+  assert.equal(updated[0]?.soundcheck_time, "5:15 PM");
+  assert.equal(updated[0]?.doors_time, "7:00 PM");
+  assert.equal(updated[0]?.set_time, "8:45 PM");
+  assert.equal(updated[0]?.curfew_time, "11:30 PM");
+  assert.equal(updated[0]?.venue_address, "1043 Virginia Ave, Indianapolis, IN");
+  assert.equal(updated[0]?.parking_load_in_notes, "Rear Alley Loading Dock");
+  assert.equal(updated[0]?.production_contact, "Sam PM (317-555-0199)");
+  assert.equal(updated[0]?.backline_wifi_notes, "House Ampeg cab + Wi-Fi at FOH");
+  assert.equal(updated[0]?.guest_list_hospitality, "8 guest spots, green room upstairs");
 });

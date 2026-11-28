@@ -8,7 +8,7 @@
 
 | Component | Status | Notes |
 | --- | --- | --- |
-| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`5d50f82`, `dpl_4pVcUgGzdy4dQKGyVaZ3vjayfcai`). |
+| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0015` landed cleanly on `main` (`aac7a9e`, `dpl_57m1m2qtVA3NLaNZGVn697o71FYG`). |
 | **Production Database (Neon `neon-cerulean-candle`)** | **ACTIVE_HEALTHY (IPv4, No Auto-Pause)** | Replaced suspended Vercel Supabase stores (`supabase-carmine-lever`, `supabase-camel-flame`). `DATABASE_URL` auto-injected in Production & Preview. |
 | **Auth & Sign-In** | **PASS (Google + Email/Pass Live)** | `scripts/oauth-state-smoke.mjs` passed (`HTTP 200`, host-only `__Host-` state cookie). Microsoft OAuth ready once Entra creds are verified. |
 | **Band Discovery, Scoring & Conversion (`/signals` → `/gigs`)** | **LIVE & CLOSED-LOOP** | `POST /api/intake/agent-signal` (Bearer `AGENT_WEBHOOK_SECRET`) scores band/live-music signals (`0011`), surfaces them on `/signals`, and converts them idempotently into `status: "lead"` gigs (`0012`) linked to `/gigs?gig=<id>`. |
@@ -23,6 +23,16 @@
 ---
 
 ## Recent Agent Handoffs
+
+### 2026-11-27 23:32 EST — Antigravity
+- **Migration `0016` & Show Advance Helpers (`feat/show-advance-day-sheet`):** Added `migrations/0016_show_advance_day_sheet.sql` (`load_in_time`, `soundcheck_time`, `doors_time`, `set_time`, `curfew_time`, `venue_address`, `parking_load_in_notes`, `production_contact`, `backline_wifi_notes`, `guest_list_hospitality`, registered in `scripts/migration-plan.test.mjs`), extended `Gig` & `gigSchema`, and added pure `buildVenueAdvanceEmail()` and `buildBandCallSheetText()` helpers in `src/lib/agent-signal-scoring.ts`.
+- **`GigDrawer` Section 5 & Print-Ready Road Day Sheet (`/day-sheet`):** Added Section 5 (**Show advance & day-of-show logistics**) with **Open Day Sheet**, **Copy Advance Email** (2s `Copied!`, human-reviewed only), and **Copy Band Call-Sheet** in `src/components/forms.tsx`; created mobile & `@media print`-ready `src/routes/day-sheet.tsx` (with `print:hidden` shell chrome in `src/components/app-shell.tsx`) and direct **Day Sheet →** links on `/gigs` cards.
+- **Verification & Next Step:** Added unit & PGlite `0016` persistence tests in `src/lib/agent-signal.test.ts`. Verified tests, `typecheck`, `lint`, and production build; opened PR for review before merging into `main`.
+
+### 2026-11-27 23:24 EST — Antigravity
+- **PR #284 Merged & Live (`main@aac7a9e`, `dpl_57m1m2qtVA3NLaNZGVn697o71FYG`):** Squash-merged `feat/settlement-and-run-rollup` into `main` (`aac7a9ec0e69c85f3580e3cc9e33a6209f5d109d`) after green CI (`validate`, `verify`, preview deploy), confirmed `[migrate] applied 0015_post_show_settlement_and_runs.sql` on Neon Postgres `neon-cerulean-candle`, and promoted `primal-directive-6y2c06m52-loose-ends-co.vercel.app` to `https://primal-directive-loose-ends-co.vercel.app`.
+- **All Live Production Checks PASSED:** `GET /api/health` → `200` (`commit: aac7a9ec0e69c85f3580e3cc9e33a6209f5d109d`), `scripts/oauth-state-smoke.mjs` → `200`, `GET /signals` → `200` (6,032B), `GET /gigs` → `200` (5,733B), and `POST /api/intake/agent-signal` (`band-settlement-check-2026-11-27`) → `201` insert (`fitScore: 100`) + `200` deduplicated.
+- **Next Step:** Open `/gigs` in a signed-in browser to test the **Multi-Date Run Roll-Up** summary pills and open a lead in `GigDrawer` (`/gigs?gig=<id>`) to enter **Section 4: Post-show settlement (Forecast vs. Actuals)** and verify live variance in the sticky header.
 
 ### 2026-11-27 23:12 EST — Antigravity
 - **Migration `0015` & Post-Show Settlement (`feat/settlement-and-run-rollup`):** Added `migrations/0015_post_show_settlement_and_runs.sql` (`actual_payout`, `actual_attendance`, `actual_merch_gross`, `actual_road_and_room_cost`, `settled_at`, `settlement_note`, `run_label` + partial indexes, registered in `scripts/migration-plan.test.mjs`) and extended `Gig` types/persistence schemas plus pure `computePostShowSettlement()` & `computeMultiDateRunRollup()` helpers in `src/lib/agent-signal-scoring.ts`.

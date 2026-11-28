@@ -181,6 +181,100 @@ export function buildBookingOutreachDraft(input: {
   );
 }
 
+export interface ShowAdvanceInput {
+  name?: string | null;
+  venue?: string | null;
+  city?: string | null;
+  date?: string | null;
+  runLabel?: string | null;
+  billRole?: SignalBillRole | null;
+  dealType?: SignalDealType | null;
+  epkReady?: boolean;
+  techPlotReady?: boolean;
+  loadInTime?: string | null;
+  soundcheckTime?: string | null;
+  doorsTime?: string | null;
+  setTime?: string | null;
+  curfewTime?: string | null;
+  venueAddress?: string | null;
+  parkingLoadInNotes?: string | null;
+  productionContact?: string | null;
+  backlineWifiNotes?: string | null;
+  guestListHospitality?: string | null;
+  outreachContact?: string | null;
+}
+
+export function buildVenueAdvanceEmail(
+  gig: ShowAdvanceInput,
+  artistName?: string | null,
+): string {
+  const artist = artistName?.trim() || "Our band";
+  const venue = gig.venue?.trim() || gig.name?.trim() || "Venue";
+  const cityPart = gig.city?.trim() ? ` (${gig.city.trim()})` : "";
+  const dateLabel = gig.date?.trim() || "our upcoming date";
+  const contactGreeting = gig.productionContact?.trim() || gig.outreachContact?.trim() || `${venue} production team`;
+
+  const scheduleLines = [
+    `- Load-in: ${gig.loadInTime?.trim() || "TBD — please confirm"}`,
+    `- Soundcheck: ${gig.soundcheckTime?.trim() || "TBD — please confirm"}`,
+    `- Doors: ${gig.doorsTime?.trim() || "TBD — please confirm"}`,
+    `- Set time: ${gig.setTime?.trim() || "TBD — please confirm"}`,
+    `- Curfew / load-out: ${gig.curfewTime?.trim() || "TBD — please confirm"}`,
+  ].join("\n");
+
+  const techNote = gig.techPlotReady
+    ? "Our stage plot and input list are finalized and ready to attach."
+    : "We will send our updated stage plot and input list shortly.";
+  const backlineLine = gig.backlineWifiNotes?.trim()
+    ? `Backline / tech notes: ${gig.backlineWifiNotes.trim()}`
+    : "Backline / tech notes: Please let us know what house backline is shared vs. what we should bring.";
+  const parkingLine = gig.parkingLoadInNotes?.trim()
+    ? `Parking / load-in: ${gig.parkingLoadInNotes.trim()}`
+    : "Parking / load-in: Please share best load-in entrance and van/trailer parking instructions.";
+  const hospitalityLine = gig.guestListHospitality?.trim()
+    ? `Guest list & hospitality: ${gig.guestListHospitality.trim()}`
+    : "Guest list & hospitality: Please confirm guest list cap/cutoff and green room or buyout details.";
+
+  return (
+    `Subject: Show Advance — ${artist} at ${venue} (${dateLabel})\n\n` +
+    `Hi ${contactGreeting},\n\n` +
+    `Advancing our upcoming show for ${artist} at ${venue}${cityPart} on ${dateLabel}. ` +
+    `Please confirm or update the run-of-show and logistics below:\n\n` +
+    `Run of Show:\n${scheduleLines}\n\n` +
+    `Production & Logistics:\n` +
+    `- ${techNote}\n` +
+    `- ${backlineLine}\n` +
+    `- ${parkingLine}\n` +
+    `- ${hospitalityLine}\n\n` +
+    `Please also confirm day-of-show settlement contact and merch table setup. Thanks so much—looking forward to a great night!\n\n` +
+    `Best,\n${artist}`
+  );
+}
+
+export function buildBandCallSheetText(gig: ShowAdvanceInput): string {
+  const venue = gig.venue?.trim() || gig.name?.trim() || "Venue TBD";
+  const city = gig.city?.trim() ? ` · ${gig.city.trim()}` : "";
+  const date = gig.date?.trim() || "Date TBD";
+  const runPart = gig.runLabel?.trim() ? ` [${gig.runLabel.trim()}]` : "";
+
+  const lines = [
+    `DAY SHEET: ${venue}${city} — ${date}${runPart}`,
+    `Address: ${gig.venueAddress?.trim() || "TBD"}`,
+    `Schedule: Load-in ${gig.loadInTime?.trim() || "TBD"} | SC ${gig.soundcheckTime?.trim() || "TBD"} | Doors ${gig.doorsTime?.trim() || "TBD"} | Set ${gig.setTime?.trim() || "TBD"}${gig.curfewTime?.trim() ? ` | Curfew ${gig.curfewTime.trim()}` : ""}`,
+    `Parking / Load-in: ${gig.parkingLoadInNotes?.trim() || "Check with venue PM"}`,
+    `Prod Contact: ${gig.productionContact?.trim() || gig.outreachContact?.trim() || "TBD"}`,
+  ];
+
+  if (gig.backlineWifiNotes?.trim()) {
+    lines.push(`Backline / Wi-Fi: ${gig.backlineWifiNotes.trim()}`);
+  }
+  if (gig.guestListHospitality?.trim()) {
+    lines.push(`Guests / Hosp: ${gig.guestListHospitality.trim()}`);
+  }
+
+  return lines.join("\n");
+}
+
 export function computeSignalScore(input: SignalScoringInput): number {
   if (typeof input.fitScore === "number" && Number.isFinite(input.fitScore)) {
     return clampFitScore(input.fitScore);
