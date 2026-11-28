@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
 import { toIsoDay } from "@/lib/format";
-import { computePostShowSettlement } from "@/lib/agent-signal-scoring";
+import {
+  buildBandCallSheetText,
+  buildVenueAdvanceEmail,
+  computePostShowSettlement,
+} from "@/lib/agent-signal-scoring";
 import { suggestedFollowUp, bookingDraft } from "@/lib/booking-workflow";
 import { useMusician } from "@/lib/store";
 import {
@@ -138,7 +142,20 @@ function GigForm({
     initial?.actualRoadAndRoomCost !== undefined ? String(initial.actualRoadAndRoomCost) : "",
   );
   const [settlementNote, setSettlementNote] = useState(initial?.settlementNote ?? "");
+  const [loadInTime, setLoadInTime] = useState(initial?.loadInTime ?? "");
+  const [soundcheckTime, setSoundcheckTime] = useState(initial?.soundcheckTime ?? "");
+  const [doorsTime, setDoorsTime] = useState(initial?.doorsTime ?? "");
+  const [setTime, setSetTime] = useState(initial?.setTime ?? "");
+  const [curfewTime, setCurfewTime] = useState(initial?.curfewTime ?? "");
+  const [venueAddress, setVenueAddress] = useState(initial?.venueAddress ?? "");
+  const [parkingLoadInNotes, setParkingLoadInNotes] = useState(initial?.parkingLoadInNotes ?? "");
+  const [productionContact, setProductionContact] = useState(initial?.productionContact ?? "");
+  const [backlineWifiNotes, setBacklineWifiNotes] = useState(initial?.backlineWifiNotes ?? "");
+  const [guestListHospitality, setGuestListHospitality] = useState(
+    initial?.guestListHospitality ?? "",
+  );
   const [draftCopied, setDraftCopied] = useState(false);
+  const [advanceCopied, setAdvanceCopied] = useState<"email" | "call" | null>(null);
 
   const settlement = computePostShowSettlement({
     guaranteeOrSplitEst: Number(guaranteeOrSplitEst) || 0,
@@ -164,6 +181,44 @@ function GigForm({
         window.setTimeout(() => setDraftCopied(false), 2000);
       })
       .catch(() => toast.error("Could not copy draft"));
+  }
+
+  function copyAdvanceText(kind: "email" | "call") {
+    const artistName = useMusician.getState().profile.artistName;
+    const payload = {
+      name,
+      venue,
+      city,
+      date,
+      runLabel,
+      billRole: billRole || undefined,
+      dealType: dealType || undefined,
+      epkReady,
+      techPlotReady,
+      loadInTime,
+      soundcheckTime,
+      doorsTime,
+      setTime,
+      curfewTime,
+      venueAddress,
+      parkingLoadInNotes,
+      productionContact,
+      backlineWifiNotes,
+      guestListHospitality,
+      outreachContact,
+    };
+    const text =
+      kind === "email"
+        ? buildVenueAdvanceEmail(payload, artistName)
+        : buildBandCallSheetText(payload);
+    void navigator.clipboard
+      ?.writeText(text)
+      .then(() => {
+        setAdvanceCopied(kind);
+        toast.success(kind === "email" ? "Venue advance email copied" : "Band call-sheet copied");
+        window.setTimeout(() => setAdvanceCopied(null), 2000);
+      })
+      .catch(() => toast.error("Could not copy to clipboard"));
   }
 
   return (
@@ -223,6 +278,16 @@ function GigForm({
               ? initial?.settledAt || new Date().toISOString()
               : undefined,
             settlementNote: settlementNote.trim() || undefined,
+            loadInTime: loadInTime.trim() || undefined,
+            soundcheckTime: soundcheckTime.trim() || undefined,
+            doorsTime: doorsTime.trim() || undefined,
+            setTime: setTime.trim() || undefined,
+            curfewTime: curfewTime.trim() || undefined,
+            venueAddress: venueAddress.trim() || undefined,
+            parkingLoadInNotes: parkingLoadInNotes.trim() || undefined,
+            productionContact: productionContact.trim() || undefined,
+            backlineWifiNotes: backlineWifiNotes.trim() || undefined,
+            guestListHospitality: guestListHospitality.trim() || undefined,
             researchVerifiedAt:
               researchSourceUrl === initial?.researchSourceUrl ? initial?.researchVerifiedAt : "",
           });
@@ -729,6 +794,131 @@ function GigForm({
             placeholder="Door split payout, merch table highlights, hotel/gas notes…"
           />
         </Field>
+      </section>
+
+      {/* Section 5: Show Advance & Day-of-Show Logistics */}
+      <section
+        aria-label="Show advance and day-of-show logistics"
+        className="space-y-3 rounded-xl border border-[#243652] bg-[#0A1628]/80 p-3.5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-fg">
+            5. Show advance &amp; day-of-show logistics
+          </h3>
+          <span className="rounded-full border border-[#E25822]/40 bg-[#E25822]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#ffb088]">
+            Human-reviewed only
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          <Field label="Load-in">
+            <Input
+              value={loadInTime}
+              onChange={(e) => setLoadInTime(e.target.value)}
+              placeholder="5:00 PM"
+            />
+          </Field>
+          <Field label="Soundcheck">
+            <Input
+              value={soundcheckTime}
+              onChange={(e) => setSoundcheckTime(e.target.value)}
+              placeholder="5:45 PM"
+            />
+          </Field>
+          <Field label="Doors">
+            <Input
+              value={doorsTime}
+              onChange={(e) => setDoorsTime(e.target.value)}
+              placeholder="7:00 PM"
+            />
+          </Field>
+          <Field label="Set time">
+            <Input
+              value={setTime}
+              onChange={(e) => setSetTime(e.target.value)}
+              placeholder="8:30 PM"
+            />
+          </Field>
+          <Field label="Curfew">
+            <Input
+              value={curfewTime}
+              onChange={(e) => setCurfewTime(e.target.value)}
+              placeholder="11:30 PM"
+            />
+          </Field>
+        </div>
+        <Field label="Venue street address">
+          <Input
+            value={venueAddress}
+            onChange={(e) => setVenueAddress(e.target.value)}
+            placeholder="2100 S Preston St, Louisville, KY 40217"
+          />
+        </Field>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Parking &amp; load-in notes">
+            <Input
+              value={parkingLoadInNotes}
+              onChange={(e) => setParkingLoadInNotes(e.target.value)}
+              placeholder="Back alley ramp, free lot behind club…"
+            />
+          </Field>
+          <Field label="Production / settlement contact">
+            <Input
+              value={productionContact}
+              onChange={(e) => setProductionContact(e.target.value)}
+              placeholder="Alex (PM) · 555-0142"
+            />
+          </Field>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Backline &amp; Wi-Fi notes">
+            <Input
+              value={backlineWifiNotes}
+              onChange={(e) => setBacklineWifiNotes(e.target.value)}
+              placeholder="Shared house drum shell pack, Wi-Fi at soundboard…"
+            />
+          </Field>
+          <Field label="Guest list &amp; hospitality">
+            <Input
+              value={guestListHospitality}
+              onChange={(e) => setGuestListHospitality(e.target.value)}
+              placeholder="6 guest spots, $15/member buyout, green room…"
+            />
+          </Field>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          {initial?.id ? (
+            <Link
+              to="/day-sheet"
+              search={{ gig: initial.id }}
+              onClick={() => useMusician.getState().setComposer({ gigOpen: false, editingGigId: undefined })}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#E25822] px-3.5 text-xs font-bold text-white hover:bg-[#D35400]"
+            >
+              Open Day Sheet →
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => copyAdvanceText("email")}
+            className={`min-h-10 rounded-lg border px-3 text-xs font-semibold transition-colors ${
+              advanceCopied === "email"
+                ? "border-live/60 bg-live/15 text-live"
+                : "border-line-strong bg-surface-2 text-fg hover:border-[#E25822]"
+            }`}
+          >
+            {advanceCopied === "email" ? "Copied!" : "Copy Advance Email"}
+          </button>
+          <button
+            type="button"
+            onClick={() => copyAdvanceText("call")}
+            className={`min-h-10 rounded-lg border px-3 text-xs font-semibold transition-colors ${
+              advanceCopied === "call"
+                ? "border-live/60 bg-live/15 text-live"
+                : "border-line-strong bg-surface-2 text-fg hover:border-[#E25822]"
+            }`}
+          >
+            {advanceCopied === "call" ? "Copied!" : "Copy Band Call-Sheet"}
+          </button>
+        </div>
       </section>
       <section
         aria-label="Booking research and outreach"

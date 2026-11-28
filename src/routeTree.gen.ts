@@ -14,6 +14,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DaySheetRouteImport } from './routes/day-sheet'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as GigsRouteImport } from './routes/gigs'
 import { Route as HelpRouteImport } from './routes/help'
@@ -54,6 +55,11 @@ const CalendarRoute = CalendarRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DaySheetRoute = DaySheetRouteImport.update({
+  id: '/day-sheet',
+  path: '/day-sheet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoRoute = DemoRouteImport.update({
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
+  '/day-sheet': typeof DaySheetRoute
   '/demo': typeof DemoRoute
   '/gigs': typeof GigsRoute
   '/help': typeof HelpRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
+  '/day-sheet': typeof DaySheetRoute
   '/demo': typeof DemoRoute
   '/gigs': typeof GigsRoute
   '/help': typeof HelpRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/board': typeof BoardRoute
   '/calendar': typeof CalendarRoute
   '/dashboard': typeof DashboardRoute
+  '/day-sheet': typeof DaySheetRoute
   '/demo': typeof DemoRoute
   '/gigs': typeof GigsRoute
   '/help': typeof HelpRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/calendar'
     | '/dashboard'
+    | '/day-sheet'
     | '/demo'
     | '/gigs'
     | '/help'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/calendar'
     | '/dashboard'
+    | '/day-sheet'
     | '/demo'
     | '/gigs'
     | '/help'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/board'
     | '/calendar'
     | '/dashboard'
+    | '/day-sheet'
     | '/demo'
     | '/gigs'
     | '/help'
@@ -285,6 +297,7 @@ export interface RootRouteChildren {
   BoardRoute: typeof BoardRoute
   CalendarRoute: typeof CalendarRoute
   DashboardRoute: typeof DashboardRoute
+  DaySheetRoute: typeof DaySheetRoute
   DemoRoute: typeof DemoRoute
   GigsRoute: typeof GigsRoute
   HelpRoute: typeof HelpRoute
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/day-sheet': {
+      id: '/day-sheet'
+      path: '/day-sheet'
+      fullPath: '/day-sheet'
+      preLoaderRoute: typeof DaySheetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo': {
@@ -461,6 +481,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoardRoute: BoardRoute,
   CalendarRoute: CalendarRoute,
   DashboardRoute: DashboardRoute,
+  DaySheetRoute: DaySheetRoute,
   DemoRoute: DemoRoute,
   GigsRoute: GigsRoute,
   HelpRoute: HelpRoute,

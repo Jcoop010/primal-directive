@@ -162,7 +162,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <SignInGate fallback={<SignInScreen />}>
       <div className="min-h-dvh md:flex">
         <DurableSync />
-        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-[#0b1016]/95 shadow-[12px_0_60px_#0002] md:flex">
+        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-[#0b1016]/95 shadow-[12px_0_60px_#0002] md:flex print:hidden">
           <div className="relative overflow-hidden px-5 pt-8 pb-7"><div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" /><div className="relative">
             <div className="text-[12px] font-extrabold tracking-[0.19em] text-accent">PRIMAL DIRECTIVE</div>
             <div className="mt-1 text-xs text-muted">Artist Command Center</div><div className="mt-5 flex items-center gap-2 text-[10px] font-bold tracking-[.15em] text-live"><span className="size-1.5 rounded-full bg-live shadow-[0_0_12px_#55d49a]" /> YOUR OPERATIONS HUB</div></div>
@@ -216,7 +216,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-          <header className="relative isolate overflow-hidden border-b border-line/60 bg-bg/75 px-4 py-3 backdrop-blur-xl md:px-8 md:py-5">
+          <header className="relative isolate overflow-hidden border-b border-line/60 bg-bg/75 px-4 py-3 backdrop-blur-xl md:px-8 md:py-5 print:hidden">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 command-grid" /><div aria-hidden="true" className="pointer-events-none absolute inset-0 command-glow" /><div className="relative mx-auto flex max-w-7xl items-end justify-between gap-4">
               <div>
                 
@@ -242,7 +242,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <main
             className={cn(
-              "mx-auto w-full max-w-7xl flex-1 px-4 pt-4 pb-28 md:px-8 md:pt-6 md:pb-10",
+              "mx-auto w-full max-w-7xl flex-1 px-4 pt-4 pb-28 md:px-8 md:pt-6 md:pb-10 print:max-w-none print:p-0",
               pathname === "/" && "flex flex-col pb-24 md:pb-8",
             )}
           >
@@ -317,7 +317,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <nav aria-label="Quick navigation" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur-xl md:hidden">
+        <nav aria-label="Quick navigation" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/95 backdrop-blur-xl md:hidden print:hidden">
           <div className="mx-auto grid w-full max-w-lg grid-cols-5 px-1 pb-[env(safe-area-inset-bottom)]">
             {NAV.filter((item) => ["/", "/signals", "/gigs", "/calendar"].includes(item.to)).map((item) => {
               const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
@@ -331,7 +331,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           type="button"
           onClick={onFab}
           className={cn(
-            "fixed right-4 bottom-[4.75rem] z-30 size-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-[0_10px_30px_#0009] md:right-8 md:bottom-8",
+            "fixed right-4 bottom-[4.75rem] z-30 size-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-[0_10px_30px_#0009] md:right-8 md:bottom-8 print:hidden",
             "hidden md:flex",
           )}
           aria-label="Add"
