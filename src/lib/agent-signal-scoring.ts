@@ -288,6 +288,196 @@ export function computePreShowYield(input: PreShowYieldInput): PreShowYieldEstim
   };
 }
 
+export interface PostShowSettlementInput extends PreShowYieldInput {
+  actualPayout?: number | null;
+  actualAttendance?: number | null;
+  actualMerchGross?: number | null;
+  actualRoadAndRoomCost?: number | null;
+  settledAt?: string | null;
+}
+
+export interface PostShowSettlementSummary {
+  hasActuals: boolean;
+  forecast: PreShowYieldEstimate;
+  actualPayout: number;
+  actualAttendance: number;
+  actualMerchGross: number;
+  actualRoadAndRoomCost: number;
+  actualGross: number;
+  actualNetYield: number;
+  actualMerchPerHead: number | null;
+  netYieldVariance: number | null;
+  grossVariance: number | null;
+}
+
+function roundCurrency(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+export function computePostShowSettlement(input: PostShowSettlementInput): PostShowSettlementSummary {
+  const forecast = computePreShowYield(input);
+  const rawPayout = typeof input.actualPayout === "number" && Number.isFinite(input.actualPayout) ? input.actualPayout : null;
+  const rawAttendance =
+    typeof input.actualAttendance === "number" && Number.isFinite(input.actualAttendance)
+      ? input.actualAttendance
+      : null;
+  const rawMerch =
+    typeof input.actualMerchGross === "number" && Number.isFinite(input.actualMerchGross)
+      ? input.actualMerchGross
+      : null;
+  const rawCost =
+    typeof input.actualRoadAndRoomCost === "number" && Number.isFinite(input.actualRoadAndRoomCost)
+      ? input.actualRoadAndRoomCost
+      : null;
+
+  const hasActuals = Boolean(
+    (rawPayout !== null && rawPayout > 0) ||
+      (rawAttendance !== null && rawAttendance > 0) ||
+      (rawMerch !== null && rawMerch > 0) ||
+      (rawCost !== null && rawCost > 0) ||
+      Boolean(input.settledAt?.trim()),
+  );
+
+  const actualPayout = Math.max(0, rawPayout ?? 0);
+  const actualAttendance = Math.max(0, Math.round(rawAttendance ?? 0));
+  const actualMerchGross = Math.max(0, rawMerch ?? 0);
+  const actualRoadAndRoomCost = Math.max(0, rawCost ?? 0);
+  const actualGross = roundCurrency(actualPayout + actualMerchGross);
+  const actualNetYield = roundCurrency(actualGross - actualRoadAndRoomCost);
+  const actualMerchPerHead =
+    actualAttendance > 0 ? roundCurrency(actualMerchGross / actualAttendance) : null;
+  const netYieldVariance = hasActuals ? roundCurrency(actualNetYield - forecast.netYieldEst) : null;
+  const grossVariance = hasActuals ? roundCurrency(actualGross - forecast.totalGrossEst) : null;
+
+  return {
+    hasActuals,
+    forecast,
+    actualPayout,
+    actualAttendance,
+    actualMerchGross,
+    actualRoadAndRoomCost,
+    actualGross,
+    actualNetYield,
+    actualMerchPerHead,
+    netYieldVariance,
+    grossVariance,
+  };
+}
+
+export interface RunRollupGigInput {
+  id: string;
+  status: string;
+  fee: number;
+  runLabel?: string | null;
+  corridor?: string | null;
+  guaranteeOrSplitEst?: number | null;
+  estAttendance?: number | null;
+  merchPerHeadEst?: number | null;
+  roadAndRoomCostEst?: number | null;
+  actualPayout?: number | null;
+  actualAttendance?: number | null;
+  actualMerchGross?: number | null;
+  actualRoadAndRoomCost?: number | null;
+  settledAt?: string | null;
+}
+
+export interface MultiDateRunRollup {
+  availableRuns: string[];
+  selectedRun: string;
+  showCount: number;
+  settledCount: number;
+  forecastPayout: number;
+  forecastMerchGross: number;
+  forecastGross: number;
+  forecastRoadAndRoom: number;
+  forecastNetYield: number;
+  settledActualNetYield: number;
+  settledForecastNetYield: number;
+  settledVariance: number | null;
+  clearsBreakEven: boolean;
+  tightStopsCount: number;
+}
+
+export function getGigRunGroup(gig: Pick<RunRollupGigInput, "runLabel" | "corridor">): string {
+  return gig.runLabel?.trim() || gig.corridor?.trim() || "";
+}
+
+export function computeMultiDateRunRollup(
+  gigs: readonly RunRollupGigInput[],
+  selectedRun = "all",
+): MultiDateRunRollup {
+  const runSet = new Set<string>();
+  for (const g of gigs) {
+    const group = getGigRunGroup(g);
+    if (group) runSet.add(group);
+  }
+  const availableRuns = [...runSet].sort((a, b) => a.localeCompare(b));
+  const activeRun = selectedRun !== "all" && runSet.has(selectedRun) ? selectedRun : "all";
+  const scoped = activeRun === "all" ? gigs : gigs.filter((g) => getGigRunGroup(g) === activeRun);
+
+  let settledCount = 0;
+  let forecastPayout = 0;
+  let forecastMerchGross = 0;
+  let forecastGross = 0;
+  let forecastRoadAndRoom = 0;
+  let forecastNetYield = 0;
+  let settledActualNetYield = 0;
+  let settledForecastNetYield = 0;
+  let tightStopsCount = 0;
+
+  for (const g of scoped) {
+    const payout =
+      typeof g.guaranteeOrSplitEst === "number" && Number.isFinite(g.guaranteeOrSplitEst)
+        ? g.guaranteeOrSplitEst
+        : Math.max(0, Number.isFinite(g.fee) ? g.fee : 0);
+    const settlement = computePostShowSettlement({
+      guaranteeOrSplitEst: payout,
+      estAttendance: g.estAttendance ?? 0,
+      merchPerHeadEst: g.merchPerHeadEst ?? 0,
+      roadAndRoomCostEst: g.roadAndRoomCostEst ?? 0,
+      actualPayout: g.actualPayout,
+      actualAttendance: g.actualAttendance,
+      actualMerchGross: g.actualMerchGross,
+      actualRoadAndRoomCost: g.actualRoadAndRoomCost,
+      settledAt: g.settledAt,
+    });
+
+    forecastPayout += settlement.forecast.payoutEst;
+    forecastMerchGross += settlement.forecast.merchGrossEst;
+    forecastGross += settlement.forecast.totalGrossEst;
+    forecastRoadAndRoom += settlement.forecast.roadAndRoomCostEst;
+    forecastNetYield += settlement.forecast.netYieldEst;
+    if (settlement.forecast.netYieldEst < 0) tightStopsCount += 1;
+
+    if (settlement.hasActuals) {
+      settledCount += 1;
+      settledActualNetYield += settlement.actualNetYield;
+      settledForecastNetYield += settlement.forecast.netYieldEst;
+    }
+  }
+
+  const roundedForecastNet = roundCurrency(forecastNetYield);
+  const roundedSettledActual = roundCurrency(settledActualNetYield);
+  const roundedSettledForecast = roundCurrency(settledForecastNetYield);
+
+  return {
+    availableRuns,
+    selectedRun: activeRun,
+    showCount: scoped.length,
+    settledCount,
+    forecastPayout: roundCurrency(forecastPayout),
+    forecastMerchGross: roundCurrency(forecastMerchGross),
+    forecastGross: roundCurrency(forecastGross),
+    forecastRoadAndRoom: roundCurrency(forecastRoadAndRoom),
+    forecastNetYield: roundedForecastNet,
+    settledActualNetYield: roundedSettledActual,
+    settledForecastNetYield: roundedSettledForecast,
+    settledVariance: settledCount > 0 ? roundCurrency(roundedSettledActual - roundedSettledForecast) : null,
+    clearsBreakEven: roundedForecastNet >= 0,
+    tightStopsCount,
+  };
+}
+
 export interface RoutingAnchorWindow {
   prevCity?: string;
   prevDate?: string;

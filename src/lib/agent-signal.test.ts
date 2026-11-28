@@ -6,6 +6,8 @@ import { PGlite } from "@electric-sql/pglite";
 import {
   applyCorridorPreset,
   clearAnchorsFromFilterState,
+  computeMultiDateRunRollup,
+  computePostShowSettlement,
   computePreShowYield,
   computeRoutingGapFit,
   computeSignalScore,
@@ -35,6 +37,7 @@ async function createTestSql(): Promise<Sql> {
     "0012_agent_signals_conversion.sql",
     "0013_band_booking_routing.sql",
     "0014_routing_gap_and_yield.sql",
+    "0015_post_show_settlement_and_runs.sql",
   ]) {
     await pg.exec(readFileSync(join(process.cwd(), "migrations", file), "utf8"));
   }
@@ -485,4 +488,134 @@ test("deriveOpenTourGapFromGigs detects upcoming booked/hold gaps and triage/sea
     triaged.map((i) => i.id),
     ["1"],
   );
+});
+
+test("computePostShowSettlement calculates actual net yield, merch/head, and variance vs forecast", () => {
+  const unsettled = computePostShowSettlement({
+    guaranteeOrSplitEst: 500,
+    estAttendance: 80,
+    merchPerHeadEst: 6,
+    roadAndRoomCostEst: 600,
+  });
+  assert.equal(unsettled.hasActuals, false);
+  assert.equal(unsettled.forecast.netYieldEst, 380);
+  assert.equal(unsettled.netYieldVariance, null);
+  assert.equal(unsettled.actualMerchPerHead, null);
+
+  const settledBeat = computePostShowSettlement({
+    guaranteeOrSplitEst: 500,
+    estAttendance: 80,
+    merchPerHeadEst: 6,
+    roadAndRoomCostEst: 600,
+    actualPayout: 650,
+    actualAttendance: 100,
+    actualMerchGross: 750,
+    actualRoadAndRoomCost: 580,
+  });
+  assert.equal(settledBeat.hasActuals, true);
+  assert.equal(settledBeat.actualGross, 1400);
+  assert.equal(settledBeat.actualNetYield, 820);
+  assert.equal(settledBeat.actualMerchPerHead, 7.5);
+  assert.equal(settledBeat.netYieldVariance, 440);
+});
+
+test("computeMultiDateRunRollup aggregates forecast & settled actuals and flags break-even across tight stops", () => {
+  const gigs = [
+    {
+      id: "thu-lou",
+      status: "completed",
+      fee: 250,
+      runLabel: "Spring 2027 I-65 Run",
+      guaranteeOrSplitEst: 250,
+      estAttendance: 40,
+      merchPerHeadEst: 5,
+      roadAndRoomCostEst: 550, // forecast net = -100 (tight mid-week stop)
+      actualPayout: 300,
+      actualAttendance: 50,
+      actualMerchGross: 300,
+      actualRoadAndRoomCost: 500, // actual net = +100 (+200 variance)
+    },
+    {
+      id: "fri-chi",
+      status: "booked",
+      fee: 900,
+      runLabel: "Spring 2027 I-65 Run",
+      guaranteeOrSplitEst: 900,
+      estAttendance: 120,
+      merchPerHeadEst: 7,
+      roadAndRoomCostEst: 650, // forecast net = +1090
+    },
+    {
+      id: "other-se",
+      status: "lead",
+      fee: 400,
+      corridor: "I-40 Southeast",
+      guaranteeOrSplitEst: 400,
+      estAttendance: 60,
+      merchPerHeadEst: 5,
+      roadAndRoomCostEst: 300,
+    },
+  ];
+
+  const i65 = computeMultiDateRunRollup(gigs, "Spring 2027 I-65 Run");
+  assert.deepEqual(i65.availableRuns, ["I-40 Southeast", "Spring 2027 I-65 Run"]);
+  assert.equal(i65.showCount, 2);
+  assert.equal(i65.settledCount, 1);
+  assert.equal(i65.forecastMerchGross, 1040);
+  assert.equal(i65.forecastGross, 2190);
+  assert.equal(i65.forecastRoadAndRoom, 1200);
+  assert.equal(i65.forecastNetYield, 990);
+  assert.equal(i65.clearsBreakEven, true);
+  assert.equal(i65.tightStopsCount, 1);
+  assert.equal(i65.settledActualNetYield, 100);
+  assert.equal(i65.settledVariance, 200);
+});
+
+test("migration 0015 persists post-show settlement columns and run_label on public.agent_signals", async () => {
+  const sql = await createTestSql();
+  const req = new Request("https://primal-directive-loose-ends-co.vercel.app/api/intake/agent-signal", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: "Bearer test-secret" },
+    body: JSON.stringify({
+      sourceAgent: "band-scout-bot",
+      signalType: "tour_routing",
+      title: "Zanzabar — I-65 Run Stop",
+      summary: "Midwest bridge stop.",
+      sourceUrl: "https://zanzabarlouisville.com/",
+      idempotencyKey: "settlement-0015-test",
+    }),
+  });
+  const created = await handleAgentSignalRequest(req, {
+    secret: "test-secret",
+    sqlProvider: async () => sql,
+  });
+  assert.equal(created.status, 201);
+  const { id } = (await created.json()) as { id: string };
+
+  const updated = await sql.query<{
+    actual_payout: string;
+    actual_attendance: number;
+    actual_merch_gross: string;
+    actual_road_and_room_cost: string;
+    settlement_note: string;
+    run_label: string;
+  }>(
+    `update public.agent_signals
+     set actual_payout = 640.50,
+         actual_attendance = 92,
+         actual_merch_gross = 552.00,
+         actual_road_and_room_cost = 410.00,
+         settled_at = now(),
+         settlement_note = 'Strong merch night',
+         run_label = 'Spring 2027 I-65 Run'
+     where id = $1
+     returning actual_payout, actual_attendance, actual_merch_gross, actual_road_and_room_cost, settlement_note, run_label`,
+    [id],
+  );
+  assert.equal(Number(updated[0]?.actual_payout), 640.5);
+  assert.equal(updated[0]?.actual_attendance, 92);
+  assert.equal(Number(updated[0]?.actual_merch_gross), 552);
+  assert.equal(Number(updated[0]?.actual_road_and_room_cost), 410);
+  assert.equal(updated[0]?.settlement_note, "Strong merch night");
+  assert.equal(updated[0]?.run_label, "Spring 2027 I-65 Run");
 });

@@ -8,7 +8,7 @@
 
 | Component | Status | Notes |
 | --- | --- | --- |
-| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`c318b24`). |
+| **Production App** (`https://primal-directive-loose-ends-co.vercel.app`) | **LIVE & HEALTHY (`HTTP 200` on `/api/health`)** | Backed by Neon Postgres `neon-cerulean-candle`. Migrations `0001`–`0014` landed cleanly on `main` (`5d50f82`, `dpl_4pVcUgGzdy4dQKGyVaZ3vjayfcai`). |
 | **Production Database (Neon `neon-cerulean-candle`)** | **ACTIVE_HEALTHY (IPv4, No Auto-Pause)** | Replaced suspended Vercel Supabase stores (`supabase-carmine-lever`, `supabase-camel-flame`). `DATABASE_URL` auto-injected in Production & Preview. |
 | **Auth & Sign-In** | **PASS (Google + Email/Pass Live)** | `scripts/oauth-state-smoke.mjs` passed (`HTTP 200`, host-only `__Host-` state cookie). Microsoft OAuth ready once Entra creds are verified. |
 | **Band Discovery, Scoring & Conversion (`/signals` → `/gigs`)** | **LIVE & CLOSED-LOOP** | `POST /api/intake/agent-signal` (Bearer `AGENT_WEBHOOK_SECRET`) scores band/live-music signals (`0011`), surfaces them on `/signals`, and converts them idempotently into `status: "lead"` gigs (`0012`) linked to `/gigs?gig=<id>`. |
@@ -23,6 +23,11 @@
 ---
 
 ## Recent Agent Handoffs
+
+### 2026-11-27 23:12 EST — Antigravity
+- **Migration `0015` & Post-Show Settlement (`feat/settlement-and-run-rollup`):** Added `migrations/0015_post_show_settlement_and_runs.sql` (`actual_payout`, `actual_attendance`, `actual_merch_gross`, `actual_road_and_room_cost`, `settled_at`, `settlement_note`, `run_label` + partial indexes, registered in `scripts/migration-plan.test.mjs`) and extended `Gig` types/persistence schemas plus pure `computePostShowSettlement()` & `computeMultiDateRunRollup()` helpers in `src/lib/agent-signal-scoring.ts`.
+- **`GigDrawer` Forecast vs. Actuals & `/gigs` Multi-Date Run Roll-Up:** Added Section 4 (**Post-show settlement**) and `Multi-date run label` inside `src/components/forms.tsx` with live `tabular-nums` Settled Net, Actual Merch \$/Head, and Variance surfaced in the sticky summary header; added the **Multi-Date Run Roll-Up** summary panel and run-filter pills on `src/routes/gigs.tsx` highlighting overall break-even status across tight mid-week stops.
+- **Verification & Next Step:** Added unit & PGlite `0015` persistence tests in `src/lib/agent-signal.test.ts`. Verified tests, `typecheck`, `lint`, and production build; opened PR for review before merging into `main`.
 
 ### 2026-11-27 22:55 EST — Antigravity
 - **Elite OS System & Interface Upgrade (`feat/elite-os-upgrade`):** Grouped sidebar navigation into **Booking / Operations / Business**, added `Signals` to the 5-slot mobile bottom bar, removed the dead `SCENE INTEL` pill, upgraded `⌘K` into a workspace command search (pages, saved gigs, contacts, quick actions), and collapsed `/gigs` Gmail debug tools into a clean expandable panel.
